@@ -48,7 +48,8 @@
   height: 110px;
   object-fit: contain;   /* بدل cover */
   display: block;
-  background: none;
+  background:transparent;
+      padding: 10px;
 }
     .label{padding:12px 10px;text-align:center;font-weight:900;opacity:.92}
 
@@ -82,7 +83,7 @@
 
     <section class="grid">
       <div class="tile" onclick="location.href='wish.html'">
-        <img src="assets/wish.jpg" alt="Whish Money"/>
+        <img src="assets/wish.png" alt="Whish Money"/>
         <div class="label">Whish Money</div>
       </div>
 
@@ -108,17 +109,22 @@
   </div>
 
   <script>
-    // ✅ Supabase Guard: ممنوع تفتح الصفحة بدون Login
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    (async ()=>{
-      const { data } = await supabase.auth.getSession();
+  (async ()=>{
+    try{
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+
       if (!data.session?.user){
-        location.replace("login.html");
+        location.replace("login.html?v=" + Date.now());
       }
-    })();
-  </script>
+    }catch(e){
+      location.replace("login.html?v=" + Date.now());
+    }
+  })();
+</script>
 </body>
 </html>
