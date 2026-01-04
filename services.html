@@ -1,259 +1,210 @@
-
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Services - Baroud Services</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Services - Baroud</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#06162a,#020b14);
-      color:#fff;
-      min-height:100vh;
-      overflow-x:hidden;
-    }
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:linear-gradient(180deg,#06162a,#020b14);
+  color:#fff;
+  min-height:100vh;
+}
 
-    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px;position:relative}
+/* ====== LAYOUT ====== */
+.wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px}
 
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:10px 0;
-    }
-    .iconBtn{
-      width:54px;height:54px;border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      user-select:none;
-    }
-    .hamburger span{
-      display:block;width:20px;height:2px;background:#fff;margin:4px 0;border-radius:9px;
-    }
+/* ====== TOP BAR ====== */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.iconBtn{
+  width:52px;height:52px;border-radius:18px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.hamburger span{
+  display:block;width:20px;height:2px;background:#fff;margin:4px 0;
+}
 
-    .brand{
-      font-weight:900;letter-spacing:3px;opacity:.9;
-    }
+/* BALANCE */
+.balance{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  padding:10px 14px;border-radius:20px;
+  font-weight:800;
+}
+.plus{
+  width:28px;height:28px;border-radius:50%;
+  background:#0aa0ff;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  font-size:20px;
+}
 
-    /* Drawer */
-    .overlay{
-      position:fixed;inset:0;
-      background:rgba(0,0,0,.55);
-      opacity:0;pointer-events:none;
-      transition:.25s;
-      z-index:50;
-    }
-    .overlay.show{opacity:1;pointer-events:auto}
+/* BRAND */
+.brand{font-weight:900;letter-spacing:2px}
 
-    .drawer{
-      position:fixed;left:0;top:0;height:100vh;width:min(320px,84vw);
-      background:rgba(10,20,40,.98);
-      border-right:1px solid rgba(255,255,255,.08);
-      box-shadow:0 30px 70px rgba(0,0,0,.65);
-      transform:translateX(-105%);
-      transition:.28s;
-      z-index:60;
-      padding:18px 16px;
-      overflow:auto;
-    }
-    .drawer.show{transform:translateX(0)}
-    .drawerTop{display:flex;justify-content:flex-end;margin-bottom:8px}
-    .closeBtn{
-      width:44px;height:44px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;font-size:26px;
-      cursor:pointer;
-    }
+/* ====== DRAWER ====== */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  opacity:0;pointer-events:none;
+  transition:.25s;
+  z-index:50;
+}
+.overlay.show{opacity:1;pointer-events:auto}
 
-    .loginCard{
-      background:#0aa0ff;
-      border-radius:28px;
-      padding:22px 18px;
-      text-align:center;
-      box-shadow:0 22px 55px rgba(0,0,0,.45);
-      margin-bottom:16px;
-    }
-    .loginCard h2{margin:0 0 10px;font-size:34px;letter-spacing:.3px;color:#fff}
-    .loginCard p{margin:0 0 14px;color:rgba(255,255,255,.85);font-weight:700;font-size:13px}
+.drawer{
+  position:fixed;left:0;top:0;height:100%;
+  width:min(300px,80vw);
+  background:#06162a;
+  transform:translateX(-100%);
+  transition:.3s;
+  z-index:60;
+  padding:18px;
+}
+.drawer.show{transform:translateX(0)}
 
-    .loginBtn{
-      display:inline-block;
-      background:#11e06d;
-      color:#06331b;
-      font-weight:900;
-      padding:14px 22px;
-      border-radius:999px;
-      text-decoration:none;
-      width:85%;
-      cursor:pointer;
-    }
+.closeBtn{
+  width:40px;height:40px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);
+  color:#fff;font-size:22px;
+  cursor:pointer;
+}
 
-    .menu{
-      margin-top:12px;
-      border-top:1px solid rgba(255,255,255,.10);
-      padding-top:12px;
-    }
-    .mItem{
-      display:flex;align-items:center;gap:12px;
-      padding:14px 10px;border-radius:14px;
-      color:rgba(240,248,255,.92);
-      cursor:pointer;
-    }
-    .mItem:hover{background:rgba(255,255,255,.04)}
-    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55)}
+.menu{margin-top:20px}
+.mItem{
+  padding:14px;border-radius:14px;
+  cursor:pointer;
+}
+.mItem:hover{background:rgba(255,255,255,.05)}
 
-    .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
+/* ====== CONTENT ====== */
+.banner{
+  margin-top:14px;border-radius:22px;overflow:hidden;
+}
+.banner img{width:100%;height:160px;object-fit:cover}
 
-    /* Page content */
-    .banner{
-      margin-top:12px;
-      border-radius:22px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.04);
-      box-shadow:0 20px 70px rgba(0,0,0,.35);
-    }
-    .banner img{width:100%;height:160px;object-fit:cover;display:block}
+.search{
+  margin-top:12px;
+  background:rgba(255,255,255,.06);
+  border-radius:26px;padding:14px 16px;
+}
+.search input{
+  width:100%;background:none;border:none;
+  outline:none;color:#fff;font-size:16px;
+}
 
-    .grid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .tile{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:22px;
-      overflow:hidden;
-      cursor:pointer;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
-    }
-    .tile img{width:100%;height:120px;object-fit:cover;display:block}
-    .label{padding:12px 10px;text-align:center;font-weight:800;opacity:.92;font-size:16px}
-  </style>
+.grid{
+  margin-top:14px;
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+}
+.card{
+  background:rgba(255,255,255,.06);
+  border-radius:22px;
+  overflow:hidden;
+  cursor:pointer;
+}
+.card img{width:100%;height:120px;object-fit:cover}
+.card div{text-align:center;padding:12px;font-weight:800}
+</style>
 </head>
 
 <body>
-  <div class="overlay" id="overlay"></div>
 
-  <aside class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawerTop">
-      <button class="closeBtn" id="closeBtn" type="button">×</button>
+<!-- DRAWER -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <button class="closeBtn" id="closeBtn">×</button>
+
+  <div class="menu">
+    <div class="mItem" onclick="location.href='services.html'">Home</div>
+    <div class="mItem" onclick="location.href='add-credit.html'">Add Credit</div>
+    <div class="mItem" onclick="logout()">Logout</div>
+  </div>
+</aside>
+
+<main class="wrap">
+
+  <!-- TOP -->
+  <div class="topbar">
+    <div class="iconBtn" id="menuBtn">
+      <div class="hamburger"><span></span><span></span><span></span></div>
     </div>
 
-    <div class="loginCard">
-      <h2>Menu</h2>
-      <p>You are logged in ✅</p>
-      <a class="loginBtn" href="#" id="logoutBtn">Logout</a>
+    <div class="balance">
+      ⭐ <span id="balance">0.00</span>
+      <div class="plus" onclick="location.href='add-credit.html'">+</div>
     </div>
 
-    <div class="menu">
-      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
-      <div class="mItem" id="addCreditItem"><span class="dot"></span><span>Add Credit</span></div>
-    </div>
+    <div class="brand">BAROUD</div>
+  </div>
 
-    <div class="hint">© Baroud Services</div>
-  </aside>
+  <!-- BANNER -->
+  <div class="banner">
+    <img src="assets/banner.jpg">
+  </div>
 
-  <main class="wrap">
-    <div class="topbar">
-      <div class="iconBtn" id="menuBtn" role="button" aria-label="Open menu">
-        <div class="hamburger"><span></span><span></span><span></span></div>
-      </div>
-      <div class="brand">BAROUD</div>
-    </div>
+  <!-- SEARCH -->
+  <div class="search">
+    <input placeholder="Search">
+  </div>
 
-    <div class="banner">
-      <img src="assets/banner.jpg" alt="banner">
-    </div>
+  <!-- GRID -->
+  <div class="grid">
+    <div class="card"><img src="assets/accounts.jpg"><div>Accounts</div></div>
+    <div class="card"><img src="assets/games.jpg"><div>Games</div></div>
+    <div class="card"><img src="assets/giftcards.jpg"><div>Gift Cards</div></div>
+    <div class="card"><img src="assets/social.jpg"><div>Social Media</div></div>
+  </div>
 
-    <section class="grid">
-      <div class="tile" id="t1">
-        <img src="assets/accounts.jpg" alt="Accounts">
-        <div class="label">Accounts</div>
-      </div>
-      <div class="tile" id="t2">
-        <img src="assets/games.jpg" alt="Games">
-        <div class="label">Games</div>
-      </div>
-      <div class="tile" id="t3">
-        <img src="assets/giftcards.jpg" alt="Gift Cards">
-        <div class="label">Gift Cards</div>
-      </div>
-      <div class="tile" id="t4">
-        <img src="assets/apps.jpg" alt="Social Media">
-        <div class="label">Social Media</div>
-      </div>
-    </section>
+</main>
 
-    <div class="hint">services (protected)</div>
-  </main>
+<script>
+/* ===== SUPABASE ===== */
+const supabase = window.supabase.createClient(
+  "https://pqrwitolonhfbfwtsnde.supabase.co",
+  "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_"
+);
 
-  <script>
-    const BASE = location.origin + location.pathname.replace(/[^\/]*$/, "");
+/* PROTECT PAGE */
+(async()=>{
+  const {data}=await supabase.auth.getSession();
+  if(!data.session) location.replace("login.html");
+})();
 
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* DRAWER */
+const drawer=document.getElementById("drawer");
+const overlay=document.getElementById("overlay");
+menuBtn.onclick=()=>{
+  drawer.classList.add("show");
+  overlay.classList.add("show");
+};
+closeBtn.onclick=overlay.onclick=()=>{
+  drawer.classList.remove("show");
+  overlay.classList.remove("show");
+};
 
-    // ✅ حماية: إذا مش عامل login رجّعو على login
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session?.user) {
-        location.replace(BASE + "login.html");
-      }
-    })();
+/* LOGOUT */
+async function logout(){
+  await supabase.auth.signOut();
+  location.replace("login.html");
+}
+</script>
 
-    const drawer = document.getElementById("drawer");
-    const overlay = document.getElementById("overlay");
-
-    function openDrawer(){
-      drawer.classList.add("show");
-      overlay.classList.add("show");
-      drawer.setAttribute("aria-hidden","false");
-    }
-    function closeDrawer(){
-      drawer.classList.remove("show");
-      overlay.classList.remove("show");
-      drawer.setAttribute("aria-hidden","true");
-    }
-
-    // ✅ sidebar شغّال 100% (click + touch)
-    const menuBtn = document.getElementById("menuBtn");
-    menuBtn.addEventListener("click", openDrawer);
-    menuBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); openDrawer(); }, {passive:false});
-
-    overlay.addEventListener("click", closeDrawer);
-    document.getElementById("closeBtn").addEventListener("click", closeDrawer);
-
-    // روابط المنيو
-    document.getElementById("homeItem").addEventListener("click", () => {
-      closeDrawer();
-      location.href = BASE + "index.html";
-    });
-
-    document.getElementById("addCreditItem").addEventListener("click", () => {
-      closeDrawer();
-      location.href = BASE + "add-credit.html";
-    });
-
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", async (e) => {
-      e.preventDefault();
-      await supabase.auth.signOut();
-      location.replace(BASE + "login.html");
-    });
-
-    // أمثلة كليك على البطاقات
-    document.getElementById("t1").addEventListener("click", () => alert("Accounts"));
-    document.getElementById("t2").addEventListener("click", () => alert("Games"));
-    document.getElementById("t3").addEventListener("click", () => alert("Gift Cards"));
-    document.getElementById("t4").addEventListener("click", () => alert("Social Media"));
-  </script>
 </body>
 </html>
