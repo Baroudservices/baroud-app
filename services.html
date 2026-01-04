@@ -29,7 +29,7 @@
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.06);
       color:#fff;
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
     }
   </style>
@@ -53,14 +53,16 @@
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // ✅ Guard: ممنوع تفتح بدون login
   (async () => {
     const { data } = await supabase.auth.getSession();
     const user = data.session?.user;
+
+    // ✅ ممنوع تفتح بدون login
     if(!user){
       window.location.replace(BASE + "login.html?v=" + Date.now());
       return;
     }
+
     document.getElementById("userEmail").textContent = "Email: " + (user.email || "");
   })();
 
