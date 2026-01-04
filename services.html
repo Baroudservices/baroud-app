@@ -1,158 +1,257 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Services</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root{--stroke:rgba(255,255,255,.10)}
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:radial-gradient(1200px 700px at 20% 0%, #0b2a52 0%, #06162a 40%, #020a12 100%);
-      color:#fff;
-      min-height:100vh;
-    }
-    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 80px}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
-    .menuBtn{
-      width:54px;height:54px;border-radius:18px;
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--stroke);
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .menuBtn span{display:block;width:22px;height:2px;background:#fff;margin:4px 0;border-radius:2px;opacity:.9}
-    .pill{
-      display:flex;align-items:center;gap:10px;
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      padding:10px 12px;
-      min-width:210px;
-      justify-content:center;
-    }
-    .star{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#8b6b1a,#f4d26a);display:flex;align-items:center;justify-content:center;color:#111;font-weight:900}
-    .plus{
-      width:36px;height:36px;border-radius:14px;
-      background:rgba(255,255,255,.08);
-      border:1px solid var(--stroke);
-      display:flex;align-items:center;justify-content:center;
-      font-size:22px;font-weight:900;
-      cursor:pointer;
-    }
-    .brand{font-weight:900;letter-spacing:6px;opacity:.9}
-    .banner{
-      border-radius:22px;padding:18px;
-      background:linear-gradient(135deg,#8a1e1e,#0b2a52);
-      border:1px solid rgba(255,255,255,.10);
-      margin-bottom:14px;
-      box-shadow:0 22px 70px rgba(0,0,0,.35);
-    }
-    .banner h2{margin:0;font-size:34px}
-    .search input{
-      width:100%;
-      padding:16px 18px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.10);
-      outline:none;
-      background:rgba(255,255,255,.05);
-      color:#fff;
-      font-size:16px;
-    }
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
-    .card{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:22px;
-      height:140px;
-      display:flex;
-      align-items:flex-end;
-      padding:16px;
-      font-weight:900;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
-      cursor:pointer;
-    }
-    .nav{
-      position:fixed;left:0;right:0;bottom:0;
-      background:rgba(0,0,0,.25);
-      border-top:1px solid rgba(255,255,255,.08);
-      backdrop-filter:blur(8px);
-      padding:12px 0;
-      display:flex;justify-content:space-around;
-    }
-    .nav div{opacity:.8}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baroud Services</title>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui, sans-serif;
+  background:linear-gradient(180deg,#061b33,#020b18);
+  color:#fff;
+}
+
+/* ===== TOP BAR ===== */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 14px;
+}
+.iconBtn{
+  width:44px;height:44px;
+  border-radius:14px;
+  background:rgba(255,255,255,.08);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.hamburger span{
+  display:block;
+  width:18px;height:2px;
+  background:#fff;
+  margin:4px 0;
+}
+.balance{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:rgba(255,255,255,.08);
+  padding:8px 14px;
+  border-radius:20px;
+}
+.plus{
+  width:28px;height:28px;
+  border-radius:50%;
+  background:#0aa0ff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+}
+.logo{font-weight:900;letter-spacing:2px}
+
+/* ===== BANNER ===== */
+.banner{
+  margin:10px;
+  padding:18px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#7b0d0d,#1a2a52);
+  font-size:22px;
+  font-weight:800;
+}
+
+/* ===== SEARCH ===== */
+.search{
+  margin:10px;
+}
+.search input{
+  width:100%;
+  padding:14px;
+  border-radius:30px;
+  border:none;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+}
+
+/* ===== GRID ===== */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  padding:10px;
+}
+.card{
+  height:140px;
+  border-radius:20px;
+  background:rgba(255,255,255,.08);
+  display:flex;
+  align-items:flex-end;
+  padding:14px;
+  font-weight:700;
+}
+
+/* ===== DRAWER ===== */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  z-index:50;
+}
+.overlay.show{display:block}
+
+.drawer{
+  position:fixed;
+  top:0;left:0;
+  width:78%;
+  height:100%;
+  background:linear-gradient(180deg,#081f3f,#041225);
+  transform:translateX(-100%);
+  transition:.3s;
+  z-index:60;
+  padding:16px;
+}
+.drawer.show{transform:translateX(0)}
+
+.closeBtn{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:26px;
+}
+
+/* login card */
+.loginCard{
+  background:#0aa0ff;
+  border-radius:26px;
+  padding:22px;
+  text-align:center;
+  margin-bottom:16px;
+}
+.loginCard h2{margin:0;color:#fff}
+.loginCard p{font-size:13px}
+.loginBtn{
+  display:block;
+  margin-top:14px;
+  background:#18e26b;
+  color:#04351c;
+  padding:14px;
+  border-radius:999px;
+  text-decoration:none;
+  font-weight:800;
+}
+
+.menuItem{
+  padding:14px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.menuItem a{
+  color:#fff;
+  text-decoration:none;
+}
+
+.social{
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  margin-top:20px;
+}
+.social a{
+  width:46px;height:46px;
+  border-radius:14px;
+  background:rgba(255,255,255,.1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  text-decoration:none;
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="header">
-      <button class="menuBtn" id="logoutBtn" type="button" title="Logout">
-        <span></span><span></span><span></span>
-      </button>
 
-      <div class="pill">
-        <div class="star">★</div>
-        <div style="font-weight:900" id="bal">0.00</div>
-        <div style="font-size:22px">🇺🇸</div>
-        <button class="plus" id="plusBtn" type="button">+</button>
-      </div>
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 
-      <div class="brand">VIPBOX</div>
-    </div>
+<!-- DRAWER -->
+<aside class="drawer" id="drawer">
+  <button class="closeBtn" onclick="closeDrawer()">×</button>
 
-    <div class="banner">
-      <h2>Unlock The Ultimate Power</h2>
-    </div>
+  <div class="loginCard">
+    <h2>Login</h2>
+    <p>Sign in to manage your account</p>
+    <a class="loginBtn" href="login.html">Login</a>
+  </div>
 
-    <div class="search"><input id="search" placeholder="Search"></div>
+  <div class="menuItem"><a href="index.html">Home</a></div>
+  <div class="menuItem"><a href="#">About Us</a></div>
 
-    <div class="grid" id="grid">
-      <div class="card">Games</div>
-      <div class="card">Applications</div>
-      <div class="card">Accounts</div>
-      <div class="card">Gift Cards</div>
+  <div class="social">
+    <a href="https://wa.me/96181812024" target="_blank">WA</a>
+    <a href="#">♪</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="topbar">
+  <div class="iconBtn" onclick="openDrawer()">
+    <div class="hamburger">
+      <span></span><span></span><span></span>
     </div>
   </div>
 
-  <div class="nav">
-    <div>🏠</div><div>🛒</div><div>🔔</div><div>💳</div><div>👤</div>
+  <div class="balance">
+    ⭐ 0.00 🇺🇸
+    <div class="plus" onclick="location.href='add-credit.html'">+</div>
   </div>
 
-  <script>
-    const BASE = location.href.includes("github.io") ? location.href.split("/").slice(0,4).join("/") + "/" + location.pathname.split("/")[1] + "/" : location.origin + "/";
+  <div class="logo">BAROUD</div>
+</div>
 
-    const SUPABASE_URL = "PUT_SUPABASE_URL_HERE";
-    const SUPABASE_ANON_KEY = "PUT_SUPABASE_ANON_KEY_HERE";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<div class="banner">Unlock The Ultimate Power</div>
 
-    // ✅ حماية: إذا مش مسجل دخول رجّع على login
-    (async ()=>{
-      const { data } = await supabase.auth.getSession();
-      if (!data?.session?.user){
-        location.replace(BASE + "login.html?v=" + Date.now());
-      }
-    })();
+<div class="search">
+  <input placeholder="Search">
+</div>
 
-    document.getElementById("plusBtn").onclick = ()=> location.href = BASE + "add-credit.html?v=" + Date.now();
+<div class="grid">
+  <div class="card">Games</div>
+  <div class="card">Applications</div>
+  <div class="card">Accounts</div>
+  <div class="card">Gift Cards</div>
+</div>
 
-    // خليه Logout على زر اليسار (بدل drawer)
-    document.getElementById("logoutBtn").onclick = async ()=>{
-      await supabase.auth.signOut();
-      location.replace(BASE + "index.html?v=" + Date.now());
-    };
+<!-- SCRIPTS -->
+<script>
+const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Search filter
-    document.getElementById("search").addEventListener("input", (e)=>{
-      const q = e.target.value.toLowerCase().trim();
-      document.querySelectorAll(".card").forEach(c=>{
-        c.style.display = c.innerText.toLowerCase().includes(q) ? "" : "none";
-      });
-    });
-  </script>
+// 🔒 Guard
+(async ()=>{
+  const { data } = await supabase.auth.getSession();
+  if(!data.session){
+    location.replace("login.html");
+  }
+})();
+
+// drawer
+function openDrawer(){
+  document.getElementById("drawer").classList.add("show");
+  document.getElementById("overlay").classList.add("show");
+}
+function closeDrawer(){
+  document.getElementById("drawer").classList.remove("show");
+  document.getElementById("overlay").classList.remove("show");
+}
+</script>
+
 </body>
 </html>
