@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:radial-gradient(900px 600px at 20% 0%, #0b2a52 0%, #06162a 45%, #020a12 100%);
+      color:#fff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .card{
+      width:min(520px,100%);
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:26px;
+      padding:18px;
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
+    }
+    .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .back{
+      width:44px;height:44px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;font-weight:900;
+      cursor:pointer;
+    }
+    h1{margin:8px 0 6px;font-size:40px}
+    .sub{opacity:.7;margin:0 0 16px}
+    label{display:block;margin:12px 0 8px;font-weight:700;opacity:.9}
+    input{
+      width:100%;
+      padding:16px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      outline:none;
+      font-size:16px;
+    }
+    .btn{
+      margin-top:16px;
+      width:100%;
+      padding:16px 14px;
+      border:none;
+      border-radius:18px;
+      font-weight:900;
+      font-size:18px;
+      cursor:pointer;
+      background:linear-gradient(90deg,#00a8ff,#2f6bff);
+      color:#fff;
+    }
+    .row{display:flex;gap:12px;margin-top:12px}
+    .ghost{
+      flex:1;
+      padding:14px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .msg{margin-top:12px;opacity:.9}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <button class="back" id="backBtn">←</button>
+      <div style="font-weight:900;opacity:.8">VIPBOXLB</div>
+    </div>
+
+    <h1>Login</h1>
+    <p class="sub">Sign in to continue.</p>
+
+    <label>Email</label>
+    <input id="email" type="email" placeholder="you@email.com" />
+
+    <label>Password</label>
+    <input id="pass" type="password" placeholder="••••••••" />
+
+    <button class="btn" id="loginBtn">Login</button>
+
+    <div class="row">
+      <button class="ghost" id="signupBtn">Sign Up</button>
+      <button class="ghost" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <script>
+    const BASE = location.href.includes("github.io") ? location.href.split("/").slice(0,4).join("/") + "/" + location.pathname.split("/")[1] + "/" : location.origin + "/";
+
+    const SUPABASE_URL = "PUT_SUPABASE_URL_HERE";
+    const SUPABASE_ANON_KEY = "PUT_SUPABASE_ANON_KEY_HERE";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const msg = (t)=>document.getElementById("msg").innerText = t || "";
+
+    document.getElementById("backBtn").onclick = ()=> location.href = BASE + "index.html?v=" + Date.now();
+
+    // لو already logged in
+    (async ()=>{
+      const { data } = await supabase.auth.getSession();
+      if (data?.session?.user) location.replace(BASE + "services.html?v=" + Date.now());
+    })();
+
+    document.getElementById("loginBtn").onclick = async ()=>{
+      msg("Logging in...");
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("pass").value;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error){ msg("❌ " + error.message); return; }
+      msg("✅ Success");
+      location.replace(BASE + "services.html?v=" + Date.now());
+    };
+
+    document.getElementById("signupBtn").onclick = async ()=>{
+      msg("Creating account...");
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("pass").value;
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error){ msg("❌ " + error.message); return; }
+      msg("✅ Account created. Try login now.");
+    };
+
+    document.getElementById("resetBtn").onclick = async ()=>{
+      const email = document.getElementById("email").value.trim();
+      if (!email){ msg("⚠️ Put your email first."); return; }
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error){ msg("❌ " + error.message); return; }
+      msg("✅ Reset email sent.");
+    };
+  </script>
+</body>
+</html>
