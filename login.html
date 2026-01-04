@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login</title>
 
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -78,7 +77,6 @@
     }
     .err{background:#d05252}
     .ok{background:#2aa96b}
-    .small{margin-top:14px;text-align:center;opacity:.55;font-weight:800;letter-spacing:1px}
   </style>
 </head>
 
@@ -102,17 +100,14 @@
     </div>
 
     <div class="field">
-      <span>👁️</span>
+      <span>🔒</span>
       <input id="pass" type="password" placeholder="Password" autocomplete="current-password"/>
     </div>
 
     <button class="btn" id="loginBtn">Login</button>
-
-    <div class="small">REGISTER</div>
   </div>
 
   <script>
-    // ✅ Supabase
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -124,16 +119,11 @@
       msg.textContent = text;
     }
 
-    // ✅ إذا أصلاً عامل login -> روح مباشرة على services.html
+    // إذا أصلاً عامل login -> روح services
     (async ()=>{
       const { data } = await supabase.auth.getSession();
       if (data.session?.user) location.replace("services.html");
     })();
-
-    // Enter key = login
-    document.addEventListener("keydown", (e)=>{
-      if(e.key === "Enter") document.getElementById("loginBtn").click();
-    });
 
     document.getElementById("loginBtn").addEventListener("click", async ()=>{
       msg.style.display="none";
@@ -148,13 +138,11 @@
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error){
-        showMsg("Invalid username or password.");
+        showMsg(error.message || "Invalid username or password.");
         return;
       }
 
       showMsg("Login successful ✅", true);
-
-      // ✅ بعد نجاح الدخول -> افتح services.html
       setTimeout(()=> location.replace("services.html"), 250);
     });
   </script>
