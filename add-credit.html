@@ -1,210 +1,80 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Add Credit</title>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root{
-      --bg1:#060b16;
-      --bg2:#0a1330;
-      --glass:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --text:#eaf2ff;
-      --muted:rgba(234,242,255,.65);
-      --shadow:0 20px 60px rgba(0,0,0,.55);
-    }
-
     *{box-sizing:border-box}
     body{
       margin:0;
-      min-height:100vh;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      color:var(--text);
-      background:
-        radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
-        radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
-        linear-gradient(160deg,var(--bg1),var(--bg2));
-      padding:16px;
+      background:radial-gradient(900px 600px at 20% 0%, #0b2a52 0%, #06162a 45%, #020a12 100%);
+      color:#fff;
+      min-height:100vh;
+      padding:18px;
     }
-
-    /* ===== HEADER (OVOXZ STYLE) ===== */
-    .header{
-      max-width:460px;
-      margin:0 auto 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .balanceBox{
-      flex:1;
-      background:var(--glass);
-      border:1px solid var(--stroke);
-      backdrop-filter:blur(14px);
-      border-radius:22px;
-      padding:14px 16px;
-      box-shadow:var(--shadow);
-    }
-
-    .balanceLabel{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:4px;
-      font-weight:600;
-    }
-
-    .balanceValue{
-      font-size:22px;
-      font-weight:900;
-      letter-spacing:.4px;
-    }
-
-    .addBtn{
-      width:56px;
-      height:56px;
-      border-radius:20px;
-      border:1px solid var(--stroke);
-      background:linear-gradient(90deg,#0ea5e9,#2563eb);
-      color:white;
-      font-size:32px;
-      font-weight:700;
-      cursor:pointer;
-      box-shadow:0 18px 45px rgba(37,99,235,.35);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .addBtn:active{transform:scale(.97)}
-
-    /* ===== CONTENT ===== */
-    .wrap{
-      max-width:460px;
-      margin:0 auto;
-    }
-
-    .title{
-      font-size:42px;
-      font-weight:900;
-      margin:18px 0 18px;
-    }
-
-    .glass{
-      background:var(--glass);
-      border:1px solid var(--stroke);
-      backdrop-filter:blur(14px);
+    .card{
+      max-width:520px;margin:0 auto;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
       border-radius:26px;
       padding:18px;
-      box-shadow:var(--shadow);
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
     }
-
-    .item{
-      width:100%;
-      border:none;
-      border-radius:26px;
-      padding:16px;
-      margin:14px 0;
-      cursor:pointer;
-      background:rgba(255,255,255,.07);
-      border:1px solid rgba(255,255,255,.08);
-      color:var(--text);
-      display:flex;
-      align-items:center;
-      gap:14px;
-      transition:.15s;
-    }
-    .item:hover{background:rgba(255,255,255,.10)}
-    .item:active{transform:scale(.99)}
-
-    .logo{
-      width:52px;
-      height:52px;
-      border-radius:18px;
+    .back{
+      width:44px;height:44px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
+      color:#fff;font-weight:900;
+      cursor:pointer;
     }
-
-    .logo img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
+    h1{margin:10px 0 6px}
+    input{
+      width:100%;padding:16px 14px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.08);
+      color:#fff;outline:none;font-size:16px;
+      margin-top:10px;
     }
-
-    .label{
-      font-size:18px;
-      font-weight:800;
+    button{
+      width:100%;margin-top:14px;
+      padding:16px 14px;border:none;border-radius:18px;
+      font-weight:900;font-size:16px;cursor:pointer;
+      background:linear-gradient(90deg,#00a8ff,#2f6bff);
+      color:#fff;
     }
-
-    .footer{
-      text-align:center;
-      color:var(--muted);
-      margin-top:18px;
-    }
+    .hint{opacity:.7;margin-top:10px}
   </style>
 </head>
-
 <body>
+  <div class="card">
+    <button class="back" id="backBtn">←</button>
+    <h1>Add Credit</h1>
+    <div class="hint">Demo page (you can connect it later)</div>
 
-  <!-- ===== HEADER ===== -->
-  <div class="header">
-    <div class="balanceBox">
-      <div class="balanceLabel">Balance</div>
-      <div class="balanceValue">$0.00</div>
-    </div>
-
-    <!-- زر + -->
-    <div class="addBtn" onclick="refreshPage()">+</div>
-  </div>
-
-  <!-- ===== CONTENT ===== -->
-  <div class="wrap">
-    <div class="title">Add Credit</div>
-
-    <div class="glass">
-      <button class="item" onclick="go('binance.html')">
-        <div class="logo"><img src="assets/binance.png"></div>
-        <div class="label">Binance</div>
-      </button>
-
-      <button class="item" onclick="go('wish.html')">
-        <div class="logo"><img src="assets/wish.png"></div>
-        <div class="label">Whish Money</div>
-      </button>
-
-      <button class="item" onclick="go('usdt-bep20.html')">
-        <div class="logo"><img src="assets/usdt.png"></div>
-        <div class="label">USDT BEP20</div>
-      </button>
-
-      <button class="item" onclick="go('usdt-trc20.html')">
-        <div class="logo"><img src="assets/usdt.png"></div>
-        <div class="label">USDT TRC20</div>
-      </button>
-
-      <button class="item" onclick="go('omt.html')">
-        <div class="logo"><img src="assets/omt.png"></div>
-        <div class="label">OMT Pay</div>
-      </button>
-
-      <div class="footer">© 2024 Baroud Services</div>
-    </div>
+    <input type="number" placeholder="Enter amount $" />
+    <input type="file" />
+    <button type="button">REQUEST</button>
   </div>
 
   <script>
-    function go(page){
-      window.location.href = page + "?v=" + Date.now();
-    }
+    const BASE = location.href.includes("github.io") ? location.href.split("/").slice(0,4).join("/") + "/" + location.pathname.split("/")[1] + "/" : location.origin + "/";
 
-    function refreshPage(){
-      window.location.replace("add-credit.html?v=" + Date.now());
-    }
+    const SUPABASE_URL = "PUT_SUPABASE_URL_HERE";
+    const SUPABASE_ANON_KEY = "PUT_SUPABASE_ANON_KEY_HERE";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // حماية مثل services (اختياري)
+    (async ()=>{
+      const { data } = await supabase.auth.getSession();
+      if (!data?.session?.user){
+        location.replace(BASE + "login.html?v=" + Date.now());
+      }
+    })();
+
+    document.getElementById("backBtn").onclick = ()=> history.back();
   </script>
-
 </body>
 </html>
