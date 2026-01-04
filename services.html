@@ -5,104 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Services</title>
 
-  <!-- Supabase UMD -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+    :root{
+      --bg1:#06162a;
+      --bg2:#020b14;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.08);
+      --text:#fff;
+      --muted:rgba(255,255,255,.70);
+      --muted2:rgba(255,255,255,.45);
+      --radius:22px;
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+    }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#06162a,#020b14);
-      color:#fff;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--text);
       min-height:100vh;
+      -webkit-tap-highlight-color:transparent;
     }
-    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px;position:relative}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px;position:relative;z-index:1}
 
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      margin-top:6px;
-    }
+    /* Topbar */
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px}
     .iconBtn{
       width:54px;height:54px;border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
+      background:var(--card);
+      border:1px solid var(--stroke);
       display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
+      cursor:pointer; user-select:none;
       -webkit-tap-highlight-color:transparent;
       touch-action:manipulation;
-      user-select:none;
-      z-index:5;
     }
-    .hamburger span{display:block;width:22px;height:2px;background:#fff;margin:4px 0;border-radius:9px}
+    .hamburger{width:22px}
+    .hamburger span{display:block;height:2px;background:#fff;margin:4px 0;border-radius:9px}
 
-    .balancePill{
-      flex:1;
-      display:flex;align-items:center;justify-content:center;gap:12px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:24px;
-      padding:12px 14px;
-      min-height:54px;
+    .brandRight{
+      font-weight:900;letter-spacing:3px;opacity:.9;
     }
-    .coin{
-      width:30px;height:30px;border-radius:50%;
-      background:linear-gradient(180deg,#d6b66a,#8a6a1e);
-      display:flex;align-items:center;justify-content:center;
-      color:#0b0b0b;font-weight:900;
-    }
-    .amount{font-weight:900;font-size:18px}
-    .flag{font-size:20px;opacity:.9}
-    .plus{
-      width:36px;height:36px;border-radius:14px;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:900;font-size:20px;
-      cursor:pointer;
-    }
-    .brand{font-weight:900;letter-spacing:3px;opacity:.9}
 
+    /* Dummy content */
     .banner{
       margin-top:14px;
-      border-radius:22px;overflow:hidden;
-      border:1px solid rgba(255,255,255,.06);
-      box-shadow:0 20px 70px rgba(0,0,0,.35);
+      border-radius:22px;
+      overflow:hidden;
+      border:1px solid var(--stroke);
       background:rgba(255,255,255,.04);
+      box-shadow:0 20px 70px rgba(0,0,0,.35);
     }
     .banner img{width:100%;height:160px;object-fit:cover;display:block}
-
     .support{
-      margin-top:12px;padding:12px 14px;border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:18px;
+      background:var(--card);
+      border:1px solid var(--stroke);
+      opacity:.9;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
-
     .searchBox{
       margin-top:12px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
+      background:var(--card);
+      border:1px solid var(--stroke);
       border-radius:26px;
       padding:14px 16px;
       box-shadow:0 18px 60px rgba(0,0,0,.18);
     }
     .searchBox input{
-      width:100%;background:transparent;border:none;outline:none;color:#fff;font-size:16px;
+      width:100%;
+      background:transparent;border:none;outline:none;
+      color:#fff;font-size:16px;
     }
-
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+    .grid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .tile{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
       border-radius:22px;
       overflow:hidden;
-      cursor:pointer;
+      background:var(--card);
+      border:1px solid var(--stroke);
       box-shadow:0 18px 60px rgba(0,0,0,.25);
     }
     .tile img{width:100%;height:120px;object-fit:cover;display:block}
-    .label{padding:12px 10px;text-align:center;font-weight:800;opacity:.92;font-size:16px}
+    .label{padding:12px;text-align:center;font-weight:800;opacity:.95}
 
-    /* Drawer */
+    /* Overlay + Drawer */
     .overlay{
       position:fixed;inset:0;
       background:rgba(0,0,0,.55);
@@ -113,207 +103,306 @@
     .overlay.show{opacity:1;pointer-events:auto}
 
     .drawer{
-      position:fixed;top:0;left:0;height:100vh;width:min(320px,86vw);
-      background:linear-gradient(180deg,#06162a,#020b14);
-      border-right:1px solid rgba(255,255,255,.08);
-      transform:translateX(-105%);
-      transition:.25s;
+      position:fixed;top:0;left:0;height:100vh;
+      width:min(84vw,360px);
+      background:linear-gradient(180deg,#071a30,#020b14);
+      border-right:1px solid rgba(255,255,255,.06);
+      box-shadow:0 30px 120px rgba(0,0,0,.65);
+      transform:translateX(-110%);
+      transition:.22s ease;
       z-index:60;
-      padding:16px;
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
     }
     .drawer.show{transform:translateX(0)}
-    .drawerTop{display:flex;justify-content:flex-end}
+
+    .drawerTop{
+      display:flex;align-items:center;justify-content:space-between;
+    }
     .closeBtn{
       width:44px;height:44px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
+      border:1px solid var(--stroke);
       background:rgba(255,255,255,.06);
-      color:#fff;font-size:22px;cursor:pointer;
-    }
-
-    .loginCard{
-      margin-top:10px;
-      background:#12a6ff;
-      border-radius:24px;
-      padding:16px;
-      color:#fff;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
-    }
-    .loginCard h2{margin:0 0 6px;font-size:28px}
-    .loginCard p{margin:0 0 12px;opacity:.9}
-    .loginBtn{
-      display:block;text-align:center;
-      background:#1fe26b;color:#0a2b18;
-      font-weight:900;
-      padding:14px;border-radius:24px;
-      text-decoration:none;
-    }
-
-    .menu{margin-top:16px}
-    .mItem{
-      display:flex;align-items:center;gap:10px;
-      padding:12px 10px;border-radius:14px;
+      color:#fff;font-size:22px;
       cursor:pointer;
+    }
+
+    .userBox{
+      margin-top:6px;
+      padding:12px;
+      border-radius:22px;
+      background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.03);
-      margin-bottom:10px;
-      font-weight:800;
     }
-    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35)}
-    .social{display:flex;gap:10px;margin-top:16px}
-    .social a{
-      flex:1;
-      text-align:center;
-      padding:12px 10px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
+    .userRow{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .userName{
+      font-size:22px;
+      font-weight:900;
+      opacity:.95;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .userId{
+      font-weight:900;
+      opacity:.7;
+      margin-left:6px;
+      font-size:14px;
+    }
+    .balanceLine{
+      margin-top:6px;
+      font-size:22px;
+      font-weight:900;
+      color:#34d5ff;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .miniIcons{
+      margin-top:10px;
+      display:flex;
+      gap:18px;
+      align-items:center;
+      justify-content:center;
+      opacity:.95;
+    }
+    .miniBtn{
+      width:44px;height:44px;
+      border-radius:14px;
       background:rgba(255,255,255,.06);
-      color:#fff;text-decoration:none;font-weight:900;
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
     }
-    .hint{margin-top:16px;text-align:center;opacity:.45;font-weight:800}
+
+    .divider{height:1px;background:rgba(255,255,255,.10);margin:10px 0}
+
+    .menu{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top:4px;
+    }
+    .mItem{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:12px 10px;
+      border-radius:16px;
+      cursor:pointer;
+      opacity:.92;
+    }
+    .mItem:hover{background:rgba(255,255,255,.05)}
+    .ico{
+      width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+      opacity:.95;
+    }
+    .mText{font-size:18px;font-weight:700;opacity:.95}
+
+    .socialRow{
+      margin-top:auto;
+      padding-top:10px;
+      display:flex;
+      justify-content:center;
+      gap:18px;
+    }
+    .socialBtn{
+      width:54px;height:54px;border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;
+      opacity:.9;
+    }
+    .copy{margin-top:8px;text-align:center;opacity:.45;font-weight:800}
+
+    /* Prevent background scroll when drawer open */
+    body.lock{overflow:hidden}
   </style>
 </head>
 
 <body>
-  <div class="overlay" id="overlay"></div>
+  <!-- overlay -->
+  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 
+  <!-- drawer -->
   <aside class="drawer" id="drawer" aria-hidden="true">
     <div class="drawerTop">
-      <button class="closeBtn" type="button" id="closeBtn">×</button>
+      <button class="closeBtn" onclick="closeDrawer()">×</button>
+      <div style="opacity:.8;font-weight:900;letter-spacing:2px">MENU</div>
     </div>
 
-    <div class="loginCard">
-      <h2>Menu</h2>
-      <p>Welcome 👋</p>
-      <a class="loginBtn" href="#" id="logoutBtn">Logout</a>
+    <div class="userBox">
+      <div class="userRow">
+        <div style="min-width:0">
+          <div class="userName" id="uName">User</div>
+        </div>
+        <div class="userId" id="uId">#---</div>
+      </div>
+
+      <div class="balanceLine">
+        <span id="uBal">0.00</span>
+        <span>🇺🇸</span>
+      </div>
+
+      <div class="miniIcons">
+        <div class="miniBtn" title="Logout" onclick="doLogout()">⎋</div>
+        <div class="miniBtn" title="Profile" onclick="go('profile.html')">👤</div>
+      </div>
     </div>
+
+    <div class="divider"></div>
 
     <div class="menu">
-      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
-      <div class="mItem" id="addCreditItem"><span class="dot"></span><span>Add Credit</span></div>
+      <div class="mItem" onclick="go('services.html')">
+        <div class="ico">🏠</div><div class="mText">Home</div>
+      </div>
+      <div class="mItem" onclick="go('add-credit.html')">
+        <div class="ico">💳</div><div class="mText">Add Credit</div>
+      </div>
+      <div class="mItem" onclick="go('payments.html')">
+        <div class="ico">🧾</div><div class="mText">My Payments</div>
+      </div>
+      <div class="mItem" onclick="go('orders.html')">
+        <div class="ico">🛒</div><div class="mText">My Orders</div>
+      </div>
+      <div class="mItem" onclick="go('security.html')">
+        <div class="ico">🛡️</div><div class="mText">Security</div>
+      </div>
+      <div class="mItem" onclick="go('about.html')">
+        <div class="ico">👥</div><div class="mText">About Us</div>
+      </div>
     </div>
 
-    <div class="social">
-      <a href="https://wa.me/96181812024" target="_blank">WA</a>
-      <a href="#" id="ttBtn">♪</a>
-    </div>
+    <div class="divider"></div>
 
-    <div class="hint">© Baroud Services</div>
+    <div class="socialRow">
+      <a class="socialBtn" href="https://www.tiktok.com" target="_blank">♪</a>
+      <a class="socialBtn" href="https://wa.me/96181812024" target="_blank">WA</a>
+    </div>
+    <div class="copy">© Baroud Services</div>
   </aside>
 
+  <!-- page -->
   <main class="wrap">
     <div class="topbar">
-      <div class="iconBtn" id="menuBtn" role="button" aria-label="Open menu">
+      <div class="iconBtn" onclick="openDrawer()">
         <div class="hamburger"><span></span><span></span><span></span></div>
       </div>
-
-      <div class="balancePill">
-        <div class="coin">★</div>
-        <div class="amount" id="balanceTxt">0.00</div>
-        <div class="flag">🇺🇸</div>
-        <div class="plus" id="plusBtn">+</div>
-      </div>
-
-      <div class="brand">BAROUD</div>
+      <div class="brandRight">BAROUD</div>
     </div>
 
     <div class="banner">
-      <img src="assets/banner.jpg" alt="banner" />
+      <img src="assets/banner.jpg" alt="banner">
     </div>
 
-    <div class="support">Support Number:+961 81812024 | Join Our WhatsApp Community | Fast & Secure Services</div>
+    <div class="support">Support Number:+961 81812024 | Join Our WhatsApp Community</div>
 
     <div class="searchBox">
-      <input id="search" placeholder="Search" />
+      <input placeholder="Search">
     </div>
 
-    <section class="grid" id="grid">
-      <div class="tile" data-name="accounts" onclick="location.href='services.html?v='+Date.now()">
-        <img src="assets/accounts.jpg" alt="Accounts" />
+    <section class="grid">
+      <a class="tile" href="accounts.html">
+        <img src="assets/accounts.jpg" alt="Accounts">
         <div class="label">Accounts</div>
-      </div>
-      <div class="tile" data-name="games" onclick="location.href='services.html?v='+Date.now()">
-        <img src="assets/games.jpg" alt="Games" />
+      </a>
+      <a class="tile" href="games.html">
+        <img src="assets/games.jpg" alt="Games">
         <div class="label">Games</div>
-      </div>
-      <div class="tile" data-name="gift cards" onclick="location.href='services.html?v='+Date.now()">
-        <img src="assets/giftcards.jpg" alt="Gift Cards" />
+      </a>
+      <a class="tile" href="giftcards.html">
+        <img src="assets/giftcards.jpg" alt="Gift Cards">
         <div class="label">Gift Cards</div>
-      </div>
-      <div class="tile" data-name="social media" onclick="location.href='services.html?v='+Date.now()">
-        <img src="assets/apps.jpg" alt="Social Media" />
+      </a>
+      <a class="tile" href="social.html">
+        <img src="assets/apps.jpg" alt="Social Media">
         <div class="label">Social Media</div>
-      </div>
+      </a>
     </section>
   </main>
 
   <script>
+    // ✅ Supabase
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const drawer = document.getElementById("drawer");
-    const overlay = document.getElementById("overlay");
-    const menuBtn = document.getElementById("menuBtn");
-    const closeBtn = document.getElementById("closeBtn");
-
     function openDrawer(){
-      drawer.classList.add("show");
-      overlay.classList.add("show");
-      drawer.setAttribute("aria-hidden","false");
+      document.body.classList.add("lock");
+      document.getElementById("drawer").classList.add("show");
+      document.getElementById("overlay").classList.add("show");
+      document.getElementById("drawer").setAttribute("aria-hidden","false");
     }
     function closeDrawer(){
-      drawer.classList.remove("show");
-      overlay.classList.remove("show");
-      drawer.setAttribute("aria-hidden","true");
+      document.body.classList.remove("lock");
+      document.getElementById("drawer").classList.remove("show");
+      document.getElementById("overlay").classList.remove("show");
+      document.getElementById("drawer").setAttribute("aria-hidden","true");
     }
 
-    // ✅ click + touch (مهم للموبايل)
-    menuBtn.addEventListener("click", openDrawer);
-    menuBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); openDrawer(); }, {passive:false});
-    overlay.addEventListener("click", closeDrawer);
-    closeBtn.addEventListener("click", closeDrawer);
-
-    document.getElementById("ttBtn").addEventListener("click",(e)=>{
-      e.preventDefault();
-      alert("TikTok");
-    });
-
-    document.getElementById("homeItem").addEventListener("click",()=>{
+    function go(url){
       closeDrawer();
-      location.href = "services.html?v=" + Date.now();
-    });
+      location.href = url;
+    }
 
-    document.getElementById("addCreditItem").addEventListener("click",()=>{
+    async function doLogout(){
       closeDrawer();
-      location.href = "add-credit.html?v=" + Date.now();
-    });
-
-    document.getElementById("plusBtn").addEventListener("click",()=>{
-      location.href = "add-credit.html?v=" + Date.now();
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", async (e)=>{
-      e.preventDefault();
       await sb.auth.signOut();
-      location.replace("login.html?v=" + Date.now());
-    });
+      location.replace("login.html");
+    }
 
-    // ✅ Guard: ممنوع تفتح services إلا إذا عامل login
+    // ✅ Guard: services ما تفتح إلا بعد login + confirmed
     (async ()=>{
       const { data } = await sb.auth.getSession();
-      if (!data.session?.user){
-        location.replace("login.html?v=" + Date.now());
+      if(!data.session?.user){
+        location.replace("login.html");
+        return;
       }
+
+      const u = data.session.user;
+      const confirmedAt = u.email_confirmed_at || u.confirmed_at;
+      if(!confirmedAt){
+        await sb.auth.signOut();
+        location.replace("login.html");
+        return;
+      }
+
+      // ✅ تعبئة بيانات السلايدبار
+      await loadProfile(u);
     })();
 
-    // ✅ Search filter
-    const search = document.getElementById("search");
-    search.addEventListener("input", () => {
-      const q = search.value.trim().toLowerCase();
-      document.querySelectorAll(".tile").forEach(t => {
-        const name = (t.getAttribute("data-name") || t.innerText).toLowerCase();
-        t.style.display = name.includes(q) ? "" : "none";
-      });
-    });
+    async function loadProfile(user){
+      // افتراض: عندك جدول profiles فيه:
+      // id (uuid = auth.user.id) , full_name (text), user_no (int), balance (numeric)
+      try{
+        const { data, error } = await sb
+          .from("profiles")
+          .select("full_name,user_no,balance")
+          .eq("id", user.id)
+          .single();
+
+        // إذا ما في جدول/سجل، منعبّي fallback
+        if(error || !data){
+          document.getElementById("uName").textContent = (user.email || "User");
+          document.getElementById("uId").textContent = "#---";
+          document.getElementById("uBal").textContent = "0.00";
+          return;
+        }
+
+        document.getElementById("uName").textContent = data.full_name || (user.email || "User");
+        document.getElementById("uId").textContent = "#" + (data.user_no ?? "---");
+        const bal = (data.balance ?? 0);
+        document.getElementById("uBal").textContent = Number(bal).toFixed(2);
+
+      }catch(e){
+        document.getElementById("uName").textContent = (user.email || "User");
+        document.getElementById("uId").textContent = "#---";
+        document.getElementById("uBal").textContent = "0.00";
+      }
+    }
   </script>
 </body>
 </html>
