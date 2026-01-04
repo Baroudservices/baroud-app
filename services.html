@@ -1,257 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baroud Services</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baroud Services</title>
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-body{
-  margin:0;
-  font-family:system-ui, sans-serif;
-  background:linear-gradient(180deg,#061b33,#020b18);
-  color:#fff;
-}
+  <script>
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
 
-/* ===== TOP BAR ===== */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 14px;
-}
-.iconBtn{
-  width:44px;height:44px;
-  border-radius:14px;
-  background:rgba(255,255,255,.08);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.hamburger span{
-  display:block;
-  width:18px;height:2px;
-  background:#fff;
-  margin:4px 0;
-}
-.balance{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  background:rgba(255,255,255,.08);
-  padding:8px 14px;
-  border-radius:20px;
-}
-.plus{
-  width:28px;height:28px;
-  border-radius:50%;
-  background:#0aa0ff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-}
-.logo{font-weight:900;letter-spacing:2px}
+    // 🔒 حماية الصفحة
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session?.user) {
+        location.replace("login.html");
+      }
+    })();
+  </script>
 
-/* ===== BANNER ===== */
-.banner{
-  margin:10px;
-  padding:18px;
-  border-radius:18px;
-  background:linear-gradient(135deg,#7b0d0d,#1a2a52);
-  font-size:22px;
-  font-weight:800;
-}
-
-/* ===== SEARCH ===== */
-.search{
-  margin:10px;
-}
-.search input{
-  width:100%;
-  padding:14px;
-  border-radius:30px;
-  border:none;
-  background:rgba(255,255,255,.08);
-  color:#fff;
-}
-
-/* ===== GRID ===== */
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-  padding:10px;
-}
-.card{
-  height:140px;
-  border-radius:20px;
-  background:rgba(255,255,255,.08);
-  display:flex;
-  align-items:flex-end;
-  padding:14px;
-  font-weight:700;
-}
-
-/* ===== DRAWER ===== */
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  z-index:50;
-}
-.overlay.show{display:block}
-
-.drawer{
-  position:fixed;
-  top:0;left:0;
-  width:78%;
-  height:100%;
-  background:linear-gradient(180deg,#081f3f,#041225);
-  transform:translateX(-100%);
-  transition:.3s;
-  z-index:60;
-  padding:16px;
-}
-.drawer.show{transform:translateX(0)}
-
-.closeBtn{
-  background:none;
-  border:none;
-  color:#fff;
-  font-size:26px;
-}
-
-/* login card */
-.loginCard{
-  background:#0aa0ff;
-  border-radius:26px;
-  padding:22px;
-  text-align:center;
-  margin-bottom:16px;
-}
-.loginCard h2{margin:0;color:#fff}
-.loginCard p{font-size:13px}
-.loginBtn{
-  display:block;
-  margin-top:14px;
-  background:#18e26b;
-  color:#04351c;
-  padding:14px;
-  border-radius:999px;
-  text-decoration:none;
-  font-weight:800;
-}
-
-.menuItem{
-  padding:14px;
-  border-bottom:1px solid rgba(255,255,255,.1);
-}
-.menuItem a{
-  color:#fff;
-  text-decoration:none;
-}
-
-.social{
-  display:flex;
-  gap:14px;
-  justify-content:center;
-  margin-top:20px;
-}
-.social a{
-  width:46px;height:46px;
-  border-radius:14px;
-  background:rgba(255,255,255,.1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  text-decoration:none;
-}
-</style>
+  <style>
+    body{
+      margin:0;
+      font-family:system-ui;
+      background:linear-gradient(180deg,#061b33,#020b14);
+      color:#fff;
+    }
+    /* كمّل CSS تبعك عادي */
+  </style>
 </head>
 
 <body>
 
-<!-- OVERLAY -->
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-
-<!-- DRAWER -->
-<aside class="drawer" id="drawer">
-  <button class="closeBtn" onclick="closeDrawer()">×</button>
-
-  <div class="loginCard">
-    <h2>Login</h2>
-    <p>Sign in to manage your account</p>
-    <a class="loginBtn" href="login.html">Login</a>
-  </div>
-
-  <div class="menuItem"><a href="index.html">Home</a></div>
-  <div class="menuItem"><a href="#">About Us</a></div>
-
-  <div class="social">
-    <a href="https://wa.me/96181812024" target="_blank">WA</a>
-    <a href="#">♪</a>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<div class="topbar">
-  <div class="iconBtn" onclick="openDrawer()">
-    <div class="hamburger">
-      <span></span><span></span><span></span>
-    </div>
-  </div>
-
-  <div class="balance">
-    ⭐ 0.00 🇺🇸
-    <div class="plus" onclick="location.href='add-credit.html'">+</div>
-  </div>
-
-  <div class="logo">BAROUD</div>
-</div>
-
-<div class="banner">Unlock The Ultimate Power</div>
-
-<div class="search">
-  <input placeholder="Search">
-</div>
-
-<div class="grid">
-  <div class="card">Games</div>
-  <div class="card">Applications</div>
-  <div class="card">Accounts</div>
-  <div class="card">Gift Cards</div>
-</div>
-
-<!-- SCRIPTS -->
-<script>
-const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// 🔒 Guard
-(async ()=>{
-  const { data } = await supabase.auth.getSession();
-  if(!data.session){
-    location.replace("login.html");
-  }
-})();
-
-// drawer
-function openDrawer(){
-  document.getElementById("drawer").classList.add("show");
-  document.getElementById("overlay").classList.add("show");
-}
-function closeDrawer(){
-  document.getElementById("drawer").classList.remove("show");
-  document.getElementById("overlay").classList.remove("show");
-}
-</script>
+<!-- ⬇️ هون بيجي HTML تبع الصفحة -->
+<h1>Services Page</h1>
 
 </body>
 </html>
