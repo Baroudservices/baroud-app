@@ -1,284 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baroud Services</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baroud Services</title>
 
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+body{
+  margin:0;
+  font-family:system-ui,sans-serif;
+  background:linear-gradient(180deg,#06162a,#020814);
+  color:#fff;
+}
 
-  <style>
-    :root{
-      --bg:#071324;
-      --card:#0d2238;
-      --btn:#1b2f46;
-      --btn2:#203a55;
-      --text:#ffffff;
-      --muted:#9fb3c8;
-      --radius:22px;
-    }
+/* ===== HEADER ===== */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px;
+}
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 50% 0%, #0b2a4a 0%, var(--bg) 55%, #050b14 100%);
-      color:var(--text);
-      min-height:100vh;
-      padding:18px 16px 40px;
-    }
+.menu{
+  font-size:24px;
+  cursor:pointer;
+}
 
-    /* TOP BAR (ovoxz style) */
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-top:6px;
-      margin-bottom:14px;
-    }
+.balanceBox{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#0d223a;
+  padding:8px 14px;
+  border-radius:20px;
+  font-weight:600;
+}
 
-    .leftGroup{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
+.plus{
+  background:#1e90ff;
+  color:#fff;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
 
-    .iconBtn{
-      width:46px;
-      height:46px;
-      border-radius:16px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:22px;
-      cursor:pointer;
-      user-select:none;
-    }
+.logo{
+  font-weight:800;
+  letter-spacing:2px;
+}
 
-    .balanceWrap{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-    }
+/* ===== BANNER ===== */
+.banner{
+  margin:10px;
+  background:linear-gradient(135deg,#9b1c1c,#041c3a);
+  border-radius:16px;
+  padding:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
 
-    .coin{
-      width:32px;
-      height:32px;
-      border-radius:50%;
-      background:linear-gradient(180deg,#caa76a,#8e6b34);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:16px;
-      box-shadow:0 6px 18px rgba(0,0,0,.35);
-    }
+.banner h3{
+  margin:0;
+}
 
-    .balance{
-      font-weight:800;
-      font-size:20px;
-      letter-spacing:.3px;
-    }
+/* ===== SEARCH ===== */
+.search{
+  margin:15px;
+}
+.search input{
+  width:100%;
+  padding:16px;
+  border-radius:30px;
+  border:none;
+  background:#0d223a;
+  color:#fff;
+  font-size:16px;
+}
 
-    .flag{
-      font-size:18px;
-      opacity:.95;
-    }
+/* ===== GRID ===== */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  padding:15px;
+}
 
-    .logo{
-      font-weight:900;
-      letter-spacing:4px;
-      opacity:.9;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      user-select:none;
-    }
+.card{
+  background:#0d223a;
+  border-radius:18px;
+  padding:20px;
+  height:120px;
+  display:flex;
+  align-items:flex-end;
+  font-weight:600;
+}
 
-    /* MAIN CARD */
-    .wrap{
-      max-width:430px;
-      margin:0 auto;
-    }
-
-    .mainCard{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:28px;
-      padding:24px 18px 18px;
-      box-shadow:0 18px 50px rgba(0,0,0,.35);
-    }
-
-    .title{
-      font-size:48px;
-      font-weight:900;
-      text-align:center;
-      margin:6px 0 6px;
-      line-height:1.05;
-    }
-
-    .dots{
-      text-align:center;
-      color:rgba(255,255,255,.35);
-      margin-bottom:14px;
-      letter-spacing:4px;
-      font-size:18px;
-    }
-
-    .btn{
-      width:100%;
-      padding:18px 16px;
-      border-radius:22px;
-      border:none;
-      margin:12px 0;
-      background:rgba(255,255,255,.08);
-      color:var(--text);
-      font-size:20px;
-      font-weight:700;
-      cursor:pointer;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-    }
-
-    .btn:hover{ background:rgba(255,255,255,.11); }
-
-    .btnPrimary{
-      background: linear-gradient(90deg,#11b7ff,#2d64ff);
-    }
-
-    .btnLogout{
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,60,60,.25);
-    }
-
-    .status{
-      text-align:center;
-      margin-top:10px;
-      color:rgba(255,255,255,.7);
-      font-weight:700;
-      font-size:18px;
-    }
-
-    /* small floating refresh like your screenshot */
-    .refreshFloat{
-      position:fixed;
-      right:18px;
-      bottom:22px;
-      width:62px;
-      height:62px;
-      border-radius:22px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:26px;
-      cursor:pointer;
-      box-shadow:0 18px 40px rgba(0,0,0,.35);
-    }
-  </style>
+/* ===== BOTTOM NAV ===== */
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#081526;
+  display:flex;
+  justify-content:space-around;
+  padding:12px 0;
+}
+.nav div{
+  opacity:.7;
+}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
 
-    <!-- TOP BAR -->
-    <div class="topbar">
-      <div class="leftGroup">
-        <div class="iconBtn" onclick="toggleMenu()">☰</div>
+<!-- HEADER -->
+<div class="header">
+  <div class="menu">☰</div>
 
-        <div class="balanceWrap">
-          <div class="coin">★</div>
-          <div class="balance" id="balance">0.00</div>
-          <div class="flag">🇺🇸</div>
-          <div class="iconBtn" style="width:42px;height:42px;border-radius:16px;" onclick="go('add-credit.html')">+</div>
-        </div>
-      </div>
-
-      <div class="logo">BAROUD</div>
-    </div>
-
-    <!-- MAIN -->
-    <div class="mainCard">
-      <div class="title">Baroud<br/>Services</div>
-      <div class="dots">···</div>
-
-      <button class="btn" onclick="openWhatsApp()">WhatsApp</button>
-      <button class="btn" onclick="alert('Service 1')">Service 1</button>
-      <button class="btn" onclick="alert('Service 2')">Service 2</button>
-
-      <button class="btn btnPrimary" onclick="go('add-credit.html')">Add Credit</button>
-      <button class="btn btnLogout" onclick="logoutUser()">Logout</button>
-
-      <div class="dots">···</div>
-      <div class="status" id="status">Checking...</div>
-    </div>
-
+  <div class="balanceBox">
+    ⭐ 0.00 🇺🇸
+    <div class="plus" onclick="location.href='add-credit.html'">+</div>
   </div>
 
-  <div class="refreshFloat" onclick="hardRefresh()">↻</div>
+  <div class="logo">BAROUD</div>
+</div>
 
-  <script>
-    // ✅ IMPORTANT: BASE تبع الريبو الجديد
-    const BASE = "https://baroudservices.github.io/baroud-app/";
+<!-- BANNER -->
+<div class="banner">
+  <h3>Unlock The Ultimate Power</h3>
+</div>
 
-    // ✅ Supabase (حط مفاتيحك نفسها اللي كانت عندك)
-    const SUPABASE_URL = "https://pqwitolorhhbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<!-- SEARCH -->
+<div class="search">
+  <input placeholder="Search">
+</div>
 
-    function go(page){
-      window.location.assign(BASE + page + "?v=" + Date.now());
-    }
+<!-- GRID -->
+<div class="grid">
+  <div class="card">Games</div>
+  <div class="card">Applications</div>
+  <div class="card">Accounts</div>
+  <div class="card">Gift Cards</div>
+</div>
 
-    function hardRefresh(){
-      window.location.replace(BASE + "services.html?v=" + Date.now());
-    }
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <div>🏠</div>
+  <div>🛒</div>
+  <div>🔔</div>
+  <div>💳</div>
+</div>
 
-    function openWhatsApp(){
-      window.open("https://wa.me/96170385398", "_blank");
-    }
-
-    function toggleMenu(){
-      alert("Menu later ✅");
-    }
-
-    async function logoutUser(){
-      await supabase.auth.signOut();
-      window.location.replace(BASE + "index.html?v=" + Date.now());
-    }
-
-    async function guard(){
-      const { data } = await supabase.auth.getSession();
-      const user = data?.session?.user;
-
-      if(!user){
-        window.location.replace(BASE + "index.html?v=" + Date.now());
-        return;
-      }
-
-      document.getElementById("status").innerText = "Ready ✅";
-
-      // ✅ هون لاحقاً منجيب البالانس الحقيقي من DB
-      document.getElementById("balance").innerText = "0.00";
-    }
-
-    // 🔥 حل جذري للكاش (حتى ما يرجع للقديم)
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((regs) => {
-        regs.forEach(r => r.unregister());
-      });
-    }
-    if (window.caches) {
-      caches.keys().then((names) => names.forEach(n => caches.delete(n)));
-    }
-
-    guard();
-  </script>
 </body>
 </html>
