@@ -1,202 +1,111 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - Baroud Services</title>
+<meta charset="UTF-8">
+<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Supabase -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<!-- Supabase -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-  <style>
-    body{
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:radial-gradient(1200px 600px at 30% 10%, #183a64 0%, #061425 55%, #04101c 100%);
-      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:#fff;
-      padding:18px;
-    }
-    .card{
-      width:min(420px, 100%);
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:26px;
-      padding:22px 18px;
-      box-shadow:0 30px 70px rgba(0,0,0,.55);
-      backdrop-filter: blur(10px);
-    }
-    h1{
-      margin:0 0 8px;
-      font-size:30px;
-      letter-spacing:.3px;
-    }
-    p{
-      margin:0 0 16px;
-      opacity:.8;
-      font-weight:600;
-      font-size:13px;
-      line-height:1.4;
-    }
-    label{
-      display:block;
-      font-size:12px;
-      opacity:.85;
-      margin:12px 0 6px;
-      font-weight:700;
-    }
-    input{
-      width:100%;
-      padding:14px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.25);
-      color:#fff;
-      outline:none;
-      font-size:15px;
-      box-sizing:border-box;
-    }
-    input::placeholder{color:rgba(255,255,255,.45)}
-    .btn{
-      margin-top:14px;
-      width:100%;
-      padding:14px 16px;
-      border:0;
-      border-radius:999px;
-      font-weight:900;
-      font-size:16px;
-      cursor:pointer;
-      background:linear-gradient(90deg, #00c2ff, #2b6cff);
-      color:white;
-      box-shadow:0 18px 45px rgba(0,0,0,.35);
-    }
-    .btn:active{transform:scale(.99)}
-    .row{
-      margin-top:12px;
-      display:flex;
-      gap:10px;
-    }
-    .btn2{
-      flex:1;
-      padding:12px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-    }
-    .msg{
-      margin-top:14px;
-      font-weight:800;
-      font-size:13px;
-      opacity:.9;
-    }
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:10px;
-    }
-    .back{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      width:44px;height:44px;
-      border-radius:16px;
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      font-weight:900;
-      user-select:none;
-    }
-  </style>
+<style>
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,#06162d,#020b18);
+  font-family:system-ui,sans-serif;
+  color:white;
+}
+.card{
+  background:#0aa0ff;
+  border-radius:28px;
+  padding:26px 20px;
+  width:90%;
+  max-width:360px;
+  text-align:center;
+  box-shadow:0 30px 70px rgba(0,0,0,.6);
+}
+.card h2{margin:0 0 10px;font-size:32px}
+.card p{font-size:13px;opacity:.9}
+
+input{
+  width:100%;
+  padding:14px;
+  margin:10px 0;
+  border:none;
+  border-radius:14px;
+  font-size:15px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:999px;
+  background:#11e06d;
+  font-weight:800;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.msg{
+  margin-top:12px;
+  font-size:13px;
+  opacity:.9;
+}
+</style>
 </head>
 
 <body>
-  <div class="card">
-    <div class="top">
-      <div class="back" id="backBtn">←</div>
-      <div style="opacity:.8;font-weight:900">Baroud Services</div>
-    </div>
 
-    <h1>Login</h1>
-    <p>Sign in to continue.</p>
+<div class="card">
+  <h2>Login</h2>
+  <p>Sign in to your account</p>
 
-    <label>Email</label>
-    <input id="email" type="email" placeholder="example@mail.com" autocomplete="email" />
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
 
-    <label>Password</label>
-    <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+  <button onclick="login()">Login</button>
 
-    <button class="btn" id="loginBtn">Login</button>
+  <div class="msg" id="msg"></div>
+</div>
 
-    <div class="row">
-      <button class="btn2" id="signupBtn">Sign Up</button>
-      <button class="btn2" id="resetBtn">Reset</button>
-    </div>
+<script>
+const BASE = "https://baroudservices.github.io/baroud-app/";
 
-    <div class="msg" id="msg"></div>
-  </div>
+const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  <script>
-    // ✅ GitHub Pages base
-    const BASE = "https://baroudservices.github.io/baroud-app/";
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("msg");
 
-    // ✅ Supabase
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  msg.innerText = "Logging in...";
 
-    const email = document.getElementById("email");
-    const pass = document.getElementById("pass");
-    const msg  = document.getElementById("msg");
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
 
-    function setMsg(t){ msg.textContent = t; }
+  if(error){
+    msg.innerText = error.message;
+    msg.style.color = "#ffdddd";
+    return;
+  }
 
-    document.getElementById("backBtn").addEventListener("click", ()=>{
-      window.location.assign(BASE + "index.html?v=" + Date.now());
-    });
+  msg.innerText = "Success ✔ Redirecting...";
+  msg.style.color = "#d4ffea";
 
-    // إذا مسجّل دخول، روح للخدمات
-    (async ()=>{
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user){
-        window.location.replace(BASE + "services.html?v=" + Date.now());
-      }
-    })();
+  setTimeout(()=>{
+    window.location.replace(BASE + "services.html?v=" + Date.now());
+  },800);
+}
+</script>
 
-    document.getElementById("loginBtn").addEventListener("click", async ()=>{
-      setMsg("Logging in...");
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.value.trim(),
-        password: pass.value
-      });
-      if (error){ setMsg(error.message); return; }
-      setMsg("Success ✅");
-      window.location.replace(BASE + "services.html?v=" + Date.now());
-    });
-
-    document.getElementById("signupBtn").addEventListener("click", async ()=>{
-      setMsg("Creating account...");
-      const { error } = await supabase.auth.signUp({
-        email: email.value.trim(),
-        password: pass.value
-      });
-      if (error){ setMsg(error.message); return; }
-      setMsg("Check your email to confirm ✅");
-    });
-
-    document.getElementById("resetBtn").addEventListener("click", async ()=>{
-      const e = email.value.trim();
-      if(!e){ setMsg("Write your email first."); return; }
-      setMsg("Sending reset email...");
-      const { error } = await supabase.auth.resetPasswordForEmail(e);
-      if (error){ setMsg(error.message); return; }
-      setMsg("Reset email sent ✅");
-    });
-  </script>
 </body>
 </html>
