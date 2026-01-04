@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="ltr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,128 +7,192 @@
 
   <style>
     :root{
-      --bg1:#060b16; --bg2:#0a1330;
-      --card: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.10);
+      --bg1:#060b16;
+      --bg2:#0a1330;
+      --glass:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.10);
       --text:#eaf2ff;
-      --muted: rgba(234,242,255,.65);
-      --shadow: 0 20px 60px rgba(0,0,0,.55);
-      --r: 26px; --r2: 20px;
+      --muted:rgba(234,242,255,.65);
+      --shadow:0 20px 60px rgba(0,0,0,.55);
     }
+
     *{box-sizing:border-box}
     body{
-      margin:0; min-height:100vh;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin:0;
+      min-height:100vh;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
       color:var(--text);
       background:
         radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
         radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
-        linear-gradient(160deg, var(--bg1), var(--bg2));
-      padding:18px;
+        linear-gradient(160deg,var(--bg1),var(--bg2));
+      padding:16px;
     }
 
-    .topbar{
-      max-width: 460px;
-      margin: 6px auto 10px;
+    /* ===== HEADER (OVOXZ STYLE) ===== */
+    .header{
+      max-width:460px;
+      margin:0 auto 14px;
       display:flex;
       align-items:center;
+      justify-content:space-between;
       gap:12px;
     }
-    .back{
+
+    .balanceBox{
+      flex:1;
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      backdrop-filter:blur(14px);
+      border-radius:22px;
+      padding:14px 16px;
+      box-shadow:var(--shadow);
+    }
+
+    .balanceLabel{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:4px;
+      font-weight:600;
+    }
+
+    .balanceValue{
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:.4px;
+    }
+
+    .addBtn{
+      width:56px;
+      height:56px;
+      border-radius:20px;
+      border:1px solid var(--stroke);
+      background:linear-gradient(90deg,#0ea5e9,#2563eb);
+      color:white;
+      font-size:32px;
+      font-weight:700;
       cursor:pointer;
-      color:var(--text);
-      opacity:.9;
+      box-shadow:0 18px 45px rgba(37,99,235,.35);
       display:flex;
       align-items:center;
-      gap:10px;
-      user-select:none;
+      justify-content:center;
     }
-    .wrap{max-width:460px;margin:0 auto;}
+    .addBtn:active{transform:scale(.97)}
+
+    /* ===== CONTENT ===== */
+    .wrap{
+      max-width:460px;
+      margin:0 auto;
+    }
+
     .title{
-      font-size:44px;
+      font-size:42px;
       font-weight:900;
-      margin: 14px 0 18px;
-      letter-spacing:.2px;
+      margin:18px 0 18px;
     }
+
     .glass{
+      background:var(--glass);
       border:1px solid var(--stroke);
-      background:var(--card);
-      backdrop-filter: blur(14px);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
+      backdrop-filter:blur(14px);
+      border-radius:26px;
       padding:18px;
+      box-shadow:var(--shadow);
     }
 
     .item{
       width:100%;
       border:none;
-      border-radius: 26px;
-      padding:16px 16px;
-      margin: 14px 0;
+      border-radius:26px;
+      padding:16px;
+      margin:14px 0;
       cursor:pointer;
-      background: rgba(255,255,255,.07);
+      background:rgba(255,255,255,.07);
       border:1px solid rgba(255,255,255,.08);
-      color: var(--text);
+      color:var(--text);
       display:flex;
       align-items:center;
       gap:14px;
-      transition:.15s ease;
+      transition:.15s;
     }
-    .item:hover{background: rgba(255,255,255,.10)}
+    .item:hover{background:rgba(255,255,255,.10)}
     .item:active{transform:scale(.99)}
-    .logoBox{
-      width:52px;height:52px;
-      border-radius: 18px;
-      display:flex;align-items:center;justify-content:center;
-      background: rgba(255,255,255,.06);
+
+    .logo{
+      width:52px;
+      height:52px;
+      border-radius:18px;
+      background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
       overflow:hidden;
     }
-    .logoBox img{width:100%;height:100%;object-fit:cover}
-    .label{font-size:18px;font-weight:800}
-    .foot{
+
+    .logo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .label{
+      font-size:18px;
+      font-weight:800;
+    }
+
+    .footer{
       text-align:center;
-      color: var(--muted);
-      margin-top: 18px;
+      color:var(--muted);
+      margin-top:18px;
     }
   </style>
 </head>
+
 <body>
 
-  <div class="topbar">
-    <div class="back" onclick="goBack()">← رجوع</div>
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="balanceBox">
+      <div class="balanceLabel">Balance</div>
+      <div class="balanceValue">$0.00</div>
+    </div>
+
+    <!-- زر + -->
+    <div class="addBtn" onclick="refreshPage()">+</div>
   </div>
 
+  <!-- ===== CONTENT ===== -->
   <div class="wrap">
-    <div class="title">Add Credit Section</div>
+    <div class="title">Add Credit</div>
 
     <div class="glass">
       <button class="item" onclick="go('binance.html')">
-        <div class="logoBox"><img src="assets/binance.png" alt="binance"></div>
+        <div class="logo"><img src="assets/binance.png"></div>
         <div class="label">Binance</div>
       </button>
 
       <button class="item" onclick="go('wish.html')">
-        <div class="logoBox"><img src="assets/wish.png" alt="wish"></div>
+        <div class="logo"><img src="assets/wish.png"></div>
         <div class="label">Whish Money</div>
       </button>
 
       <button class="item" onclick="go('usdt-bep20.html')">
-        <div class="logoBox"><img src="assets/usdt.png" alt="usdt"></div>
+        <div class="logo"><img src="assets/usdt.png"></div>
         <div class="label">USDT BEP20</div>
       </button>
 
       <button class="item" onclick="go('usdt-trc20.html')">
-        <div class="logoBox"><img src="assets/usdt.png" alt="usdt"></div>
+        <div class="logo"><img src="assets/usdt.png"></div>
         <div class="label">USDT TRC20</div>
       </button>
 
       <button class="item" onclick="go('omt.html')">
-        <div class="logoBox"><img src="assets/omt.png" alt="omt"></div>
+        <div class="logo"><img src="assets/omt.png"></div>
         <div class="label">OMT Pay</div>
       </button>
 
-      <div class="foot">© 2024 Baroud Services</div>
+      <div class="footer">© 2024 Baroud Services</div>
     </div>
   </div>
 
@@ -136,9 +200,11 @@
     function go(page){
       window.location.href = page + "?v=" + Date.now();
     }
-    function goBack(){
-      window.location.replace("services.html?v=" + Date.now());
+
+    function refreshPage(){
+      window.location.replace("add-credit.html?v=" + Date.now());
     }
   </script>
+
 </body>
 </html>
