@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Baroud Services</title>
 
   <!-- Supabase -->
@@ -12,11 +12,11 @@
     :root{
       --bg1:#06162a;
       --bg2:#020b14;
+      --text:#ffffff;
       --glass:rgba(255,255,255,.06);
-      --glass2:rgba(255,255,255,.08);
       --stroke:rgba(255,255,255,.08);
-      --text:#fff;
-      --muted:rgba(255,255,255,.65);
+      --muted:rgba(255,255,255,.70);
+      --muted2:rgba(255,255,255,.45);
       --shadow:0 18px 60px rgba(0,0,0,.35);
       --radius:22px;
     }
@@ -29,21 +29,21 @@
       min-height:100vh;
       -webkit-tap-highlight-color:transparent;
     }
-
+    a{color:inherit;text-decoration:none}
     .wrap{
       max-width:520px;
       margin:0 auto;
-      padding:14px 14px 90px;
+      padding:14px 14px 40px;
       position:relative;
       z-index:1;
     }
 
-    /* Topbar */
+    /* ===== Topbar ===== */
     .topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
+      gap:12px;
       margin-top:6px;
     }
     .iconBtn{
@@ -58,102 +58,137 @@
     }
     .hamburger{width:22px}
     .hamburger span{
-      display:block;height:2px;background:#fff;border-radius:9px;
-      margin:4px 0;opacity:.9;
+      display:block;height:2px;border-radius:2px;
+      background:#fff;margin:4px 0;
+      opacity:.9;
     }
 
     .balancePill{
       flex:1;
+      min-width:0;
       height:54px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:0 12px;
-      border-radius:18px;
+      border-radius:22px;
       background:var(--glass);
       border:1px solid var(--stroke);
-      box-shadow:0 10px 30px rgba(0,0,0,.2);
-      overflow:hidden;
-      min-width:0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:8px 10px;
+      box-shadow:0 12px 50px rgba(0,0,0,.22);
+      gap:10px;
     }
     .coin{
       width:34px;height:34px;border-radius:50%;
+      background:#b68b2a;
       display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(180deg,#d6b35c,#9a6d12);
-      color:#000;font-weight:900;
+      font-weight:900;
+      box-shadow:inset 0 0 0 2px rgba(0,0,0,.15);
       flex:0 0 auto;
     }
-    .balText{
+    .balTop{
       font-weight:900;
+      font-size:22px;
       letter-spacing:.5px;
       white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      flex:1;
     }
     .flag{
-      opacity:.9;
-      white-space:nowrap;
-    }
-
-    /* زر + (Add Credit) */
-    .addBtn{
-      margin-left:auto;
-      width:34px;height:34px;border-radius:50%;
-      border:none;
-      background:linear-gradient(135deg,#1bb6ff,#2a74ff);
-      color:#fff;
       font-size:22px;
-      font-weight:900;
-      cursor:pointer;
-      box-shadow:0 6px 18px rgba(0,0,0,.35);
       flex:0 0 auto;
     }
-    .addBtn:active{transform:scale(.95)}
+    .addBtn{
+      width:40px;height:40px;border-radius:16px;
+      border:none;
+      cursor:pointer;
+      font-size:22px;
+      font-weight:1000;
+      color:#fff;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      box-shadow:0 12px 40px rgba(0,0,0,.30);
+      flex:0 0 auto;
+    }
 
-    /* Logo top right */
     .brandRight{
+      min-width:62px;
       display:flex;
       align-items:center;
       justify-content:flex-end;
-      min-width:84px;
-      background:transparent;
     }
+    /* ✅ كبرنا اللوغو + شلنا أي خلفية */
     .logoTop{
-      height:48px;
+      height:52px; /* كبر */
       display:block;
-      opacity:.1
-      background:none;
-      box-shadow:none;
+      background:transparent !important;
+      box-shadow:none !important;
+      border:none !important;
+      filter:drop-shadow(0 10px 18px rgba(0,0,0,.35));
     }
 
-    /* Banner */
+    /* ===== Banner Slider ===== */
     .banner{
       margin-top:14px;
-      border-radius:22px;
+      border-radius:var(--radius);
       overflow:hidden;
       background:var(--glass);
       border:1px solid var(--stroke);
       box-shadow:0 20px 70px rgba(0,0,0,.35);
     }
-    .banner img{
+    .slider{
+      position:relative;
+      overflow:hidden;
+      border-radius:var(--radius);
+    }
+    .slides{
+      display:flex;
+      transition:transform .55s ease;
+      will-change:transform;
+    }
+    .slide{
+      min-width:100%;
+      height:170px;
+      position:relative;
+    }
+    .slide img{
       width:100%;
-      height:160px;
+      height:170px;
       object-fit:cover;
       display:block;
     }
+    .dots{
+      position:absolute;
+      left:0;right:0;
+      bottom:10px;
+      display:flex;
+      justify-content:center;
+      gap:7px;
+      pointer-events:auto;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:99px;
+      background:rgba(255,255,255,.30);
+      border:1px solid rgba(255,255,255,.10);
+      cursor:pointer;
+    }
+    .dot.active{
+      width:18px;
+      background:rgba(255,255,255,.85);
+    }
 
+    /* ===== Support + Search ===== */
     .support{
       margin-top:12px;
       padding:12px 14px;
       border-radius:18px;
       background:var(--glass);
       border:1px solid var(--stroke);
-      color:rgba(255,255,255,.85);
+      opacity:.92;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      font-weight:800;
+      box-shadow:0 18px 60px rgba(0,0,0,.18);
     }
-
-    /* Search */
     .searchBox{
       margin-top:12px;
       background:var(--glass);
@@ -168,11 +203,11 @@
       border:none;
       outline:none;
       color:#fff;
-      font-size:16px;
+      font-size:18px;
+      opacity:.9;
     }
-    .searchBox input::placeholder{color:rgba(255,255,255,.35)}
 
-    /* Grid tiles */
+    /* ===== Tiles ===== */
     .grid{
       margin-top:14px;
       display:grid;
@@ -180,246 +215,246 @@
       gap:14px;
     }
     .tile{
-      background:var(--glass);
-      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
       border-radius:22px;
       overflow:hidden;
       box-shadow:0 18px 60px rgba(0,0,0,.25);
       cursor:pointer;
-      user-select:none;
     }
     .tile img{
-      width:100%;
-      height:120px;
-      object-fit:cover;
+      width:100%;height:140px;object-fit:cover;
       display:block;
     }
     .label{
       padding:12px;
       text-align:center;
       font-weight:900;
-      letter-spacing:.3px;
       opacity:.95;
     }
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      opacity:.55;
+      font-weight:800;
+      letter-spacing:1px;
+    }
 
-    /* Drawer + Overlay */
+    /* ===== Drawer ===== */
     .overlay{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.45);
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
       opacity:0;
-      visibility:hidden;
-      transition:.2s;
-      z-index:1000;
+      pointer-events:none;
+      transition:opacity .25s ease;
+      z-index:9998;
     }
     .overlay.show{
       opacity:1;
-      visibility:visible;
+      pointer-events:auto;
     }
 
     .drawer{
       position:fixed;
-      top:0; left:0;
-      width:min(78vw,330px);
-      height:100vh;
-      background:linear-gradient(180deg,#071a33,#020b14);
+      top:0;bottom:0;left:0;
+      width:min(86vw,340px);
+      background:linear-gradient(180deg,#071a31,#020b14);
       border-right:1px solid rgba(255,255,255,.08);
       transform:translateX(-105%);
-      transition:.22s ease;
-      z-index:1001;
-      padding:14px;
-      box-shadow:30px 0 80px rgba(0,0,0,.5);
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
+      transition:transform .28s ease;
+      z-index:9999;
+      padding:18px 16px;
     }
-    .drawer.show{transform:translateX(0)}
+    .drawer.show{
+      transform:translateX(0);
+    }
     .drawerTop{
       display:flex;
-      justify-content:flex-end;
+      align-items:center;
+      justify-content:space-between;
       margin-bottom:10px;
     }
     .closeBtn{
-      width:44px;height:44px;
-      border-radius:14px;
+      width:44px;height:44px;border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.06);
-      color:#fff;
-      font-size:22px;
+      color:#fff;font-size:22px;
       cursor:pointer;
     }
+    .drawerBrand{
+      font-weight:900;
+      letter-spacing:2px;
+      opacity:.85;
+    }
 
-    /* User box inside drawer */
-    .userBox{
+    .profile{
+      margin-top:6px;
       padding:14px;
       border-radius:22px;
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.07);
-      margin-bottom:14px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
     }
-    .userName{
-      font-weight:900;
-      font-size:20px;
+    .nameRow{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .pName{
+      font-size:22px;
+      font-weight:950;
       letter-spacing:.3px;
-      line-height:1.2;
     }
-    .userBal{
+    .pId{
+      opacity:.7;
+      font-weight:800;
+    }
+    .pBal{
       margin-top:6px;
+      font-size:22px;
+      font-weight:950;
+      color:#1bc7ff;
       display:flex;
       align-items:center;
       gap:8px;
-      font-weight:900;
-      color:#6fd2ff;
     }
-    .userBal .flag{color:#fff;opacity:.9}
-    .userActions{
-      margin-top:12px;
+
+    .quickIcons{
+      margin-top:10px;
       display:flex;
-      gap:10px;
+      gap:14px;
+      opacity:.95;
     }
-    .miniBtn{
-      width:44px;height:44px;
-      border-radius:16px;
+    .qBtn{
+      width:42px;height:42px;border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.06);
-      color:#fff;
-      font-size:18px;
+      display:flex;align-items:center;justify-content:center;
       cursor:pointer;
+      user-select:none;
     }
 
-    .line{height:1px;background:rgba(255,255,255,.08);margin:14px 0}
-
+    .sep{
+      margin:14px 0;
+      height:1px;
+      background:rgba(255,255,255,.10);
+    }
     .menu{
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:14px;
+      padding:4px 6px;
     }
     .mItem{
       display:flex;
       align-items:center;
-      gap:10px;
-      padding:10px 10px;
+      gap:12px;
+      font-size:18px;
+      padding:10px 8px;
       border-radius:16px;
-      background:transparent;
       cursor:pointer;
-      user-select:none;
     }
-    .mItem:active{background:rgba(255,255,255,.06)}
-    .ico{
-      width:30px;
+    .mItem:hover{background:rgba(255,255,255,.05)}
+    .mIcon{
+      width:28px;
+      opacity:.9;
       display:flex;
       justify-content:center;
-      opacity:.95;
-    }
-    .mText{
-      font-weight:900;
-      letter-spacing:.2px;
-      opacity:.95;
     }
 
     .social{
-      margin-top:14px;
+      margin-top:16px;
       display:flex;
-      justify-content:center;
       gap:14px;
+      justify-content:center;
     }
     .social a{
-      width:54px;height:54px;
-      display:flex;align-items:center;justify-content:center;
-      border-radius:18px;
-      background:rgba(255,255,255,.06);
+      width:56px;height:56px;border-radius:18px;
       border:1px solid rgba(255,255,255,.10);
-      color:#fff;
+      background:rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:center;
       font-weight:900;
-      text-decoration:none;
+      opacity:.9;
     }
     .hint{
       margin-top:14px;
       text-align:center;
       color:rgba(255,255,255,.35);
       font-size:12px;
-      font-weight:800;
-      letter-spacing:1px;
-    }
-
-    /* Bottom nav (اختياري إذا عندك) */
-    .bottomNav{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      height:64px;
-      background:rgba(5,20,40,.92);
-      border-top:1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(8px);
-      display:flex;
-      justify-content:space-around;
-      align-items:center;
-      z-index:999;
-    }
-    .bottomNav .bIcon{
-      opacity:.7;
-      font-size:20px;
-      cursor:pointer;
-      user-select:none;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- overlay -->
+  <!-- Overlay -->
   <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 
-  <!-- drawer -->
+  <!-- Drawer -->
   <aside class="drawer" id="drawer">
     <div class="drawerTop">
       <button class="closeBtn" onclick="closeDrawer()">×</button>
+      <div class="drawerBrand">MENU</div>
     </div>
 
-    <div class="userBox">
-      <div class="userName" id="uName">User</div>
-      <div class="userBal">
-        <span id="uBalSide">0.00</span> <span class="flag">🇺🇸</span>
+    <div class="profile">
+      <div class="nameRow">
+        <div class="pName" id="pName">User</div>
+        <div class="pId" id="pId">#000</div>
+      </div>
+      <div class="pBal">
+        <span id="pBal">0.00</span> <span style="opacity:.9">🇺🇸</span>
       </div>
 
-      <div class="userActions">
-        <button class="miniBtn" title="Logout" onclick="doLogout()">⎋</button>
-        <button class="miniBtn" title="Profile" onclick="alert('Profile')">👤</button>
+      <div class="quickIcons">
+        <div class="qBtn" title="Logout" onclick="doLogout()">⎋</div>
+        <div class="qBtn" title="Profile" onclick="go('services.html')">👤</div>
       </div>
     </div>
 
-    <div class="line"></div>
+    <div class="sep"></div>
 
     <div class="menu">
       <div class="mItem" onclick="go('services.html')">
-        <div class="ico">🏠</div><div class="mText">Home</div>
+        <div class="mIcon">🏠</div><div>Home</div>
       </div>
+
       <div class="mItem" onclick="go('add-credit.html')">
-        <div class="ico">💳</div><div class="mText">Add Credit</div>
+        <div class="mIcon">💳</div><div>Add Credit</div>
       </div>
-      <div class="mItem" onclick="alert('My Payments')">
-        <div class="ico">🧾</div><div class="mText">My Payments</div>
+
+      <div class="mItem" onclick="alert('My Payments (later)')">
+        <div class="mIcon">💼</div><div>My Payments</div>
       </div>
-      <div class="mItem" onclick="alert('My Orders')">
-        <div class="ico">🛒</div><div class="mText">My Orders</div>
+
+      <div class="mItem" onclick="alert('My Orders (later)')">
+        <div class="mIcon">🛒</div><div>My Orders</div>
       </div>
-      <div class="mItem" onclick="alert('Security')">
-        <div class="ico">🛡️</div><div class="mText">Security</div>
+
+      <div class="mItem" onclick="alert('Security (later)')">
+        <div class="mIcon">🛡️</div><div>Security</div>
       </div>
+
       <div class="mItem" onclick="alert('About Us')">
-        <div class="ico">👥</div><div class="mText">About Us</div>
+        <div class="mIcon">👥</div><div>About Us</div>
       </div>
     </div>
 
-    <div class="line"></div>
+    <div class="sep"></div>
 
     <div class="social">
-      <a href="https://wa.me/96181812024" target="_blank">WA</a>
       <a href="#" onclick="alert('TikTok')">♪</a>
+      <a href="https://wa.me/96181812024" target="_blank">WA</a>
     </div>
 
     <div class="hint">© Baroud Services</div>
   </aside>
 
-  <!-- main -->
+  <!-- Page -->
   <main class="wrap">
+
+    <!-- Topbar -->
     <div class="topbar">
       <div class="iconBtn" onclick="openDrawer()">
         <div class="hamburger">
@@ -429,21 +464,24 @@
 
       <div class="balancePill">
         <div class="coin">★</div>
-        <div class="balText" id="uBalTop">0.00</div>
+        <div class="balTop" id="uBalTop">0.00</div>
         <div class="flag">🇺🇸</div>
-
-        <!-- زر + -->
         <button class="addBtn" onclick="go('add-credit.html')">+</button>
       </div>
 
-      <!-- LOGO -->
       <div class="brandRight">
         <img src="assets/logo.png" alt="Baroud Services" class="logoTop">
       </div>
     </div>
 
-    <div class="banner">
-      <img src="assets/banner.jpg" alt="banner">
+    <!-- Banner Slider -->
+    <div class="banner slider" id="slider">
+      <div class="slides">
+        <div class="slide"><img src="assets/banner1.jpg" alt="banner 1"></div>
+        <div class="slide"><img src="assets/banner2.jpg" alt="banner 2"></div>
+        <div class="slide"><img src="assets/banner3.jpg" alt="banner 3"></div>
+      </div>
+      <div class="dots" id="dots"></div>
     </div>
 
     <div class="support">
@@ -455,43 +493,36 @@
     </div>
 
     <section class="grid">
-      <div class="tile" onclick="go('accounts.html')">
+      <div class="tile" onclick="alert('Accounts')">
         <img src="assets/accounts.jpg" alt="Accounts">
         <div class="label">Accounts</div>
       </div>
 
-      <div class="tile" onclick="go('games.html')">
+      <div class="tile" onclick="alert('Games')">
         <img src="assets/games.jpg" alt="Games">
         <div class="label">Games</div>
       </div>
 
-      <div class="tile" onclick="go('giftcards.html')">
+      <div class="tile" onclick="alert('Gift Cards')">
         <img src="assets/giftcards.jpg" alt="Gift Cards">
         <div class="label">Gift Cards</div>
       </div>
 
-      <div class="tile" onclick="go('social.html')">
+      <div class="tile" onclick="alert('Social Media')">
         <img src="assets/social.jpg" alt="Social Media">
         <div class="label">Social Media</div>
       </div>
     </section>
+
+    <div class="footer">©2025 Baroud Services</div>
   </main>
 
-  <!-- (اختياري) bottom nav -->
-  <div class="bottomNav">
-    <div class="bIcon" onclick="go('services.html')">🏠</div>
-    <div class="bIcon" onclick="alert('Cart')">🛒</div>
-    <div class="bIcon" onclick="alert('Notifications')">🔔</div>
-    <div class="bIcon" onclick="go('add-credit.html')">💳</div>
-  </div>
-
   <script>
-    // ====== Supabase Config ======
+    // ✅ Supabase (نفس يلي عندك)
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ====== Drawer ======
     function openDrawer(){
       document.getElementById("drawer").classList.add("show");
       document.getElementById("overlay").classList.add("show");
@@ -500,37 +531,120 @@
       document.getElementById("drawer").classList.remove("show");
       document.getElementById("overlay").classList.remove("show");
     }
-
     function go(url){
       closeDrawer();
       location.href = url;
     }
 
-    // ====== Auth Guard (لا يفتح services بدون login) ======
-    (async ()=>{
-      const { data, error } = await sb.auth.getSession();
-      const user = data?.session?.user;
+    async function doLogout(){
+      closeDrawer();
+      await sb.auth.signOut();
+      location.replace("login.html?v=" + Date.now());
+    }
 
-      if(!user){
-        location.replace("login.html");
+    // ✅ Gate: Services يفتح فقط بعد Login
+    (async ()=>{
+      const { data } = await sb.auth.getSession();
+      if(!data.session?.user){
+        location.replace("login.html?v=" + Date.now());
         return;
       }
 
-      // اسم المستخدم (إذا عندك metadata)
-      const email = user.email || "User";
-      document.getElementById("uName").textContent = email.split("@")[0];
+      // ✅ عرض الاسم + ID + الرصيد (placeholder بسيط)
+      const email = data.session.user.email || "User";
+      const name = email.split("@")[0].replace(/\./g," ");
+      const id = (data.session.user.id || "000").slice(0,3);
 
-      // رصيد تجريبي (بدّك تربطها بجدول لاحقاً)
-      const balance = 0.00;
-      document.getElementById("uBalTop").textContent = balance.toFixed(2);
-      document.getElementById("uBalSide").textContent = balance.toFixed(2);
+      // رصيد من localStorage (انت لاحقاً بتشبكو بجدول)
+      const bal = parseFloat(localStorage.getItem("balance") || "0").toFixed(2);
+
+      document.getElementById("pName").textContent = cap(name);
+      document.getElementById("pId").textContent = "#" + id;
+      document.getElementById("pBal").textContent = bal;
+      document.getElementById("uBalTop").textContent = bal;
+
     })();
 
-    async function doLogout(){
-      await sb.auth.signOut();
-      location.replace("login.html");
+    function cap(s){
+      return (s||"").split(" ").map(x => x ? x[0].toUpperCase()+x.slice(1) : "").join(" ");
     }
-  </script>
 
+    // ===== Banner Slider (Auto + Swipe + dots) =====
+    document.addEventListener("DOMContentLoaded", () => {
+      const slider = document.getElementById("slider");
+      const slidesEl = slider.querySelector(".slides");
+      const slides = [...slider.querySelectorAll(".slide")];
+      const dotsEl = document.getElementById("dots");
+
+      let i = 0;
+      let timer = null;
+
+      let startX = 0;
+      let dx = 0;
+      let dragging = false;
+
+      // dots
+      slides.forEach((_, idx) => {
+        const d = document.createElement("div");
+        d.className = "dot" + (idx === 0 ? " active" : "");
+        d.addEventListener("click", () => goTo(idx, true));
+        dotsEl.appendChild(d);
+      });
+
+      function setDots(){
+        [...dotsEl.children].forEach((d, idx) => d.classList.toggle("active", idx === i));
+      }
+
+      function goTo(n, user=false){
+        i = (n + slides.length) % slides.length;
+        slidesEl.style.transition = user ? "transform .45s ease" : "transform .55s ease";
+        slidesEl.style.transform = `translateX(${-i * 100}%)`;
+        setDots();
+      }
+
+      function next(){ goTo(i + 1); }
+
+      function play(){
+        stop();
+        timer = setInterval(next, 4500);
+      }
+      function stop(){
+        if(timer) clearInterval(timer);
+        timer = null;
+      }
+
+      // swipe
+      slider.addEventListener("touchstart", (e) => {
+        dragging = true;
+        stop();
+        startX = e.touches[0].clientX;
+        dx = 0;
+        slidesEl.style.transition = "none";
+      }, {passive:true});
+
+      slider.addEventListener("touchmove", (e) => {
+        if(!dragging) return;
+        dx = e.touches[0].clientX - startX;
+        const percent = (dx / slider.clientWidth) * 100;
+        slidesEl.style.transform = `translateX(${(-i * 100) + percent}%)`;
+      }, {passive:true});
+
+      // ✅ FIXED (كان عندك if(dragging) return غلط)
+      slider.addEventListener("touchend", () => {
+        if(!dragging) return;
+        dragging = false;
+
+        if (dx > 60) goTo(i - 1, true);
+        else if (dx < -60) goTo(i + 1, true);
+        else goTo(i, true);
+
+        play();
+      });
+
+      // start
+      goTo(0);
+      play();
+    });
+  </script>
 </body>
 </html>
