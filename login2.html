@@ -1,3 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Baroud Services</title>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:radial-gradient(1200px 600px at 30% 10%, #183a64 0%, #061425 55%, #04101c 100%);
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:#fff;
+      padding:18px;
+    }
+    .card{
+      width:min(420px, 100%);
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:26px;
+      padding:22px 18px;
+      box-shadow:0 30px 70px rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+    }
+    h1{
+      margin:0 0 8px;
+      font-size:30px;
+      letter-spacing:.3px;
+    }
+    p{
+      margin:0 0 16px;
+      opacity:.8;
+      font-weight:600;
+      font-size:13px;
+      line-height:1.4;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      opacity:.85;
+      margin:12px 0 6px;
+      font-weight:700;
+    }
+    input{
+      width:100%;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      outline:none;
+      font-size:15px;
+      box-sizing:border-box;
+    }
+    input::placeholder{color:rgba(255,255,255,.45)}
+    .btn{
+      margin-top:14px;
+      width:100%;
+      padding:14px 16px;
+      border:0;
+      border-radius:999px;
+      font-weight:900;
+      font-size:16px;
+      cursor:pointer;
+      background:linear-gradient(90deg, #00c2ff, #2b6cff);
+      color:white;
+      box-shadow:0 18px 45px rgba(0,0,0,.35);
+    }
+    .btn:active{transform:scale(.99)}
+    .row{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+    }
+    .btn2{
+      flex:1;
+      padding:12px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .msg{
+      margin-top:14px;
+      font-weight:800;
+      font-size:13px;
+      opacity:.9;
+    }
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .back{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      width:44px;height:44px;
+      border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      font-weight:900;
+      user-select:none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="top">
+      <div class="back" id="backBtn">←</div>
+      <div style="opacity:.8;font-weight:900">Baroud Services</div>
+    </div>
+
+    <h1>Login</h1>
+    <p>Sign in to continue.</p>
+
+    <label>Email</label>
+    <input id="email" type="email" placeholder="example@mail.com" autocomplete="email" />
+
+    <label>Password</label>
+    <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+
+    <button class="btn" id="loginBtn">Login</button>
+
+    <div class="row">
+      <button class="btn2" id="signupBtn">Sign Up</button>
+      <button class="btn2" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <script>
+    // ✅ GitHub Pages base
+    const BASE = "https://baroudservices.github.io/baroud-app/";
+
+    // ✅ Supabase
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const email = document.getElementById("email");
+    const pass = document.getElementById("pass");
+    const msg  = document.getElementById("msg");
+
+    function setMsg(t){ msg.textContent = t; }
+
+    document.getElementById("backBtn").addEventListener("click", ()=>{
+      window.location.assign(BASE + "index.html?v=" + Date.now());
+    });
+
+    // إذا مسجّل دخول، روح للخدمات
+    (async ()=>{
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user){
+        window.location.replace(BASE + "services.html?v=" + Date.now());
+      }
+    })();
+
+    document.getElementById("loginBtn").addEventListener("click", async ()=>{
+      setMsg("Logging in...");
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.value.trim(),
         password: pass.value
       });
       if (error){ setMsg(error.message); return; }
