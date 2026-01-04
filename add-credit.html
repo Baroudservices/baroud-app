@@ -15,65 +15,106 @@
       background:linear-gradient(180deg,#06162a,#020b14);
       color:#fff;
     }
-    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 90px}
+
+    /* أصغر */
+    .wrap{max-width:520px;margin:0 auto;padding:10px 12px 78px}
+
     .top{
-      display:flex;align-items:center;justify-content:space-between;
-      margin-top:6px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start; /* زر واحد فقط */
+      margin-top:4px;
     }
+
     .menuBtn,.goBtn{
-      width:58px;height:58px;border-radius:18px;
+      width:44px;height:44px;border-radius:14px;
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.06);
       display:flex;align-items:center;justify-content:center;
-      box-shadow:0 18px 55px rgba(0,0,0,.35);
+      box-shadow:0 14px 45px rgba(0,0,0,.32);
       cursor:pointer;
       -webkit-tap-highlight-color:transparent;
     }
-    .backArrow{
-  font-size:26px;
-  font-weight:900;
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-    .hamb span{display:block;width:22px;height:2px;background:#fff;margin:5px 0;border-radius:999px;opacity:.9}
-    h1{margin:18px 0 18px;font-size:34px;opacity:.9}
 
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    /* سهم أصغر */
+    .backArrow{
+      font-size:18px;
+      font-weight:900;
+      line-height:1;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transform: translateY(-1px);
+    }
+
+    /* عنوان أصغر */
+    h1{
+      margin:12px 0 14px;
+      font-size:26px;
+      font-weight:900;
+      opacity:.92;
+    }
+
+    /* كروت أصغر + فراغ أقل */
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
     .tile{
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.06);
-      border-radius:22px;
+      border-radius:18px;
       overflow:hidden;
       cursor:pointer;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
+      box-shadow:0 14px 45px rgba(0,0,0,.25);
       transition:.12s transform;
     }
     .tile:active{transform:scale(.99)}
+
+    /* الصورة أصغر */
     .tile img{
-  width: 100%;
-  height: 170px;
-  object-fit: cover;   /* بدل cover */
-  display: block;
-  background:transparent;
-      padding: 0px;
-}
-    .label{padding:14x 10px;text-align:center;font-weight:900;opacity:.92}
+      width:100%;
+      height:132px;           /* كانت 170 */
+      object-fit:cover;
+      display:block;
+      background:transparent;
+      padding:0;
+    }
 
-    .footer{margin:22px 0 0;text-align:center;opacity:.35}
+    .label{
+      padding:10px 8px;       /* كانت 14x غلط */
+      text-align:center;
+      font-weight:900;
+      font-size:14px;
+      opacity:.92;
+    }
 
-    /* bottom nav (اختياري) */
+    .footer{
+      margin:16px 0 0;
+      text-align:center;
+      opacity:.35;
+      font-size:12px;
+    }
+
+    /* bottom nav أصغر */
     .nav{
       position:fixed;left:0;right:0;bottom:0;
       background:rgba(0,0,0,.35);
       backdrop-filter:blur(10px);
       border-top:1px solid rgba(255,255,255,.06);
-      padding:10px 0;
-      display:flex;justify-content:space-around;
+      padding:8px 0;
+      display:flex;
+      justify-content:space-around;
       z-index:20;
     }
-    .nav div{opacity:.7;font-weight:900}
+    .nav div{
+      opacity:.75;
+      font-weight:900;
+      font-size:16px;
+    }
   </style>
 </head>
 
@@ -81,11 +122,6 @@
   <div class="wrap">
     <div class="top">
       <div class="menuBtn backArrow" onclick="history.back()">←</div>
-      </div>
-
-      <!--
-<div class="goBtn" onclick="location.href='index.html'">→</div>
--->
     </div>
 
     <h1>Add Credit Section</h1>
@@ -118,22 +154,22 @@
   </div>
 
   <script>
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  (async ()=>{
-    try{
-      const { data, error } = await supabase.auth.getSession();
-      if (error) throw error;
+    (async ()=>{
+      try{
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
 
-      if (!data.session?.user){
+        if (!data.session?.user){
+          location.replace("login.html?v=" + Date.now());
+        }
+      }catch(e){
         location.replace("login.html?v=" + Date.now());
       }
-    }catch(e){
-      location.replace("login.html?v=" + Date.now());
-    }
-  })();
-</script>
+    })();
+  </script>
 </body>
 </html>
