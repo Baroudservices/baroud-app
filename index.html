@@ -8,12 +8,7 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    :root{
-      --bg:#07111e;
-      --panel:rgba(255,255,255,.08);
-      --panel2:rgba(255,255,255,.06);
-      --text:#fff;
-    }
+    :root{ --bg:#07111e; --text:#fff; }
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -28,7 +23,7 @@
     .overlay{
       position:fixed; inset:0;
       background:rgba(0,0,0,.55);
-      z-index:50;
+      z-index:9998;
       display:none;
     }
     .overlay.show{display:block}
@@ -43,11 +38,25 @@
       box-shadow:0 30px 70px rgba(0,0,0,.65);
       transform:translateX(-105%);
       transition:.28s;
-      z-index:60;
+      z-index:9999;
       padding:18px 16px;
       overflow:auto;
+      -webkit-overflow-scrolling:touch;
     }
     .drawer.show{transform:translateX(0)}
+
+    .drawerTop{
+      display:flex; align-items:center; justify-content:flex-end;
+      margin-bottom:10px;
+    }
+    .closeBtn{
+      width:44px;height:44px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      font-size:22px;
+      cursor:pointer;
+    }
 
     .loginCard{
       background:#0aa0ff;
@@ -57,19 +66,8 @@
       box-shadow:0 22px 55px rgba(0,0,0,.45);
       margin-bottom:16px;
     }
-    .loginCard h2{
-      margin:0 0 10px;
-      font-size:34px;
-      letter-spacing:.3px;
-      color:white;
-    }
-    .loginCard p{
-      margin:0 0 14px;
-      color:rgba(255,255,255,.85);
-      font-weight:600;
-      font-size:13px;
-      line-height:1.35;
-    }
+    .loginCard h2{margin:0 0 10px;font-size:34px;color:#fff}
+    .loginCard p{margin:0 0 14px;color:rgba(255,255,255,.85);font-weight:600;font-size:13px}
     .loginBtn{
       display:inline-block;
       background:#11e06d;
@@ -81,81 +79,56 @@
       width:85%;
     }
 
-    .menu{
-      margin-top:12px;
-      border-top:1px solid rgba(255,255,255,.10);
-      padding-top:12px;
-    }
+    .menu{margin-top:12px;border-top:1px solid rgba(255,255,255,.10);padding-top:12px}
     .mItem{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px 10px;
-      border-radius:14px;
+      display:flex;align-items:center;gap:12px;
+      padding:14px 10px;border-radius:14px;
       color:rgba(240,248,255,.92);
       cursor:pointer;
     }
     .mItem:hover{background:rgba(255,255,255,.04)}
-    .dot{
-      width:10px;height:10px;border-radius:50%;
-      background:rgba(255,255,255,.55);
-    }
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55)}
 
     .social{
-      margin-top:18px;
-      padding-top:14px;
-      border-top:1px solid rgba(255,255,255,.10);
-      display:flex; gap:14px; justify-content:center;
-      opacity:.9;
+      margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.10);
+      display:flex;gap:14px;justify-content:center;opacity:.9;
     }
     .social a{
       width:46px;height:46px;border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
       display:flex;align-items:center;justify-content:center;
-      color:white;
-      text-decoration:none;
-      font-weight:800;
+      color:#fff;text-decoration:none;font-weight:800;
     }
 
     /* content */
-    .wrap{
-      padding:18px 16px 24px;
-      max-width:460px;
-      margin:0 auto;
-    }
-
+    .wrap{padding:18px 16px 24px;max-width:460px;margin:0 auto}
     .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding-top:8px;
-      margin-bottom:14px;
+      display:flex;align-items:center;justify-content:space-between;
+      padding-top:8px;margin-bottom:14px;
     }
 
+    /* ✅ مهم: نخلي الزر فوق أي شي */
     .iconBtn{
-      width:56px;height:56px;
-      border-radius:18px;
+      width:56px;height:56px;border-radius:18px;
       background:rgba(255,255,255,.08);
       border:1px solid rgba(255,255,255,.08);
       display:flex;align-items:center;justify-content:center;
       cursor:pointer;
       box-shadow:0 12px 40px rgba(0,0,0,.25);
       backdrop-filter: blur(10px);
+      position:relative;
+      z-index:10;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
     }
     .hamburger{width:22px}
     .hamburger span{
-      display:block;height:2px;
-      background:#fff;border-radius:99px;
-      margin:5px 0;
-      opacity:.9;
+      display:block;height:2px;background:#fff;border-radius:99px;
+      margin:5px 0;opacity:.9;
     }
 
-    .brand img{
-      height:38px;
-      width:auto;
-      opacity:.95;
-    }
+    .brand img{height:38px;width:auto;opacity:.95}
 
     .banner{
       background:rgba(255,255,255,.06);
@@ -176,20 +149,14 @@
     }
     .searchBox input{
       width:100%;
-      border:none;
-      outline:none;
+      border:none;outline:none;
       background:transparent;
-      color:#fff;
-      font-size:18px;
+      color:#fff;font-size:18px;
       padding:10px 6px;
     }
     .searchBox input::placeholder{color:rgba(255,255,255,.45)}
 
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .tile{
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.06);
@@ -198,53 +165,35 @@
       cursor:pointer;
       box-shadow:0 18px 60px rgba(0,0,0,.25);
     }
-    .tile img{
-      width:100%;
-      height:120px;
-      object-fit:cover;
-      display:block;
-    }
-    .label{
-      padding:12px 10px;
-      text-align:center;
-      font-weight:700;
-      opacity:.92;
-      font-size:16px;
-    }
+    .tile img{width:100%;height:120px;object-fit:cover;display:block}
+    .label{padding:12px 10px;text-align:center;font-weight:700;opacity:.92;font-size:16px}
 
-    .hint{
-      margin-top:14px;
-      text-align:center;
-      color:rgba(255,255,255,.35);
-      font-size:12px;
-    }
+    .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
   </style>
 </head>
 
 <body>
-  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+  <div class="overlay" id="overlay"></div>
 
-  <aside class="drawer" id="drawer">
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawerTop">
+      <button class="closeBtn" type="button" id="closeBtn">×</button>
+    </div>
+
     <div class="loginCard">
       <h2>Login</h2>
       <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
-
-      <!-- ✅ الزر صار يروح على login.html -->
-      <a class="loginBtn" href="#" onclick="goLogin(event)">Login</a>
+      <a class="loginBtn" href="#" id="loginBtn">Login</a>
     </div>
 
     <div class="menu">
-      <div class="mItem" onclick="goHome()">
-        <span class="dot"></span><span>Home</span>
-      </div>
-      <div class="mItem" onclick="alert('About Us')">
-        <span class="dot"></span><span>About Us</span>
-      </div>
+      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
+      <div class="mItem" id="aboutItem"><span class="dot"></span><span>About Us</span></div>
     </div>
 
     <div class="social">
-      <a href="#" onclick="alert('TikTok')">♪</a>
-      <a href="#" onclick="openWA()">WA</a>
+      <a href="#" id="ttBtn">♪</a>
+      <a href="#" id="waBtn">WA</a>
     </div>
 
     <div class="hint">© Baroud Services</div>
@@ -252,7 +201,8 @@
 
   <main class="wrap">
     <div class="topbar">
-      <div class="iconBtn" onclick="openDrawer()">
+      <!-- ✅ زر ☰ -->
+      <div class="iconBtn" id="menuBtn" role="button" aria-label="Open menu">
         <div class="hamburger">
           <span></span><span></span><span></span>
         </div>
@@ -294,38 +244,58 @@
   </main>
 
   <script>
-    // ✅ 1) رابط GitHub Pages تبعك هون
     const BASE = "https://baroudservices.github.io/baroud-app/";
 
-    // ✅ 2) Supabase
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+    const menuBtn = document.getElementById("menuBtn");
+    const closeBtn = document.getElementById("closeBtn");
+
     function openDrawer(){
-      document.getElementById("drawer").classList.add("show");
-      document.getElementById("overlay").classList.add("show");
+      drawer.classList.add("show");
+      overlay.classList.add("show");
+      drawer.setAttribute("aria-hidden","false");
     }
     function closeDrawer(){
-      document.getElementById("drawer").classList.remove("show");
-      document.getElementById("overlay").classList.remove("show");
+      drawer.classList.remove("show");
+      overlay.classList.remove("show");
+      drawer.setAttribute("aria-hidden","true");
     }
 
-    // ✅ زر Login يروح على login.html مع cache busting
-    function goLogin(e){
-      if(e) e.preventDefault();
+    // ✅ ربط أكيد (click + touch)
+    menuBtn.addEventListener("click", openDrawer);
+    menuBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); openDrawer(); }, {passive:false});
+
+    overlay.addEventListener("click", closeDrawer);
+    closeBtn.addEventListener("click", closeDrawer);
+
+    // روابط داخل المنيو
+    document.getElementById("loginBtn").addEventListener("click",(e)=>{
+      e.preventDefault();
       closeDrawer();
       window.location.assign(BASE + "login.html?v=" + Date.now());
-    }
+    });
 
-    function goHome(){
+    document.getElementById("homeItem").addEventListener("click",()=>{
       closeDrawer();
       window.location.assign(BASE + "index.html?v=" + Date.now());
-    }
+    });
 
-    function openWA(){
+    document.getElementById("aboutItem").addEventListener("click",()=>alert("About Us"));
+
+    document.getElementById("waBtn").addEventListener("click",(e)=>{
+      e.preventDefault();
       window.open("https://wa.me/96181812024","_blank");
-    }
+    });
+
+    document.getElementById("ttBtn").addEventListener("click",(e)=>{
+      e.preventDefault();
+      alert("TikTok");
+    });
 
     // لو في session روح على الخدمات
     async function guard(){
@@ -337,7 +307,7 @@
     }
     guard();
 
-    // فلترة البحث (UI)
+    // search filter
     const search = document.getElementById("search");
     search.addEventListener("input", () => {
       const q = search.value.trim().toLowerCase();
