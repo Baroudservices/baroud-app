@@ -471,6 +471,22 @@
     });
   });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const BASE = "https://baroudservices.github.io/baroud-app/";
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  (async () => {
+    const { data } = await supabase.auth.getSession();
+    const user = data.session?.user;
+
+    // ✅ اذا مش مسجل دخول -> روح على login
+    if (!user) {
+      window.location.replace(BASE + "login.html?v=" + Date.now());
+    }
+  })();
+</script>
 </body>
 </html>
