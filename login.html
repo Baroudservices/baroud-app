@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <title>Login - Baroud Services</title>
 
-  <!-- Supabase v2 -->
+  <!-- Supabase CDN (لازم قبل أي createClient) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -29,6 +29,7 @@
       padding:18px;
       box-shadow:0 30px 80px rgba(0,0,0,.5);
       position:relative;
+      overflow:hidden;
     }
     .back{
       position:absolute;left:16px;top:16px;
@@ -37,14 +38,23 @@
       background:rgba(255,255,255,.06);
       color:#fff;font-size:20px;
       cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
     }
-    h1{margin:56px 0 6px;font-size:44px}
-    p{margin:0 0 12px;opacity:.75}
+    .titleRow{display:flex;align-items:center;justify-content:space-between;margin-top:52px}
+    .brand{font-weight:900;letter-spacing:2px;opacity:.85}
+    h1{margin:14px 0 6px;font-size:44px}
+    p{margin:0 0 18px;opacity:.75}
 
-    .ver{
-      position:absolute;right:14px;top:18px;
-      font-size:12px;opacity:.65;font-weight:800;
+    .msg{
+      margin:10px 0 6px;
+      padding:12px 14px;
+      border-radius:14px;
+      display:none;
+      font-weight:800;
+      font-size:14px;
     }
+    .err{background:#d05252}
+    .ok{background:#2aa96b}
 
     .field{
       display:flex;align-items:center;gap:12px;
@@ -72,32 +82,27 @@
       box-shadow:0 18px 60px rgba(0,0,0,.35);
       margin-top:10px;
     }
-    .msg{
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:14px;
-      font-weight:800;
-      line-height:1.35;
-      word-break:break-word;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.10);
-      min-height:44px;
-      white-space:pre-wrap;
+    .btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
     }
-    .ok{background:#2aa96b;border-color:#2aa96b}
-    .err{background:#d05252;border-color:#d05252}
+    .small{margin-top:14px;text-align:center;opacity:.55;font-weight:800;letter-spacing:1px}
   </style>
 </head>
 
 <body>
   <div class="card">
-    <button class="back" type="button" onclick="location.href='index.html'">←</button>
-    <div class="ver">LOGIN v3</div>
+    <button class="back" id="backBtn" type="button">←</button>
+
+    <div class="titleRow">
+      <div></div>
+      <div class="brand">Baroud Services</div>
+    </div>
 
     <h1>Login</h1>
     <p>Sign in to continue.</p>
 
-    <div id="msg" class="msg">Ready…</div>
+    <div id="msg" class="msg"></div>
 
     <div class="field">
       <span>👤</span>
@@ -109,73 +114,92 @@
       <input id="pass" type="password" placeholder="Password" autocomplete="current-password"/>
     </div>
 
-    <!-- ✅ onclick مباشر (مستحيل ما يشتغل) -->
-    <button class="btn" type="button" onclick="doLogin()">Login</button>
+    <button class="btn" id="loginBtn" type="button">Login</button>
+
+    <div class="small">REGISTER</div>
   </div>
 
   <script>
-    const msg = document.getElementById("msg");
-    function setMsg(text, type){
-      msg.className = "msg" + (type ? (" " + type) : "");
-      msg.textContent = text;
-    }
+    // ✅ مهم: BASE تلقائي حسب مكان الموقع (baroud-app)
+    const BASE = location.origin + location.pathname.replace(/[^\/]*$/, ""); // مثال: https://.../baroud-app/
 
-    // ✅ اطبع أي خطأ JS على الشاشة
-    window.onerror = function(message, source, lineno, colno){
-      setMsg("JS ERROR:\n" + message + "\n" + (source||"") + ":" + lineno + ":" + colno, "err");
-      return true;
-    };
-
-    // ✅ Supabase values
+    // ✅ Supabase
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ✅ تأكد المكتبة loaded
-    if (!window.supabase){
-      setMsg("Supabase CDN not loaded.\n(جرب افتح الصفحة بمتصفح تاني)", "err");
+    const msg = document.getElementById("msg");
+    const loginBtn = document.getElementById("loginBtn");
+
+    function showMsg(text, ok=false){
+      msg.style.display = "block";
+      msg.className = "msg " + (ok ? "ok" : "err");
+      msg.textContent = text;
     }
+    function hideMsg(){ msg.style.display="none"; msg.textContent=""; }
 
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // زر رجوع على index
+    document.getElementById("backBtn").addEventListener("click", () => {
+      location.href = BASE + "index.html";
+    });
 
-    // ✅ إذا في session روح services
-    (async ()=>{
+    // ✅ إذا أصلاً عامل login -> روح services مباشرة
+    (async () => {
       try{
-        const { data, error } = await sb.auth.getSession();
-        if (error) setMsg("getSession error:\n" + error.message, "err");
-        if (data?.session?.user) location.replace("services.html");
+        const { data, error } = await supabase.auth.getSession();
+        if (error) console.log(error);
+        if (data?.session?.user) {
+          location.replace(BASE + "services.html");
+        }
       }catch(e){
-        setMsg("getSession crash:\n" + (e?.message || e), "err");
+        console.log(e);
       }
     })();
 
-    async function doLogin(){
-      alert("Button clicked ✅"); // ✅ لتتأكد الزر عم ينكبس
+    // ✅ Login
+    loginBtn.addEventListener("click", async () => {
+      hideMsg();
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("pass").value;
 
       if(!email || !password){
-        setMsg("Fill email and password.", "err");
+        showMsg("Fill email and password.");
         return;
       }
 
-      setMsg("Logging in…");
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Signing in...";
 
       try{
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
         if (error){
-          setMsg("Login failed:\n" + error.message, "err");
+          showMsg(error.message || "Invalid email or password.");
+          loginBtn.disabled = false;
+          loginBtn.textContent = "Login";
           return;
         }
 
-        setMsg("Login successful ✅\nRedirecting…", "ok");
-        location.replace("services.html");
+        if (data?.user){
+          showMsg("Login successful ✅", true);
+          setTimeout(() => {
+            location.replace(BASE + "services.html");
+          }, 250);
+          return;
+        }
 
+        showMsg("Login failed. Try again.");
       }catch(e){
-        setMsg("Login crash:\n" + (e?.message || e), "err");
+        showMsg("Network error. Try again.");
+      }finally{
+        // إذا ما صار redirect
+        setTimeout(() => {
+          loginBtn.disabled = false;
+          loginBtn.textContent = "Login";
+        }, 600);
       }
-    }
+    });
   </script>
 </body>
 </html>
