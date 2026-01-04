@@ -1,210 +1,255 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Services - Baroud</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Services</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:linear-gradient(180deg,#06162a,#020b14);
-  color:#fff;
-  min-height:100vh;
-}
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#06162a,#020b14);
+      color:#fff;
+      min-height:100vh;
+    }
+    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px;position:relative}
 
-/* ====== LAYOUT ====== */
-.wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-top:6px;
+    }
+    .iconBtn{
+      width:54px;height:54px;border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+      user-select:none;
+      z-index:5;
+    }
+    .hamburger span{display:block;width:22px;height:2px;background:#fff;margin:4px 0;border-radius:9px}
 
-/* ====== TOP BAR ====== */
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.iconBtn{
-  width:52px;height:52px;border-radius:18px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-}
-.hamburger span{
-  display:block;width:20px;height:2px;background:#fff;margin:4px 0;
-}
+    .balancePill{
+      flex:1;
+      display:flex;align-items:center;justify-content:center;gap:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:24px;
+      padding:12px 14px;
+      min-height:54px;
+    }
+    .coin{
+      width:30px;height:30px;border-radius:50%;
+      background:linear-gradient(180deg,#d6b66a,#8a6a1e);
+      display:flex;align-items:center;justify-content:center;
+      color:#0b0b0b;font-weight:900;
+    }
+    .amount{font-weight:900;font-size:18px}
+    .flag{font-size:20px;opacity:.9}
+    .plus{
+      width:36px;height:36px;border-radius:14px;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;font-size:20px;
+      cursor:pointer;
+    }
+    .brand{font-weight:900;letter-spacing:3px;opacity:.9}
 
-/* BALANCE */
-.balance{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);
-  padding:10px 14px;border-radius:20px;
-  font-weight:800;
-}
-.plus{
-  width:28px;height:28px;border-radius:50%;
-  background:#0aa0ff;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-  font-size:20px;
-}
+    .banner{
+      margin-top:14px;
+      border-radius:22px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 20px 70px rgba(0,0,0,.35);
+      background:rgba(255,255,255,.04);
+    }
+    .banner img{width:100%;height:160px;object-fit:cover;display:block}
 
-/* BRAND */
-.brand{font-weight:900;letter-spacing:2px}
+    .support{
+      margin-top:12px;padding:12px 14px;border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
 
-/* ====== DRAWER ====== */
-.overlay{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.55);
-  opacity:0;pointer-events:none;
-  transition:.25s;
-  z-index:50;
-}
-.overlay.show{opacity:1;pointer-events:auto}
+    .searchBox{
+      margin-top:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:26px;
+      padding:14px 16px;
+      box-shadow:0 18px 60px rgba(0,0,0,.18);
+    }
+    .searchBox input{
+      width:100%;background:transparent;border:none;outline:none;color:#fff;font-size:16px;
+    }
 
-.drawer{
-  position:fixed;left:0;top:0;height:100%;
-  width:min(300px,80vw);
-  background:#06162a;
-  transform:translateX(-100%);
-  transition:.3s;
-  z-index:60;
-  padding:18px;
-}
-.drawer.show{transform:translateX(0)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+    .tile{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px;
+      overflow:hidden;
+      cursor:pointer;
+      box-shadow:0 18px 60px rgba(0,0,0,.25);
+    }
+    .tile img{width:100%;height:120px;object-fit:cover;display:block}
+    .label{padding:12px 10px;text-align:center;font-weight:800;opacity:.92;font-size:16px}
 
-.closeBtn{
-  width:40px;height:40px;border-radius:14px;
-  border:1px solid rgba(255,255,255,.1);
-  background:rgba(255,255,255,.05);
-  color:#fff;font-size:22px;
-  cursor:pointer;
-}
+    /* Drawer */
+    .overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.55);
+      opacity:0;pointer-events:none;
+      transition:.2s;
+      z-index:50;
+    }
+    .overlay.show{opacity:1;pointer-events:auto}
 
-.menu{margin-top:20px}
-.mItem{
-  padding:14px;border-radius:14px;
-  cursor:pointer;
-}
-.mItem:hover{background:rgba(255,255,255,.05)}
+    .drawer{
+      position:fixed;top:0;left:0;height:100vh;width:min(320px,86vw);
+      background:linear-gradient(180deg,#06162a,#020b14);
+      border-right:1px solid rgba(255,255,255,.08);
+      transform:translateX(-105%);
+      transition:.25s;
+      z-index:60;
+      padding:16px;
+    }
+    .drawer.show{transform:translateX(0)}
+    .drawerTop{display:flex;justify-content:flex-end}
+    .closeBtn{
+      width:44px;height:44px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;font-size:22px;cursor:pointer;
+    }
 
-/* ====== CONTENT ====== */
-.banner{
-  margin-top:14px;border-radius:22px;overflow:hidden;
-}
-.banner img{width:100%;height:160px;object-fit:cover}
+    .loginCard{
+      margin-top:10px;
+      background:#12a6ff;
+      border-radius:24px;
+      padding:16px;
+      color:#fff;
+      box-shadow:0 18px 60px rgba(0,0,0,.25);
+    }
+    .loginCard h2{margin:0 0 6px;font-size:28px}
+    .loginCard p{margin:0 0 12px;opacity:.9}
+    .loginBtn{
+      display:block;text-align:center;
+      background:#1fe26b;color:#0a2b18;
+      font-weight:900;
+      padding:14px;border-radius:24px;
+      text-decoration:none;
+    }
 
-.search{
-  margin-top:12px;
-  background:rgba(255,255,255,.06);
-  border-radius:26px;padding:14px 16px;
-}
-.search input{
-  width:100%;background:none;border:none;
-  outline:none;color:#fff;font-size:16px;
-}
-
-.grid{
-  margin-top:14px;
-  display:grid;grid-template-columns:1fr 1fr;gap:14px;
-}
-.card{
-  background:rgba(255,255,255,.06);
-  border-radius:22px;
-  overflow:hidden;
-  cursor:pointer;
-}
-.card img{width:100%;height:120px;object-fit:cover}
-.card div{text-align:center;padding:12px;font-weight:800}
-</style>
+    .menu{margin-top:16px}
+    .mItem{
+      display:flex;align-items:center;gap:10px;
+      padding:12px 10px;border-radius:14px;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.03);
+      margin-bottom:10px;
+      font-weight:800;
+    }
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35)}
+    .social{display:flex;gap:10px;margin-top:16px}
+    .social a{
+      flex:1;
+      text-align:center;
+      padding:12px 10px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;text-decoration:none;font-weight:900;
+    }
+    .hint{margin-top:16px;text-align:center;opacity:.45;font-weight:800}
+  </style>
 </head>
 
 <body>
+  <div class="overlay" id="overlay"></div>
 
-<!-- DRAWER -->
-<div class="overlay" id="overlay"></div>
-<aside class="drawer" id="drawer">
-  <button class="closeBtn" id="closeBtn">×</button>
-
-  <div class="menu">
-    <div class="mItem" onclick="location.href='services.html'">Home</div>
-    <div class="mItem" onclick="location.href='add-credit.html'">Add Credit</div>
-    <div class="mItem" onclick="logout()">Logout</div>
-  </div>
-</aside>
-
-<main class="wrap">
-
-  <!-- TOP -->
-  <div class="topbar">
-    <div class="iconBtn" id="menuBtn">
-      <div class="hamburger"><span></span><span></span><span></span></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawerTop">
+      <button class="closeBtn" type="button" id="closeBtn">×</button>
     </div>
 
-    <div class="balance">
-      ⭐ <span id="balance">0.00</span>
-      <div class="plus" onclick="location.href='add-credit.html'">+</div>
+    <div class="loginCard">
+      <h2>Menu</h2>
+      <p>Welcome 👋</p>
+      <a class="loginBtn" href="#" id="logoutBtn">Logout</a>
     </div>
 
-    <div class="brand">BAROUD</div>
-  </div>
+    <div class="menu">
+      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
+      <div class="mItem" id="addCreditItem"><span class="dot"></span><span>Add Credit</span></div>
+    </div>
 
-  <!-- BANNER -->
-  <div class="banner">
-    <img src="assets/banner.jpg">
-  </div>
+    <div class="social">
+      <a href="https://wa.me/96181812024" target="_blank">WA</a>
+      <a href="#" id="ttBtn">♪</a>
+    </div>
 
-  <!-- SEARCH -->
-  <div class="search">
-    <input placeholder="Search">
-  </div>
+    <div class="hint">© Baroud Services</div>
+  </aside>
 
-  <!-- GRID -->
-  <div class="grid">
-    <div class="card"><img src="assets/accounts.jpg"><div>Accounts</div></div>
-    <div class="card"><img src="assets/games.jpg"><div>Games</div></div>
-    <div class="card"><img src="assets/giftcards.jpg"><div>Gift Cards</div></div>
-    <div class="card"><img src="assets/social.jpg"><div>Social Media</div></div>
-  </div>
+  <main class="wrap">
+    <div class="topbar">
+      <div class="iconBtn" id="menuBtn" role="button" aria-label="Open menu">
+        <div class="hamburger"><span></span><span></span><span></span></div>
+      </div>
 
-</main>
+      <div class="balancePill">
+        <div class="coin">★</div>
+        <div class="amount" id="balanceTxt">0.00</div>
+        <div class="flag">🇺🇸</div>
+        <div class="plus" id="plusBtn">+</div>
+      </div>
 
-<script>
-/* ===== SUPABASE ===== */
-const supabase = window.supabase.createClient(
-  "https://pqrwitolonhfbfwtsnde.supabase.co",
-  "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_"
-);
+      <div class="brand">BAROUD</div>
+    </div>
 
-/* PROTECT PAGE */
-(async()=>{
-  const {data}=await supabase.auth.getSession();
-  if(!data.session) location.replace("login.html");
-})();
+    <div class="banner">
+      <img src="assets/banner.jpg" alt="banner" />
+    </div>
 
-/* DRAWER */
-const drawer=document.getElementById("drawer");
-const overlay=document.getElementById("overlay");
-menuBtn.onclick=()=>{
-  drawer.classList.add("show");
-  overlay.classList.add("show");
-};
-closeBtn.onclick=overlay.onclick=()=>{
-  drawer.classList.remove("show");
-  overlay.classList.remove("show");
-};
+    <div class="support">Support Number:+961 81812024 | Join Our WhatsApp Community | Fast & Secure Services</div>
 
-/* LOGOUT */
-async function logout(){
-  await supabase.auth.signOut();
-  location.replace("login.html");
-}
-</script>
+    <div class="searchBox">
+      <input id="search" placeholder="Search" />
+    </div>
 
-</body>
-</html>
+    <section class="grid" id="grid">
+      <div class="tile" data-name="accounts" onclick="location.href='services.html?v='+Date.now()">
+        <img src="assets/accounts.jpg" alt="Accounts" />
+        <div class="label">Accounts</div>
+      </div>
+      <div class="tile" data-name="games" onclick="location.href='services.html?v='+Date.now()">
+        <img src="assets/games.jpg" alt="Games" />
+        <div class="label">Games</div>
+      </div>
+      <div class="tile" data-name="gift cards" onclick="location.href='services.html?v='+Date.now()">
+        <img src="assets/giftcards.jpg" alt="Gift Cards" />
+        <div class="label">Gift Cards</div>
+      </div>
+      <div class="tile" data-name="social media" onclick="location.href='services.html?v='+Date.now()">
+        <img src="assets/apps.jpg" alt="Social Media" />
+        <div class="label">Social Media</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+    const menuBtn = document.getElementById("
