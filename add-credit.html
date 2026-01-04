@@ -1,1 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Credit</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background:#0b1220;
+      color:white;
+      margin:0;
+      padding:20px;
+    }
+    .card {
+      background:#111827;
+      padding:20px;
+      border-radius:16px;
+      max-width:420px;
+      margin:40px auto;
+    }
+    .item {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px;
+      background:#1f2937;
+      border-radius:12px;
+      margin-top:10px;
+      cursor:pointer;
+    }
+    img {
+      width:36px;
+      height:36px;
+    }
+    .back {
+      cursor:pointer;
+      margin-bottom:20px;
+      display:inline-block;
+    }
+  </style>
+</head>
+<body>
 
+  <div class="back" onclick="history.back()">← رجوع</div>
+
+  <div class="card">
+    <h2>Add Credit</h2>
+
+    <div class="item" onclick="location.href='wish.html'">
+      <img src="assets/wish.png">
+      Whish Money
+    </div>
+
+    <div class="item">
+      Binance
+    </div>
+
+    <div class="item">
+      USDT BEP20
+    </div>
+
+    <div class="item">
+      USDT TRC20
+    </div>
+
+    <div class="item">
+      OMT Pay
+    </div>
+
+  </div>
+
+</body>
+</html>
