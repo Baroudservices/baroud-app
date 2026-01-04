@@ -1,188 +1,366 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!doctype html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Services - Baroud</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Baroud Services</title>
 
+  <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
+    :root{
+      --bg1:#050d1a;
+      --bg2:#071a2e;
+      --glass:rgba(255,255,255,.06);
+      --glass2:rgba(255,255,255,.04);
+      --stroke:rgba(255,255,255,.08);
+      --text:#eaf2ff;
+      --muted:#a9bdd7;
+      --shadow:0 18px 55px rgba(0,0,0,.55);
+      --r:22px;
+      --r2:16px;
+    }
+    *{box-sizing:border-box}
     body{
-      font-family: system-ui, sans-serif;
-      background: radial-gradient(1200px 800px at 50% 10%, #0d2a57 0%, #06152f 45%, #040b18 100%);
-      color:#fff;
       margin:0;
-      padding:18px;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 700px at 60% 20%, rgba(46,115,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 20% 40%, rgba(0,255,196,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      overflow-x:hidden;
+      padding-bottom:84px; /* للـ navbar تحت */
     }
 
-    /* ✅ Top Bar مثل OVOXZ */
-    .top-bar{
+    .wrap{max-width:980px;margin:0 auto;padding:14px 16px 30px}
+
+    /* ===== Top Header (ovo) ===== */
+    .top{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      max-width:420px;
-      margin:0 auto 18px;
+      padding:8px 2px 14px;
     }
 
-    .back-btn, .plus-btn{
-      width:52px;
-      height:52px;
-      border-radius:18px;
-      background:rgba(255,255,255,.08);
-      box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
+    .leftGroup{
       display:flex;
       align-items:center;
-      justify-content:center;
-      font-size:24px;
+      gap:10px;
+    }
+
+    .iconBtn{
+      width:46px;height:46px;border-radius:14px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.04);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
       cursor:pointer;
       user-select:none;
     }
+    .iconBtn:active{transform:scale(.98)}
 
-    .balance-box{
-      flex:1;
-      background:rgba(255,255,255,.08);
-      border-radius:22px;
-      padding:10px 14px;
-      text-align:center;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
+    .hamburger{width:22px;height:16px;position:relative}
+    .hamburger span{
+      position:absolute;left:0;right:0;height:2px;border-radius:99px;
+      background:rgba(255,255,255,.92);
+    }
+    .hamburger span:nth-child(1){top:0}
+    .hamburger span:nth-child(2){top:7px;opacity:.8}
+    .hamburger span:nth-child(3){bottom:0;opacity:.6}
+
+    .avatar{
+      width:34px;height:34px;border-radius:999px;
+      background:radial-gradient(circle at 30% 30%, #ffd9a6, #a97a41);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 12px 26px rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.15);
+      font-size:16px;
     }
 
-    .balance-label{
-      font-size:12px;
-      opacity:.75;
-      letter-spacing:.3px;
+    .balanceRow{
+      display:flex;align-items:center;gap:8px;
+      font-weight:800;
+      letter-spacing:.2px;
     }
-
-    .balance-value{
+    .balance{
+      font-size:20px;
+      text-shadow:0 12px 28px rgba(0,0,0,.55);
+    }
+    .flag{
       font-size:18px;
-      font-weight:900;
-      margin-top:2px;
+      filter:drop-shadow(0 10px 18px rgba(0,0,0,.45));
     }
-
-    /* ✅ Card */
-    .card{
-      max-width:420px;
-      margin:0 auto;
-      padding:22px 18px 20px;
-      border-radius:26px;
+    .plusSmall{
+      width:30px;height:30px;border-radius:10px;
+      border:1px solid var(--stroke);
       background:rgba(255,255,255,.06);
-      box-shadow: 0 18px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
-      backdrop-filter: blur(8px);
-    }
-
-    h1{
-      margin:10px 0 4px;
-      text-align:center;
-      font-size:40px;
-      font-weight:900;
-      letter-spacing:.5px;
-    }
-
-    .dots{
-      text-align:center;
-      opacity:.7;
-      margin-bottom:18px;
-      font-size:18px;
-    }
-
-    .btn{
-      width:100%;
-      padding:16px 14px;
-      margin-top:14px;
-      border:none;
-      border-radius:22px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;font-weight:900;
       cursor:pointer;
-      font-size:18px;
-      font-weight:800;
-      color:#fff;
-      background:rgba(255,255,255,.10);
-      box-shadow: 0 14px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .plusSmall:active{transform:scale(.98)}
+
+    .brand{
+      display:flex;align-items:center;gap:10px;
+      opacity:.95;
+    }
+    .brand img{
+      height:30px;width:auto;
+      filter:drop-shadow(0 10px 22px rgba(0,0,0,.55));
     }
 
-    .btn-primary{
-      background: linear-gradient(90deg, #11b7ff, #2f6bff);
+    /* Banner */
+    .banner{
+      border-radius:26px;overflow:hidden;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:var(--shadow);
+    }
+    .banner img{width:100%;height:165px;object-fit:cover;display:block}
+
+    /* Ticker / Notice bar */
+    .ticker{
+      margin:12px 2px 10px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow:0 12px 35px rgba(0,0,0,.35);
+    }
+    .ticker .move{
+      white-space:nowrap;
+      display:inline-block;
+      padding:10px 14px;
+      color:rgba(240,248,255,.85);
+      animation:mar 16s linear infinite;
+    }
+    @keyframes mar{
+      0%{transform:translateX(100%)}
+      100%{transform:translateX(-120%)}
     }
 
-    .btn-danger{
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,80,80,.25);
+    /* Search */
+    .searchBox{
+      margin:14px 2px 6px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:26px;
+      padding:14px 18px;
+      box-shadow:0 12px 40px rgba(0,0,0,.35);
     }
+    .searchBox input{
+      width:100%;border:none;outline:none;background:transparent;
+      color:var(--text);font-size:16px;
+    }
+    .searchBox input::placeholder{color:rgba(230,240,255,.55)}
 
-    .status{
+    /* Grid Tiles */
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    .tile{
+      border-radius:18px;overflow:hidden;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 16px 45px rgba(0,0,0,.42);
+      cursor:pointer;
+      position:relative;
+    }
+    .tile:active{transform:scale(.99)}
+    .tile img{width:100%;height:118px;object-fit:cover;display:block}
+    .tile .label{
+      padding:10px 12px 12px;
       text-align:center;
-      margin-top:16px;
-      font-weight:800;
-      opacity:.85;
+      font-weight:700;
+      color:rgba(240,248,255,.92);
+      letter-spacing:.2px;
     }
 
-    a { text-decoration:none; }
+    /* Bottom Nav */
+    .nav{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:14px;
+      width:min(520px, calc(100% - 24px));
+      background:rgba(7,15,30,.72);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      box-shadow:0 18px 55px rgba(0,0,0,.60);
+      backdrop-filter: blur(10px);
+      padding:10px 12px;
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      z-index:99;
+    }
+    .nav .nitem{
+      width:54px;height:44px;
+      border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      color:rgba(255,255,255,.85);
+      cursor:pointer;
+      user-select:none;
+    }
+    .nav .nitem:active{transform:scale(.98)}
+    .nav .active{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+    }
+
+    /* Drawer */
+    .overlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      opacity:0; pointer-events:none;
+      transition:.25s;
+      z-index:50;
+    }
+    .overlay.show{opacity:1; pointer-events:auto}
+    .drawer{
+      position:fixed; top:0; left:0;
+      width:78%; max-width:340px; height:100%;
+      background:linear-gradient(180deg, rgba(10,18,32,.98), rgba(6,13,26,.98));
+      border-right:1px solid rgba(255,255,255,.06);
+      box-shadow:0 30px 70px rgba(0,0,0,.65);
+      transform:translateX(-105%);
+      transition:.28s;
+      z-index:60;
+      padding:18px 16px;
+      overflow:auto;
+    }
+    .drawer.show{transform:translateX(0)}
+    .dTitle{font-size:18px;font-weight:800;margin:0 0 10px}
+    .mItem{
+      display:flex;align-items:center;gap:12px;
+      padding:14px 10px;border-radius:14px;
+      color:rgba(240,248,255,.92);
+      cursor:pointer;
+    }
+    .mItem:hover{background:rgba(255,255,255,.04)}
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55)}
+
+    @media (max-width:520px){
+      .banner img{height:150px}
+    }
   </style>
 </head>
 
 <body>
+  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 
-  <!-- ✅ Top Bar -->
-  <div class="top-bar">
-    <div class="back-btn" onclick="goBack()">↩</div>
+  <aside class="drawer" id="drawer">
+    <h3 class="dTitle">Menu</h3>
 
-    <div class="balance-box">
-      <div class="balance-label">Balance</div>
-      <div class="balance-value" id="balance">$0.00</div>
+    <div class="mItem" onclick="go('services.html')"><span class="dot"></span><span>Home</span></div>
+    <div class="mItem" onclick="go('add-credit.html')"><span class="dot"></span><span>Add Credit</span></div>
+    <div class="mItem" onclick="logoutUser()"><span class="dot"></span><span>Logout</span></div>
+
+    <div style="height:14px"></div>
+    <div style="color:rgba(255,255,255,.45);font-size:12px">© Baroud Services</div>
+  </aside>
+
+  <main class="wrap">
+    <!-- TOP -->
+    <div class="top">
+      <div class="leftGroup">
+        <div class="iconBtn" onclick="openDrawer()">
+          <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+
+        <div class="avatar">★</div>
+
+        <div class="balanceRow">
+          <div class="balance" id="balanceText">0.00</div>
+          <div class="flag">🇺🇸</div>
+          <div class="plusSmall" onclick="go('add-credit.html')">+</div>
+        </div>
+      </div>
+
+      <div class="brand">
+        <!-- لوغو يمين -->
+        <img src="assets/logo.png" alt="logo" />
+      </div>
     </div>
 
-    <div class="plus-btn" onclick="goToAddCredit()">+</div>
-  </div>
+    <!-- Banner -->
+    <div class="banner">
+      <img src="assets/banner.jpg" alt="banner" />
+    </div>
 
-  <div class="card">
-    <h1>Baroud<br>Services</h1>
-    <div class="dots">...</div>
+    <!-- ticker -->
+    <div class="ticker">
+      <div class="move">
+        Support Number: +961 81812024 | Join Our WhatsApp Community | Fast Delivery ✅
+      </div>
+    </div>
 
-    <a href="https://wa.me/96170385398" target="_blank">
-      <button class="btn">WhatsApp</button>
-    </a>
+    <!-- Search -->
+    <div class="searchBox">
+      <input id="search" placeholder="Search" />
+    </div>
 
-    <button class="btn" onclick="alert('Service 1')">Service 1</button>
-    <button class="btn" onclick="alert('Service 2')">Service 2</button>
+    <!-- Grid -->
+    <section class="grid" id="grid">
+      <div class="tile" onclick="alert('Games')">
+        <img src="assets/games.jpg" alt="Games" />
+        <div class="label">Games</div>
+      </div>
 
-    <button class="btn btn-primary" onclick="goToAddCredit()">Add Credit</button>
-    <button class="btn btn-danger" onclick="logoutUser()">Logout</button>
+      <div class="tile" onclick="alert('Applications')">
+        <img src="assets/apps.jpg" alt="Applications" />
+        <div class="label">Applications</div>
+      </div>
 
-    <div class="status" id="msg">...</div>
+      <div class="tile" onclick="alert('Accounts')">
+        <img src="assets/accounts.jpg" alt="Accounts" />
+        <div class="label">Accounts</div>
+      </div>
+
+      <div class="tile" onclick="alert('Gift Cards')">
+        <img src="assets/giftcards.jpg" alt="Gift Cards" />
+        <div class="label">Gift Cards</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Nav -->
+  <div class="nav">
+    <div class="nitem active" onclick="go('services.html')">🏠</div>
+    <div class="nitem" onclick="alert('Cart')">🛒</div>
+    <div class="nitem" onclick="alert('Notifications')">🔔</div>
+    <div class="nitem" onclick="go('add-credit.html')">💳</div>
+    <div class="nitem" onclick="alert('Profile')">👤</div>
   </div>
 
   <script>
-    // ✅ غيّرهم إذا بدك (أنت عندك نفسهم)
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-
-    // ✅ مهم: BASE لازم يكون مطابق للرابط الجديد تبعك
+    // ✅ خليه نفس رابطك
     const BASE = "https://baroudservices.github.io/baroud-app/";
 
+    // ✅ supabase
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function goToAddCredit(){
-      window.location.href = BASE + "add-credit.html?v=" + Date.now();
+    function openDrawer(){
+      document.getElementById("drawer").classList.add("show");
+      document.getElementById("overlay").classList.add("show");
+    }
+    function closeDrawer(){
+      document.getElementById("drawer").classList.remove("show");
+      document.getElementById("overlay").classList.remove("show");
     }
 
-    function goBack(){
-      // ✅ رجوع دايمًا على services (حل جذري للقديم)
-      window.location.replace(BASE + "services.html?v=" + Date.now());
-    }
-
-    async function guard(){
-      const { data } = await supabase.auth.getSession();
-      const user = data?.session?.user;
-
-      if(!user){
-        window.location.replace(BASE + "index.html?v=" + Date.now());
-        return;
-      }
-
-      document.getElementById("msg").innerText = "Ready ✅";
-      // إذا بدك لاحقًا نجيب balance الحقيقي من DB بدل 0.00
-      document.getElementById("balance").innerText = "$0.00";
+    // ✅ cache-busting navigation
+    function go(page){
+      window.location.assign(BASE + page + "?v=" + Date.now());
     }
 
     async function logoutUser(){
@@ -190,19 +368,37 @@
       window.location.replace(BASE + "index.html?v=" + Date.now());
     }
 
-    // ✅ حذف أي كاش/Service Worker (حل جذري للنسخة القديمة)
-    (function nukeCache(){
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-        });
+    async function guard(){
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (!user){
+        window.location.replace(BASE + "index.html?v=" + Date.now());
+        return;
       }
-      if (window.caches) {
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-      }
-    })();
-
+      // Balance حاليا ثابت:
+      document.getElementById("balanceText").innerText = "0.00";
+    }
     guard();
+
+    // Search filter
+    const search = document.getElementById("search");
+    search.addEventListener("input", () => {
+      const q = search.value.trim().toLowerCase();
+      document.querySelectorAll(".tile").forEach(t => {
+        const name = t.innerText.toLowerCase();
+        t.style.display = name.includes(q) ? "" : "none";
+      });
+    });
+
+    // 🔥 تنظيف اي ServiceWorker وكاش (حل جذري للنسخ القديمة)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      });
+    }
+    if (window.caches && caches.keys) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
   </script>
 </body>
 </html>
