@@ -1,244 +1,151 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baroud Services</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baroud Services</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:linear-gradient(180deg,#06162a,#020b14);
+  color:#fff;
+}
 
-  <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#06162a,#020b14);
-      color:#fff;
-      min-height:100vh;
-    }
-    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px; position:relative; z-index:1;}
+.wrap{max-width:520px;margin:auto;padding:14px}
 
-    /* top */
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .iconBtn{
-      width:54px;height:54px;border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      position:relative;
-      z-index:9999;              /* ✅ فوق أي شي */
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
-      user-select:none;
-    }
-    .hamburger span{display:block;width:20px;height:2px;background:#fff;margin:4px 0;border-radius:99px;opacity:.9}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+}
 
-    .brand{font-weight:900;letter-spacing:3px;opacity:.9}
+.menuBtn{
+  width:44px;height:44px;border-radius:14px;
+  background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
 
-    /* banner */
-    .banner{
-      margin-top:14px;border-radius:22px;overflow:hidden;
-      border:1px solid rgba(255,255,255,.06);
-      box-shadow:0 20px 70px rgba(0,0,0,.35);
-      background:rgba(255,255,255,.04);
-    }
-    .banner img{width:100%;height:160px;object-fit:cover;display:block}
+.menuBtn span{
+  display:block;width:20px;height:2px;background:#fff;margin:3px 0;
+}
 
-    .support{
-      margin-top:12px;padding:12px 14px;border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    }
+.brand{font-weight:900;letter-spacing:3px}
 
-    .searchBox{
-      margin-top:12px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:26px;
-      padding:14px 16px;
-      box-shadow:0 18px 60px rgba(0,0,0,.18);
-    }
-    .searchBox input{width:100%;background:transparent;border:none;outline:none;color:#fff;font-size:16px}
+.banner{
+  margin-top:14px;border-radius:22px;overflow:hidden;
+}
+.banner img{width:100%;height:160px;object-fit:cover}
 
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
-    .tile{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:22px;
-      overflow:hidden;
-      cursor:pointer;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
-      position:relative;
-      z-index:1;
-    }
-    .tile img{width:100%;height:120px;object-fit:cover;display:block}
-    .label{padding:12px 10px;text-align:center;font-weight:900;opacity:.92}
+.search{
+  margin-top:14px;
+  background:rgba(255,255,255,.08);
+  border-radius:26px;padding:14px;
+}
+.search input{
+  width:100%;background:none;border:none;color:#fff;font-size:16px;
+  outline:none;
+}
 
-    /* ✅ Overlay: افتراضيًا OFF 100% */
-    .overlay{
-      position:fixed;inset:0;
-      background:rgba(0,0,0,.55);
-      opacity:0;
-      pointer-events:none;        /* ✅ ما بياكل لمس */
-      transition:.2s;
-      z-index:2000;
-    }
-    .overlay.show{
-      opacity:1;
-      pointer-events:auto;        /* ✅ بس وقت drawer مفتوح */
-    }
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-top:14px;
+}
 
-    /* Drawer */
-    .drawer{
-      position:fixed;top:0;left:0;height:100vh;width:min(320px,82vw);
-      background:linear-gradient(180deg,#0c2747,#06162a);
-      border-right:1px solid rgba(255,255,255,.08);
-      box-shadow:0 30px 70px rgba(0,0,0,.65);
-      transform:translateX(-105%);
-      transition:.25s;
-      z-index:2100;
-      padding:18px 16px;
-      overflow:auto;
-    }
-    .drawer.show{transform:translateX(0)}
+.card{
+  background:rgba(255,255,255,.06);
+  border-radius:22px;
+  overflow:hidden;
+  cursor:pointer;
+}
 
-    .closeRow{display:flex;justify-content:flex-end}
-    .closeBtn{
-      width:44px;height:44px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;font-size:22px;cursor:pointer;
-    }
+.card img{
+  width:100%;height:120px;object-fit:cover;
+}
 
-    .loginCard{
-      background:#0aa0ff;border-radius:28px;padding:22px 18px;text-align:center;
-      box-shadow:0 22px 55px rgba(0,0,0,.45);margin:10px 0 16px;
-    }
-    .loginCard h2{margin:0 0 10px;font-size:34px;color:#fff}
-    .loginCard p{margin:0 0 14px;color:rgba(255,255,255,.88);font-weight:800;font-size:13px}
-    .loginBtn{
-      display:inline-block;background:#11e06d;color:#06331b;font-weight:900;
-      padding:14px 22px;border-radius:999px;text-decoration:none;width:85%;
-    }
-    .menu{margin-top:12px;border-top:1px solid rgba(255,255,255,.10);padding-top:12px}
-    .mItem{display:flex;align-items:center;gap:12px;padding:14px 10px;border-radius:14px;color:rgba(240,248,255,.92);cursor:pointer}
-    .mItem:hover{background:rgba(255,255,255,.04)}
-    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55)}
-    .social{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.10);display:flex;gap:14px;justify-content:center;opacity:.9}
-    .social a{width:46px;height:46px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-weight:900}
-    .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
-  </style>
+.card div{
+  padding:12px;text-align:center;font-weight:800;
+}
+
+/* drawer */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+}
+.drawer{
+  position:fixed;left:-280px;top:0;height:100%;
+  width:260px;background:#06162a;
+  padding:18px;transition:.3s;
+}
+.drawer.show{left:0}
+.overlay.show{display:block}
+
+.drawer a{
+  display:block;color:#fff;text-decoration:none;
+  padding:10px 0;font-weight:700;
+}
+</style>
 </head>
 
 <body>
-  <!-- ✅ overlay لازم يضل OFF إلا لما drawer.show -->
-  <div class="overlay" id="overlay"></div>
 
-  <aside class="drawer" id="drawer">
-    <div class="closeRow">
-      <button class="closeBtn" id="closeBtn" type="button">×</button>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="drawer" id="drawer">
+  <a href="login.html">Login</a>
+  <a href="#">Home</a>
+  <a href="#">About Us</a>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="menuBtn" onclick="openMenu()">
+      <span></span><span></span><span></span>
     </div>
+    <div class="brand">BAROUD</div>
+  </div>
 
-    <div class="loginCard">
-      <h2>Login</h2>
-      <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
-      <a class="loginBtn" href="login.html">Login</a>
+  <div class="banner">
+    <img src="assets/banner.jpg">
+  </div>
+
+  <div class="search">
+    <input placeholder="Search">
+  </div>
+
+  <div class="grid">
+    <div class="card" onclick="goLogin()">
+      <img src="assets/accounts.jpg"><div>Accounts</div>
     </div>
-
-    <div class="menu">
-      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
-      <div class="mItem" id="aboutItem"><span class="dot"></span><span>About Us</span></div>
+    <div class="card" onclick="goLogin()">
+      <img src="assets/games.jpg"><div>Games</div>
     </div>
-
-    <div class="social">
-      <a href="https://wa.me/96181812024" target="_blank" rel="noopener">WA</a>
-      <a href="#" id="ttBtn">♪</a>
+    <div class="card" onclick="goLogin()">
+      <img src="assets/giftcards.jpg"><div>Gift Cards</div>
     </div>
-
-    <div class="hint">© Baroud Services</div>
-  </aside>
-
-  <main class="wrap">
-    <div class="topbar">
-      <!-- ✅ زر ☰ -->
-      <div class="iconBtn" id="menuBtn" aria-label="Open menu">
-        <div class="hamburger"><span></span><span></span><span></span></div>
-      </div>
-      <div class="brand">BAROUD</div>
+    <div class="card" onclick="goLogin()">
+      <img src="assets/apps.jpg"><div>Social Media</div>
     </div>
+  </div>
+</div>
 
-    <div class="banner">
-      <img src="assets/banner.jpg" alt="banner" onerror="this.style.display='none'">
-    </div>
+<script>
+function openMenu(){
+  drawer.classList.add("show");
+  overlay.classList.add("show");
+}
+function closeMenu(){
+  drawer.classList.remove("show");
+  overlay.classList.remove("show");
+}
+function goLogin(){
+  location.href="login.html";
+}
+</script>
 
-    <div class="support">Support Number:+961 81812024 | Join Our WhatsApp Community</div>
-
-    <div class="searchBox">
-      <input id="search" placeholder="Search" />
-    </div>
-
-    <section class="grid" id="grid">
-      <div class="tile" data-go="login.html"><img src="assets/accounts.jpg" alt=""><div class="label">Accounts</div></div>
-      <div class="tile" data-go="login.html"><img src="assets/games.jpg" alt=""><div class="label">Games</div></div>
-      <div class="tile" data-go="login.html"><img src="assets/giftcards.jpg" alt=""><div class="label">Gift Cards</div></div>
-      <div class="tile" data-go="login.html"><img src="assets/apps.jpg" alt=""><div class="label">Applications</div></div>
-    </section>
-
-    <div class="hint">pre-login</div>
-  </main>
-
-  <script>
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // ✅ إذا في session روح services
-    (async ()=>{
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user) location.replace("services.html");
-    })();
-
-    const drawer  = document.getElementById("drawer");
-    const overlay = document.getElementById("overlay");
-    const menuBtn = document.getElementById("menuBtn");
-    const closeBtn= document.getElementById("closeBtn");
-
-    function openDrawer(){
-      drawer.classList.add("show");
-      overlay.classList.add("show");
-    }
-    function closeDrawer(){
-      drawer.classList.remove("show");
-      overlay.classList.remove("show");
-    }
-
-    // ✅ click + touch (حل نهائي للموبايل)
-    menuBtn.onclick = openDrawer;
-    menuBtn.addEventListener("touchstart",(e)=>{e.preventDefault();openDrawer();},{passive:false});
-
-    overlay.onclick = closeDrawer;
-    closeBtn.onclick = closeDrawer;
-
-    document.getElementById("homeItem").onclick = ()=>{closeDrawer(); location.href="index.html";};
-    document.getElementById("aboutItem").onclick= ()=>alert("About Us");
-    document.getElementById("ttBtn").onclick   = (e)=>{e.preventDefault(); alert("TikTok");};
-
-    // tiles تروح login
-    document.querySelectorAll(".tile").forEach(t=>{
-      t.addEventListener("click", ()=> location.href = t.dataset.go);
-      t.addEventListener("touchstart", ()=> location.href = t.dataset.go, {passive:true});
-    });
-
-    // search filter
-    const search = document.getElementById("search");
-    search.addEventListener("input", ()=>{
-      const q = search.value.trim().toLowerCase();
-      document.querySelectorAll(".tile").forEach(t=>{
-        t.style.display = t.innerText.toLowerCase().includes(q) ? "" : "none";
-      });
-    });
-  </script>
 </body>
 </html>
