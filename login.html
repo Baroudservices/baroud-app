@@ -74,7 +74,7 @@
       padding:12px 14px;
       border-radius:14px;
       display:none;
-      font-weight:700;
+      font-weight:800;
     }
     .err{background:#d05252}
     .ok{background:#2aa96b}
@@ -124,11 +124,16 @@
       msg.textContent = text;
     }
 
-    // ✅ إذا أصلاً عامل login -> روح مباشرة على add-credit (الصورة الثالثة)
+    // ✅ إذا أصلاً عامل login -> روح مباشرة على services.html
     (async ()=>{
       const { data } = await supabase.auth.getSession();
-      if (data.session?.user) location.replace("add-credit.html");
+      if (data.session?.user) location.replace("services.html");
     })();
+
+    // Enter key = login
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") document.getElementById("loginBtn").click();
+    });
 
     document.getElementById("loginBtn").addEventListener("click", async ()=>{
       msg.style.display="none";
@@ -140,17 +145,17 @@
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error){
-        showMsg(error.message || "Invalid username or password.");
+        showMsg("Invalid username or password.");
         return;
       }
 
       showMsg("Login successful ✅", true);
 
-      // ✅ بعد نجاح الدخول -> افتح add-credit (الصورة الثالثة)
-      setTimeout(()=> location.replace("add-credit.html"), 300);
+      // ✅ بعد نجاح الدخول -> افتح services.html
+      setTimeout(()=> location.replace("services.html"), 250);
     });
   </script>
 </body>
