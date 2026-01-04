@@ -1,1 +1,28 @@
+        password: pass.value
+      });
+      if (error){ setMsg(error.message); return; }
+      setMsg("Success ✅");
+      window.location.replace(BASE + "services.html?v=" + Date.now());
+    });
 
+    document.getElementById("signupBtn").addEventListener("click", async ()=>{
+      setMsg("Creating account...");
+      const { error } = await supabase.auth.signUp({
+        email: email.value.trim(),
+        password: pass.value
+      });
+      if (error){ setMsg(error.message); return; }
+      setMsg("Check your email to confirm ✅");
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", async ()=>{
+      const e = email.value.trim();
+      if(!e){ setMsg("Write your email first."); return; }
+      setMsg("Sending reset email...");
+      const { error } = await supabase.auth.resetPasswordForEmail(e);
+      if (error){ setMsg(error.message); return; }
+      setMsg("Reset email sent ✅");
+    });
+  </script>
+</body>
+</html>
