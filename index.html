@@ -1,42 +1,374 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ar" dir="ltr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baroud Services</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Baroud Store</title>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background:#0b1220;
-      color:white;
+    :root{
+      --bg1:#050d1a;
+      --bg2:#071a2e;
+      --card:#0f233b;
+      --card2:#0c1c31;
+      --text:#eaf2ff;
+      --muted:#9fb3cc;
+      --shadow:0 18px 55px rgba(0,0,0,.55);
+      --radius:22px;
+      --radius2:16px;
+    }
+
+    *{box-sizing:border-box}
+    body{
       margin:0;
-      padding:20px;
-      text-align:center;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 700px at 60% 20%, rgba(46, 115, 255, .18), transparent 60%),
+        radial-gradient(900px 600px at 20% 40%, rgba(0, 255, 196, .10), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      overflow-x:hidden;
     }
-    .card {
-      background:#111827;
-      padding:20px;
-      border-radius:16px;
-      max-width:420px;
-      margin:40px auto;
+
+    .wrap{
+      max-width:960px;
+      margin:0 auto;
+      padding:18px 16px 40px;
     }
-    button {
-      width:100%;
-      padding:14px;
-      margin-top:10px;
-      border:none;
-      border-radius:12px;
-      font-size:16px;
+
+    /* Header */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 4px 16px;
+    }
+    .iconBtn{
+      width:46px;height:46px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
       cursor:pointer;
+      user-select:none;
+    }
+    .iconBtn:active{transform:scale(.98)}
+    .hamburger{
+      width:22px;height:16px; position:relative;
+    }
+    .hamburger span{
+      position:absolute;left:0;right:0;
+      height:2px;border-radius:99px;
+      background:rgba(255,255,255,.9);
+    }
+    .hamburger span:nth-child(1){top:0}
+    .hamburger span:nth-child(2){top:7px;opacity:.8}
+    .hamburger span:nth-child(3){bottom:0;opacity:.6}
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      opacity:.95;
+    }
+    .brand img{
+      height:34px;
+      width:auto;
+      filter:drop-shadow(0 8px 16px rgba(0,0,0,.45));
+    }
+
+    /* Banner */
+    .banner{
+      margin-top:6px;
+      border-radius:26px;
+      overflow:hidden;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:var(--shadow);
+    }
+    .banner img{
+      display:block;
+      width:100%;
+      height:165px;
+      object-fit:cover;
+    }
+
+    /* Search */
+    .searchBox{
+      margin:16px 2px 8px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:26px;
+      padding:14px 18px;
+      color:var(--muted);
+      box-shadow:0 12px 40px rgba(0,0,0,.35);
+    }
+    .searchBox input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:transparent;
+      color:var(--text);
+      font-size:16px;
+    }
+    .searchBox input::placeholder{color:rgba(230,240,255,.55)}
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    .tile{
+      border-radius:18px;
+      overflow:hidden;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 16px 45px rgba(0,0,0,.42);
+      cursor:pointer;
+      position:relative;
+    }
+    .tile:active{transform:scale(.99)}
+    .tile img{
+      width:100%;
+      height:118px;
+      object-fit:cover;
+      display:block;
+    }
+    .tile .label{
+      padding:10px 12px 12px;
+      text-align:center;
+      font-weight:600;
+      letter-spacing:.2px;
+      color:rgba(240,248,255,.92);
+    }
+
+    @media (max-width:520px){
+      .grid{grid-template-columns:1fr 1fr}
+      .banner img{height:150px}
+    }
+
+    /* Drawer */
+    .overlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      opacity:0; pointer-events:none;
+      transition:.25s;
+      z-index:50;
+    }
+    .overlay.show{opacity:1; pointer-events:auto}
+
+    .drawer{
+      position:fixed;
+      top:0; left:0;
+      width:78%;
+      max-width:340px;
+      height:100%;
+      background:linear-gradient(180deg, rgba(10,18,32,.98), rgba(6,13,26,.98));
+      border-right:1px solid rgba(255,255,255,.06);
+      box-shadow:0 30px 70px rgba(0,0,0,.65);
+      transform:translateX(-105%);
+      transition:.28s;
+      z-index:60;
+      padding:18px 16px;
+      overflow:auto;
+    }
+    .drawer.show{transform:translateX(0)}
+
+    .loginCard{
+      background:#0aa0ff;
+      border-radius:28px;
+      padding:22px 18px;
+      text-align:center;
+      box-shadow:0 22px 55px rgba(0,0,0,.45);
+      margin-bottom:16px;
+    }
+    .loginCard h2{
+      margin:0 0 10px;
+      font-size:34px;
+      letter-spacing:.3px;
+      color:white;
+    }
+    .loginCard p{
+      margin:0 0 14px;
+      color:rgba(255,255,255,.85);
+      font-weight:600;
+      font-size:13px;
+    }
+    .loginBtn{
+      display:inline-block;
+      background:#11e06d;
+      color:#06331b;
+      font-weight:800;
+      padding:14px 22px;
+      border-radius:999px;
+      text-decoration:none;
+      width:85%;
+    }
+
+    .menu{
+      margin-top:12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:12px;
+    }
+    .mItem{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 10px;
+      border-radius:14px;
+      color:rgba(240,248,255,.92);
+      cursor:pointer;
+    }
+    .mItem:hover{background:rgba(255,255,255,.04)}
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:rgba(255,255,255,.55);
+    }
+
+    .social{
+      margin-top:18px;
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      display:flex; gap:14px; justify-content:center;
+      opacity:.9;
+    }
+    .social a{
+      width:46px;height:46px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      display:flex;align-items:center;justify-content:center;
+      color:white;
+      text-decoration:none;
+      font-weight:800;
+    }
+
+    /* Small helper */
+    .hint{
+      margin-top:14px;
+      text-align:center;
+      color:rgba(255,255,255,.35);
+      font-size:12px;
     }
   </style>
 </head>
+
 <body>
+  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 
-  <div class="card">
-    <h1>Baroud Services</h1>
-    <button onclick="location.href='services.html'">Enter</button>
-  </div>
+  <aside class="drawer" id="drawer">
+    <div class="loginCard">
+      <h2>Login</h2>
+      <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
+      <!-- روح على صفحة تسجيل الدخول تبعك -->
+      <a class="loginBtn" href="index.html">Login</a>
+    </div>
 
+    <div class="menu">
+      <div class="mItem" onclick="closeDrawer()">
+        <span class="dot"></span><span>Home</span>
+      </div>
+      <div class="mItem" onclick="alert('About Us')">
+        <span class="dot"></span><span>About Us</span>
+      </div>
+    </div>
+
+    <div class="social">
+      <a href="#" onclick="alert('TikTok')">♪</a>
+      <a href="#" onclick="alert('WhatsApp')">WA</a>
+    </div>
+
+    <div class="hint">© Baroud Services</div>
+  </aside>
+
+  <main class="wrap">
+    <div class="topbar">
+      <div class="iconBtn" onclick="openDrawer()">
+        <div class="hamburger">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="brand">
+        <!-- لوغو يمين -->
+        <img src="assets/logo.png" alt="logo" />
+      </div>
+    </div>
+
+    <div class="banner">
+      <img src="assets/banner.jpg" alt="banner" />
+    </div>
+
+    <div class="searchBox">
+      <input id="search" placeholder="Search" />
+    </div>
+
+    <section class="grid" id="grid">
+      <div class="tile" onclick="alert('Games')">
+        <img src="assets/games.jpg" alt="Games" />
+        <div class="label">Games</div>
+      </div>
+      <div class="tile" onclick="alert('Applications')">
+        <img src="assets/apps.jpg" alt="Applications" />
+        <div class="label">Applications</div>
+      </div>
+      <div class="tile" onclick="alert('Accounts')">
+        <img src="assets/accounts.jpg" alt="Accounts" />
+        <div class="label">Accounts</div>
+      </div>
+      <div class="tile" onclick="alert('Gift Cards')">
+        <img src="assets/giftcards.jpg" alt="Gift Cards" />
+        <div class="label">Gift Cards</div>
+      </div>
+    </section>
+
+    <div class="hint">ovo-style landing (pre-login)</div>
+  </main>
+
+  <script>
+    // ✅ 1) حط رابط GitHub Pages تبعك هون
+    const BASE = "https://baroudservices.github.io/baroud-app/";
+
+    // ✅ 2) Supabase
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function openDrawer(){
+      document.getElementById("drawer").classList.add("show");
+      document.getElementById("overlay").classList.add("show");
+    }
+    function closeDrawer(){
+      document.getElementById("drawer").classList.remove("show");
+      document.getElementById("overlay").classList.remove("show");
+    }
+
+    // لو في session روح على الخدمات
+    async function guard(){
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (user){
+        // cache busting
+        window.location.replace(BASE + "services.html?v=" + Date.now());
+      }
+    }
+    guard();
+
+    // فلترة البحث (بس UI)
+    const search = document.getElementById("search");
+    search.addEventListener("input", () => {
+      const q = search.value.trim().toLowerCase();
+      document.querySelectorAll(".tile").forEach(t => {
+        const name = t.innerText.toLowerCase();
+        t.style.display = name.includes(q) ? "" : "none";
+      });
+    });
+  </script>
 </body>
 </html>
