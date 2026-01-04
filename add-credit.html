@@ -1,74 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Add Credit</title>
+
   <style>
     body {
       font-family: system-ui, sans-serif;
-      background:#0b1220;
-      color:white;
-      margin:0;
-      padding:20px;
+      background: #0b1220;
+      color: white;
+      margin: 0;
+      padding: 20px;
     }
-    .card {
-      background:#111827;
-      padding:20px;
-      border-radius:16px;
-      max-width:420px;
-      margin:40px auto;
-    }
-    .item {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px;
-      background:#1f2937;
-      border-radius:12px;
-      margin-top:10px;
-      cursor:pointer;
-    }
-    img {
-      width:36px;
-      height:36px;
-    }
+
     .back {
-      cursor:pointer;
-      margin-bottom:20px;
-      display:inline-block;
+      cursor: pointer;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    .card {
+      background: #111827;
+      padding: 20px;
+      border-radius: 20px;
+      max-width: 420px;
+      margin: 40px auto;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      margin-top: 12px;
+      border-radius: 14px;
+      border: none;
+      font-size: 16px;
+      background: #1f2937;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    img {
+      width: 32px;
+      height: 32px;
     }
   </style>
 </head>
+
 <body>
 
-  <div class="back" onclick="history.back()">← رجوع</div>
+  <div class="back" onclick="goBack()">← رجوع</div>
 
   <div class="card">
-    <h2>Add Credit</h2>
+    <button onclick="go('binance.html')">
+      <img src="assets/binance.png"> Binance
+    </button>
 
-    <div class="item" onclick="location.href='wish.html'">
-      <img src="assets/wish.png">
-      Whish Money
-    </div>
+    <button onclick="go('wish.html')">
+      <img src="assets/wish.png"> Whish Money
+    </button>
 
-    <div class="item">
-      Binance
-    </div>
+    <button onclick="go('usdt-bep20.html')">
+      <img src="assets/usdt.png"> USDT BEP20
+    </button>
 
-    <div class="item">
-      USDT BEP20
-    </div>
+    <button onclick="go('usdt-trc20.html')">
+      <img src="assets/usdt.png"> USDT TRC20
+    </button>
 
-    <div class="item">
-      USDT TRC20
-    </div>
-
-    <div class="item">
-      OMT Pay
-    </div>
-
+    <button onclick="go('omt.html')">
+      <img src="assets/omt.png"> OMT Pay
+    </button>
   </div>
+
+  <script>
+    function go(page) {
+      window.location.href = page + "?v=" + Date.now();
+    }
+
+    function goBack() {
+      window.location.replace("services.html?v=" + Date.now());
+    }
+  </script>
 
 </body>
 </html>
