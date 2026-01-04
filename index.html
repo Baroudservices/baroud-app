@@ -9,9 +9,16 @@
 
   <style>
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#06162a,#020b14);color:#fff;min-height:100vh}
-    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#06162a,#020b14);
+      color:#fff;
+      min-height:100vh;
+    }
+    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px; position:relative; z-index:1;}
 
+    /* top */
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .iconBtn{
       width:54px;height:54px;border-radius:18px;
@@ -19,15 +26,17 @@
       border:1px solid rgba(255,255,255,.06);
       display:flex;align-items:center;justify-content:center;
       cursor:pointer;
-      position:relative;z-index:1000;
+      position:relative;
+      z-index:9999;              /* ✅ فوق أي شي */
       -webkit-tap-highlight-color:transparent;
       touch-action:manipulation;
+      user-select:none;
     }
     .hamburger span{display:block;width:20px;height:2px;background:#fff;margin:4px 0;border-radius:99px;opacity:.9}
 
-    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:2px;opacity:.9}
-    .brand img{height:30px;width:auto;display:block}
+    .brand{font-weight:900;letter-spacing:3px;opacity:.9}
 
+    /* banner */
     .banner{
       margin-top:14px;border-radius:22px;overflow:hidden;
       border:1px solid rgba(255,255,255,.06);
@@ -61,13 +70,27 @@
       overflow:hidden;
       cursor:pointer;
       box-shadow:0 18px 60px rgba(0,0,0,.25);
+      position:relative;
+      z-index:1;
     }
     .tile img{width:100%;height:120px;object-fit:cover;display:block}
-    .label{padding:12px 10px;text-align:center;font-weight:800;opacity:.92}
+    .label{padding:12px 10px;text-align:center;font-weight:900;opacity:.92}
+
+    /* ✅ Overlay: افتراضيًا OFF 100% */
+    .overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;        /* ✅ ما بياكل لمس */
+      transition:.2s;
+      z-index:2000;
+    }
+    .overlay.show{
+      opacity:1;
+      pointer-events:auto;        /* ✅ بس وقت drawer مفتوح */
+    }
 
     /* Drawer */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.2s;z-index:2000}
-    .overlay.show{opacity:1;pointer-events:auto}
     .drawer{
       position:fixed;top:0;left:0;height:100vh;width:min(320px,82vw);
       background:linear-gradient(180deg,#0c2747,#06162a);
@@ -80,6 +103,7 @@
       overflow:auto;
     }
     .drawer.show{transform:translateX(0)}
+
     .closeRow{display:flex;justify-content:flex-end}
     .closeBtn{
       width:44px;height:44px;border-radius:14px;
@@ -87,12 +111,13 @@
       background:rgba(255,255,255,.06);
       color:#fff;font-size:22px;cursor:pointer;
     }
+
     .loginCard{
       background:#0aa0ff;border-radius:28px;padding:22px 18px;text-align:center;
       box-shadow:0 22px 55px rgba(0,0,0,.45);margin:10px 0 16px;
     }
     .loginCard h2{margin:0 0 10px;font-size:34px;color:#fff}
-    .loginCard p{margin:0 0 14px;color:rgba(255,255,255,.88);font-weight:700;font-size:13px}
+    .loginCard p{margin:0 0 14px;color:rgba(255,255,255,.88);font-weight:800;font-size:13px}
     .loginBtn{
       display:inline-block;background:#11e06d;color:#06331b;font-weight:900;
       padding:14px 22px;border-radius:999px;text-decoration:none;width:85%;
@@ -108,10 +133,13 @@
 </head>
 
 <body>
+  <!-- ✅ overlay لازم يضل OFF إلا لما drawer.show -->
   <div class="overlay" id="overlay"></div>
 
   <aside class="drawer" id="drawer">
-    <div class="closeRow"><button class="closeBtn" id="closeBtn" type="button">×</button></div>
+    <div class="closeRow">
+      <button class="closeBtn" id="closeBtn" type="button">×</button>
+    </div>
 
     <div class="loginCard">
       <h2>Login</h2>
@@ -134,14 +162,11 @@
 
   <main class="wrap">
     <div class="topbar">
+      <!-- ✅ زر ☰ -->
       <div class="iconBtn" id="menuBtn" aria-label="Open menu">
         <div class="hamburger"><span></span><span></span><span></span></div>
       </div>
-
-      <div class="brand">
-        <span>BAROUD</span>
-        <img src="assets/logo.png" alt="logo" onerror="this.style.display='none'">
-      </div>
+      <div class="brand">BAROUD</div>
     </div>
 
     <div class="banner">
@@ -155,10 +180,10 @@
     </div>
 
     <section class="grid" id="grid">
-      <div class="tile"><img src="assets/accounts.jpg" alt=""><div class="label">Accounts</div></div>
-      <div class="tile"><img src="assets/games.jpg" alt=""><div class="label">Games</div></div>
-      <div class="tile"><img src="assets/giftcards.jpg" alt=""><div class="label">Gift Cards</div></div>
-      <div class="tile"><img src="assets/apps.jpg" alt=""><div class="label">Applications</div></div>
+      <div class="tile" data-go="login.html"><img src="assets/accounts.jpg" alt=""><div class="label">Accounts</div></div>
+      <div class="tile" data-go="login.html"><img src="assets/games.jpg" alt=""><div class="label">Games</div></div>
+      <div class="tile" data-go="login.html"><img src="assets/giftcards.jpg" alt=""><div class="label">Gift Cards</div></div>
+      <div class="tile" data-go="login.html"><img src="assets/apps.jpg" alt=""><div class="label">Applications</div></div>
     </section>
 
     <div class="hint">pre-login</div>
@@ -169,40 +194,48 @@
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ✅ إذا في session روح للـ services
+    // ✅ إذا في session روح services
     (async ()=>{
       const { data } = await supabase.auth.getSession();
       if (data.session?.user) location.replace("services.html");
     })();
 
-    // Drawer
-    const drawer = document.getElementById("drawer");
+    const drawer  = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
-    const closeBtn = document.getElementById("closeBtn");
+    const closeBtn= document.getElementById("closeBtn");
 
-    function openDrawer(){ drawer.classList.add("show"); overlay.classList.add("show"); }
-    function closeDrawer(){ drawer.classList.remove("show"); overlay.classList.remove("show"); }
+    function openDrawer(){
+      drawer.classList.add("show");
+      overlay.classList.add("show");
+    }
+    function closeDrawer(){
+      drawer.classList.remove("show");
+      overlay.classList.remove("show");
+    }
 
-    menuBtn.addEventListener("click", openDrawer);
+    // ✅ click + touch (حل نهائي للموبايل)
+    menuBtn.onclick = openDrawer;
     menuBtn.addEventListener("touchstart",(e)=>{e.preventDefault();openDrawer();},{passive:false});
-    overlay.addEventListener("click", closeDrawer);
-    closeBtn.addEventListener("click", closeDrawer);
 
-    document.getElementById("homeItem").addEventListener("click", ()=>{ closeDrawer(); location.href="index.html"; });
-    document.getElementById("aboutItem").addEventListener("click", ()=>alert("About Us"));
-    document.getElementById("ttBtn").addEventListener("click",(e)=>{e.preventDefault(); alert("TikTok");});
+    overlay.onclick = closeDrawer;
+    closeBtn.onclick = closeDrawer;
 
-    // قبل login: كبس tiles يفتح login
+    document.getElementById("homeItem").onclick = ()=>{closeDrawer(); location.href="index.html";};
+    document.getElementById("aboutItem").onclick= ()=>alert("About Us");
+    document.getElementById("ttBtn").onclick   = (e)=>{e.preventDefault(); alert("TikTok");};
+
+    // tiles تروح login
     document.querySelectorAll(".tile").forEach(t=>{
-      t.addEventListener("click", ()=> location.href="login.html");
+      t.addEventListener("click", ()=> location.href = t.dataset.go);
+      t.addEventListener("touchstart", ()=> location.href = t.dataset.go, {passive:true});
     });
 
-    // search
+    // search filter
     const search = document.getElementById("search");
-    search.addEventListener("input", () => {
+    search.addEventListener("input", ()=>{
       const q = search.value.trim().toLowerCase();
-      document.querySelectorAll(".tile").forEach(t => {
+      document.querySelectorAll(".tile").forEach(t=>{
         t.style.display = t.innerText.toLowerCase().includes(q) ? "" : "none";
       });
     });
