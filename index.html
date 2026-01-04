@@ -1,240 +1,487 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Baroud Services</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baroud Services</title>
 
-<style>
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    background:linear-gradient(180deg,#051c2e,#020b16);
-    color:#fff;
-    -webkit-tap-highlight-color:transparent;
-  }
+  <!-- (اختياري) Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  /* ===== Top bar ===== */
-  .topbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:12px 14px;
-    position:relative;
-    z-index:1;
-  }
+  <style>
+    :root{
+      --bg1:#06162a;
+      --bg2:#020814;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.08);
+      --txt:rgba(240,248,255,.92>
+    }
 
-  /* ✅ زر المينو لازم يكون فوق الكل */
-  .menuBtn{
-    width:54px;height:54px;
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,.10);
-    background:rgba(255,255,255,.08);
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
-    position:relative;
-    z-index:99999; /* ✅ */
-    touch-action:manipulation;
-    user-select:none;
-    pointer-events:auto;
-  }
-  .hamburger{width:24px}
-  .hamburger span{
-    display:block;height:2px;background:#fff;border-radius:99px;
-    margin:5px 0;
-  }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:rgba(240,248,255,.92);
+      background:radial-gradient(1200px 700px at 20% 0%, #0a2a52 0%, #06162a 40%, #030915 100%);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
 
-  .balance{
-    display:flex;align-items:center;gap:10px;
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.10);
-    padding:10px 14px;border-radius:22px;
-    font-weight:900;
-  }
-  .balance .plus{
-    width:30px;height:30px;border-radius:14px;
-    background:rgba(255,255,255,.10);
-    display:flex;align-items:center;justify-content:center;
-    font-size:22px;
-  }
-  .logo{font-weight:900;letter-spacing:3px;opacity:.95}
+    /* ===== TOP BAR (ovoxz style) ===== */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      padding:14px 14px 10px;
+      background:linear-gradient(180deg, rgba(2,8,20,.92), rgba(2,8,20,.35));
+      backdrop-filter: blur(10px);
+    }
 
-  .banner{
-    margin:14px;
-    border-radius:22px;
-    background:linear-gradient(135deg,#7b1010,#0a1f44);
-    padding:22px;
-    box-shadow:0 22px 60px rgba(0,0,0,.35);
-  }
+    .topRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
 
-  .searchBox{margin:14px}
-  .searchBox input{
-    width:100%;
-    padding:16px;
-    border-radius:30px;
-    border:none;
-    outline:none;
-    background:rgba(255,255,255,.08);
-    color:#fff;
-    font-size:16px;
-  }
+    .menuBtn{
+      width:54px;height:54px;
+      border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      position:relative;
+      z-index:99999;            /* ✅ أهم شي للموبايل */
+      pointer-events:auto;
+    }
+    .hamburger{width:22px}
+    .hamburger span{
+      display:block;
+      height:2px;
+      background:rgba(255,255,255,.92);
+      margin:5px 0;
+      border-radius:2px;
+      opacity:.92;
+    }
 
-  .grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
-    padding:14px;
-  }
-  .tile{
-    background:rgba(255,255,255,.07);
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:22px;
-    height:140px;
-    display:flex;
-    align-items:flex-end;
-    padding:14px;
-    font-weight:900;
-    box-shadow:0 18px 60px rgba(0,0,0,.25);
-  }
+    .pill{
+      flex:1;
+      max-width:260px;
+      height:54px;
+      border-radius:20px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 12px;
+      gap:10px;
+      box-shadow:0 18px 60px rgba(0,0,0,.25);
+    }
 
-  /* ===== Overlay + Drawer (z-index مضبوط) ===== */
-  .overlay{
-    position:fixed; inset:0;
-    background:rgba(0,0,0,.45);
-    opacity:0;
-    pointer-events:none;
-    transition:.2s;
-    z-index:1000;        /* ✅ تحت drawer */
-  }
-  .overlay.show{
-    opacity:1;
-    pointer-events:auto;
-  }
+    .leftPill{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
 
-  .drawer{
-    position:fixed;
-    top:0; left:0;
-    width:78%;
-    max-width:340px;
-    height:100%;
-    background:#041a2a;
-    border-right:1px solid rgba(255,255,255,.10);
-    box-shadow:0 30px 70px rgba(0,0,0,.65);
-    transform:translateX(-105%);
-    transition:.28s;
-    z-index:1001;        /* ✅ فوق overlay */
-    padding:18px 16px;
-    overflow:auto;
-    -webkit-overflow-scrolling:touch;
-  }
-  .drawer.show{transform:translateX(0)}
+    .coin{
+      width:34px;height:34px;border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #ffd37a, #b07a1a);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;
+      color:#2b1700;
+      font-size:16px;
+      flex:0 0 auto;
+    }
 
-  .drawerTop{display:flex;justify-content:flex-end;margin-bottom:10px}
-  .closeBtn{
-    width:44px;height:44px;border-radius:16px;
-    border:1px solid rgba(255,255,255,.10);
-    background:rgba(255,255,255,.06);
-    color:#fff;font-size:26px;
-    cursor:pointer;
-  }
+    .bal{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-weight:800;
+      font-size:20px;
+      white-space:nowrap;
+    }
+    .flag{font-size:20px;opacity:.95}
 
-  .loginCard{
-    background:#0aa0ff;
-    border-radius:28px;
-    padding:22px 18px;
-    text-align:center;
-    box-shadow:0 22px 55px rgba(0,0,0,.45);
-    margin-bottom:16px;
-  }
-  .loginCard h2{margin:0 0 10px;font-size:34px;color:#fff}
-  .loginCard p{margin:0 0 14px;color:rgba(255,255,255,.85);font-weight:700;font-size:13px}
-  .loginBtn{
-    display:block;
-    background:#11e06d;color:#06331b;
-    font-weight:900;
-    padding:14px;
-    border-radius:999px;
-    text-decoration:none;
-  }
+    .plusBtn{
+      width:38px;height:38px;
+      border-radius:14px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.10);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;
+      font-size:22px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  .menu{border-top:1px solid rgba(255,255,255,.12);padding-top:12px;margin-top:12px}
-  .mItem{display:flex;align-items:center;gap:10px;padding:14px;border-radius:14px;cursor:pointer}
-  .mItem:hover{background:rgba(255,255,255,.04)}
-  .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.7)}
-  .social{display:flex;justify-content:center;gap:14px;margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)}
-  .social a{
-    width:46px;height:46px;border-radius:16px;
-    border:1px solid rgba(255,255,255,.18);
-    display:flex;align-items:center;justify-content:center;
-    text-decoration:none;color:#fff;font-weight:900;
-  }
-</style>
+    .brandText{
+      font-weight:900;
+      letter-spacing:6px;
+      opacity:.95;
+      font-size:20px;
+      margin-left:6px;
+      white-space:nowrap;
+    }
+
+    /* ===== MAIN ===== */
+    .wrap{
+      padding:8px 14px 30px;
+    }
+
+    .banner{
+      margin-top:10px;
+      background:linear-gradient(135deg, rgba(155,23,23,.9), rgba(70,20,90,.7), rgba(5,40,80,.35));
+      border-radius:22px;
+      padding:20px 18px;
+      box-shadow:0 22px 70px rgba(0,0,0,.35);
+    }
+    .banner h1{
+      margin:0;
+      font-size:34px;
+      line-height:1.1;
+      letter-spacing:.2px;
+    }
+
+    .ticker{
+      margin-top:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:12px 14px;
+      overflow:hidden;
+      white-space:nowrap;
+      opacity:.9;
+    }
+    .ticker .move{
+      display:inline-block;
+      padding-left:100%;
+      animation:marq 14s linear infinite;
+    }
+    @keyframes marq{
+      0%{transform:translateX(0)}
+      100%{transform:translateX(-100%)}
+    }
+
+    .searchBox{
+      margin-top:14px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:26px;
+      padding:14px 16px;
+      box-shadow:0 18px 60px rgba(0,0,0,.20);
+    }
+    .searchBox input{
+      width:100%;
+      background:transparent;
+      border:0;
+      outline:none;
+      color:rgba(240,248,255,.92);
+      font-size:18px;
+    }
+    .searchBox input::placeholder{color:rgba(240,248,255,.45)}
+
+    .grid{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+    .tile{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:0 18px 60px rgba(0,0,0,.25);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tile img{
+      width:100%;
+      height:140px;
+      object-fit:cover;
+      display:block;
+    }
+    .label{
+      padding:12px 10px;
+      text-align:center;
+      font-weight:800;
+      letter-spacing:.3px;
+      opacity:.95;
+      font-size:18px;
+    }
+
+    /* ===== DRAWER + OVERLAY ===== */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
+      transition:.25s;
+      z-index:1000;  /* ✅ تحت الدروار */
+    }
+    .overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .drawer{
+      position:fixed;
+      top:0;
+      left:0;
+      width:78%;
+      max-width:330px;
+      height:100vh;
+      background:linear-gradient(180deg, rgba(6,16,32,.98), rgba(3,9,21,.98));
+      border-right:1px solid rgba(255,255,255,.08);
+      transform:translateX(-105%);
+      transition:.28s;
+      z-index:1001; /* ✅ فوق الأوفرلاي */
+      padding:18px 16px;
+      overflow:auto;
+      box-shadow:0 30px 70px rgba(0,0,0,.65);
+      -webkit-overflow-scrolling: touch;
+    }
+    .drawer.show{transform:translateX(0)}
+
+    .drawerTop{
+      display:flex;
+      justify-content:flex-end;
+      margin-bottom:10px;
+    }
+    .closeBtn{
+      width:44px;height:44px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:white;
+      font-size:26px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .loginCard{
+      background:#0aa0ff;
+      border-radius:28px;
+      padding:22px 18px;
+      text-align:center;
+      box-shadow:0 22px 55px rgba(0,0,0,.45);
+      margin-bottom:16px;
+    }
+    .loginCard h2{
+      margin:0 0 10px;
+      font-size:34px;
+      letter-spacing:.3px;
+      color:white;
+    }
+    .loginCard p{
+      margin:0 0 14px;
+      color:rgba(255,255,255,.85);
+      font-weight:700;
+      font-size:13px;
+      line-height:1.35;
+    }
+    .loginBtn{
+      display:inline-block;
+      background:#11e06d;
+      color:#06331b;
+      font-weight:900;
+      padding:14px 22px;
+      border-radius:999px;
+      text-decoration:none;
+      width:85%;
+    }
+
+    .menu{
+      margin-top:12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:12px;
+    }
+    .mItem{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 10px;
+      border-radius:14px;
+      color:rgba(240,248,255,.92);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mItem:hover{background:rgba(255,255,255,.04)}
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:rgba(255,255,255,.55);
+    }
+
+    .social{
+      margin-top:18px;
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      display:flex; gap:14px; justify-content:center;
+      opacity:.95;
+    }
+    .social a{
+      width:52px;height:52px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      display:flex;align-items:center;justify-content:center;
+      color:white;
+      text-decoration:none;
+      font-weight:900;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .hint{
+      margin-top:14px;
+      text-align:center;
+      color:rgba(255,255,255,.35);
+      font-size:12px;
+      padding-bottom:12px;
+    }
+
+    /* small screen tweak */
+    @media (max-width:380px){
+      .brandText{letter-spacing:4px;font-size:18px}
+      .banner h1{font-size:30px}
+      .tile img{height:130px}
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+  <!-- overlay -->
+  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 
-<aside class="drawer" id="drawer">
-  <div class="drawerTop">
-    <button class="closeBtn" onclick="closeDrawer()">×</button>
-  </div>
+  <!-- drawer -->
+  <aside class="drawer" id="drawer">
+    <div class="drawerTop">
+      <button class="closeBtn" type="button" onclick="closeDrawer()">×</button>
+    </div>
 
-  <div class="loginCard">
-    <h2>Login</h2>
-    <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
-    <a class="loginBtn" href="login.html?v=1">Login</a>
-  </div>
+    <div class="loginCard">
+      <h2>Login</h2>
+      <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
+      <!-- ✅ روح على login.html -->
+      <a class="loginBtn" href="login.html?v=1">Login</a>
+    </div>
 
-  <div class="menu">
-    <div class="mItem" onclick="closeDrawer()"><span class="dot"></span>Home</div>
-    <div class="mItem" onclick="alert('About Us')"><span class="dot"></span>About Us</div>
-  </div>
+    <div class="menu">
+      <div class="mItem" onclick="closeDrawer(); location.href='index.html?v=1';">
+        <span class="dot"></span><span>Home</span>
+      </div>
+      <div class="mItem" onclick="alert('About Us');">
+        <span class="dot"></span><span>About Us</span>
+      </div>
+    </div>
 
-  <div class="social">
-    <a href="https://wa.me/96181812024" target="_blank">WA</a>
-    <a href="#" onclick="alert('TikTok')">♪</a>
-  </div>
-</aside>
+    <div class="social">
+      <a href="https://wa.me/96181812024" target="_blank" rel="noopener">WA</a>
+      <a href="#" onclick="alert('TikTok')">♪</a>
+    </div>
 
-<div class="topbar">
-  <!-- ✅ onclick مباشر = مضمون -->
-  <div class="menuBtn" onclick="openDrawer()">
-    <div class="hamburger"><span></span><span></span><span></span></div>
-  </div>
+    <div class="hint">© Baroud Services</div>
+  </aside>
 
-  <div class="balance">★ 0.00 🇺🇸 <div class="plus">+</div></div>
-  <div class="logo">BAROUD</div>
-</div>
+  <!-- top bar -->
+  <header class="topbar">
+    <div class="topRow">
+      <!-- ✅ زر ☰ (onclick مباشر + z-index عالي) -->
+      <div class="menuBtn" onclick="openDrawer()" role="button" aria-label="Open menu">
+        <div class="hamburger">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
 
-<div class="banner">
-  <h2 style="margin:0">Unlock The Ultimate Power</h2>
-</div>
+      <!-- ✅ Balance pill -->
+      <div class="pill" aria-label="Balance">
+        <div class="leftPill">
+          <div class="coin">★</div>
+          <div class="bal">
+            <span id="balanceVal">0.00</span>
+            <span class="flag">🇺🇸</span>
+          </div>
+        </div>
+        <!-- ✅ plus goes to add-credit -->
+        <div class="plusBtn" onclick="location.href='add-credit.html?v=1';" role="button" aria-label="Add credit">+</div>
+      </div>
 
-<div class="searchBox">
-  <input placeholder="Search">
-</div>
+      <div class="brandText">BAROUD</div>
+    </div>
+  </header>
 
-<div class="grid">
-  <div class="tile">Games</div>
-  <div class="tile">Applications</div>
-  <div class="tile">Accounts</div>
-  <div class="tile">Gift Cards</div>
-</div>
+  <!-- main -->
+  <main class="wrap">
+    <div class="banner">
+      <h1>Unlock The Ultimate Power</h1>
+    </div>
 
-<script>
-  function openDrawer(){
-    document.getElementById("drawer").classList.add("show");
-    document.getElementById("overlay").classList.add("show");
-    document.body.style.overflow = "hidden"; // ✅ يمنع تعليق/سكرول
-  }
-  function closeDrawer(){
-    document.getElementById("drawer").classList.remove("show");
-    document.getElementById("overlay").classList.remove("show");
-    document.body.style.overflow = ""; // ✅ يرجع طبيعي
-  }
-</script>
+    <div class="ticker">
+      <span class="move">Support Number:+961 81812024 | Join Our WhatsApp Community | Fast & Secure Services</span>
+    </div>
+
+    <div class="searchBox">
+      <input id="search" placeholder="Search" />
+    </div>
+
+    <section class="grid" id="grid">
+      <div class="tile" onclick="alert('Games')">
+        <img src="assets/games.jpg" alt="Games">
+        <div class="label">Games</div>
+      </div>
+      <div class="tile" onclick="alert('Applications')">
+        <img src="assets/apps.jpg" alt="Applications">
+        <div class="label">Applications</div>
+      </div>
+      <div class="tile" onclick="alert('Accounts')">
+        <img src="assets/accounts.jpg" alt="Accounts">
+        <div class="label">Accounts</div>
+      </div>
+      <div class="tile" onclick="alert('Gift Cards')">
+        <img src="assets/giftcards.jpg" alt="Gift Cards">
+        <div class="label">Gift Cards</div>
+      </div>
+    </section>
+
+    <div class="hint">ovo-style landing (pre-login)</div>
+  </main>
+
+  <script>
+    // ✅ Drawer open/close (مضمون على الموبايل)
+    function openDrawer(){
+      document.getElementById("drawer").classList.add("show");
+      document.getElementById("overlay").classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+    function closeDrawer(){
+      document.getElementById("drawer").classList.remove("show");
+      document.getElementById("overlay").classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    // ✅ Search filter (UI)
+    document.getElementById("search").addEventListener("input", function(){
+      const q = this.value.trim().toLowerCase();
+      document.querySelectorAll(".tile").forEach(t=>{
+        const name = t.innerText.toLowerCase();
+        t.style.display = name.includes(q) ? "" : "none";
+      });
+    });
+  </script>
 
 </body>
 </html>
