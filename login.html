@@ -1,9 +1,10 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <title>Login - Baroud Services</title>
 
   <!-- Supabase UMD -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -37,11 +38,27 @@
       background:rgba(255,255,255,.06);
       color:#fff;font-size:20px;
       cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
     }
-    .titleRow{display:flex;align-items:center;justify-content:space-between;margin-top:52px}
-    .brand{font-weight:900;letter-spacing:2px;opacity:.85}
-    h1{margin:14px 0 6px;font-size:44px}
-    p{margin:0 0 18px;opacity:.75}
+    .brand{
+      position:absolute;right:16px;top:18px;
+      font-weight:900;letter-spacing:2px;opacity:.85;font-size:12px;
+    }
+    h1{margin:52px 0 6px;font-size:44px}
+    p{margin:0 0 14px;opacity:.75}
+
+    .msg{
+      margin:10px 0 6px;
+      padding:12px 14px;
+      border-radius:14px;
+      display:none;
+      font-weight:800;
+      font-size:14px;
+      line-height:1.35;
+      word-break:break-word;
+    }
+    .err{background:#d05252}
+    .ok{background:#2aa96b}
 
     .field{
       display:flex;align-items:center;gap:12px;
@@ -56,6 +73,7 @@
       background:transparent;border:none;outline:none;
       color:#fff;font-size:16px;
     }
+
     .btn{
       width:100%;
       border:none;
@@ -70,27 +88,50 @@
       margin-top:10px;
     }
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .msg{
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:14px;
-      display:none;
-      font-weight:700;
-      line-height:1.3;
+
+    .divider{
+      margin:16px 0 10px;
+      display:flex;align-items:center;gap:12px;
+      opacity:.6;
+      font-weight:900;
+      letter-spacing:2px;
+      font-size:12px;
     }
-    .err{background:#d05252}
-    .ok{background:#2aa96b}
+    .divider::before,.divider::after{
+      content:"";
+      flex:1;
+      height:1px;
+      background:rgba(255,255,255,.18);
+    }
+
+    .subBtn{
+      width:100%;
+      border:none;
+      border-radius:26px;
+      padding:16px;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      color:#fff;
+      margin-top:10px;
+    }
+    .hint{
+      margin-top:14px;
+      text-align:center;
+      opacity:.55;
+      font-weight:800;
+      letter-spacing:1px;
+      font-size:12px;
+    }
   </style>
 </head>
 
 <body>
   <div class="card">
     <button class="back" type="button" onclick="location.href='index.html'">←</button>
-
-    <div class="titleRow">
-      <div></div>
-      <div class="brand">Baroud Services</div>
-    </div>
+    <div class="brand">Baroud Services</div>
 
     <h1>Login</h1>
     <p>Sign in to continue.</p>
@@ -107,71 +148,121 @@
       <input id="pass" type="password" placeholder="Password" autocomplete="current-password"/>
     </div>
 
-    <button class="btn" id="loginBtn">Login</button>
+    <!-- LOGIN -->
+    <button class="btn" id="loginBtn" type="button">Login</button>
+
+    <div class="divider">OR</div>
+
+    <!-- REGISTER -->
+    <button class="subBtn" id="registerBtn" type="button">Register</button>
+
+    <div class="hint">© Baroud Services</div>
   </div>
 
   <script>
-    // ✅ Supabase keys (متل ما عندك)
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const msg = document.getElementById("msg");
     const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
 
     function showMsg(text, ok=false){
       msg.style.display="block";
       msg.className = "msg " + (ok ? "ok" : "err");
       msg.textContent = text;
     }
+    function hideMsg(){ msg.style.display="none"; msg.textContent=""; }
 
-    // ✅ إذا أصلاً عامل login -> روح على services
+    // لو في session -> روح services
     (async ()=>{
       try{
-        const { data, error } = await sb.auth.getSession();
-        if (error) console.log(error);
+        const { data } = await sb.auth.getSession();
         if (data.session?.user) location.replace("services.html?v=" + Date.now());
-      }catch(e){
-        console.log(e);
-      }
+      }catch(e){}
     })();
 
-    loginBtn.addEventListener("click", async ()=>{
-      msg.style.display="none";
-      loginBtn.disabled = true;
-
+    async function doLogin(){
+      hideMsg();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("pass").value;
 
       if(!email || !password){
         showMsg("Fill email and password.");
-        loginBtn.disabled = false;
         return;
       }
 
+      loginBtn.disabled = true;
+      registerBtn.disabled = true;
+      loginBtn.textContent = "Signing in...";
+
       try{
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
         if (error){
           showMsg(error.message || "Login failed.");
-          loginBtn.disabled = false;
           return;
         }
-
-        if (!data.session?.user){
-          showMsg("Login succeeded but no session found. Check Supabase Auth settings.");
-          loginBtn.disabled = false;
-          return;
-        }
-
         showMsg("Login successful ✅", true);
+        setTimeout(()=> location.replace("services.html?v=" + Date.now()), 250);
+      }catch(e){
+        showMsg("Network error. Try again.");
+      }finally{
+        loginBtn.disabled = false;
+        registerBtn.disabled = false;
+        loginBtn.textContent = "Login";
+      }
+    }
+
+    async function doRegister(){
+      hideMsg();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("pass").value;
+
+      if(!email || !password){
+        showMsg("Fill email and password.");
+        return;
+      }
+      if(password.length < 6){
+        showMsg("Password must be at least 6 characters.");
+        return;
+      }
+
+      loginBtn.disabled = true;
+      registerBtn.disabled = true;
+      registerBtn.textContent = "Creating...";
+
+      try{
+        const { data, error } = await sb.auth.signUp({ email, password });
+        if (error){
+          showMsg(error.message || "Register failed.");
+          return;
+        }
+
+        // إذا Email confirmation شغّال -> ما في session مباشرة
+        if(!data.session){
+          showMsg("Account created ✅ Check your email to confirm, then login.", true);
+          return;
+        }
+
+        showMsg("Account created ✅ Logged in.", true);
         setTimeout(()=> location.replace("services.html?v=" + Date.now()), 250);
 
       }catch(e){
-        showMsg("Error: " + (e?.message || "Unknown"));
+        showMsg("Network error. Try again.");
+      }finally{
         loginBtn.disabled = false;
+        registerBtn.disabled = false;
+        registerBtn.textContent = "Register";
       }
+    }
+
+    loginBtn.addEventListener("click", doLogin);
+    registerBtn.addEventListener("click", doRegister);
+
+    // Enter key = Login
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") doLogin();
     });
   </script>
 </body>
