@@ -113,80 +113,32 @@
   </div>
 
   <script>
-    // ✅ ضع بيانات Supabase نفسها اللي عندك
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-    // ✅ الأهم: طريقة إنشاء الكلاينت الصحيحة في v2
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const loginBtn = document.getElementById("loginBtn");
 
-    const msg = document.getElementById("msg");
-    const loginBtn = document.getElementById("loginBtn");
+  loginBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("pass").value;
 
-    function showMsg(text, ok=false){
-      msg.style.display="block";
-      msg.className = "msg " + (ok ? "ok" : "err");
-      msg.textContent = text;
-    }
-
-    // رجعة للـ index
-    document.getElementById("backBtn").addEventListener("click", ()=>{
-      location.href = "index.html";
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    // ✅ إذا أصلاً عامل login -> روح على services
-    (async ()=>{
-      try{
-        const { data, error } = await sb.auth.getSession();
-        if (error) console.log("getSession error:", error);
-        if (data?.session?.user) location.replace("services.html");
-      }catch(e){
-        console.log("session check crash:", e);
-      }
-    })();
-
-    async function doLogin(){
-      msg.style.display="none";
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("pass").value;
-
-      if(!email || !password){
-        showMsg("Fill email and password.");
-        return;
-      }
-
-      loginBtn.disabled = true;
-      loginBtn.textContent = "Logging in...";
-
-      try{
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
-        if (error){
-          // ✅ هيدا أهم سطر: بيبينلك سبب المشكلة الحقيقي
-          showMsg(error.message || "Invalid username or password.");
-          loginBtn.disabled = false;
-          loginBtn.textContent = "Login";
-          return;
-        }
-
-        showMsg("Login successful ✅", true);
-
-        // ✅ بعد نجاح الدخول -> services
-        setTimeout(()=> location.replace("services.html"), 250);
-
-      }catch(e){
-        showMsg("Login error: " + (e?.message || e), false);
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Login";
-      }
+    if (error) {
+      alert("Email أو Password غلط");
+      return;
     }
 
-    loginBtn.addEventListener("click", doLogin);
-
-    // Enter = Login
-    document.getElementById("pass").addEventListener("keydown",(e)=>{
-      if(e.key === "Enter") doLogin();
-    });
-  </script>
+    // ✅ هون بينحط السطر
+    location.replace("services.html");
+  });
+</script>
 </body>
 </html>
