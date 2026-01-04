@@ -1,204 +1,108 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baroud Services</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VIPBOXLB</title>
 
-  <!-- (اختياري) Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root{
       --bg1:#06162a;
-      --bg2:#020814;
-      --card:rgba(255,255,255,.06);
+      --bg2:#020a12;
+      --card:#0b223a;
       --stroke:rgba(255,255,255,.08);
-      --txt:rgba(240,248,255,.92>
+      --text:rgba(255,255,255,.92);
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:rgba(240,248,255,.92);
-      background:radial-gradient(1200px 700px at 20% 0%, #0a2a52 0%, #06162a 40%, #030915 100%);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:radial-gradient(1200px 700px at 20% 0%, #0b2a52 0%, #06162a 40%, #020a12 100%);
+      color:var(--text);
       min-height:100vh;
-      overflow-x:hidden;
     }
+    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 30px}
 
-    /* ===== TOP BAR (ovoxz style) ===== */
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:50;
-      padding:14px 14px 10px;
-      background:linear-gradient(180deg, rgba(2,8,20,.92), rgba(2,8,20,.35));
-      backdrop-filter: blur(10px);
-    }
-
-    .topRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .menuBtn{
-      width:54px;height:54px;
-      border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    /* Topbar */
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+    .iconBtn{
+      width:54px;height:54px;border-radius:18px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--stroke);
+      display:flex;align-items:center;justify-content:center;
       cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
       position:relative;
-      z-index:99999;            /* ✅ أهم شي للموبايل */
-      pointer-events:auto;
-    }
-    .hamburger{width:22px}
-    .hamburger span{
-      display:block;
-      height:2px;
-      background:rgba(255,255,255,.92);
-      margin:5px 0;
-      border-radius:2px;
-      opacity:.92;
-    }
-
-    .pill{
-      flex:1;
-      max-width:260px;
-      height:54px;
-      border-radius:20px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:10px 12px;
-      gap:10px;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
-    }
-
-    .leftPill{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-
-    .coin{
-      width:34px;height:34px;border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, #ffd37a, #b07a1a);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:900;
-      color:#2b1700;
-      font-size:16px;
-      flex:0 0 auto;
-    }
-
-    .bal{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-weight:800;
-      font-size:20px;
-      white-space:nowrap;
-    }
-    .flag{font-size:20px;opacity:.95}
-
-    .plusBtn{
-      width:38px;height:38px;
-      border-radius:14px;
-      background:rgba(255,255,255,.07);
-      border:1px solid rgba(255,255,255,.10);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:900;
-      font-size:22px;
-      cursor:pointer;
-      user-select:none;
+      z-index:30;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
+    .hamburger span{display:block;width:22px;height:2px;background:#fff;margin:4px 0;border-radius:2px;opacity:.9}
 
     .brandText{
-      font-weight:900;
-      letter-spacing:6px;
-      opacity:.95;
-      font-size:20px;
-      margin-left:6px;
-      white-space:nowrap;
+      font-weight:900; letter-spacing:6px; opacity:.9;
+      margin-left:auto;
     }
 
-    /* ===== MAIN ===== */
-    .wrap{
-      padding:8px 14px 30px;
-    }
-
-    .banner{
-      margin-top:10px;
-      background:linear-gradient(135deg, rgba(155,23,23,.9), rgba(70,20,90,.7), rgba(5,40,80,.35));
-      border-radius:22px;
-      padding:20px 18px;
-      box-shadow:0 22px 70px rgba(0,0,0,.35);
-    }
-    .banner h1{
-      margin:0;
-      font-size:34px;
-      line-height:1.1;
-      letter-spacing:.2px;
-    }
-
-    .ticker{
-      margin-top:12px;
+    /* Balance pill (optional في index إذا بدك نفس الشكل) */
+    .pill{
+      display:flex;align-items:center;gap:10px;
       background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:10px 12px;
+      min-width:210px;
+      justify-content:center;
+    }
+    .star{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#8b6b1a,#f4d26a);display:flex;align-items:center;justify-content:center;color:#111;font-weight:900}
+    .plus{
+      width:36px;height:36px;border-radius:14px;
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--stroke);
+      display:flex;align-items:center;justify-content:center;
+      font-size:22px;font-weight:900;
+      cursor:pointer;
+    }
+
+    /* Banner */
+    .banner{
+      border-radius:26px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 22px 70px rgba(0,0,0,.35);
+      margin-bottom:12px;
+      background:rgba(255,255,255,.04);
+    }
+    .banner img{width:100%;display:block;object-fit:cover;height:170px}
+
+    /* notice bar */
+    .notice{
+      margin:10px 0 12px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--stroke);
       border-radius:18px;
       padding:12px 14px;
-      overflow:hidden;
-      white-space:nowrap;
       opacity:.9;
-    }
-    .ticker .move{
-      display:inline-block;
-      padding-left:100%;
-      animation:marq 14s linear infinite;
-    }
-    @keyframes marq{
-      0%{transform:translateX(0)}
-      100%{transform:translateX(-100%)}
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    .searchBox{
-      margin-top:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:26px;
-      padding:14px 16px;
-      box-shadow:0 18px 60px rgba(0,0,0,.20);
-    }
+    /* Search */
     .searchBox input{
       width:100%;
-      background:transparent;
-      border:0;
+      padding:16px 18px;
+      border-radius:22px;
+      border:1px solid var(--stroke);
       outline:none;
-      color:rgba(240,248,255,.92);
-      font-size:18px;
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      font-size:16px;
     }
-    .searchBox input::placeholder{color:rgba(240,248,255,.45)}
 
-    .grid{
-      margin-top:16px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
+    /* Grid */
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
     .tile{
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.08);
@@ -206,72 +110,45 @@
       overflow:hidden;
       box-shadow:0 18px 60px rgba(0,0,0,.25);
       cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
+      position:relative;
     }
-    .tile img{
-      width:100%;
-      height:140px;
-      object-fit:cover;
-      display:block;
-    }
-    .label{
-      padding:12px 10px;
-      text-align:center;
-      font-weight:800;
-      letter-spacing:.3px;
-      opacity:.95;
-      font-size:18px;
-    }
+    .tile img{width:100%;height:120px;object-fit:cover;display:block}
+    .label{padding:12px;text-align:center;font-weight:800;letter-spacing:.3px}
 
-    /* ===== DRAWER + OVERLAY ===== */
+    .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
+
+    /* Drawer */
     .overlay{
-      position:fixed;
-      inset:0;
+      position:fixed;inset:0;
       background:rgba(0,0,0,.55);
-      opacity:0;
-      pointer-events:none;
+      opacity:0;pointer-events:none;
       transition:.25s;
-      z-index:1000;  /* ✅ تحت الدروار */
+      z-index:50;
     }
-    .overlay.show{
-      opacity:1;
-      pointer-events:auto;
-    }
+    .overlay.show{opacity:1;pointer-events:auto}
 
     .drawer{
-      position:fixed;
-      top:0;
-      left:0;
-      width:78%;
-      max-width:330px;
-      height:100vh;
-      background:linear-gradient(180deg, rgba(6,16,32,.98), rgba(3,9,21,.98));
+      position:fixed;top:0;left:0;height:100vh;width:min(86vw,360px);
+      background:linear-gradient(180deg,#071a33,#06162a);
       border-right:1px solid rgba(255,255,255,.08);
       transform:translateX(-105%);
       transition:.28s;
-      z-index:1001; /* ✅ فوق الأوفرلاي */
+      z-index:60;
       padding:18px 16px;
       overflow:auto;
       box-shadow:0 30px 70px rgba(0,0,0,.65);
-      -webkit-overflow-scrolling: touch;
     }
     .drawer.show{transform:translateX(0)}
 
-    .drawerTop{
-      display:flex;
-      justify-content:flex-end;
-      margin-bottom:10px;
-    }
+    .drawerTop{display:flex;justify-content:flex-end;margin-bottom:10px}
     .closeBtn{
-      width:44px;height:44px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      color:white;
-      font-size:26px;
+      width:42px;height:42px;border-radius:14px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--stroke);
+      color:#fff;font-size:22px;font-weight:900;
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     .loginCard{
@@ -282,19 +159,8 @@
       box-shadow:0 22px 55px rgba(0,0,0,.45);
       margin-bottom:16px;
     }
-    .loginCard h2{
-      margin:0 0 10px;
-      font-size:34px;
-      letter-spacing:.3px;
-      color:white;
-    }
-    .loginCard p{
-      margin:0 0 14px;
-      color:rgba(255,255,255,.85);
-      font-weight:700;
-      font-size:13px;
-      line-height:1.35;
-    }
+    .loginCard h2{margin:0 0 10px;font-size:34px;letter-spacing:.3px;color:white}
+    .loginCard p{margin:0 0 14px;color:rgba(255,255,255,.85);font-weight:700;font-size:13px}
     .loginBtn{
       display:inline-block;
       background:#11e06d;
@@ -306,182 +172,158 @@
       width:85%;
     }
 
-    .menu{
-      margin-top:12px;
-      border-top:1px solid rgba(255,255,255,.10);
-      padding-top:12px;
-    }
+    .menu{margin-top:12px;border-top:1px solid rgba(255,255,255,.10);padding-top:12px}
     .mItem{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:14px 10px;
-      border-radius:14px;
+      display:flex;align-items:center;gap:12px;
+      padding:14px 10px;border-radius:14px;
       color:rgba(240,248,255,.92);
       cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
     }
     .mItem:hover{background:rgba(255,255,255,.04)}
-    .dot{
-      width:10px;height:10px;border-radius:50%;
-      background:rgba(255,255,255,.55);
-    }
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55)}
 
-    .social{
-      margin-top:18px;
-      padding-top:14px;
-      border-top:1px solid rgba(255,255,255,.10);
-      display:flex; gap:14px; justify-content:center;
-      opacity:.95;
-    }
+    .social{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.10);display:flex;gap:14px;justify-content:center;opacity:.95}
     .social a{
-      width:52px;height:52px;border-radius:18px;
+      width:46px;height:46px;border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
       display:flex;align-items:center;justify-content:center;
-      color:white;
-      text-decoration:none;
-      font-weight:900;
+      color:white;text-decoration:none;font-weight:900;
       -webkit-tap-highlight-color: transparent;
-    }
-
-    .hint{
-      margin-top:14px;
-      text-align:center;
-      color:rgba(255,255,255,.35);
-      font-size:12px;
-      padding-bottom:12px;
-    }
-
-    /* small screen tweak */
-    @media (max-width:380px){
-      .brandText{letter-spacing:4px;font-size:18px}
-      .banner h1{font-size:30px}
-      .tile img{height:130px}
+      touch-action: manipulation;
     }
   </style>
 </head>
 
 <body>
+  <div class="overlay" id="overlay"></div>
 
-  <!-- overlay -->
-  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-
-  <!-- drawer -->
-  <aside class="drawer" id="drawer">
+  <aside class="drawer" id="drawer" aria-hidden="true">
     <div class="drawerTop">
-      <button class="closeBtn" type="button" onclick="closeDrawer()">×</button>
+      <button class="closeBtn" id="closeBtn" type="button">×</button>
     </div>
 
     <div class="loginCard">
       <h2>Login</h2>
       <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
-      <!-- ✅ روح على login.html -->
-      <a class="loginBtn" href="login.html?v=1">Login</a>
+      <a class="loginBtn" id="loginBtn" href="#">Login</a>
     </div>
 
     <div class="menu">
-      <div class="mItem" onclick="closeDrawer(); location.href='index.html?v=1';">
-        <span class="dot"></span><span>Home</span>
-      </div>
-      <div class="mItem" onclick="alert('About Us');">
-        <span class="dot"></span><span>About Us</span>
-      </div>
+      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
+      <div class="mItem" id="aboutItem"><span class="dot"></span><span>About Us</span></div>
     </div>
 
     <div class="social">
-      <a href="https://wa.me/96181812024" target="_blank" rel="noopener">WA</a>
-      <a href="#" onclick="alert('TikTok')">♪</a>
+      <a id="waBtn" href="#">WA</a>
+      <a id="ttBtn" href="#">♪</a>
     </div>
 
-    <div class="hint">© Baroud Services</div>
+    <div class="hint">© VIPBOXLB</div>
   </aside>
 
-  <!-- top bar -->
-  <header class="topbar">
-    <div class="topRow">
-      <!-- ✅ زر ☰ (onclick مباشر + z-index عالي) -->
-      <div class="menuBtn" onclick="openDrawer()" role="button" aria-label="Open menu">
-        <div class="hamburger">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
-
-      <!-- ✅ Balance pill -->
-      <div class="pill" aria-label="Balance">
-        <div class="leftPill">
-          <div class="coin">★</div>
-          <div class="bal">
-            <span id="balanceVal">0.00</span>
-            <span class="flag">🇺🇸</span>
-          </div>
-        </div>
-        <!-- ✅ plus goes to add-credit -->
-        <div class="plusBtn" onclick="location.href='add-credit.html?v=1';" role="button" aria-label="Add credit">+</div>
-      </div>
-
-      <div class="brandText">BAROUD</div>
-    </div>
-  </header>
-
-  <!-- main -->
   <main class="wrap">
-    <div class="banner">
-      <h1>Unlock The Ultimate Power</h1>
+    <div class="topbar">
+      <button class="iconBtn" id="menuBtn" type="button" aria-label="Open menu">
+        <div class="hamburger"><span></span><span></span><span></span></div>
+      </button>
+
+      <div class="pill" aria-label="Balance">
+        <div class="star">★</div>
+        <div style="font-weight:900">0.00</div>
+        <div style="font-size:22px">🇺🇸</div>
+        <button class="plus" id="plusBtn" type="button">+</button>
+      </div>
+
+      <div class="brandText">VIPBOX</div>
     </div>
 
-    <div class="ticker">
-      <span class="move">Support Number:+961 81812024 | Join Our WhatsApp Community | Fast & Secure Services</span>
+    <div class="banner">
+      <img src="assets/banner.jpg" alt="banner" />
     </div>
+
+    <div class="notice">Support Number:+961 81812024 | Join Our WhatsApp Community | Fast & Secure Services</div>
 
     <div class="searchBox">
       <input id="search" placeholder="Search" />
     </div>
 
     <section class="grid" id="grid">
-      <div class="tile" onclick="alert('Games')">
-        <img src="assets/games.jpg" alt="Games">
-        <div class="label">Games</div>
-      </div>
-      <div class="tile" onclick="alert('Applications')">
-        <img src="assets/apps.jpg" alt="Applications">
-        <div class="label">Applications</div>
-      </div>
-      <div class="tile" onclick="alert('Accounts')">
-        <img src="assets/accounts.jpg" alt="Accounts">
-        <div class="label">Accounts</div>
-      </div>
-      <div class="tile" onclick="alert('Gift Cards')">
-        <img src="assets/giftcards.jpg" alt="Gift Cards">
-        <div class="label">Gift Cards</div>
-      </div>
+      <div class="tile"><img src="assets/games.jpg" alt="Games"><div class="label">Games</div></div>
+      <div class="tile"><img src="assets/apps.jpg" alt="Applications"><div class="label">Applications</div></div>
+      <div class="tile"><img src="assets/accounts.jpg" alt="Accounts"><div class="label">Accounts</div></div>
+      <div class="tile"><img src="assets/giftcards.jpg" alt="Gift Cards"><div class="label">Gift Cards</div></div>
     </section>
 
-    <div class="hint">ovo-style landing (pre-login)</div>
+    <div class="hint">pre-login</div>
   </main>
 
   <script>
-    // ✅ Drawer open/close (مضمون على الموبايل)
+    // ✅ عدّل هيدا حسب موقعك
+    const BASE = location.href.includes("github.io") ? location.href.split("/").slice(0,4).join("/") + "/" + location.pathname.split("/")[1] + "/" : location.origin + "/";
+
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+
     function openDrawer(){
-      document.getElementById("drawer").classList.add("show");
-      document.getElementById("overlay").classList.add("show");
-      document.body.style.overflow = "hidden";
+      drawer.classList.add("show");
+      overlay.classList.add("show");
+      drawer.setAttribute("aria-hidden","false");
     }
     function closeDrawer(){
-      document.getElementById("drawer").classList.remove("show");
-      document.getElementById("overlay").classList.remove("show");
-      document.body.style.overflow = "";
+      drawer.classList.remove("show");
+      overlay.classList.remove("show");
+      drawer.setAttribute("aria-hidden","true");
     }
 
-    // ✅ Search filter (UI)
-    document.getElementById("search").addEventListener("input", function(){
-      const q = this.value.trim().toLowerCase();
-      document.querySelectorAll(".tile").forEach(t=>{
+    // ✅ حل مشاكل الموبايل: button + pointer events
+    document.getElementById("menuBtn").addEventListener("click", openDrawer);
+    document.getElementById("closeBtn").addEventListener("click", closeDrawer);
+    overlay.addEventListener("click", closeDrawer);
+
+    document.getElementById("loginBtn").addEventListener("click",(e)=>{
+      e.preventDefault();
+      closeDrawer();
+      location.href = BASE + "login.html?v=" + Date.now();
+    });
+
+    document.getElementById("homeItem").addEventListener("click", ()=>{ closeDrawer(); location.href = BASE + "index.html?v=" + Date.now(); });
+    document.getElementById("aboutItem").addEventListener("click", ()=>alert("About Us"));
+
+    document.getElementById("waBtn").addEventListener("click",(e)=>{
+      e.preventDefault();
+      window.open("https://wa.me/96181812024","_blank");
+    });
+    document.getElementById("ttBtn").addEventListener("click",(e)=>{
+      e.preventDefault();
+      alert("TikTok");
+    });
+
+    document.getElementById("plusBtn").addEventListener("click", ()=>{
+      location.href = BASE + "add-credit.html?v=" + Date.now();
+    });
+
+    // ✅ إذا في session روح على services (ما يخليك تشوف index بعد login)
+    (async ()=>{
+      const { data } = await supabase.auth.getSession();
+      if (data?.session?.user){
+        location.replace(BASE + "services.html?v=" + Date.now());
+      }
+    })();
+
+    // filter search
+    const search = document.getElementById("search");
+    search.addEventListener("input", () => {
+      const q = search.value.trim().toLowerCase();
+      document.querySelectorAll(".tile").forEach(t => {
         const name = t.innerText.toLowerCase();
         t.style.display = name.includes(q) ? "" : "none";
       });
     });
   </script>
-
 </body>
 </html>
