@@ -1,80 +1,118 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Add Credit</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:radial-gradient(900px 600px at 20% 0%, #0b2a52 0%, #06162a 45%, #020a12 100%);
+      background:linear-gradient(180deg,#06162a,#020b14);
       color:#fff;
-      min-height:100vh;
-      padding:18px;
     }
-    .card{
-      max-width:520px;margin:0 auto;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:26px;
-      padding:18px;
-      box-shadow:0 30px 80px rgba(0,0,0,.45);
+    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 90px}
+    .top{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-top:6px;
     }
-    .back{
-      width:44px;height:44px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
+    .menuBtn,.goBtn{
+      width:58px;height:58px;border-radius:18px;
       background:rgba(255,255,255,.06);
-      color:#fff;font-weight:900;
+      border:1px solid rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 18px 55px rgba(0,0,0,.35);
       cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
     }
-    h1{margin:10px 0 6px}
-    input{
-      width:100%;padding:16px 14px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.08);
-      color:#fff;outline:none;font-size:16px;
-      margin-top:10px;
+    .hamb span{display:block;width:22px;height:2px;background:#fff;margin:5px 0;border-radius:999px;opacity:.9}
+    h1{margin:18px 0 18px;font-size:34px;opacity:.9}
+
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .tile{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px;
+      overflow:hidden;
+      cursor:pointer;
+      box-shadow:0 18px 60px rgba(0,0,0,.25);
+      transition:.12s transform;
     }
-    button{
-      width:100%;margin-top:14px;
-      padding:16px 14px;border:none;border-radius:18px;
-      font-weight:900;font-size:16px;cursor:pointer;
-      background:linear-gradient(90deg,#00a8ff,#2f6bff);
-      color:#fff;
+    .tile:active{transform:scale(.99)}
+    .tile img{width:100%;height:110px;object-fit:cover;display:block}
+    .label{padding:12px 10px;text-align:center;font-weight:900;opacity:.92}
+
+    .footer{margin:22px 0 0;text-align:center;opacity:.35}
+
+    /* bottom nav (اختياري) */
+    .nav{
+      position:fixed;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,.35);
+      backdrop-filter:blur(10px);
+      border-top:1px solid rgba(255,255,255,.06);
+      padding:10px 0;
+      display:flex;justify-content:space-around;
+      z-index:20;
     }
-    .hint{opacity:.7;margin-top:10px}
+    .nav div{opacity:.7;font-weight:900}
   </style>
 </head>
-<body>
-  <div class="card">
-    <button class="back" id="backBtn">←</button>
-    <h1>Add Credit</h1>
-    <div class="hint">Demo page (you can connect it later)</div>
 
-    <input type="number" placeholder="Enter amount $" />
-    <input type="file" />
-    <button type="button">REQUEST</button>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="menuBtn" onclick="location.href='index.html'">
+        <div class="hamb"><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="goBtn" onclick="location.href='index.html'">→</div>
+    </div>
+
+    <h1>Add Credit Section</h1>
+
+    <section class="grid">
+      <div class="tile" onclick="location.href='wish.html'">
+        <img src="assets/wish.jpg" alt="Whish Money"/>
+        <div class="label">Whish Money</div>
+      </div>
+
+      <div class="tile" onclick="location.href='binance.html'">
+        <img src="assets/binance.jpg" alt="Binance"/>
+        <div class="label">Binance</div>
+      </div>
+
+      <div class="tile" onclick="location.href='usdt-bep20.html'">
+        <img src="assets/usdt.jpg" alt="USDT"/>
+        <div class="label">Usdt Bep20 - Automatic</div>
+      </div>
+    </section>
+
+    <div class="footer">©2025 VIP BOX</div>
+  </div>
+
+  <div class="nav">
+    <div onclick="location.href='index.html'">🏠</div>
+    <div>🛒</div>
+    <div>🔔</div>
+    <div>💳</div>
   </div>
 
   <script>
-    const BASE = location.href.includes("github.io") ? location.href.split("/").slice(0,4).join("/") + "/" + location.pathname.split("/")[1] + "/" : location.origin + "/";
+    // ✅ Supabase Guard: ممنوع تفتح الصفحة بدون Login
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const SUPABASE_URL = "PUT_SUPABASE_URL_HERE";
-    const SUPABASE_ANON_KEY = "PUT_SUPABASE_ANON_KEY_HERE";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // حماية مثل services (اختياري)
     (async ()=>{
       const { data } = await supabase.auth.getSession();
-      if (!data?.session?.user){
-        location.replace(BASE + "login.html?v=" + Date.now());
+      if (!data.session?.user){
+        location.replace("login.html");
       }
     })();
-
-    document.getElementById("backBtn").onclick = ()=> history.back();
   </script>
 </body>
 </html>
