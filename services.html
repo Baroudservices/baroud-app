@@ -15,8 +15,6 @@
       --text:#ffffff;
       --glass:rgba(255,255,255,.06);
       --stroke:rgba(255,255,255,.08);
-      --muted:rgba(255,255,255,.70);
-      --muted2:rgba(255,255,255,.45);
       --shadow:0 18px 60px rgba(0,0,0,.35);
       --radius:22px;
     }
@@ -43,11 +41,12 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       margin-top:6px;
     }
+
     .iconBtn{
-      width:54px;height:54px;
+      width:52px;height:52px;
       border-radius:18px;
       background:var(--glass);
       border:1px solid var(--stroke);
@@ -55,75 +54,90 @@
       cursor:pointer;
       user-select:none;
       touch-action:manipulation;
-    }
-    .hamburger{width:22px}
-    .hamburger span{
-      display:block;height:2px;border-radius:2px;
-      background:#fff;margin:4px 0;
-      opacity:.9;
+      flex:0 0 auto;
     }
 
+    .hamburger{width:20px}
+    .hamburger span{
+      display:block;height:2px;border-radius:2px;
+      background:#fff;margin:4px 0;opacity:.9;
+    }
+
+    /* ✅ صغّرنا الرصيد/العلم/+ */
     .balancePill{
       flex:1;
       min-width:0;
-      height:54px;
-      border-radius:22px;
+      height:48px;                 /* كان 54 */
+      border-radius:20px;
       background:var(--glass);
       border:1px solid var(--stroke);
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:8px 10px;
-      box-shadow:0 12px 50px rgba(0,0,0,.22);
-      gap:10px;
+      padding:7px 9px;
+      box-shadow:0 12px 45px rgba(0,0,0,.20);
+      gap:8px;
     }
+
     .coin{
-      width:34px;height:34px;border-radius:50%;
+      width:28px;height:28px;      /* كان 34 */
+      border-radius:50%;
       background:#b68b2a;
       display:flex;align-items:center;justify-content:center;
       font-weight:900;
-      box-shadow:inset 0 0 0 2px rgba(0,0,0,.15);
+      font-size:14px;
       flex:0 0 auto;
+      box-shadow:inset 0 0 0 2px rgba(0,0,0,.15);
     }
+
     .balTop{
-      font-weight:900;
-      font-size:22px;
-      letter-spacing:.5px;
+      font-weight:950;
+      font-size:18px;              /* كان 22 */
+      letter-spacing:.3px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       flex:1;
     }
+
     .flag{
-      font-size:22px;
-      flex:0 0 auto;
-    }
-    .addBtn{
-      width:40px;height:40px;border-radius:16px;
-      border:none;
-      cursor:pointer;
-      font-size:22px;
-      font-weight:1000;
-      color:#fff;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      box-shadow:0 12px 40px rgba(0,0,0,.30);
+      font-size:18px;              /* كان 22 */
       flex:0 0 auto;
     }
 
+    .addBtn{
+      width:34px;height:34px;      /* كان 40 */
+      border-radius:14px;
+      border:none;
+      cursor:pointer;
+      font-size:18px;              /* كان 22 */
+      font-weight:1000;
+      color:#fff;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      box-shadow:0 10px 35px rgba(0,0,0,.25);
+      flex:0 0 auto;
+      line-height:34px;
+    }
+
     .brandRight{
-      min-width:62px;
+      width:54px;
       display:flex;
       align-items:center;
       justify-content:flex-end;
+      flex:0 0 auto;
     }
-    /* ✅ كبرنا اللوغو + شلنا أي خلفية */
+
+    /* ✅ اللوغو بدون أي خلفية */
     .logoTop{
-      height:52px; /* كبر */
+      height:44px;                 /* كان 52 (صغّر شوي ليوازن) */
       display:block;
       background:transparent !important;
-      box-shadow:none !important;
       border:none !important;
-      filter:drop-shadow(0 10px 18px rgba(0,0,0,.35));
+      box-shadow:none !important;
+      padding:0 !important;
+      margin:0 !important;
+      mix-blend-mode:normal;
+      filter:drop-shadow(0 8px 14px rgba(0,0,0,.35)); /* ظل خفيف */
     }
 
     /* ===== Banner Slider ===== */
@@ -135,35 +149,14 @@
       border:1px solid var(--stroke);
       box-shadow:0 20px 70px rgba(0,0,0,.35);
     }
-    .slider{
-      position:relative;
-      overflow:hidden;
-      border-radius:var(--radius);
-    }
-    .slides{
-      display:flex;
-      transition:transform .55s ease;
-      will-change:transform;
-    }
-    .slide{
-      min-width:100%;
-      height:170px;
-      position:relative;
-    }
-    .slide img{
-      width:100%;
-      height:170px;
-      object-fit:cover;
-      display:block;
-    }
+    .slider{position:relative;overflow:hidden;border-radius:var(--radius)}
+    .slides{display:flex;transition:transform .55s ease;will-change:transform}
+    .slide{min-width:100%;height:170px}
+    .slide img{width:100%;height:170px;object-fit:cover;display:block}
+
     .dots{
-      position:absolute;
-      left:0;right:0;
-      bottom:10px;
-      display:flex;
-      justify-content:center;
-      gap:7px;
-      pointer-events:auto;
+      position:absolute;left:0;right:0;bottom:10px;
+      display:flex;justify-content:center;gap:7px;
     }
     .dot{
       width:8px;height:8px;border-radius:99px;
@@ -171,10 +164,7 @@
       border:1px solid rgba(255,255,255,.10);
       cursor:pointer;
     }
-    .dot.active{
-      width:18px;
-      background:rgba(255,255,255,.85);
-    }
+    .dot.active{width:18px;background:rgba(255,255,255,.85)}
 
     /* ===== Support + Search ===== */
     .support{
@@ -222,42 +212,19 @@
       box-shadow:0 18px 60px rgba(0,0,0,.25);
       cursor:pointer;
     }
-    .tile img{
-      width:100%;height:140px;object-fit:cover;
-      display:block;
-    }
-    .label{
-      padding:12px;
-      text-align:center;
-      font-weight:900;
-      opacity:.95;
-    }
-    .footer{
-      margin-top:18px;
-      text-align:center;
-      opacity:.55;
-      font-weight:800;
-      letter-spacing:1px;
-    }
+    .tile img{width:100%;height:140px;object-fit:cover;display:block}
+    .label{padding:12px;text-align:center;font-weight:900;opacity:.95}
+    .footer{margin-top:18px;text-align:center;opacity:.55;font-weight:800;letter-spacing:1px}
 
     /* ===== Drawer ===== */
     .overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.55);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .25s ease;
-      z-index:9998;
+      position:fixed;inset:0;background:rgba(0,0,0,.55);
+      opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:9998;
     }
-    .overlay.show{
-      opacity:1;
-      pointer-events:auto;
-    }
+    .overlay.show{opacity:1;pointer-events:auto}
 
     .drawer{
-      position:fixed;
-      top:0;bottom:0;left:0;
+      position:fixed;top:0;bottom:0;left:0;
       width:min(86vw,340px);
       background:linear-gradient(180deg,#071a31,#020b14);
       border-right:1px solid rgba(255,255,255,.08);
@@ -266,123 +233,56 @@
       z-index:9999;
       padding:18px 16px;
     }
-    .drawer.show{
-      transform:translateX(0);
-    }
-    .drawerTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:10px;
-    }
+    .drawer.show{transform:translateX(0)}
+    .drawerTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
     .closeBtn{
       width:44px;height:44px;border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.06);
-      color:#fff;font-size:22px;
-      cursor:pointer;
+      color:#fff;font-size:22px;cursor:pointer;
     }
-    .drawerBrand{
-      font-weight:900;
-      letter-spacing:2px;
-      opacity:.85;
-    }
+    .drawerBrand{font-weight:900;letter-spacing:2px;opacity:.85}
 
     .profile{
-      margin-top:6px;
-      padding:14px;
-      border-radius:22px;
+      margin-top:6px;padding:14px;border-radius:22px;
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.08);
     }
-    .nameRow{
-      display:flex;
-      align-items:baseline;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .pName{
-      font-size:22px;
-      font-weight:950;
-      letter-spacing:.3px;
-    }
-    .pId{
-      opacity:.7;
-      font-weight:800;
-    }
+    .nameRow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+    .pName{font-size:22px;font-weight:950;letter-spacing:.3px}
+    .pId{opacity:.7;font-weight:800}
     .pBal{
-      margin-top:6px;
-      font-size:22px;
-      font-weight:950;
-      color:#1bc7ff;
-      display:flex;
-      align-items:center;
-      gap:8px;
+      margin-top:6px;font-size:22px;font-weight:950;color:#1bc7ff;
+      display:flex;align-items:center;gap:8px;
     }
 
-    .quickIcons{
-      margin-top:10px;
-      display:flex;
-      gap:14px;
-      opacity:.95;
-    }
+    .quickIcons{margin-top:10px;display:flex;gap:14px;opacity:.95}
     .qBtn{
       width:42px;height:42px;border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.06);
       display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      user-select:none;
+      cursor:pointer;user-select:none;
     }
 
-    .sep{
-      margin:14px 0;
-      height:1px;
-      background:rgba(255,255,255,.10);
-    }
-    .menu{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      padding:4px 6px;
-    }
+    .sep{margin:14px 0;height:1px;background:rgba(255,255,255,.10)}
+    .menu{display:flex;flex-direction:column;gap:14px;padding:4px 6px}
     .mItem{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      font-size:18px;
-      padding:10px 8px;
-      border-radius:16px;
-      cursor:pointer;
+      display:flex;align-items:center;gap:12px;
+      font-size:18px;padding:10px 8px;border-radius:16px;cursor:pointer;
     }
     .mItem:hover{background:rgba(255,255,255,.05)}
-    .mIcon{
-      width:28px;
-      opacity:.9;
-      display:flex;
-      justify-content:center;
-    }
+    .mIcon{width:28px;opacity:.9;display:flex;justify-content:center}
 
-    .social{
-      margin-top:16px;
-      display:flex;
-      gap:14px;
-      justify-content:center;
-    }
+    .social{margin-top:16px;display:flex;gap:14px;justify-content:center}
     .social a{
       width:56px;height:56px;border-radius:18px;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.06);
       display:flex;align-items:center;justify-content:center;
-      font-weight:900;
-      opacity:.9;
+      font-weight:900;opacity:.9;
     }
-    .hint{
-      margin-top:14px;
-      text-align:center;
-      color:rgba(255,255,255,.35);
-      font-size:12px;
-    }
+    .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
   </style>
 </head>
 
@@ -416,29 +316,12 @@
     <div class="sep"></div>
 
     <div class="menu">
-      <div class="mItem" onclick="go('services.html')">
-        <div class="mIcon">🏠</div><div>Home</div>
-      </div>
-
-      <div class="mItem" onclick="go('add-credit.html')">
-        <div class="mIcon">💳</div><div>Add Credit</div>
-      </div>
-
-      <div class="mItem" onclick="alert('My Payments (later)')">
-        <div class="mIcon">💼</div><div>My Payments</div>
-      </div>
-
-      <div class="mItem" onclick="alert('My Orders (later)')">
-        <div class="mIcon">🛒</div><div>My Orders</div>
-      </div>
-
-      <div class="mItem" onclick="alert('Security (later)')">
-        <div class="mIcon">🛡️</div><div>Security</div>
-      </div>
-
-      <div class="mItem" onclick="alert('About Us')">
-        <div class="mIcon">👥</div><div>About Us</div>
-      </div>
+      <div class="mItem" onclick="go('services.html')"><div class="mIcon">🏠</div><div>Home</div></div>
+      <div class="mItem" onclick="go('add-credit.html')"><div class="mIcon">💳</div><div>Add Credit</div></div>
+      <div class="mItem" onclick="alert('My Payments (later)')"><div class="mIcon">💼</div><div>My Payments</div></div>
+      <div class="mItem" onclick="alert('My Orders (later)')"><div class="mIcon">🛒</div><div>My Orders</div></div>
+      <div class="mItem" onclick="alert('Security (later)')"><div class="mIcon">🛡️</div><div>Security</div></div>
+      <div class="mItem" onclick="alert('About Us')"><div class="mIcon">👥</div><div>About Us</div></div>
     </div>
 
     <div class="sep"></div>
@@ -457,9 +340,7 @@
     <!-- Topbar -->
     <div class="topbar">
       <div class="iconBtn" onclick="openDrawer()">
-        <div class="hamburger">
-          <span></span><span></span><span></span>
-        </div>
+        <div class="hamburger"><span></span><span></span><span></span></div>
       </div>
 
       <div class="balancePill">
@@ -470,7 +351,7 @@
       </div>
 
       <div class="brandRight">
-        <img src="assets/logo.png" alt="Baroud Services" class="logoTop">
+        <img src="assets/logo.png" alt="Logo" class="logoTop">
       </div>
     </div>
 
@@ -518,7 +399,7 @@
   </main>
 
   <script>
-    // ✅ Supabase (نفس يلي عندك)
+    // ✅ Supabase
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -550,19 +431,16 @@
         return;
       }
 
-      // ✅ عرض الاسم + ID + الرصيد (placeholder بسيط)
       const email = data.session.user.email || "User";
       const name = email.split("@")[0].replace(/\./g," ");
       const id = (data.session.user.id || "000").slice(0,3);
 
-      // رصيد من localStorage (انت لاحقاً بتشبكو بجدول)
       const bal = parseFloat(localStorage.getItem("balance") || "0").toFixed(2);
 
       document.getElementById("pName").textContent = cap(name);
       document.getElementById("pId").textContent = "#" + id;
       document.getElementById("pBal").textContent = bal;
       document.getElementById("uBalTop").textContent = bal;
-
     })();
 
     function cap(s){
@@ -613,7 +491,6 @@
         timer = null;
       }
 
-      // swipe
       slider.addEventListener("touchstart", (e) => {
         dragging = true;
         stop();
@@ -629,7 +506,6 @@
         slidesEl.style.transform = `translateX(${(-i * 100) + percent}%)`;
       }, {passive:true});
 
-      // ✅ FIXED (كان عندك if(dragging) return غلط)
       slider.addEventListener("touchend", () => {
         if(!dragging) return;
         dragging = false;
@@ -641,7 +517,6 @@
         play();
       });
 
-      // start
       goTo(0);
       play();
     });
