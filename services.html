@@ -1,56 +1,86 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Services</title>
+  <title>Baroud Services</title>
+
   <style>
     body {
       font-family: system-ui, sans-serif;
-      background:#0b1220;
-      color:white;
-      margin:0;
-      padding:20px;
+      background: #0b1220;
+      color: white;
+      margin: 0;
+      padding: 20px;
     }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
     .card {
-      background:#111827;
-      padding:20px;
-      border-radius:16px;
-      max-width:420px;
-      margin:40px auto;
-      text-align:center;
+      background: #111827;
+      padding: 20px;
+      border-radius: 20px;
+      max-width: 420px;
+      margin: 40px auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,.4);
     }
+
     button {
-      width:100%;
-      padding:14px;
-      margin-top:10px;
-      border:none;
-      border-radius:12px;
-      font-size:16px;
-      cursor:pointer;
+      width: 100%;
+      padding: 16px;
+      margin-top: 12px;
+      border-radius: 14px;
+      border: none;
+      font-size: 16px;
+      background: #1f2937;
+      color: white;
+      cursor: pointer;
     }
+
     .add {
-      background:#2563eb;
-      color:white;
+      background: linear-gradient(90deg,#0ea5e9,#2563eb);
+      font-weight: bold;
+    }
+
+    .logout {
+      background: #7f1d1d;
     }
   </style>
 </head>
+
 <body>
 
   <div class="card">
     <h2>Baroud Services</h2>
 
-    <button>WhatsApp</button>
-    <button>Service 1</button>
-    <button>Service 2</button>
+    <button onclick="go('https://wa.me/96170385398')">WhatsApp</button>
+    <button onclick="alert('Service 1')">Service 1</button>
+    <button onclick="alert('Service 2')">Service 2</button>
 
-    <button class="add" onclick="location.href='add-credit.html'">
-      Add Credit
-    </button>
-
-    <button onclick="location.href='index.html'">Logout</button>
+    <button class="add" onclick="go('add-credit.html')">Add Credit</button>
+    <button class="logout" onclick="logout()">Logout</button>
   </div>
+
+  <script>
+    function go(page) {
+      window.location.href = page + "?v=" + Date.now();
+    }
+
+    function logout() {
+      window.location.href = "index.html?v=" + Date.now();
+    }
+
+    // تنظيف كاش + Service Worker (حل نهائي للنسخ القديمة)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(r => {
+        r.forEach(reg => reg.unregister());
+      });
+    }
+    caches?.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  </script>
 
 </body>
 </html>
