@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Baroud Services</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#06162a,#020b14);color:#fff;min-height:100vh}
+    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .iconBtn{
+      width:54px;height:54px;border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      position:relative;z-index:1000;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+    }
+    .hamburger span{display:block;width:20px;height:2px;background:#fff;margin:4px 0;border-radius:99px;opacity:.9}
+
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:2px;opacity:.9}
+    .brand img{height:30px;width:auto;display:block}
+
+    .banner{
+      margin-top:14px;border-radius:22px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 20px 70px rgba(0,0,0,.35);
+      background:rgba(255,255,255,.04);
+    }
+    .banner img{width:100%;height:160px;object-fit:cover;display:block}
+
+    .support{
+      margin-top:12px;padding:12px 14px;border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+
+    .searchBox{
+      margin-top:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:26px;
+      padding:14px 16px;
+      box-shadow:0 18px 60px rgba(0,0,0,.18);
+    }
+    .searchBox input{width:100%;background:transparent;border:none;outline:none;color:#fff;font-size:16px}
+
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+    .tile{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px;
+      overflow:hidden;
+      cursor:pointer;
+      box-shadow:0 18px 60px rgba(0,0,0,.25);
+    }
+    .tile img{width:100%;height:120px;object-fit:cover;display:block}
+    .label{padding:12px 10px;text-align:center;font-weight:800;opacity:.92}
+
+    /* Drawer */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.2s;z-index:2000}
+    .overlay.show{opacity:1;pointer-events:auto}
+    .drawer{
+      position:fixed;top:0;left:0;height:100vh;width:min(320px,82vw);
+      background:linear-gradient(180deg,#0c2747,#06162a);
+      border-right:1px solid rgba(255,255,255,.08);
+      box-shadow:0 30px 70px rgba(0,0,0,.65);
+      transform:translateX(-105%);
+      transition:.25s;
+      z-index:2100;
+      padding:18px 16px;
+      overflow:auto;
+    }
+    .drawer.show{transform:translateX(0)}
+    .closeRow{display:flex;justify-content:flex-end}
+    .closeBtn{
+      width:44px;height:44px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;font-size:22px;cursor:pointer;
+    }
+    .loginCard{
+      background:#0aa0ff;border-radius:28px;padding:22px 18px;text-align:center;
+      box-shadow:0 22px 55px rgba(0,0,0,.45);margin:10px 0 16px;
+    }
+    .loginCard h2{margin:0 0 10px;font-size:34px;color:#fff}
+    .loginCard p{margin:0 0 14px;color:rgba(255,255,255,.88);font-weight:700;font-size:13px}
+    .loginBtn{
+      display:inline-block;background:#11e06d;color:#06331b;font-weight:900;
+      padding:14px 22px;border-radius:999px;text-decoration:none;width:85%;
+    }
+    .menu{margin-top:12px;border-top:1px solid rgba(255,255,255,.10);padding-top:12px}
+    .mItem{display:flex;align-items:center;gap:12px;padding:14px 10px;border-radius:14px;color:rgba(240,248,255,.92);cursor:pointer}
+    .mItem:hover{background:rgba(255,255,255,.04)}
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55)}
+    .social{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.10);display:flex;gap:14px;justify-content:center;opacity:.9}
+    .social a{width:46px;height:46px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-weight:900}
+    .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
+  </style>
+</head>
+
+<body>
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="drawer" id="drawer">
+    <div class="closeRow"><button class="closeBtn" id="closeBtn" type="button">×</button></div>
+
+    <div class="loginCard">
+      <h2>Login</h2>
+      <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
+      <a class="loginBtn" href="login.html">Login</a>
+    </div>
+
+    <div class="menu">
+      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
+      <div class="mItem" id="aboutItem"><span class="dot"></span><span>About Us</span></div>
+    </div>
+
+    <div class="social">
+      <a href="https://wa.me/96181812024" target="_blank" rel="noopener">WA</a>
+      <a href="#" id="ttBtn">♪</a>
+    </div>
+
+    <div class="hint">© Baroud Services</div>
+  </aside>
+
+  <main class="wrap">
+    <div class="topbar">
+      <div class="iconBtn" id="menuBtn" aria-label="Open menu">
+        <div class="hamburger"><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="brand">
+        <span>BAROUD</span>
+        <img src="assets/logo.png" alt="logo" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <div class="banner">
+      <img src="assets/banner.jpg" alt="banner" onerror="this.style.display='none'">
+    </div>
+
+    <div class="support">Support Number:+961 81812024 | Join Our WhatsApp Community</div>
+
+    <div class="searchBox">
+      <input id="search" placeholder="Search" />
+    </div>
+
+    <section class="grid" id="grid">
+      <div class="tile"><img src="assets/accounts.jpg" alt=""><div class="label">Accounts</div></div>
+      <div class="tile"><img src="assets/games.jpg" alt=""><div class="label">Games</div></div>
+      <div class="tile"><img src="assets/giftcards.jpg" alt=""><div class="label">Gift Cards</div></div>
+      <div class="tile"><img src="assets/apps.jpg" alt=""><div class="label">Applications</div></div>
+    </section>
+
+    <div class="hint">pre-login</div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ✅ إذا في session روح للـ services
+    (async ()=>{
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) location.replace("services.html");
+    })();
+
+    // Drawer
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+    const menuBtn = document.getElementById("menuBtn");
+    const closeBtn = document.getElementById("closeBtn");
+
+    function openDrawer(){ drawer.classList.add("show"); overlay.classList.add("show"); }
+    function closeDrawer(){ drawer.classList.remove("show"); overlay.classList.remove("show"); }
+
+    menuBtn.addEventListener("click", openDrawer);
+    menuBtn.addEventListener("touchstart",(e)=>{e.preventDefault();openDrawer();},{passive:false});
+    overlay.addEventListener("click", closeDrawer);
+    closeBtn.addEventListener("click", closeDrawer);
+
+    document.getElementById("homeItem").addEventListener("click", ()=>{ closeDrawer(); location.href="index.html"; });
+    document.getElementById("aboutItem").addEventListener("click", ()=>alert("About Us"));
+    document.getElementById("ttBtn").addEventListener("click",(e)=>{e.preventDefault(); alert("TikTok");});
+
+    // قبل login: كبس tiles يفتح login
+    document.querySelectorAll(".tile").forEach(t=>{
+      t.addEventListener("click", ()=> location.href="login.html");
+    });
+
+    // search
+    const search = document.getElementById("search");
+    search.addEventListener("input", () => {
+      const q = search.value.trim().toLowerCase();
+      document.querySelectorAll(".tile").forEach(t => {
+        t.style.display = t.innerText.toLowerCase().includes(q) ? "" : "none";
+      });
+    });
+  </script>
+</body>
+</html>
