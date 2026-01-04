@@ -3,52 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VIPBOXLB</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Baroud</title>
 
   <style>
     :root{
-      --bg1:#06162a;
+      --stroke:rgba(255,255,255,.10);
+      --card:rgba(255,255,255,.06);
+      --bg1:#0b2a52;
       --bg2:#020a12;
-      --card:#0b223a;
-      --stroke:rgba(255,255,255,.08);
-      --text:rgba(255,255,255,.92);
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:radial-gradient(1200px 700px at 20% 0%, #0b2a52 0%, #06162a 40%, #020a12 100%);
-      color:var(--text);
+      background:radial-gradient(1200px 700px at 20% 0%, var(--bg1) 0%, #06162a 45%, var(--bg2) 100%);
+      color:#fff;
       min-height:100vh;
     }
     .wrap{max-width:520px;margin:0 auto;padding:14px 14px 30px}
 
-    /* Topbar */
+    /* top bar */
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
-    .iconBtn{
+    .btn{
       width:54px;height:54px;border-radius:18px;
       background:rgba(255,255,255,.05);
       border:1px solid var(--stroke);
       display:flex;align-items:center;justify-content:center;
       cursor:pointer;
-      position:relative;
-      z-index:30;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
+      z-index:30;
+      position:relative;
     }
     .hamburger span{display:block;width:22px;height:2px;background:#fff;margin:4px 0;border-radius:2px;opacity:.9}
 
-    .brandText{
-      font-weight:900; letter-spacing:6px; opacity:.9;
-      margin-left:auto;
-    }
-
-    /* Balance pill (optional في index إذا بدك نفس الشكل) */
     .pill{
       display:flex;align-items:center;gap:10px;
-      background:rgba(255,255,255,.06);
+      background:var(--card);
       border:1px solid var(--stroke);
       border-radius:18px;
       padding:10px 12px;
@@ -64,8 +55,9 @@
       font-size:22px;font-weight:900;
       cursor:pointer;
     }
+    .brand{font-weight:900;letter-spacing:6px;opacity:.9}
 
-    /* Banner */
+    /* banner + notice */
     .banner{
       border-radius:26px;
       overflow:hidden;
@@ -75,8 +67,6 @@
       background:rgba(255,255,255,.04);
     }
     .banner img{width:100%;display:block;object-fit:cover;height:170px}
-
-    /* notice bar */
     .notice{
       margin:10px 0 12px;
       background:rgba(255,255,255,.05);
@@ -89,8 +79,8 @@
       text-overflow:ellipsis;
     }
 
-    /* Search */
-    .searchBox input{
+    /* search */
+    .search input{
       width:100%;
       padding:16px 18px;
       border-radius:22px;
@@ -101,7 +91,7 @@
       font-size:16px;
     }
 
-    /* Grid */
+    /* grid */
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
     .tile{
       background:rgba(255,255,255,.06);
@@ -110,14 +100,11 @@
       overflow:hidden;
       box-shadow:0 18px 60px rgba(0,0,0,.25);
       cursor:pointer;
-      position:relative;
     }
     .tile img{width:100%;height:120px;object-fit:cover;display:block}
-    .label{padding:12px;text-align:center;font-weight:800;letter-spacing:.3px}
+    .label{padding:12px;text-align:center;font-weight:900;opacity:.95}
 
-    .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
-
-    /* Drawer */
+    /* drawer */
     .overlay{
       position:fixed;inset:0;
       background:rgba(0,0,0,.55);
@@ -173,12 +160,7 @@
     }
 
     .menu{margin-top:12px;border-top:1px solid rgba(255,255,255,.10);padding-top:12px}
-    .mItem{
-      display:flex;align-items:center;gap:12px;
-      padding:14px 10px;border-radius:14px;
-      color:rgba(240,248,255,.92);
-      cursor:pointer;
-    }
+    .mItem{display:flex;align-items:center;gap:12px;padding:14px 10px;border-radius:14px;color:rgba(240,248,255,.92);cursor:pointer}
     .mItem:hover{background:rgba(255,255,255,.04)}
     .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55)}
 
@@ -206,7 +188,7 @@
     <div class="loginCard">
       <h2>Login</h2>
       <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
-      <a class="loginBtn" id="loginBtn" href="#">Login</a>
+      <a class="loginBtn" href="login.html">Login</a>
     </div>
 
     <div class="menu">
@@ -215,27 +197,27 @@
     </div>
 
     <div class="social">
-      <a id="waBtn" href="#">WA</a>
-      <a id="ttBtn" href="#">♪</a>
+      <a href="https://wa.me/96181812024" target="_blank">WA</a>
+      <a href="#" id="ttBtn">♪</a>
     </div>
 
-    <div class="hint">© VIPBOXLB</div>
+    <div style="text-align:center;opacity:.35;margin-top:14px;font-size:12px">© Baroud Services</div>
   </aside>
 
   <main class="wrap">
     <div class="topbar">
-      <button class="iconBtn" id="menuBtn" type="button" aria-label="Open menu">
+      <button class="btn" id="menuBtn" type="button" aria-label="Open menu">
         <div class="hamburger"><span></span><span></span><span></span></div>
       </button>
 
-      <div class="pill" aria-label="Balance">
+      <div class="pill">
         <div class="star">★</div>
         <div style="font-weight:900">0.00</div>
         <div style="font-size:22px">🇺🇸</div>
-        <button class="plus" id="plusBtn" type="button">+</button>
+        <button class="plus" type="button" onclick="location.href='add-credit.html'">+</button>
       </div>
 
-      <div class="brandText">VIPBOX</div>
+      <div class="brand">BAROUD</div>
     </div>
 
     <div class="banner">
@@ -244,28 +226,19 @@
 
     <div class="notice">Support Number:+961 81812024 | Join Our WhatsApp Community | Fast & Secure Services</div>
 
-    <div class="searchBox">
+    <div class="search">
       <input id="search" placeholder="Search" />
     </div>
 
-    <section class="grid" id="grid">
-      <div class="tile"><img src="assets/games.jpg" alt="Games"><div class="label">Games</div></div>
-      <div class="tile"><img src="assets/apps.jpg" alt="Applications"><div class="label">Applications</div></div>
-      <div class="tile"><img src="assets/accounts.jpg" alt="Accounts"><div class="label">Accounts</div></div>
-      <div class="tile"><img src="assets/giftcards.jpg" alt="Gift Cards"><div class="label">Gift Cards</div></div>
+    <section class="grid">
+      <div class="tile"><img src="assets/games.jpg"><div class="label">Games</div></div>
+      <div class="tile"><img src="assets/apps.jpg"><div class="label">Applications</div></div>
+      <div class="tile"><img src="assets/accounts.jpg"><div class="label">Accounts</div></div>
+      <div class="tile"><img src="assets/giftcards.jpg"><div class="label">Gift Cards</div></div>
     </section>
-
-    <div class="hint">pre-login</div>
   </main>
 
   <script>
-    // ✅ عدّل هيدا حسب موقعك
-    const BASE = location.href.includes("github.io") ? location.href.split("/").slice(0,4).join("/") + "/" + location.pathname.split("/")[1] + "/" : location.origin + "/";
-
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
 
@@ -280,48 +253,18 @@
       drawer.setAttribute("aria-hidden","true");
     }
 
-    // ✅ حل مشاكل الموبايل: button + pointer events
     document.getElementById("menuBtn").addEventListener("click", openDrawer);
     document.getElementById("closeBtn").addEventListener("click", closeDrawer);
     overlay.addEventListener("click", closeDrawer);
 
-    document.getElementById("loginBtn").addEventListener("click",(e)=>{
-      e.preventDefault();
-      closeDrawer();
-      location.href = BASE + "login.html?v=" + Date.now();
-    });
-
-    document.getElementById("homeItem").addEventListener("click", ()=>{ closeDrawer(); location.href = BASE + "index.html?v=" + Date.now(); });
+    document.getElementById("homeItem").addEventListener("click", ()=>{ closeDrawer(); location.href="index.html"; });
     document.getElementById("aboutItem").addEventListener("click", ()=>alert("About Us"));
+    document.getElementById("ttBtn").addEventListener("click", (e)=>{ e.preventDefault(); alert("TikTok"); });
 
-    document.getElementById("waBtn").addEventListener("click",(e)=>{
-      e.preventDefault();
-      window.open("https://wa.me/96181812024","_blank");
-    });
-    document.getElementById("ttBtn").addEventListener("click",(e)=>{
-      e.preventDefault();
-      alert("TikTok");
-    });
-
-    document.getElementById("plusBtn").addEventListener("click", ()=>{
-      location.href = BASE + "add-credit.html?v=" + Date.now();
-    });
-
-    // ✅ إذا في session روح على services (ما يخليك تشوف index بعد login)
-    (async ()=>{
-      const { data } = await supabase.auth.getSession();
-      if (data?.session?.user){
-        location.replace(BASE + "services.html?v=" + Date.now());
-      }
-    })();
-
-    // filter search
-    const search = document.getElementById("search");
-    search.addEventListener("input", () => {
-      const q = search.value.trim().toLowerCase();
-      document.querySelectorAll(".tile").forEach(t => {
-        const name = t.innerText.toLowerCase();
-        t.style.display = name.includes(q) ? "" : "none";
+    document.getElementById("search").addEventListener("input", (e)=>{
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll(".tile").forEach(t=>{
+        t.style.display = t.innerText.toLowerCase().includes(q) ? "" : "none";
       });
     });
   </script>
