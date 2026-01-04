@@ -2,35 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Baroud Services</title>
 
+  <!-- ✅ Supabase CDN (ضروري) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
+    :root{
+      --bg1:#06162a;
+      --bg2:#0a2a4a;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.08);
+      --text:rgba(240,248,255,.92);
+    }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont;
-      background:linear-gradient(180deg,#061a33,#020b18);
-      color:white;
-      -webkit-tap-highlight-color: transparent;
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:radial-gradient(900px 500px at 50% 20%, #0b3f6e 0%, var(--bg1) 55%, #030a12 100%);
+      color:var(--text);
     }
 
-    /* overlay */
+    .wrap{
+      max-width:520px;
+      margin:0 auto;
+      padding:16px 14px 28px;
+    }
+
+    /* ===== Top bar (مثل ovoxz) ===== */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 2px 12px;
+    }
+    .iconBtn{
+      width:54px;height:54px;
+      border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hamburger span{
+      display:block;
+      width:22px;height:2px;
+      background:rgba(255,255,255,.92);
+      margin:4px 0;
+      border-radius:99px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      justify-content:flex-end;
+      flex:1;
+    }
+    .brand img{
+      height:28px;
+      object-fit:contain;
+      filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));
+    }
+
+    /* ===== Banner ===== */
+    .banner{
+      margin-top:6px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.2);
+    }
+    .banner img{
+      width:100%;
+      display:block;
+      height:140px;
+      object-fit:cover;
+    }
+
+    /* ===== Search ===== */
+    .searchBox{
+      margin-top:14px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      padding:14px 16px;
+    }
+    .searchBox input{
+      width:100%;
+      background:transparent;
+      border:none;
+      outline:none;
+      color:white;
+      font-size:16px;
+    }
+    .searchBox input::placeholder{color:rgba(255,255,255,.55)}
+
+    /* ===== Grid ===== */
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+    .tile{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:0 18px 60px rgba(0,0,0,.25);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tile img{
+      width:100%;
+      height:120px;
+      object-fit:cover;
+      display:block;
+    }
+    .label{
+      padding:12px;
+      text-align:center;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .hint{
+      margin-top:14px;
+      text-align:center;
+      color:rgba(255,255,255,.35);
+      font-size:12px;
+    }
+
+    /* ===== Drawer ===== */
     .overlay{
       position:fixed; inset:0;
-      background:rgba(0,0,0,.45);
-      opacity:0; pointer-events:none;
+      background:rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
       transition:.25s;
       z-index:50;
     }
-    .overlay.show{opacity:1;pointer-events:auto}
+    .overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
 
-    /* drawer */
     .drawer{
-      position:fixed; top:0; left:0;
-      width:82%; max-width:320px;
-      height:100%;
-      background:#071b33;
+      position:fixed;
+      top:0; left:0;
+      width:min(86vw, 340px);
+      height:100vh;
+      background:rgba(6,22,42,.96);
+      border-right:1px solid rgba(255,255,255,.08);
       box-shadow:0 30px 70px rgba(0,0,0,.65);
       transform:translateX(-105%);
       transition:.28s;
@@ -41,12 +171,17 @@
     .drawer.show{transform:translateX(0)}
 
     .drawerTop{
-      display:flex; justify-content:flex-end;
+      display:flex;
+      justify-content:flex-end;
       margin-bottom:10px;
     }
     .closeBtn{
-      background:none;border:none;
-      color:white;font-size:28px;
+      width:44px;height:44px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:white;
+      font-size:22px;
       cursor:pointer;
     }
 
@@ -61,6 +196,7 @@
     .loginCard h2{
       margin:0 0 10px;
       font-size:34px;
+      letter-spacing:.3px;
       color:white;
     }
     .loginCard p{
@@ -68,12 +204,13 @@
       color:rgba(255,255,255,.85);
       font-weight:600;
       font-size:13px;
+      line-height:1.35;
     }
     .loginBtn{
       display:inline-block;
       background:#11e06d;
       color:#06331b;
-      font-weight:800;
+      font-weight:900;
       padding:14px 22px;
       border-radius:999px;
       text-decoration:none;
@@ -91,9 +228,10 @@
       gap:12px;
       padding:14px 10px;
       border-radius:14px;
+      color:rgba(240,248,255,.92);
       cursor:pointer;
     }
-    .mItem:hover{background:rgba(255,255,255,.05)}
+    .mItem:hover{background:rgba(255,255,255,.04)}
     .dot{
       width:10px;height:10px;border-radius:50%;
       background:rgba(255,255,255,.55);
@@ -104,163 +242,179 @@
       padding-top:14px;
       border-top:1px solid rgba(255,255,255,.10);
       display:flex; gap:14px; justify-content:center;
+      opacity:.95;
     }
     .social a{
       width:46px;height:46px;border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
       display:flex;align-items:center;justify-content:center;
-      color:white;text-decoration:none;font-weight:800;
-    }
-
-    /* main */
-    .wrap{padding:16px}
-
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:14px;
-      position:relative;
-      z-index:10;
-    }
-
-    /* ✅ زر ☰ (فوق كلشي و قابل للضغط) */
-    .iconBtn{
-      width:44px;height:44px;
-      border-radius:14px;
-      background:rgba(255,255,255,.08);
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      position:relative;
-      z-index:9999;
-      touch-action: manipulation;
-      pointer-events:auto;
-      user-select:none;
-    }
-    .hamburger span{
-      display:block;width:20px;height:2px;
-      background:white;margin:4px 0;
-    }
-
-    .banner img{
-      width:100%;
-      border-radius:20px;
-      margin-bottom:14px;
-      display:block;
-    }
-
-    .searchBox input{
-      width:100%;
-      padding:14px;
-      border-radius:18px;
-      border:none;
-      background:rgba(255,255,255,.08);
       color:white;
-      margin-bottom:16px;
-      outline:none;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
-    .tile{
-      background:rgba(255,255,255,.06);
-      border-radius:22px;
-      overflow:hidden;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
-    }
-    .tile img{
-      width:100%;height:120px;object-fit:cover;
-      display:block;
-    }
-    .label{
-      padding:12px;text-align:center;
-      font-weight:700;
-    }
-
-    .hint{
-      margin-top:14px;
-      text-align:center;
-      color:rgba(255,255,255,.35);
-      font-size:12px;
+      text-decoration:none;
+      font-weight:900;
     }
   </style>
 </head>
 
 <body>
 
-<!-- ✅ خلي الإغلاق onclick مباشرة -->
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+  <div class="overlay" id="overlay"></div>
 
-<aside class="drawer" id="drawer">
-  <div class="drawerTop">
-    <button class="closeBtn" onclick="closeDrawer()">×</button>
-  </div>
-
-  <div class="loginCard">
-    <h2>Login</h2>
-    <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
-    <!-- ✅ روح على login.html -->
-    <a class="loginBtn" href="login.html?v=1">Login</a>
-  </div>
-
-  <div class="menu">
-    <div class="mItem" onclick="closeDrawer()">
-      <span class="dot"></span><span>Home</span>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawerTop">
+      <button class="closeBtn" type="button" id="closeBtn">×</button>
     </div>
-    <div class="mItem" onclick="alert('About Us')">
-      <span class="dot"></span><span>About Us</span>
+
+    <div class="loginCard">
+      <h2>Login</h2>
+      <p>Sign Up Now And Enjoy An Easy Recharging Experience!</p>
+      <!-- ✅ يروح على login.html -->
+      <a class="loginBtn" href="#" id="loginBtn">Login</a>
     </div>
-  </div>
 
-  <div class="social">
-    <a href="https://wa.me/96181812024" target="_blank">WA</a>
-    <a href="#" onclick="alert('TikTok')">♪</a>
-  </div>
+    <div class="menu">
+      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
+      <div class="mItem" id="aboutItem"><span class="dot"></span><span>About Us</span></div>
+    </div>
 
-  <div class="hint">© Baroud Services</div>
-</aside>
+    <div class="social">
+      <a href="#" id="waBtn">WA</a>
+      <a href="#" id="ttBtn">♪</a>
+    </div>
 
-<main class="wrap">
-  <div class="topbar">
-    <!-- ✅ الحل الجذري: onclick مباشر -->
-    <div class="iconBtn" onclick="openDrawer()">
-      <div class="hamburger">
-        <span></span><span></span><span></span>
+    <div class="hint">© Baroud Services</div>
+  </aside>
+
+  <main class="wrap">
+    <div class="topbar">
+      <!-- ✅ زر ☰ -->
+      <div class="iconBtn" id="menuBtn" role="button" aria-label="Open menu">
+        <div class="hamburger">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="brand">
+        <img src="assets/logo.png" alt="logo" />
       </div>
     </div>
-  </div>
 
-  <div class="banner">
-    <img src="assets/banner.jpg" alt="banner">
-  </div>
+    <div class="banner">
+      <img src="assets/banner.jpg" alt="banner" />
+    </div>
 
-  <div class="searchBox">
-    <input placeholder="Search">
-  </div>
+    <div class="searchBox">
+      <input id="search" placeholder="Search" />
+    </div>
 
-  <section class="grid">
-    <div class="tile"><img src="assets/games.jpg"><div class="label">Games</div></div>
-    <div class="tile"><img src="assets/apps.jpg"><div class="label">Applications</div></div>
-    <div class="tile"><img src="assets/accounts.jpg"><div class="label">Accounts</div></div>
-    <div class="tile"><img src="assets/giftcards.jpg"><div class="label">Gift Cards</div></div>
-  </section>
+    <section class="grid" id="grid">
+      <div class="tile" data-name="Games" onclick="alert('Games')">
+        <img src="assets/games.jpg" alt="Games" />
+        <div class="label">Games</div>
+      </div>
 
-  <div class="hint">ovo-style landing (pre-login)</div>
-</main>
+      <div class="tile" data-name="Applications" onclick="alert('Applications')">
+        <img src="assets/apps.jpg" alt="Applications" />
+        <div class="label">Applications</div>
+      </div>
 
-<script>
-  function openDrawer(){
-    document.getElementById("drawer").classList.add("show");
-    document.getElementById("overlay").classList.add("show");
-  }
-  function closeDrawer(){
-    document.getElementById("drawer").classList.remove("show");
-    document.getElementById("overlay").classList.remove("show");
-  }
-</script>
+      <div class="tile" data-name="Accounts" onclick="alert('Accounts')">
+        <img src="assets/accounts.jpg" alt="Accounts" />
+        <div class="label">Accounts</div>
+      </div>
+
+      <div class="tile" data-name="Gift Cards" onclick="alert('Gift Cards')">
+        <img src="assets/giftcards.jpg" alt="Gift Cards" />
+        <div class="label">Gift Cards</div>
+      </div>
+    </section>
+
+    <div class="hint">ovo-style landing (pre-login)</div>
+  </main>
+
+  <script>
+    // ✅ رابط مشروعك
+    const BASE = "https://baroudservices.github.io/baroud-app/";
+
+    // ✅ Supabase (نفس يلي عندك)
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Drawer refs
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+    const menuBtn = document.getElementById("menuBtn");
+    const closeBtn = document.getElementById("closeBtn");
+
+    function openDrawer(){
+      drawer.classList.add("show");
+      overlay.classList.add("show");
+      drawer.setAttribute("aria-hidden","false");
+    }
+    function closeDrawer(){
+      drawer.classList.remove("show");
+      overlay.classList.remove("show");
+      drawer.setAttribute("aria-hidden","true");
+    }
+
+    // ✅ موبايل: click + touch
+    menuBtn.addEventListener("click", openDrawer);
+    menuBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); openDrawer(); }, {passive:false});
+
+    overlay.addEventListener("click", closeDrawer);
+    closeBtn.addEventListener("click", closeDrawer);
+
+    // ✅ زر Login بالمنيو -> login.html
+    document.getElementById("loginBtn").addEventListener("click", (e)=>{
+      e.preventDefault();
+      closeDrawer();
+      window.location.assign(BASE + "login.html?v=" + Date.now());
+    });
+
+    // Home
+    document.getElementById("homeItem").addEventListener("click", ()=>{
+      closeDrawer();
+      window.location.assign(BASE + "index.html?v=" + Date.now());
+    });
+
+    // About
+    document.getElementById("aboutItem").addEventListener("click", ()=>{
+      alert("About Us");
+    });
+
+    // WhatsApp
+    document.getElementById("waBtn").addEventListener("click", (e)=>{
+      e.preventDefault();
+      window.open("https://wa.me/96181812024","_blank");
+    });
+
+    // TikTok placeholder
+    document.getElementById("ttBtn").addEventListener("click", (e)=>{
+      e.preventDefault();
+      alert("TikTok");
+    });
+
+    // ✅ إذا المستخدم مسجّل دخول: حوله على services.html
+    async function guard(){
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if(user){
+        window.location.replace(BASE + "services.html?v=" + Date.now());
+      }
+    }
+    guard();
+
+    // ✅ فلترة Search
+    const search = document.getElementById("search");
+    search.addEventListener("input", ()=>{
+      const q = search.value.trim().toLowerCase();
+      document.querySelectorAll(".tile").forEach(t=>{
+        const name = (t.dataset.name || "").toLowerCase();
+        t.style.display = name.includes(q) ? "" : "none";
+      });
+    });
+  </script>
 
 </body>
 </html>
