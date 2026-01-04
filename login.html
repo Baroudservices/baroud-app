@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login</title>
 
-  <!-- ✅ Supabase v2 (global: supabase) -->
+  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -69,24 +69,23 @@
       box-shadow:0 18px 60px rgba(0,0,0,.35);
       margin-top:10px;
     }
-    .btn:disabled{opacity:.6;cursor:not-allowed}
     .msg{
       margin-top:12px;
       padding:12px 14px;
       border-radius:14px;
       display:none;
       font-weight:700;
+      line-height:1.35;
       word-break:break-word;
     }
     .err{background:#d05252}
     .ok{background:#2aa96b}
-    .small{margin-top:14px;text-align:center;opacity:.55;font-weight:800;letter-spacing:1px}
   </style>
 </head>
 
 <body>
   <div class="card">
-    <button class="back" id="backBtn" type="button">←</button>
+    <button class="back" onclick="location.href='index.html'">←</button>
 
     <div class="titleRow">
       <div></div>
@@ -104,41 +103,75 @@
     </div>
 
     <div class="field">
-      <span>👁️</span>
+      <span>🔒</span>
       <input id="pass" type="password" placeholder="Password" autocomplete="current-password"/>
     </div>
 
-    <button class="btn" id="loginBtn" type="button">Login</button>
-    <div class="small">REGISTER</div>
+    <button class="btn" id="loginBtn">Login</button>
   </div>
 
   <script>
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-  const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+    // ✅ Supabase
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 
-  const loginBtn = document.getElementById("loginBtn");
-
-  loginBtn.addEventListener("click", async () => {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("pass").value;
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      alert("Email أو Password غلط");
-      return;
+    // تأكد المكتبة موجودة
+    if (!window.supabase) {
+      alert("Supabase library not loaded (CDN problem).");
     }
 
-    // ✅ هون بينحط السطر
-    location.replace("services.html");
-  });
-</script>
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const msg = document.getElementById("msg");
+    const loginBtn = document.getElementById("loginBtn");
+
+    function showMsg(text, ok=false){
+      msg.style.display="block";
+      msg.className = "msg " + (ok ? "ok" : "err");
+      msg.textContent = text;
+    }
+
+    // ✅ إذا أصلاً في session -> روح على services.html
+    (async ()=>{
+      const { data, error } = await supabase.auth.getSession();
+      if (error) showMsg("Session error: " + error.message);
+      if (data?.session?.user) location.replace("services.html");
+    })();
+
+    loginBtn.addEventListener("click", async ()=>{
+      msg.style.display="none";
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Loading...";
+
+      try{
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("pass").value;
+
+        if(!email || !password){
+          showMsg("Fill email and password.");
+          return;
+        }
+
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error){
+          // ✅ أهم شي: هيدا بيطلعلك سبب المشكلة
+          showMsg("Login failed: " + error.message);
+          return;
+        }
+
+        showMsg("Login successful ✅", true);
+
+        // ✅ بعد نجاح الدخول
+        location.replace("services.html");
+
+      } catch(e){
+        showMsg("Unexpected error: " + (e?.message || e));
+      } finally{
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+      }
+    });
+  </script>
 </body>
 </html>
