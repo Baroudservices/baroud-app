@@ -29,6 +29,14 @@
       cursor:pointer;
       -webkit-tap-highlight-color:transparent;
     }
+    .backArrow{
+  font-size:26px;
+  font-weight:900;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
     .hamb span{display:block;width:22px;height:2px;background:#fff;margin:5px 0;border-radius:999px;opacity:.9}
     h1{margin:18px 0 18px;font-size:34px;opacity:.9}
 
@@ -72,11 +80,12 @@
 <body>
   <div class="wrap">
     <div class="top">
-      <div class="menuBtn" onclick="location.href='services.html'">
-        <div class="hamb"><span></span><span></span><span></span></div>
+      <div class="menuBtn backArrow" onclick="history.back()">←</div>
       </div>
 
-      <div class="goBtn" onclick="location.href='index.html'">→</div>
+      <!--
+<div class="goBtn" onclick="location.href='index.html'">→</div>
+-->
     </div>
 
     <h1>Add Credit Section</h1>
