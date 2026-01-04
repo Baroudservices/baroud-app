@@ -1,216 +1,208 @@
 <!DOCTYPE html>
-<html lang="ar" dir="ltr">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baroud Services</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Services - Baroud</title>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    :root{
-      --bg1:#060b16;
-      --bg2:#0a1330;
-      --card: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.10);
-      --text:#eaf2ff;
-      --muted: rgba(234,242,255,.65);
-      --pill: rgba(255,255,255,.08);
-      --shadow: 0 20px 60px rgba(0,0,0,.55);
-      --r: 26px;
-      --r2: 18px;
-    }
-
-    *{box-sizing:border-box}
     body{
+      font-family: system-ui, sans-serif;
+      background: radial-gradient(1200px 800px at 50% 10%, #0d2a57 0%, #06152f 45%, #040b18 100%);
+      color:#fff;
       margin:0;
-      min-height:100vh;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
-        radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
-        linear-gradient(160deg, var(--bg1), var(--bg2));
-      padding: 18px;
+      padding:18px;
     }
 
-    .topbar{
-      max-width: 460px;
-      margin: 6px auto 16px;
+    /* ✅ Top Bar مثل OVOXZ */
+    .top-bar{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
+      max-width:420px;
+      margin:0 auto 18px;
     }
-    .iconbtn{
-      width:44px;height:44px;
-      border-radius: 16px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: blur(12px);
-      display:flex;align-items:center;justify-content:center;
+
+    .back-btn, .plus-btn{
+      width:52px;
+      height:52px;
+      border-radius:18px;
+      background:rgba(255,255,255,.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:24px;
       cursor:pointer;
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
       user-select:none;
     }
-    .iconbtn:active{transform:scale(.98)}
-    .icon{
-      width:20px;height:20px; fill: rgba(234,242,255,.9);
-    }
 
-    .wrap{
-      max-width: 460px;
-      margin: 0 auto;
-    }
-
-    .glass{
-      border: 1px solid var(--stroke);
-      background: var(--card);
-      backdrop-filter: blur(14px);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      padding: 22px 18px 18px;
-      position: relative;
-      overflow:hidden;
-    }
-    .glass::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background: radial-gradient(500px 200px at 20% 10%, rgba(255,255,255,.12), transparent 55%);
-      pointer-events:none;
-    }
-
-    .title{
+    .balance-box{
+      flex:1;
+      background:rgba(255,255,255,.08);
+      border-radius:22px;
+      padding:10px 14px;
       text-align:center;
-      font-size: 40px;
-      letter-spacing:.2px;
-      margin: 10px 0 10px;
-      font-weight: 800;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
     }
+
+    .balance-label{
+      font-size:12px;
+      opacity:.75;
+      letter-spacing:.3px;
+    }
+
+    .balance-value{
+      font-size:18px;
+      font-weight:900;
+      margin-top:2px;
+    }
+
+    /* ✅ Card */
+    .card{
+      max-width:420px;
+      margin:0 auto;
+      padding:22px 18px 20px;
+      border-radius:26px;
+      background:rgba(255,255,255,.06);
+      box-shadow: 0 18px 60px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+      backdrop-filter: blur(8px);
+    }
+
+    h1{
+      margin:10px 0 4px;
+      text-align:center;
+      font-size:40px;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+
     .dots{
       text-align:center;
-      color: var(--muted);
-      margin-bottom: 18px;
-      letter-spacing:4px;
+      opacity:.7;
+      margin-bottom:18px;
+      font-size:18px;
     }
 
     .btn{
       width:100%;
+      padding:16px 14px;
+      margin-top:14px;
       border:none;
-      border-radius: 22px;
-      padding: 18px 16px;
-      margin: 10px 0;
+      border-radius:22px;
       cursor:pointer;
-      background: var(--pill);
-      border: 1px solid rgba(255,255,255,.08);
-      color: var(--text);
-      font-size: 16px;
-      font-weight: 650;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-      transition: .15s ease;
-    }
-    .btn:hover{background: rgba(255,255,255,.10)}
-    .btn:active{transform: scale(.99)}
-
-    .btn.primary{
-      background: linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
-      border: none;
-      box-shadow: 0 18px 45px rgba(37,99,235,.25);
+      font-size:18px;
+      font-weight:800;
+      color:#fff;
+      background:rgba(255,255,255,.10);
+      box-shadow: 0 14px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.08);
     }
 
-    .btn.danger{
-      background: rgba(255,255,255,.07);
-      border:1px solid rgba(255,80,80,.25);
+    .btn-primary{
+      background: linear-gradient(90deg, #11b7ff, #2f6bff);
+    }
+
+    .btn-danger{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,80,80,.25);
     }
 
     .status{
       text-align:center;
-      color: var(--muted);
-      margin-top: 10px;
-      font-weight: 700;
+      margin-top:16px;
+      font-weight:800;
+      opacity:.85;
     }
 
-    .fab{
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      width: 58px;
-      height: 58px;
-      border-radius: 22px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 18px 50px rgba(0,0,0,.45);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-    }
-    .fab:active{transform:scale(.98)}
+    a { text-decoration:none; }
   </style>
 </head>
 
 <body>
-  <div class="topbar">
-    <div class="iconbtn" onclick="hardRefresh()" title="Refresh">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 0 1-9.9 1h-2.02A7 7 0 0 0 19 13c0-3.87-3.13-7-7-7z"/></svg>
+
+  <!-- ✅ Top Bar -->
+  <div class="top-bar">
+    <div class="back-btn" onclick="goBack()">↩</div>
+
+    <div class="balance-box">
+      <div class="balance-label">Balance</div>
+      <div class="balance-value" id="balance">$0.00</div>
     </div>
 
-    <div style="flex:1"></div>
-
-    <div class="iconbtn" onclick="go('add-credit.html')" title="Add Credit">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M19 11H13V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
-    </div>
+    <div class="plus-btn" onclick="goToAddCredit()">+</div>
   </div>
 
-  <div class="wrap">
-    <div class="glass">
-      <div class="title">Baroud Services</div>
-      <div class="dots">...</div>
+  <div class="card">
+    <h1>Baroud<br>Services</h1>
+    <div class="dots">...</div>
 
-      <button class="btn" onclick="go('https://wa.me/96170385398')">WhatsApp</button>
-      <button class="btn" onclick="alert('Service 1')">Service 1</button>
-      <button class="btn" onclick="alert('Service 2')">Service 2</button>
+    <a href="https://wa.me/96170385398" target="_blank">
+      <button class="btn">WhatsApp</button>
+    </a>
 
-      <button class="btn primary" onclick="go('add-credit.html')">Add Credit</button>
-      <button class="btn danger" onclick="logout()">Logout</button>
+    <button class="btn" onclick="alert('Service 1')">Service 1</button>
+    <button class="btn" onclick="alert('Service 2')">Service 2</button>
 
-      <div class="status">Ready ✅</div>
-    </div>
-  </div>
+    <button class="btn btn-primary" onclick="goToAddCredit()">Add Credit</button>
+    <button class="btn btn-danger" onclick="logoutUser()">Logout</button>
 
-  <div class="fab" onclick="hardRefresh()" title="Refresh">
-    <svg class="icon" viewBox="0 0 24 24"><path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 0 1-9.9 1h-2.02A7 7 0 0 0 19 13c0-3.87-3.13-7-7-7z"/></svg>
+    <div class="status" id="msg">...</div>
   </div>
 
   <script>
-    // ✅ حل جذري للنسخ القديمة
-    function killCache() {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(list => list.forEach(r => r.unregister()));
+    // ✅ غيّرهم إذا بدك (أنت عندك نفسهم)
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+
+    // ✅ مهم: BASE لازم يكون مطابق للرابط الجديد تبعك
+    const BASE = "https://baroudservices.github.io/baroud-app/";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function goToAddCredit(){
+      window.location.href = BASE + "add-credit.html?v=" + Date.now();
+    }
+
+    function goBack(){
+      // ✅ رجوع دايمًا على services (حل جذري للقديم)
+      window.location.replace(BASE + "services.html?v=" + Date.now());
+    }
+
+    async function guard(){
+      const { data } = await supabase.auth.getSession();
+      const user = data?.session?.user;
+
+      if(!user){
+        window.location.replace(BASE + "index.html?v=" + Date.now());
+        return;
       }
-      if (window.caches?.keys) {
+
+      document.getElementById("msg").innerText = "Ready ✅";
+      // إذا بدك لاحقًا نجيب balance الحقيقي من DB بدل 0.00
+      document.getElementById("balance").innerText = "$0.00";
+    }
+
+    async function logoutUser(){
+      await supabase.auth.signOut();
+      window.location.replace(BASE + "index.html?v=" + Date.now());
+    }
+
+    // ✅ حذف أي كاش/Service Worker (حل جذري للنسخة القديمة)
+    (function nukeCache(){
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(r => r.unregister());
+        });
+      }
+      if (window.caches) {
         caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
       }
-    }
-    killCache();
+    })();
 
-    function go(page){
-      // رابط خارجي
-      if (page.startsWith("http")) { window.location.href = page; return; }
-      window.location.href = page + "?v=" + Date.now();
-    }
-
-    function logout(){
-      window.location.replace("index.html?v=" + Date.now());
-    }
-
-    function hardRefresh(){
-      killCache();
-      window.location.replace("services.html?v=" + Date.now());
-    }
+    guard();
   </script>
 </body>
 </html>
