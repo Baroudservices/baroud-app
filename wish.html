@@ -26,30 +26,110 @@
         linear-gradient(160deg,var(--bg1),var(--bg2));
       padding:18px;
     }
-    .topbar{max-width:460px;margin:6px auto 10px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-    .back{cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none;opacity:.95;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);}
+
+    .topbar{max-width:460px;margin:6px auto 10px;display:flex;gap:12px;}
+    /* ✅ رجوع بدون JS */
+    .back{
+      display:inline-flex;align-items:center;gap:10px;
+      text-decoration:none;color:var(--text);
+      user-select:none;opacity:.95;
+      padding:10px 12px;border-radius:14px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      -webkit-tap-highlight-color: transparent;
+    }
+
     .wrap{max-width:460px;margin:0 auto;}
     .wishLogo{display:flex;justify-content:center;margin:10px 0 6px;}
     .wishLogo img{height:60px;display:block;}
     .title{font-size:42px;font-weight:900;margin:14px 0 18px;text-align:center;}
-    .glass{border:1px solid var(--stroke);background:var(--card);backdrop-filter:blur(14px);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);}
-    .box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:14px;margin-bottom:14px;}
-    .id{width:100%;text-align:center;padding:14px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-weight:900;letter-spacing:.4px;margin:10px 0 4px;}
-    input{width:100%;padding:16px;border-radius:18px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.22);color:var(--text);outline:none;margin-top:10px;font-size:16px;}
-    .btn{width:100%;border:none;padding:18px;border-radius:18px;margin-top:14px;cursor:pointer;color:white;font-weight:900;font-size:16px;background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));box-shadow:0 18px 45px rgba(37,99,235,.25);}
+
+    .glass{
+      border:1px solid var(--stroke);
+      background:var(--card);
+      backdrop-filter:blur(14px);
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+    .box{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+    .id{
+      width:100%;
+      text-align:center;
+      padding:14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      font-weight:900;
+      letter-spacing:.4px;
+      margin:10px 0 4px;
+    }
+    input{
+      width:100%;
+      padding:16px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      outline:none;
+      margin-top:10px;
+      font-size:16px;
+    }
+    .btn{
+      width:100%;
+      border:none;
+      padding:18px;
+      border-radius:18px;
+      margin-top:14px;
+      cursor:pointer;
+      color:white;
+      font-weight:900;
+      font-size:16px;
+      background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
+      box-shadow:0 18px 45px rgba(37,99,235,.25);
+      -webkit-tap-highlight-color: transparent;
+    }
     .btn:active{transform:scale(.99)}
     .btn:disabled{opacity:.6; cursor:not-allowed}
+
     .foot{text-align:center;color:var(--muted);margin-top:16px;opacity:.8;}
 
-    /* overlay */
-    .overlay{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:9999; padding:18px; opacity:0; pointer-events:none; transition:.15s opacity;}
+    .overlay{
+      position:fixed; inset:0;
+      display:flex;
+      align-items:center;justify-content:center;
+      background:rgba(0,0,0,.55);
+      z-index:9999;
+      padding:18px;
+      opacity:0;
+      pointer-events:none;
+      transition:.15s opacity;
+    }
     .overlay.show{opacity:1; pointer-events:auto;}
-    .modal{max-width:420px;width:100%;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.92);backdrop-filter:blur(12px);padding:16px;box-shadow:0 30px 80px rgba(0,0,0,.55);}
+    .modal{
+      max-width:420px; width:100%;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(15,23,42,.92);
+      backdrop-filter:blur(12px);
+      padding:16px;
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
+    }
     .modal h3{margin:0 0 8px;font-size:18px}
     .modal p{margin:0;color:rgba(234,242,255,.8);line-height:1.4}
-    .modal .ok{margin-top:14px;width:100%;padding:12px;border-radius:14px;border:0;font-weight:900;cursor:pointer;background:rgba(255,255,255,.10);color:#fff;}
+    .modal .ok{
+      margin-top:14px;width:100%;
+      padding:12px;border-radius:14px;border:0;
+      font-weight:900;cursor:pointer;
+      background:rgba(255,255,255,.10);color:#fff;
+    }
 
-    /* debug box */
     .debug{
       max-width:460px;margin:10px auto 0;
       display:none;
@@ -67,12 +147,12 @@
 
 <body>
   <div class="topbar">
-    <div id="btnBack" class="back">← رجوع</div>
+    <!-- ✅ رجوع شغال حتى لو JS خربان -->
+    <a class="back" href="/baroud-app/add-credit.html">← رجوع</a>
   </div>
 
   <div class="wrap">
     <div class="wishLogo">
-      <!-- ✅ absolute path for GitHub Pages -->
       <img src="/baroud-app/assets/wish.png" alt="Wish Money">
     </div>
 
@@ -83,9 +163,7 @@
         <div style="color:var(--muted);font-weight:700;">
           Please send the amount to this number ID:
         </div>
-
         <div class="id">+961 70385398</div>
-
         <div style="margin-top:10px;color:var(--muted);font-weight:700;">
           The minimum deposit is <b style="color:var(--text)">10$</b><br/>
           It takes between <b style="color:var(--text)">1 & 15</b> minutes
@@ -95,7 +173,8 @@
       <input id="amount" type="number" placeholder="Enter amount $" />
       <input id="receipt" type="file" accept="image/*" />
 
-      <button id="btnReq" class="btn" type="button">REQUEST</button>
+      <!-- ✅ onclick مباشر (ما بيعتمد على addEventListener) -->
+      <button id="btnReq" class="btn" type="button" onclick="requestNow(event)">REQUEST</button>
 
       <div class="foot">© 2024 Baroud Services</div>
     </div>
@@ -103,136 +182,123 @@
 
   <div id="debug" class="debug"></div>
 
-  <!-- overlay -->
   <div class="overlay" id="overlay" aria-hidden="true">
     <div class="modal">
       <h3 id="ovTitle">Done</h3>
       <p id="ovMsg">...</p>
-      <button id="ovOk" class="ok" type="button">OK</button>
+      <button id="ovOk" class="ok" type="button" onclick="hideOverlay()">OK</button>
     </div>
   </div>
 
+  <!-- ✅ حمّل supabase قبل الكود -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const debugEl = document.getElementById("debug");
-  function debug(msg){
-    debugEl.style.display = "block";
-    debugEl.textContent = msg;
-  }
 
-  window.addEventListener("error", (e)=>{
-    debug("JS Error:\n" + (e?.message || "unknown") + "\n" + (e?.filename||"") + ":" + (e?.lineno||""));
-  });
-  window.addEventListener("unhandledrejection", (e)=>{
-    debug("Unhandled Promise:\n" + (e?.reason?.message || String(e?.reason || "unknown")));
-  });
+  <script>
+    const debugEl = document.getElementById("debug");
+    function debug(msg){
+      debugEl.style.display = "block";
+      debugEl.textContent = msg;
+    }
 
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.addEventListener("error", (e)=>{
+      debug("JS Error:\n" + (e?.message || "unknown") + "\n" + (e?.filename||"") + ":" + (e?.lineno||""));
+    });
+    window.addEventListener("unhandledrejection", (e)=>{
+      debug("Unhandled Promise:\n" + (e?.reason?.message || String(e?.reason || "unknown")));
+    });
 
-  const btnReq  = document.getElementById("btnReq");
-  const btnBack = document.getElementById("btnBack");
-  const ovOk    = document.getElementById("ovOk");
+    function showOverlay(title, msg){
+      document.getElementById("ovTitle").textContent = title;
+      document.getElementById("ovMsg").textContent = msg;
+      document.getElementById("overlay").classList.add("show");
+    }
+    function hideOverlay(){
+      document.getElementById("overlay").classList.remove("show");
+    }
 
-  function showOverlay(title, msg){
-    document.getElementById("ovTitle").textContent = title;
-    document.getElementById("ovMsg").textContent = msg;
-    document.getElementById("overlay").classList.add("show");
-  }
-  function hideOverlay(){
-    document.getElementById("overlay").classList.remove("show");
-  }
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
 
-  btnBack.addEventListener("click", () => {
-    location.href = "/baroud-app/add-credit.html?v=" + Date.now();
-  });
+    // ✅ تأكد ان المكتبة انحملت
+    if(!window.supabase || !window.supabase.createClient){
+      debug("Supabase library not loaded.\nCheck internet / refresh.");
+    }
 
-  ovOk.addEventListener("click", () => hideOverlay());
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  btnReq.addEventListener("click", async (e)=>{
-    e.preventDefault();
-    await requestNow();
-  });
+    // ✅ function global للـ onclick
+    async function requestNow(e){
+      if(e) e.preventDefault();
 
-  async function requestNow(){
-    debugEl.style.display = "none";
-    debugEl.textContent = "";
+      const btnReq = document.getElementById("btnReq");
+      const amountEl = document.getElementById("amount");
+      const fileEl   = document.getElementById("receipt");
 
-    const amountEl = document.getElementById("amount");
-    const fileEl   = document.getElementById("receipt");
+      const amount = Number(amountEl.value);
+      const file   = fileEl.files?.[0];
 
-    const amount = Number(amountEl.value);
-    const file   = fileEl.files?.[0];
+      if(!amount || amount < 10) return showOverlay("Error ❌","Minimum deposit is 10$");
+      if(!file) return showOverlay("Error ❌","Please upload receipt image");
 
-    if(!amount || amount < 10) return showOverlay("Error ❌","Minimum deposit is 10$");
-    if(!file) return showOverlay("Error ❌","Please upload receipt image");
+      btnReq.disabled = true;
+      btnReq.textContent = "SENDING...";
 
-    btnReq.disabled = true;
-    btnReq.textContent = "SENDING...";
+      try{
+        debugEl.style.display = "none";
 
-    // ✅ timeout safety (15s)
-    const timeout = new Promise((_, rej)=> setTimeout(()=> rej(new Error("Timeout: request stuck (15s)")), 15000));
+        const { data: s, error: sErr } = await supabase.auth.getSession();
+        if(sErr) throw sErr;
 
-    try{
-      debug("1) Checking session...");
-      const sessionRes = await Promise.race([supabase.auth.getSession(), timeout]);
-      const sErr = sessionRes?.error;
-      if(sErr) throw sErr;
+        const user = s?.session?.user;
+        if(!user){
+          // ✅ ما منرجع للرئيسية، منوديك على login الصحيح
+          location.replace("/baroud-app/login.html?v=" + Date.now());
+          return;
+        }
 
-      const user = sessionRes?.data?.session?.user;
-      if(!user){
-        debug("No session found -> redirecting to login");
-        location.href = "/baroud-app/login.html?v=" + Date.now();
-        return;
-      }
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
+        const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
 
-      debug("2) Got user: " + user.id);
+        const { error: upErr } = await supabase.storage
+          .from("receipts")
+          .upload(fileName, file, { upsert:false });
 
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
-      const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
+        if(upErr) throw upErr;
 
-      debug("3) Uploading receipt to bucket: receipts\nPath: " + fileName);
-
-      const upRes = await Promise.race([
-        supabase.storage.from("receipts").upload(fileName, file, { upsert:false }),
-        timeout
-      ]);
-
-      if(upRes.error) throw upRes.error;
-
-      debug("4) Upload OK ✅\n5) Inserting deposit row...");
-
-      const insRes = await Promise.race([
-        supabase.from("deposits").insert([{
+        const { error: insErr } = await supabase.from("deposits").insert([{
           user_id: user.id,
           method: "Whish Money",
           amount,
           receipt_path: fileName,
           status: "pending"
-        }]),
-        timeout
-      ]);
+        }]);
 
-      if(insRes.error) throw insRes.error;
+        if(insErr) throw insErr;
 
-      debug("6) Insert OK ✅ DONE");
-      showOverlay("Request sent ✅","Your deposit request is pending.");
+        showOverlay("Request sent ✅","Your deposit request is pending.");
+        amountEl.value = "";
+        fileEl.value = "";
 
-      amountEl.value = "";
-      fileEl.value = "";
-
-    }catch(e){
-      const msg = e?.message || JSON.stringify(e);
-      debug("FAILED ❌\n" + msg);
-      showOverlay("Failed ❌", msg);
-    }finally{
-      btnReq.disabled = false;
-      btnReq.textContent = "REQUEST";
+      }catch(err){
+        const msg = err?.message || JSON.stringify(err);
+        debug("REQUEST ERROR:\n" + msg);
+        showOverlay("Failed ❌", msg);
+      }finally{
+        btnReq.disabled = false;
+        btnReq.textContent = "REQUEST";
+      }
     }
-  }
-</script>
+
+    // ✅ جرّب نطبع session فوراً للتأكد
+    (async ()=>{
+      try{
+        const { data } = await supabase.auth.getSession();
+        const ok = !!data?.session?.user;
+        // ما منعمل overlay، بس Debug خفيف إذا مش مسجل
+        if(!ok) debug("Note: No session found. You must login first on same domain (/baroud-app/).");
+      }catch(e){}
+    })();
+  </script>
 </body>
 </html>
