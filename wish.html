@@ -28,7 +28,6 @@
     }
 
     .topbar{max-width:460px;margin:6px auto 10px;display:flex;gap:12px;}
-    /* ✅ رجوع بدون JS */
     .back{
       display:inline-flex;align-items:center;gap:10px;
       text-decoration:none;color:var(--text);
@@ -51,6 +50,8 @@
       border-radius:var(--r);
       padding:18px;
       box-shadow:var(--shadow);
+      position:relative;
+      z-index:1;
     }
     .box{
       background:rgba(255,255,255,.06);
@@ -70,6 +71,8 @@
       letter-spacing:.4px;
       margin:10px 0 4px;
     }
+
+    .fields{ position:relative; z-index:2; }
     input{
       width:100%;
       padding:16px;
@@ -80,7 +83,13 @@
       outline:none;
       margin-top:10px;
       font-size:16px;
+      display:block;
+      position:relative;
+      z-index:2;
     }
+    /* ✅ مهم: خليه تحت الزر (ما يغطيه) */
+    #receipt{ z-index:2; }
+
     .btn{
       width:100%;
       border:none;
@@ -94,6 +103,11 @@
       background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
       box-shadow:0 18px 45px rgba(37,99,235,.25);
       -webkit-tap-highlight-color: transparent;
+
+      /* ✅ أهم شي */
+      position:relative;
+      z-index:10;
+      pointer-events:auto;
     }
     .btn:active{transform:scale(.99)}
     .btn:disabled{opacity:.6; cursor:not-allowed}
@@ -102,8 +116,7 @@
 
     .overlay{
       position:fixed; inset:0;
-      display:flex;
-      align-items:center;justify-content:center;
+      display:flex; align-items:center; justify-content:center;
       background:rgba(0,0,0,.55);
       z-index:9999;
       padding:18px;
@@ -147,7 +160,6 @@
 
 <body>
   <div class="topbar">
-    <!-- ✅ رجوع شغال حتى لو JS خربان -->
     <a class="back" href="/baroud-app/add-credit.html">← رجوع</a>
   </div>
 
@@ -160,9 +172,7 @@
 
     <div class="glass">
       <div class="box">
-        <div style="color:var(--muted);font-weight:700;">
-          Please send the amount to this number ID:
-        </div>
+        <div style="color:var(--muted);font-weight:700;">Please send the amount to this number ID:</div>
         <div class="id">+961 70385398</div>
         <div style="margin-top:10px;color:var(--muted);font-weight:700;">
           The minimum deposit is <b style="color:var(--text)">10$</b><br/>
@@ -170,11 +180,13 @@
         </div>
       </div>
 
-      <input id="amount" type="number" placeholder="Enter amount $" />
-      <input id="receipt" type="file" accept="image/*" />
+      <div class="fields">
+        <input id="amount" type="number" placeholder="Enter amount $" />
+        <input id="receipt" type="file" accept="image/*" />
+      </div>
 
-      <!-- ✅ onclick مباشر (ما بيعتمد على addEventListener) -->
-      <button id="btnReq" class="btn" type="button" onclick="requestNow(event)">REQUEST</button>
+      <!-- ✅ onclick + touchstart (مضمون) -->
+      <button id="btnReq" class="btn" type="button">REQUEST</button>
 
       <div class="foot">© 2024 Baroud Services</div>
     </div>
@@ -182,30 +194,21 @@
 
   <div id="debug" class="debug"></div>
 
-  <div class="overlay" id="overlay" aria-hidden="true">
+  <div class="overlay" id="overlay">
     <div class="modal">
       <h3 id="ovTitle">Done</h3>
       <p id="ovMsg">...</p>
-      <button id="ovOk" class="ok" type="button" onclick="hideOverlay()">OK</button>
+      <button class="ok" type="button" onclick="hideOverlay()">OK</button>
     </div>
   </div>
 
-  <!-- ✅ حمّل supabase قبل الكود -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
     const debugEl = document.getElementById("debug");
     function debug(msg){
       debugEl.style.display = "block";
       debugEl.textContent = msg;
     }
-
-    window.addEventListener("error", (e)=>{
-      debug("JS Error:\n" + (e?.message || "unknown") + "\n" + (e?.filename||"") + ":" + (e?.lineno||""));
-    });
-    window.addEventListener("unhandledrejection", (e)=>{
-      debug("Unhandled Promise:\n" + (e?.reason?.message || String(e?.reason || "unknown")));
-    });
 
     function showOverlay(title, msg){
       document.getElementById("ovTitle").textContent = title;
@@ -216,42 +219,47 @@
       document.getElementById("overlay").classList.remove("show");
     }
 
+    window.addEventListener("error", (e)=>{
+      debug("JS Error:\n" + (e?.message || "unknown") + "\n" + (e?.filename||"") + ":" + (e?.lineno||""));
+    });
+    window.addEventListener("unhandledrejection", (e)=>{
+      debug("Unhandled Promise:\n" + (e?.reason?.message || String(e?.reason || "unknown")));
+    });
+
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-
-    // ✅ تأكد ان المكتبة انحملت
-    if(!window.supabase || !window.supabase.createClient){
-      debug("Supabase library not loaded.\nCheck internet / refresh.");
-    }
-
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ✅ function global للـ onclick
-    async function requestNow(e){
-      if(e) e.preventDefault();
+    const btnReq = document.getElementById("btnReq");
 
-      const btnReq = document.getElementById("btnReq");
+    // ✅ ربط click + touchstart للموبايل
+    btnReq.addEventListener("click", (e)=>{ e.preventDefault(); requestNow(); });
+    btnReq.addEventListener("touchstart", (e)=>{ e.preventDefault(); requestNow(); }, {passive:false});
+
+    let sending = false;
+
+    async function requestNow(){
+      if(sending) return;
+      sending = true;
+
       const amountEl = document.getElementById("amount");
       const fileEl   = document.getElementById("receipt");
 
       const amount = Number(amountEl.value);
       const file   = fileEl.files?.[0];
 
-      if(!amount || amount < 10) return showOverlay("Error ❌","Minimum deposit is 10$");
-      if(!file) return showOverlay("Error ❌","Please upload receipt image");
+      if(!amount || amount < 10){ sending=false; return showOverlay("Error ❌","Minimum deposit is 10$"); }
+      if(!file){ sending=false; return showOverlay("Error ❌","Please upload receipt image"); }
 
       btnReq.disabled = true;
       btnReq.textContent = "SENDING...";
 
       try{
-        debugEl.style.display = "none";
-
         const { data: s, error: sErr } = await supabase.auth.getSession();
         if(sErr) throw sErr;
 
         const user = s?.session?.user;
         if(!user){
-          // ✅ ما منرجع للرئيسية، منوديك على login الصحيح
           location.replace("/baroud-app/login.html?v=" + Date.now());
           return;
         }
@@ -260,10 +268,7 @@
         const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
         const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
 
-        const { error: upErr } = await supabase.storage
-          .from("receipts")
-          .upload(fileName, file, { upsert:false });
-
+        const { error: upErr } = await supabase.storage.from("receipts").upload(fileName, file, { upsert:false });
         if(upErr) throw upErr;
 
         const { error: insErr } = await supabase.from("deposits").insert([{
@@ -273,7 +278,6 @@
           receipt_path: fileName,
           status: "pending"
         }]);
-
         if(insErr) throw insErr;
 
         showOverlay("Request sent ✅","Your deposit request is pending.");
@@ -287,18 +291,9 @@
       }finally{
         btnReq.disabled = false;
         btnReq.textContent = "REQUEST";
+        sending = false;
       }
     }
-
-    // ✅ جرّب نطبع session فوراً للتأكد
-    (async ()=>{
-      try{
-        const { data } = await supabase.auth.getSession();
-        const ok = !!data?.session?.user;
-        // ما منعمل overlay، بس Debug خفيف إذا مش مسجل
-        if(!ok) debug("Note: No session found. You must login first on same domain (/baroud-app/).");
-      }catch(e){}
-    })();
   </script>
 </body>
 </html>
