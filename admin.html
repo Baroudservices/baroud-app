@@ -38,6 +38,7 @@ th{color:#93c5fd;text-align:left}
 .actionBtn:active{transform:scale(.98)}
 .actionBtn.okBtn{background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.35)}
 .actionBtn.noBtn{background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.35)}
+.actionBtn:disabled{opacity:.55; cursor:not-allowed; transform:none}
 </style>
 </head>
 
@@ -88,6 +89,21 @@ function esc(s){
     .replaceAll("'","&#039;");
 }
 
+// إذا id رقم => bigint ، إذا uuid => string
+function normalizeDepositId(raw){
+  const s = String(raw ?? "").trim();
+  // digits only => send as Number (bigint)
+  if (/^\d+$/.test(s)) return Number(s);
+  // otherwise keep as string (uuid)
+  return s;
+}
+
+function setBusy(isBusy){
+  btnRefresh.disabled = isBusy;
+  btnLogout.disabled = isBusy;
+  rowsEl.querySelectorAll("button.actionBtn").forEach(b => b.disabled = isBusy);
+}
+
 async function load(){
   rowsEl.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
   emptyEl.style.display = "none";
@@ -126,20 +142,21 @@ async function load(){
       return;
     }
 
-    // ✅ Render rows (بدون onclick)
+    // ✅ Render rows
     rowsEl.innerHTML = "";
     for(const d of data){
-      const stClass = d.status==="approved" ? "ok" : d.status==="rejected" ? "no" : "";
+      const st = String(d.status || "pending");
+      const stClass = st==="approved" ? "ok" : st==="rejected" ? "no" : "";
       rowsEl.innerHTML += `
         <tr>
           <td>${esc(d.id)}</td>
           <td>${esc(d.user_id)}</td>
           <td>$${esc(d.amount)}</td>
           <td>${esc(d.method)}</td>
-          <td class="status ${stClass}">${esc(d.status)}</td>
+          <td class="status ${stClass}">${esc(st)}</td>
           <td>
-            <button class="actionBtn okBtn" data-id="${esc(d.id)}" data-status="approved">✔</button>
-            <button class="actionBtn noBtn" data-id="${esc(d.id)}" data-status="rejected">✖</button>
+            <button class="actionBtn okBtn" data-id="${esc(d.id)}" data-status="approved" title="Approve">✔</button>
+            <button class="actionBtn noBtn" data-id="${esc(d.id)}" data-status="rejected" title="Reject">✖</button>
           </td>
         </tr>`;
     }
@@ -149,18 +166,25 @@ async function load(){
   }
 }
 
-async function setStatus(id, status){
+async function setStatus(rawId, status){
   try{
-    // ✅ Recommended (RLS safe) via RPC function
+    setBusy(true);
+
+    const id = normalizeDepositId(rawId);
+
+    // ✅ RPC (RLS safe) via function
     const { error } = await sb.rpc("admin_set_deposit_status", {
       p_deposit_id: id,
       p_status: status
     });
+
     if(error) throw error;
 
     await load();
   }catch(e){
     alert(e?.message || e);
+  }finally{
+    setBusy(false);
   }
 }
 
@@ -169,7 +193,7 @@ async function logout(){
   location.href="login.html";
 }
 
-// ✅ Event delegation for action buttons
+// ✅ Event delegation
 rowsEl.addEventListener("click", (ev)=>{
   const btn = ev.target.closest("button[data-id][data-status]");
   if(!btn) return;
