@@ -109,38 +109,35 @@ async function load(){
   emptyEl.style.display = "none";
 
   try{
-    const { data: s, error: sErr } = await sb.auth.getSession();
-    if(sErr) throw sErr;
-    if(!s?.session){ location.href="login.html"; return; }
+  const { data: s, error: sErr } = await sb.auth.getSession();
+  if(sErr) throw sErr;
+  if(!s?.session){ location.href="login.html"; return; }
 
-    // ✅ Admin check
-    const { data: profile, error: pErr } = await sb
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", s.session.user.id)
-      .single();
+  // ✅ Admin check (RLS-safe)
+  const { data: isAdmin, error: aErr } = await sb.rpc("is_admin");
+  if(aErr) throw aErr;
 
-    if(pErr) throw pErr;
+  if(!isAdmin){
+    alert("Not admin");
+    rowsEl.innerHTML = "";
+    return;
+  }
 
-    if(!profile?.is_admin){
-      alert("Not admin");
-      rowsEl.innerHTML = "";
-      return;
-    }
+  // ✅ Load deposits
+  const { data, error } = await sb
+    .from("deposits")
+    .select("*")
+    .order("created_at", { ascending:false });
 
-    // ✅ Load deposits
-    const { data, error } = await sb
-      .from("deposits")
-      .select("*")
-      .order("created_at",{ascending:false});
+  if(error) throw error;
 
-    if(error) throw error;
+  if(!data || !data.length){
+    rowsEl.innerHTML = "";
+    emptyEl.style.display = "block";
+    return;
+  }
 
-    if(!data || !data.length){
-      rowsEl.innerHTML = "";
-      emptyEl.style.display = "block";
-      return;
-    }
+  // ... كمّل رندر التابل هون
 
     // ✅ Render rows
     rowsEl.innerHTML = "";
