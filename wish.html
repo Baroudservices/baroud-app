@@ -179,6 +179,14 @@
       line-height:1.3;
       opacity:.9;
     }
+    /* ✅ تأكيد ما في شي يغطي الزر */
+.btn{ position:relative; z-index:50; }
+.fileBtn{ position:relative; z-index:40; }
+.glass, .wrap, body{ position:relative; }
+
+/* ✅ overlay ما يسرق اللمس إلا وقت يكون show */
+.overlay{ pointer-events:none; }
+.overlay.show{ pointer-events:auto; }
   </style>
 </head>
 
@@ -195,30 +203,34 @@
     <div class="title">Whish Money $</div>
 
     <div class="glass">
-      <div class="box">
-        <div style="color:var(--muted);font-weight:700;">Please send the amount to this number ID:</div>
-        <div class="id">+961 70385398</div>
-        <div style="margin-top:10px;color:var(--muted);font-weight:700;">
-          The minimum deposit is <b style="color:var(--text)">10$</b><br/>
-          It takes between <b style="color:var(--text)">1 & 15</b> minutes
-        </div>
+  <form id="wishForm">
+    <div class="box">
+      <div style="color:var(--muted);font-weight:700;">
+        Please send the amount to this number ID:
       </div>
 
-      <input id="amount" type="number" placeholder="Enter amount $" />
+      <div class="id">+961 70385398</div>
 
-      <!-- ✅ زر رفع صورة بدل input file -->
-      <input id="receipt" type="file" accept="image/*" />
-      <label class="fileBtn" for="receipt">
-        <span>📎 Upload receipt</span>
-        <span class="fileName" id="fileName">No file</span>
-      </label>
-
-      <!-- ✅ TEST: اول ما تكبس لازم يكتب SENDING فوراً -->
-      <button id="btnReq" class="btn" type="button">REQUEST</button>
-
-      <div class="foot">© 2024 Baroud Services</div>
+      <div style="margin-top:10px;color:var(--muted);font-weight:700;">
+        The minimum deposit is <b style="color:var(--text)">10$</b><br/>
+        It takes between <b style="color:var(--text)">1 & 15</b> minutes
+      </div>
     </div>
-  </div>
+
+    <input id="amount" type="number" placeholder="Enter amount $" />
+
+    <input id="receipt" type="file" accept="image/*" />
+    <label class="fileBtn" for="receipt">
+      <span>📎 Upload receipt</span>
+      <span class="fileName" id="fileName">No file</span>
+    </label>
+
+    <!-- ✅ داخل form زر submit -->
+    <button id="btnReq" class="btn" type="submit">REQUEST</button>
+
+    <div class="foot">© 2024 Baroud Services</div>
+  </form>
+</div>
 
   <div id="debug" class="debug">Debug: page loaded ✅</div>
 
@@ -232,107 +244,83 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const debugEl = document.getElementById("debug");
-    function debug(msg){ debugEl.textContent = msg; }
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function showOverlay(title, msg){
-      document.getElementById("ovTitle").textContent = title;
-      document.getElementById("ovMsg").textContent = msg;
-      document.getElementById("overlay").classList.add("show");
-    }
-    function hideOverlay(){
-      document.getElementById("overlay").classList.remove("show");
-    }
+  const receipt = document.getElementById("receipt");
+  const fileNameEl = document.getElementById("fileName");
+  receipt.addEventListener("change", ()=>{
+    fileNameEl.textContent = receipt.files?.[0]?.name ? receipt.files[0].name : "No file";
+  });
 
-    window.addEventListener("error", (e)=>{
-      debug("JS Error:\n" + (e?.message || "unknown") + "\n" + (e?.filename||"") + ":" + (e?.lineno||""));
-    });
-    window.addEventListener("unhandledrejection", (e)=>{
-      debug("Unhandled Promise:\n" + (e?.reason?.message || String(e?.reason || "unknown")));
-    });
+  function showOverlay(title, msg){
+    document.getElementById("ovTitle").textContent = title;
+    document.getElementById("ovMsg").textContent = msg;
+    document.getElementById("overlay").classList.add("show");
+  }
+  function hideOverlay(){
+    document.getElementById("overlay").classList.remove("show");
+  }
+  window.hideOverlay = hideOverlay;
 
-    // ✅ عرض اسم الملف
-    const receipt = document.getElementById("receipt");
-    const fileNameEl = document.getElementById("fileName");
-    receipt.addEventListener("change", ()=>{
-      fileNameEl.textContent = receipt.files?.[0]?.name ? receipt.files[0].name : "No file";
-    });
+  const form = document.getElementById("wishForm");
+  const btnReq = document.getElementById("btnReq");
+  let sending = false;
 
-    // ✅ Supabase
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  form.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    if(sending) return;
+    sending = true;
 
-    const btnReq = document.getElementById("btnReq");
+    const amountEl = document.getElementById("amount");
+    const amount = Number(amountEl.value);
+    const file = receipt.files?.[0];
 
-    // ✅ click + touch
-    btnReq.addEventListener("click", (e)=>{ e.preventDefault(); requestNow(); });
-    btnReq.addEventListener("touchstart", (e)=>{ e.preventDefault(); requestNow(); }, {passive:false});
+    if(!amount || amount < 10){ sending=false; return showOverlay("Error ❌","Minimum deposit is 10$"); }
+    if(!file){ sending=false; return showOverlay("Error ❌","Please upload receipt image"); }
 
-    let sending = false;
+    btnReq.disabled = true;
+    btnReq.textContent = "SENDING...";
 
-    async function requestNow(){
-      if(sending) return;
-      sending = true;
+    try{
+      const { data: s, error: sErr } = await supabase.auth.getSession();
+      if(sErr) throw sErr;
 
-      debug("Clicked ✅ Starting...");
-
-      const amountEl = document.getElementById("amount");
-      const amount = Number(amountEl.value);
-      const file = receipt.files?.[0];
-
-      if(!amount || amount < 10){ sending=false; return showOverlay("Error ❌","Minimum deposit is 10$"); }
-      if(!file){ sending=false; return showOverlay("Error ❌","Please upload receipt image"); }
-
-      btnReq.disabled = true;
-      btnReq.textContent = "SENDING...";
-
-      try{
-        debug("1) Session...");
-        const { data: s, error: sErr } = await supabase.auth.getSession();
-        if(sErr) throw sErr;
-
-        const user = s?.session?.user;
-        if(!user){
-          debug("No session -> login");
-          location.replace("/baroud-app/login.html?v=" + Date.now());
-          return;
-        }
-
-        debug("2) Upload...");
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-        const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
-        const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
-
-        const { error: upErr } = await supabase.storage.from("receipts").upload(fileName, file, { upsert:false });
-        if(upErr) throw upErr;
-
-        debug("3) Insert...");
-        const { error: insErr } = await supabase.from("deposits").insert([{
-          user_id: user.id,
-          method: "Whish Money",
-          amount,
-          receipt_path: fileName,
-          status: "pending"
-        }]);
-        if(insErr) throw insErr;
-
-        debug("DONE ✅");
-        showOverlay("Request sent ✅","Your deposit request is pending.");
-        amountEl.value = "";
-        receipt.value = "";
-        fileNameEl.textContent = "No file";
-
-      }catch(err){
-        const msg = err?.message || JSON.stringify(err);
-        debug("FAILED ❌\n" + msg);
-        showOverlay("Failed ❌", msg);
-      }finally{
-        btnReq.disabled = false;
-        btnReq.textContent = "REQUEST";
-        sending = false;
+      const user = s?.session?.user;
+      if(!user){
+        location.replace("login.html?v=" + Date.now());
+        return;
       }
+
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
+      const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
+
+      const { error: upErr } = await supabase.storage.from("receipts").upload(fileName, file, { upsert:false });
+      if(upErr) throw upErr;
+
+      const { error: insErr } = await supabase.from("deposits").insert([{
+        user_id: user.id,
+        method: "Whish Money",
+        amount,
+        receipt_path: fileName,
+        status: "pending"
+      }]);
+      if(insErr) throw insErr;
+
+      showOverlay("Request sent ✅","Your deposit request is pending.");
+      amountEl.value = "";
+      receipt.value = "";
+      fileNameEl.textContent = "No file";
+    }catch(err){
+      showOverlay("Failed ❌", err?.message || JSON.stringify(err));
+    }finally{
+      btnReq.disabled = false;
+      btnReq.textContent = "REQUEST";
+      sending = false;
     }
-  </script>
+  });
+</script>
 </body>
 </html>
