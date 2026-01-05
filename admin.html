@@ -35,12 +35,17 @@
       color:#ffd6d6; font-weight:700;
       white-space:pre-wrap;
     }
+    .infoBox{
+      margin:12px 0; padding:12px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:rgba(234,242,255,.85);
+      font-weight:700;
+      white-space:pre-wrap;
+    }
     table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px;}
     th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); font-size:14px;}
     th{color:rgba(234,242,255,.75); text-align:left; font-weight:900;}
-    .status{font-weight:900;}
-    .ok{background:rgba(34,197,94,.18); border:1px solid rgba(34,197,94,.25)}
-    .no{background:rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.25)}
     .miniBtn{
       padding:8px 10px; border-radius:10px; border:0; cursor:pointer;
       color:#fff; font-weight:900; margin-right:6px;
@@ -63,6 +68,9 @@
 
     <div class="card">
       <div id="errorBox" class="errorBox"></div>
+
+      <!-- ✅ Debug مهم: بيقلك إذا في session + إذا انت admin -->
+      <div id="infoBox" class="infoBox">Checking session...</div>
 
       <table>
         <thead>
@@ -89,9 +97,13 @@
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const rowsEl = document.getElementById("rows");
+    const rowsEl  = document.getElementById("rows");
     const emptyEl = document.getElementById("empty");
-    const errorBox = document.getElementById("errorBox");
+    const errorBox= document.getElementById("errorBox");
+    const infoBox = document.getElementById("infoBox");
+
+    let cachedUser = null;
+    let cachedIsAdmin = false;
 
     function showError(msg){
       errorBox.style.display = "block";
@@ -101,20 +113,25 @@
       errorBox.style.display = "none";
       errorBox.textContent = "";
     }
+    function setInfo(msg){
+      infoBox.textContent = msg;
+    }
 
     async function requireAdmin(){
-      // 1) لازم session
+      clearError();
+
+      // ✅ 1) session
       const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
       if(sessionErr) throw sessionErr;
 
       const user = sessionData?.session?.user;
       if(!user){
-        showError("Not logged in. Redirecting to login...");
+        setInfo("No session ❌ (Not logged in)\nRedirecting to login...");
         location.replace("login.html?v=" + Date.now());
         return null;
       }
 
-      // 2) لازم يقدر يقرا profiles ليتأكد is_admin
+      // ✅ 2) read profile => is_admin
       const { data: prof, error: profErr } = await supabase
         .from("profiles")
         .select("id, is_admin")
@@ -124,9 +141,14 @@
       if(profErr) throw profErr;
 
       if(!prof?.is_admin){
+        setInfo("Logged in ✅\nUser: " + user.id + "\nAdmin: NO ❌");
         showError("Access denied: you are not admin.");
         return null;
       }
+
+      cachedUser = user;
+      cachedIsAdmin = true;
+      setInfo("Logged in ✅\nUser: " + user.id + "\nAdmin: YES ✅\nOrigin: " + location.origin);
 
       return user;
     }
@@ -143,10 +165,9 @@
         .from("deposits")
         .select("id, created_at, user_id, amount, method, status, receipt_path")
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(100);
 
       if(error){
-        // 👇 هون رح يبينلك سبب المشكلة الحقيقي (RLS / table name / JWT...)
         showError("LOAD ERROR:\n" + (error.message || JSON.stringify(error)));
         return;
       }
@@ -163,7 +184,7 @@
           <td style="font-size:12px; opacity:.9;">${r.user_id || "-"}</td>
           <td><b>${r.amount ?? "-"}</b></td>
           <td>${r.method || "-"}</td>
-          <td class="status">${r.status || "-"}</td>
+          <td style="font-weight:900;">${r.status || "-"}</td>
           <td>
             <button class="miniBtn ok" data-act="approve" data-id="${r.id}">Approve</button>
             <button class="miniBtn no" data-act="reject" data-id="${r.id}">Reject</button>
@@ -176,11 +197,28 @@
 
     async function openReceipt(path){
       if(!path) return alert("No receipt path");
-      // bucket receipts public: getPublicUrl
-      const { data } = supabase.storage.from("receipts").getPublicUrl(path);
-      const url = data?.publicUrl;
-      if(!url) return alert("No public URL (check bucket public)");
-      window.open(url, "_blank");
+
+      // ✅ إذا bucket public بيشتغل publicUrl
+      const { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
+      const publicUrl = pub?.publicUrl;
+
+      // جرّب public أولًا
+      if(publicUrl){
+        // ملاحظة: publicUrl موجود دائمًا، بس إذا bucket private ممكن الرابط يفتح error
+        // لذلك منجرّب signed كخيار “آمن”
+      }
+
+      // ✅ Signed URL (شغّال حتى لو bucket private)
+      const { data, error } = await supabase.storage
+        .from("receipts")
+        .createSignedUrl(path, 60 * 10); // 10 min
+
+      if(error){
+        alert("Cannot open receipt: " + error.message);
+        return;
+      }
+
+      window.open(data.signedUrl, "_blank");
     }
 
     async function updateStatus(id, newStatus){
@@ -222,6 +260,13 @@
       location.replace("login.html?v=" + Date.now());
     });
 
+    // ✅ مهم: استنى auth يثبت (حل مشكلة “فاضي”)
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if(session) loadDeposits();
+      else setInfo("No session ❌ (Not logged in)\nOrigin: " + location.origin);
+    });
+
+    // أول تحميل
     loadDeposits();
   </script>
 </body>
