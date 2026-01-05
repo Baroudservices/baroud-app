@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Orders</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:linear-gradient(180deg,#0b1424,#050a14);
+  color:#fff;
+  min-height:100vh;
+  padding:16px;
+}
+.wrap{max-width:520px;margin:auto}
+.top{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.back{
+  padding:10px 14px;
+  border-radius:14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+}
+h2{margin:0;font-size:22px}
+
+.card{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.name{font-weight:900}
+.small{opacity:.65;font-size:12px}
+.price{font-weight:900;color:#38bdf8}
+
+.status{
+  font-weight:900;
+}
+.paid{color:#22c55e}
+.pending{color:#fbbf24}
+.cancelled{color:#ef4444}
+
+.empty{
+  opacity:.6;
+  text-align:center;
+  margin-top:40px;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="back" onclick="history.back()">←</div>
+    <h2>My Orders</h2>
+  </div>
+
+  <div id="list"></div>
+  <div id="empty" class="empty" style="display:none">
+    No orders yet
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const listEl = document.getElementById("list");
+const emptyEl = document.getElementById("empty");
+
+function esc(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+(async ()=>{
+  const { data: s } = await sb.auth.getSession();
+  if(!s?.session?.user){
+    location.replace("login.html");
+    return;
+  }
+
+  const { data, error } = await sb
+    .from("orders")
+    .select(`
+      id,
+      price,
+      status,
+      created_at,
+      products(title)
+    `)
+    .order("created_at",{ascending:false});
+
+  if(error){
+    listEl.innerHTML = `<div class="empty">Error loading orders</div>`;
+    return;
+  }
+
+  if(!data || !data.length){
+    emptyEl.style.display = "block";
+    return;
+  }
+
+  for(const o of data){
+    const stClass =
+      o.status === "paid" ? "paid" :
+      o.status === "pending" ? "pending" : "cancelled";
+
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <div class="row">
+        <div>
+          <div class="name">${esc(o.products?.title || "Product")}</div>
+          <div class="small">${new Date(o.created_at).toLocaleString()}</div>
+        </div>
+        <div class="price">$${Number(o.price).toFixed(2)}</div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="small">Order #${o.id}</div>
+        <div class="status ${stClass}">${esc(o.status)}</div>
+      </div>
+    `;
+    listEl.appendChild(el);
+  }
+})();
+</script>
+</body>
+</html>
