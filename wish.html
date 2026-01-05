@@ -50,6 +50,7 @@
       border-radius:var(--r);
       padding:18px;
       box-shadow:var(--shadow);
+      position:relative;
     }
 
     .box{
@@ -85,7 +86,7 @@
       display:block;
     }
 
-    /* ✅ اخفاء input file نهائياً (هو سبب المشكلة غالباً) */
+    /* ✅ نخفي file input لأن كتير موبايلات بتخربط اللمس فوقه */
     #receipt{
       position:absolute;
       left:-9999px;
@@ -108,6 +109,8 @@
       justify-content:space-between;
       gap:10px;
       -webkit-tap-highlight-color:transparent;
+      position:relative;
+      z-index:10;
     }
     .fileName{
       opacity:.75;
@@ -132,6 +135,8 @@
       background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
       box-shadow:0 18px 45px rgba(37,99,235,.25);
       -webkit-tap-highlight-color:transparent;
+      position:relative;
+      z-index:20;
     }
     .btn:active{transform:scale(.99)}
     .btn:disabled{opacity:.6; cursor:not-allowed}
@@ -165,162 +170,221 @@
       background:rgba(255,255,255,.10);color:#fff;
     }
 
-    /* ✅ debug ظاهر دائماً */
-    .debug{
-      max-width:460px;margin:10px auto 0;
-      display:block;
+    /* ✅ Debug مخفي، بيبين بس وقت الخطأ */
+    .debugWrap{
+      max-width:460px;
+      margin:10px auto 0;
+      display:none;
+      gap:10px;
+      flex-direction:column;
+    }
+    .debugBox{
       white-space:pre-wrap;
       padding:12px 14px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.06);
-      color:rgba(234,242,255,.9);
+      color:rgba(234,242,255,.95);
       font-weight:800;
       line-height:1.3;
-      opacity:.9;
+      opacity:.95;
     }
-    /* ✅ تأكيد ما في شي يغطي الزر */
-.btn{ position:relative; z-index:50; }
-.fileBtn{ position:relative; z-index:40; }
-.glass, .wrap, body{ position:relative; }
-
-/* ✅ overlay ما يسرق اللمس إلا وقت يكون show */
-.overlay{ pointer-events:none; }
-.overlay.show{ pointer-events:auto; }
+    .dbgBtn{
+      border:0;
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      background:rgba(255,255,255,.10);
+      color:#fff;
+      font-weight:900;
+      width:fit-content;
+    }
   </style>
 </head>
 
 <body>
   <div class="topbar">
-    <a class="back" href="/baroud-app/add-credit.html">← رجوع</a>
+    <!-- ✅ relative path -->
+    <a class="back" href="add-credit.html">← رجوع</a>
   </div>
 
   <div class="wrap">
     <div class="wishLogo">
-      <img src="/baroud-app/assets/wish.png" alt="Wish Money">
+      <!-- ✅ relative path -->
+      <img src="assets/wish.png" alt="Wish Money">
     </div>
 
     <div class="title">Whish Money $</div>
 
     <div class="glass">
-  <form id="wishForm">
-    <div class="box">
-      <div style="color:var(--muted);font-weight:700;">
-        Please send the amount to this number ID:
+      <div class="box">
+        <div style="color:var(--muted);font-weight:700;">
+          Please send the amount to this number ID:
+        </div>
+
+        <div class="id">+961 70385398</div>
+
+        <div style="margin-top:10px;color:var(--muted);font-weight:700;">
+          The minimum deposit is <b style="color:var(--text)">10$</b><br/>
+          It takes between <b style="color:var(--text)">1 & 15</b> minutes
+        </div>
       </div>
 
-      <div class="id">+961 70385398</div>
+      <input id="amount" type="number" placeholder="Enter amount $" inputmode="numeric" />
 
-      <div style="margin-top:10px;color:var(--muted);font-weight:700;">
-        The minimum deposit is <b style="color:var(--text)">10$</b><br/>
-        It takes between <b style="color:var(--text)">1 & 15</b> minutes
-      </div>
+      <input id="receipt" type="file" accept="image/*" />
+      <label class="fileBtn" for="receipt">
+        <span>📎 Upload receipt</span>
+        <span class="fileName" id="fileName">No file</span>
+      </label>
+
+      <!-- ✅ أهم تعديل: type=button (بدون submit) -->
+      <button id="btnReq" class="btn" type="button">REQUEST</button>
+
+      <div class="foot">© 2024 Baroud Services</div>
     </div>
+  </div>
 
-    <input id="amount" type="number" placeholder="Enter amount $" />
+  <!-- ✅ Debug -->
+  <div class="debugWrap" id="debugWrap">
+    <button class="dbgBtn" id="dbgToggle" type="button">Hide debug</button>
+    <div class="debugBox" id="debugBox">Debug ready…</div>
+  </div>
 
-    <input id="receipt" type="file" accept="image/*" />
-    <label class="fileBtn" for="receipt">
-      <span>📎 Upload receipt</span>
-      <span class="fileName" id="fileName">No file</span>
-    </label>
-
-    <!-- ✅ داخل form زر submit -->
-    <button id="btnReq" class="btn" type="submit">REQUEST</button>
-
-    <div class="foot">© 2024 Baroud Services</div>
-  </form>
-</div>
-
-  <div id="debug" class="debug">Debug: page loaded ✅</div>
-
-  <div class="overlay" id="overlay">
+  <div class="overlay" id="overlay" aria-hidden="true">
     <div class="modal">
       <h3 id="ovTitle">Done</h3>
       <p id="ovMsg">...</p>
-      <button class="ok" type="button" onclick="hideOverlay()">OK</button>
+      <button id="ovOk" class="ok" type="button">OK</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const receipt = document.getElementById("receipt");
-  const fileNameEl = document.getElementById("fileName");
-  receipt.addEventListener("change", ()=>{
-    fileNameEl.textContent = receipt.files?.[0]?.name ? receipt.files[0].name : "No file";
-  });
+    const receipt = document.getElementById("receipt");
+    const fileNameEl = document.getElementById("fileName");
+    const btnReq = document.getElementById("btnReq");
 
-  function showOverlay(title, msg){
-    document.getElementById("ovTitle").textContent = title;
-    document.getElementById("ovMsg").textContent = msg;
-    document.getElementById("overlay").classList.add("show");
-  }
-  function hideOverlay(){
-    document.getElementById("overlay").classList.remove("show");
-  }
-  window.hideOverlay = hideOverlay;
+    const debugWrap = document.getElementById("debugWrap");
+    const debugBox = document.getElementById("debugBox");
+    const dbgToggle = document.getElementById("dbgToggle");
 
-  const form = document.getElementById("wishForm");
-  const btnReq = document.getElementById("btnReq");
-  let sending = false;
+    function dbg(msg){
+      // بيظهر فقط وقت الخطأ/التتبّع
+      debugWrap.style.display = "flex";
+      debugBox.textContent = String(msg);
+    }
 
-  form.addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    if(sending) return;
-    sending = true;
+    dbgToggle.addEventListener("click", ()=>{
+      if(debugBox.style.display === "none"){
+        debugBox.style.display = "block";
+        dbgToggle.textContent = "Hide debug";
+      }else{
+        debugBox.style.display = "none";
+        dbgToggle.textContent = "Show debug";
+      }
+    });
 
-    const amountEl = document.getElementById("amount");
-    const amount = Number(amountEl.value);
-    const file = receipt.files?.[0];
+    window.addEventListener("error", (e)=>{
+      dbg("JS ERROR:\n" + (e?.message || "unknown") + "\n" + (e?.filename || "") + ":" + (e?.lineno || "") );
+    });
+    window.addEventListener("unhandledrejection", (e)=>{
+      dbg("PROMISE ERROR:\n" + (e?.reason?.message || JSON.stringify(e?.reason) || "unknown"));
+    });
 
-    if(!amount || amount < 10){ sending=false; return showOverlay("Error ❌","Minimum deposit is 10$"); }
-    if(!file){ sending=false; return showOverlay("Error ❌","Please upload receipt image"); }
+    receipt.addEventListener("change", ()=>{
+      fileNameEl.textContent = receipt.files?.[0]?.name ? receipt.files[0].name : "No file";
+    });
 
-    btnReq.disabled = true;
-    btnReq.textContent = "SENDING...";
+    function showOverlay(title, msg){
+      document.getElementById("ovTitle").textContent = title;
+      document.getElementById("ovMsg").textContent = msg;
+      document.getElementById("overlay").classList.add("show");
+    }
+    function hideOverlay(){
+      document.getElementById("overlay").classList.remove("show");
+    }
+    document.getElementById("ovOk").addEventListener("click", hideOverlay);
 
-    try{
-      const { data: s, error: sErr } = await supabase.auth.getSession();
-      if(sErr) throw sErr;
+    let sending = false;
 
-      const user = s?.session?.user;
-      if(!user){
-        location.replace("login.html?v=" + Date.now());
-        return;
+    async function requestNow(){
+      if(sending) return;
+      sending = true;
+
+      const amountEl = document.getElementById("amount");
+      const amount = Number(amountEl.value);
+      const file = receipt.files?.[0];
+
+      if(!amount || amount < 10){
+        sending = false;
+        return showOverlay("Error ❌","Minimum deposit is 10$");
+      }
+      if(!file){
+        sending = false;
+        return showOverlay("Error ❌","Please upload receipt image");
       }
 
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
-      const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
+      btnReq.disabled = true;
+      btnReq.textContent = "SENDING...";
 
-      const { error: upErr } = await supabase.storage.from("receipts").upload(fileName, file, { upsert:false });
-      if(upErr) throw upErr;
+      try{
+        const { data: s, error: sErr } = await supabase.auth.getSession();
+        if(sErr) throw sErr;
 
-      const { error: insErr } = await supabase.from("deposits").insert([{
-        user_id: user.id,
-        method: "Whish Money",
-        amount,
-        receipt_path: fileName,
-        status: "pending"
-      }]);
-      if(insErr) throw insErr;
+        const user = s?.session?.user;
+        if(!user){
+          // ✅ ما منعمل redirect إلا إذا مش عامل login
+          location.replace("login.html?v=" + Date.now());
+          return;
+        }
 
-      showOverlay("Request sent ✅","Your deposit request is pending.");
-      amountEl.value = "";
-      receipt.value = "";
-      fileNameEl.textContent = "No file";
-    }catch(err){
-      showOverlay("Failed ❌", err?.message || JSON.stringify(err));
-    }finally{
-      btnReq.disabled = false;
-      btnReq.textContent = "REQUEST";
-      sending = false;
+        // ✅ upload
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
+        const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
+
+        const { error: upErr } = await supabase
+          .storage
+          .from("receipts")
+          .upload(fileName, file, { upsert:false });
+
+        if(upErr) throw upErr;
+
+        // ✅ insert
+        const { error: insErr } = await supabase.from("deposits").insert([{
+          user_id: user.id,
+          method: "Whish Money",
+          amount,
+          receipt_path: fileName,
+          status: "pending"
+        }]);
+
+        if(insErr) throw insErr;
+
+        showOverlay("Request sent ✅","Your deposit request is pending.");
+        amountEl.value = "";
+        receipt.value = "";
+        fileNameEl.textContent = "No file";
+
+      }catch(err){
+        // ✅ هون بيبين السبب الحقيقي (RLS / permission / bucket / ...)
+        dbg("REQUEST FAILED:\n" + (err?.message || JSON.stringify(err)));
+        showOverlay("Failed ❌", err?.message || "Unknown error");
+      }finally{
+        btnReq.disabled = false;
+        btnReq.textContent = "REQUEST";
+        sending = false;
+      }
     }
-  });
-</script>
+
+    // ✅ click + touch لتفادي مشاكل الموبايل
+    btnReq.addEventListener("click", requestNow, { passive:false });
+    btnReq.addEventListener("touchend", (e)=>{ e.preventDefault(); requestNow(); }, { passive:false });
+  </script>
 </body>
 </html>
