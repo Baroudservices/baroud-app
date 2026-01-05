@@ -56,10 +56,10 @@ h2{margin:0;font-size:22px}
 
 .replyBox{
   margin-top:10px;
-  padding:10px 12px;
+  padding:12px;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.06);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
 }
 .replyLabel{
   opacity:.7;
@@ -71,11 +71,22 @@ h2{margin:0;font-size:22px}
   font-weight:900;
   line-height:1.35;
 }
-.replyEmpty{
-  opacity:.5;
-  font-weight:800;
+.replyText{
+  opacity:.85;
+  font-size:14px;
+}
+.replyStatus{
+  font-weight:900;
+  margin-bottom:6px;
 }
 
+.replyStatus.pending{
+  color:#fbbf24; /* أصفر */
+}
+
+.replyStatus.done{
+  color:#22c55e; /* أخضر */
+}
 .empty{
   opacity:.6;
   text-align:center;
@@ -173,14 +184,16 @@ function esc(s){
 
       <!-- ✅ Admin Reply -->
       <div class="replyBox">
-        <div class="replyLabel">Admin Reply</div>
-        <div class="replyText">
-          ${
-            hasReply
-              ? esc(o.admin_reply)
-              : `<span class="replyEmpty">No reply yet</span>`
-          }
-        </div>
+  <div class="replyStatus ${o.admin_reply ? 'done' : 'pending'}">
+    Status: ${o.admin_reply ? 'Done' : 'Pending'}
+  </div>
+
+  ${o.admin_reply ? `
+    <div class="replyText">${esc(o.admin_reply)}</div>
+  ` : `
+    <div class="replyText">Waiting for reply…</div>
+  `}
+</div>
       </div>
     `;
 
