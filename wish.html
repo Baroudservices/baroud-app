@@ -156,25 +156,89 @@
   </div>
 
   <script>
-    // ✅ رجوع مضمون: ما بيعتمد على history (لأنه أحياناً بيرجعك نسخة قديمة)
-    function goBack(){
-      window.location.replace("add-credit.html?v=" + Date.now());
+  // ✅ Supabase Client
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ✅ رجوع مضمون (بدون history)
+  function goBack(){
+    window.location.replace("add-credit.html?v=" + Date.now());
+  }
+
+  // ✅ إرسال طلب Whish Money
+  async function requestNow(){
+    const amountEl = document.getElementById("amount");
+    const fileEl   = document.getElementById("receipt");
+
+    const amount = Number(amountEl.value);
+    const file   = fileEl.files?.[0];
+
+    if(!amount || amount < 10){
+      alert("Minimum deposit is 10$");
+      return;
+    }
+    if(!file){
+      alert("Please upload receipt image");
+      return;
     }
 
-    function requestNow(){
-      const amount = document.getElementById("amount").value;
-      const file = document.getElementById("receipt").files[0];
-      if(!amount || Number(amount) < 10){
-        alert("Minimum deposit is 10$");
-        return;
-      }
-      if(!file){
-        alert("Please upload receipt image");
-        return;
-      }
-      alert("Request sent ✅ (later we connect Supabase upload)");
+    // ✅ تأكد إنو المستخدم عامل Login
+    const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+    if (sessionErr){
+      console.error(sessionErr);
+      alert("Session error, please login again.");
+      location.replace("login.html?v=" + Date.now());
+      return;
     }
-  </script>
+
+    const user = sessionData.session?.user;
+    if(!user){
+      alert("Please login first");
+      location.replace("login.html?v=" + Date.now());
+      return;
+    }
+
+    // ✅ 1) رفع الصورة على Storage bucket: receipts
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
+    const fileName = `${user.id}/${Date.now()}.${safeExt}`;
+
+    const { error: uploadError } = await supabase
+      .storage
+      .from("receipts")
+      .upload(fileName, file, { upsert: false });
+
+    if(uploadError){
+      console.error(uploadError);
+      alert("Upload failed ❌");
+      return;
+    }
+
+    // ✅ 2) إدخال الطلب بجدول deposits
+    const { error: insertError } = await supabase
+      .from("deposits")
+      .insert({
+        user_id: user.id,
+        method: "Whish Money",
+        amount: amount,
+        receipt_path: fileName,
+        status: "pending"
+      });
+
+    if(insertError){
+      console.error(insertError);
+      alert("Failed to save request ❌");
+      return;
+    }
+
+    alert("Request sent ✅");
+
+    // ✅ تنظيف الفورم
+    amountEl.value = "";
+    fileEl.value = "";
+  }
+</script>
 
 </body>
 </html>
