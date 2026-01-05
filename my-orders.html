@@ -54,6 +54,28 @@ h2{margin:0;font-size:22px}
 .pending{color:#fbbf24}
 .cancelled{color:#ef4444}
 
+.replyBox{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.06);
+}
+.replyLabel{
+  opacity:.7;
+  font-weight:900;
+  font-size:12px;
+}
+.replyText{
+  margin-top:6px;
+  font-weight:900;
+  line-height:1.35;
+}
+.replyEmpty{
+  opacity:.5;
+  font-weight:800;
+}
+
 .empty{
   opacity:.6;
   text-align:center;
@@ -101,6 +123,7 @@ function esc(s){
     return;
   }
 
+  // ✅ جبت admin_reply (+ admin_reply_at اختياري)
   const { data, error } = await sb
     .from("orders")
     .select(`
@@ -108,6 +131,8 @@ function esc(s){
       price,
       status,
       created_at,
+      admin_reply,
+      admin_reply_at,
       products(title)
     `)
     .order("created_at",{ascending:false});
@@ -129,6 +154,9 @@ function esc(s){
 
     const el = document.createElement("div");
     el.className = "card";
+
+    const hasReply = !!(o.admin_reply && String(o.admin_reply).trim().length);
+
     el.innerHTML = `
       <div class="row">
         <div>
@@ -137,11 +165,25 @@ function esc(s){
         </div>
         <div class="price">$${Number(o.price).toFixed(2)}</div>
       </div>
+
       <div class="row" style="margin-top:8px">
         <div class="small">Order #${o.id}</div>
         <div class="status ${stClass}">${esc(o.status)}</div>
       </div>
+
+      <!-- ✅ Admin Reply -->
+      <div class="replyBox">
+        <div class="replyLabel">Admin Reply</div>
+        <div class="replyText">
+          ${
+            hasReply
+              ? esc(o.admin_reply)
+              : `<span class="replyEmpty">No reply yet</span>`
+          }
+        </div>
+      </div>
     `;
+
     listEl.appendChild(el);
   }
 })();
