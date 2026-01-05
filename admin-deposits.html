@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Deposits</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --bg1:#060b16; --bg2:#0a1330;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.10);
+      --text:#eaf2ff;
+      --muted:rgba(234,242,255,.65);
+      --shadow:0 20px 60px rgba(0,0,0,.55);
+      --r:20px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
+        radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
+        linear-gradient(160deg,var(--bg1),var(--bg2));
+      padding:14px;
+    }
+    .wrap{max-width:900px;margin:0 auto;}
+    .top{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin:8px 0 14px;
+    }
+    .title{font-size:22px;font-weight:900}
+    .btn{
+      border:0; cursor:pointer; font-weight:900;
+      padding:10px 14px; border-radius:14px;
+      color:#fff;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .panel{
+      border:1px solid var(--stroke);
+      background:var(--card);
+      backdrop-filter:blur(14px);
+      border-radius:var(--r);
+      padding:14px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 80px 1fr 110px 150px 160px 220px;
+      gap:10px;
+      padding:10px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      align-items:center;
+      font-size:14px;
+    }
+    .row.head{font-weight:900; opacity:.9}
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      font-weight:900;
+      text-align:center;
+      width:max-content;
+    }
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .ok{
+      background:linear-gradient(90deg, rgba(34,197,94,.95), rgba(16,185,129,.95));
+      box-shadow:0 18px 45px rgba(16,185,129,.20);
+    }
+    .no{
+      background:linear-gradient(90deg, rgba(239,68,68,.95), rgba(244,63,94,.95));
+      box-shadow:0 18px 45px rgba(244,63,94,.20);
+    }
+    .small{font-size:12px;color:var(--muted)}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .notice{margin-top:10px;color:var(--muted);font-size:13px}
+    @media (max-width: 900px){
+      .row{grid-template-columns: 70px 1fr 90px 120px 140px 1fr;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="title">Admin – Deposit Requests</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="btnRefresh">Refresh</button>
+        <button class="btn" id="btnLogout">Logout</button>
+      </div>
+    </div>
+
+    <div class="panel" id="panel">
+      <div class="row head">
+        <div>ID</div>
+        <div>User</div>
+        <div>Amount</div>
+        <div>Method</div>
+        <div>Status</div>
+        <div>Actions</div>
+      </div>
+      <div id="list"></div>
+      <div class="notice" id="note"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const listEl = document.getElementById("list");
+    const noteEl = document.getElementById("note");
+
+    function esc(s){ return (s ?? "").toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    async function ensureAdmin(){
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData?.session?.user;
+      if(!user){
+        location.replace("login.html?v=" + Date.now());
+        return null;
+      }
+
+      // check is_admin from profiles
+      const { data: prof, error } = await supabase
+        .from("profiles")
+        .select("id,is_admin")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if(error || !prof?.is_admin){
+        alert("Not admin ❌");
+        location.replace("index.html?v=" + Date.now());
+        return null;
+      }
+      return user;
+    }
+
+    async function loadDeposits(){
+      listEl.innerHTML = "";
+      noteEl.textContent = "Loading...";
+      const user = await ensureAdmin();
+      if(!user) return;
+
+      // load pending first (and latest)
+      const { data, error } = await supabase
+        .from("deposits")
+        .select("id,user_id,amount,method,status,receipt_path,created_at")
+        .order("created_at", { ascending:false })
+        .limit(50);
+
+      if(error){
+        console.error(error);
+        noteEl.textContent = "Error: " + (error.message || "failed");
+        return;
+      }
+
+      if(!data || data.length === 0){
+        noteEl.textContent = "No deposits yet.";
+        return;
+      }
+
+      noteEl.textContent = "Showing last 50 requests.";
+      data.forEach(row => {
+        const status = row.status || "pending";
+        const receipt = row.receipt_path ? row.receipt_path : "";
+
+        const div = document.createElement("div");
+        div.className = "row";
+        div.innerHTML = `
+          <div class="mono">${esc(row.id)}</div>
+          <div class="mono small">${esc(row.user_id)}</div>
+          <div><span class="badge">$${esc(row.amount)}</span></div>
+          <div>${esc(row.method || "")}</div>
+          <div><span class="badge">${esc(status)}</span></div>
+          <div class="actions">
+            <button class="btn ok" data-act="approve" data-id="${esc(row.id)}" ${status!=="pending" ? "disabled" : ""}>Approve</button>
+            <button class="btn no" data-act="reject" data-id="${esc(row.id)}" ${status!=="pending" ? "disabled" : ""}>Reject</button>
+            ${receipt ? `<button class="btn" data-act="receipt" data-path="${esc(receipt)}">Receipt</button>` : `<span class="small">No receipt</span>`}
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+    }
+
+    async function openReceipt(path){
+      // نجيب public URL (اذا bucket public) أو signed URL (اذا private)
+      // ✅ جرّب public أولاً:
+      let { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
+      const publicUrl = pub?.publicUrl;
+
+      // إذا مش public أو ما اشتغل، اعمل signed url:
+      if(!publicUrl){
+        const { data, error } = await supabase.storage.from("receipts").createSignedUrl(path, 60);
+        if(error) return alert("Cannot open receipt: " + error.message);
+        window.open(data.signedUrl, "_blank");
+        return;
+      }
+
+      window.open(publicUrl, "_blank");
+    }
+
+    async function updateStatus(id, newStatus){
+      if(!confirm(`Set deposit #${id} to ${newStatus}?`)) return;
+
+      const { error } = await supabase
+        .from("deposits")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if(error){
+        console.error(error);
+        alert("Failed: " + (error.message || "error"));
+        return;
+      }
+
+      // ✅ إذا عندك trigger: الرصيد بينضاف تلقائي لما يصير approved
+      alert(newStatus === "approved"
+        ? "Approved ✅ (balance will be credited automatically)"
+        : "Rejected ✅"
+      );
+
+      loadDeposits();
+    }
+
+    document.getElementById("btnRefresh").addEventListener("click", loadDeposits);
+
+    document.getElementById("btnLogout").addEventListener("click", async ()=>{
+      await supabase.auth.signOut();
+      location.replace("login.html?v=" + Date.now());
+    });
+
+    document.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button");
+      if(!btn) return;
+      const act = btn.dataset.act;
+      if(act === "approve") updateStatus(btn.dataset.id, "approved");
+      if(act === "reject")  updateStatus(btn.dataset.id, "rejected");
+      if(act === "receipt") openReceipt(btn.dataset.path);
+    });
+
+    loadDeposits();
+  </script>
+</body>
+</html>
