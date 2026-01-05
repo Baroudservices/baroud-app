@@ -43,6 +43,28 @@
       position:relative;
       z-index:1;
     }
+    .support-slider{
+  overflow:hidden;
+  position:relative;
+  width:100%;
+}
+
+.support-track{
+  display:flex;
+  gap:40px;
+  width:max-content;
+  animation: scrollSupport 14s linear infinite;
+}
+
+.support-track span{
+  white-space:nowrap;
+  font-weight:800;
+}
+
+@keyframes scrollSupport{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
 
     /* ===== Topbar ===== */
     .topbar{
@@ -370,8 +392,13 @@
     </div>
 
     <div class="support">
-      Support Number:+961 70385398 | Join Our WhatsApp Community | Fast & Secure Services
+  <div class="support-slider">
+    <div class="support-track">
+      <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
+      <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
     </div>
+  </div>
+</div>
 
     <div class="searchBox">
       <input id="search" placeholder="Search">
