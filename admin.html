@@ -1,163 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Deposit Requests</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:linear-gradient(160deg,#060b16,#0a1330);
+  color:#fff;
+  padding:16px;
+}
+.wrap{max-width:1000px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;background:#1e293b;color:#fff}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #334155;font-size:14px}
+th{color:#93c5fd;text-align:left}
+.status{font-weight:bold}
+.ok{color:#22c55e}
+.no{color:#ef4444}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="top">
+    <h2>Admin – Deposit Requests</h2>
+    <div>
+      <button class="btn" onclick="load()">Refresh</button>
+      <button class="btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Amount</th>
+        <th>Method</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <p id="empty" style="display:none;opacity:.6">No deposits found</p>
+</div>
+
 <script>
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
 
-  // ✅ حط هون anon public key (eyJ...):
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // ✅ نفس storageKey بكل الصفحات (login/admin/wish)
-  const STORAGE_KEY = "baroud_auth_v1";
+async function load(){
+  const rows = document.getElementById("rows");
+  const empty = document.getElementById("empty");
+  rows.innerHTML="";
+  empty.style.display="none";
 
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storageKey: STORAGE_KEY
-    }
+  const { data: s } = await sb.auth.getSession();
+  if(!s.session){ location.href="login.html"; return; }
+
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", s.session.user.id)
+    .single();
+
+  if(!profile?.is_admin){
+    alert("Not admin");
+    return;
+  }
+
+  const { data, error } = await sb
+    .from("deposits")
+    .select("*")
+    .order("created_at",{ascending:false});
+
+  if(error){ alert(error.message); return; }
+
+  if(!data.length){ empty.style.display="block"; return; }
+
+  data.forEach(d=>{
+    rows.innerHTML += `
+      <tr>
+        <td>${d.id}</td>
+        <td>${d.user_id}</td>
+        <td>$${d.amount}</td>
+        <td>${d.method}</td>
+        <td class="status ${d.status==="approved"?"ok":d.status==="rejected"?"no":""}">
+          ${d.status}
+        </td>
+        <td>
+          <button onclick="setStatus(${d.id},'approved')">✔</button>
+          <button onclick="setStatus(${d.id},'rejected')">✖</button>
+        </td>
+      </tr>`;
   });
+}
 
-  const msg = document.getElementById("msg");
-  const loginBtn = document.getElementById("loginBtn");
-  const registerBtn = document.getElementById("registerBtn");
-  const resetBtn = document.getElementById("resetBtn");
+async function setStatus(id,status){
+  await sb.from("deposits").update({status}).eq("id",id);
+  load();
+}
 
-  function showMsg(text, ok=false){
-    msg.style.display="block";
-    msg.className = "msg " + (ok ? "ok" : "err");
-    msg.textContent = text;
-  }
-  function hideMsg(){
-    msg.style.display="none";
-    msg.textContent="";
-  }
-  function setLoading(isLoading, text){
-    loginBtn.disabled = isLoading;
-    registerBtn.disabled = isLoading;
-    resetBtn.disabled = isLoading;
-    loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
-  }
+async function logout(){
+  await sb.auth.signOut();
+  location.href="login.html";
+}
 
-  // ✅ إذا عامل login already -> روح services
-  (async ()=>{
-    try{
-      const { data, error } = await sb.auth.getSession();
-      if(error) console.log(error);
-      if (data.session?.user) location.replace("services.html?v=" + Date.now());
-    }catch(e){}
-  })();
-
-  async function doLogin(){
-    hideMsg();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("pass").value;
-
-    if(!email || !password){
-      showMsg("Fill email and password.");
-      return;
-    }
-
-    setLoading(true, "Signing in...");
-
-    try{
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
-      if (error){
-        showMsg(error.message || "Login failed.");
-        return;
-      }
-
-      const user = data?.user;
-      const confirmedAt = user?.email_confirmed_at || user?.confirmed_at;
-
-      if(!confirmedAt){
-        await sb.auth.signOut();
-        showMsg("Please confirm your email first 📧 (Check your inbox).");
-        return;
-      }
-
-      showMsg("Login successful ✅", true);
-      setTimeout(()=> location.replace("services.html?v=" + Date.now()), 250);
-
-    }catch(e){
-      showMsg("Network error. Try again.");
-    }finally{
-      setLoading(false);
-    }
-  }
-
-  async function doRegister(){
-    hideMsg();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("pass").value;
-
-    if(!email || !password){
-      showMsg("Fill email and password.");
-      return;
-    }
-    if(password.length < 6){
-      showMsg("Password must be at least 6 characters.");
-      return;
-    }
-
-    setLoading(true, "Creating...");
-
-    try{
-      const { error } = await sb.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: "https://baroudservices.github.io/baroud-app/confirmed.html"
-        }
-      });
-
-      if (error){
-        showMsg(error.message || "Register failed.");
-        return;
-      }
-
-      showMsg("Register successful ✅ Check your email 📧", true);
-
-    }catch(e){
-      showMsg("Network error. Try again.");
-    }finally{
-      setLoading(false);
-    }
-  }
-
-  async function doReset(){
-    hideMsg();
-    const email = document.getElementById("email").value.trim();
-    if(!email){
-      showMsg("Enter your email first.");
-      return;
-    }
-
-    setLoading(true, "Sending...");
-
-    try{
-      const { error } = await sb.auth.resetPasswordForEmail(email, {
-        redirectTo: "https://baroudservices.github.io/baroud-app/login.html"
-      });
-
-      if(error){
-        showMsg(error.message || "Reset failed.");
-        return;
-      }
-
-      showMsg("Reset email sent ✅ Check your inbox 📧", true);
-
-    }catch(e){
-      showMsg("Network error. Try again.");
-    }finally{
-      setLoading(false);
-    }
-  }
-
-  loginBtn.addEventListener("click", doLogin);
-  registerBtn.addEventListener("click", doRegister);
-  resetBtn.addEventListener("click", doReset);
-
-  document.getElementById("pass").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter") doLogin();
-  });
+load();
 </script>
+</body>
+</html>
