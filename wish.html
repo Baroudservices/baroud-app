@@ -27,6 +27,18 @@
       padding:18px;
     }
 
+    /* ✅ Debug banner always visible */
+    #dbg{
+      max-width:460px;margin:0 auto 10px;
+      padding:10px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:#fff;font-weight:900;
+      white-space:pre-wrap;
+      position:relative;
+      z-index:999999;
+    }
+
     .topbar{max-width:460px;margin:6px auto 10px;display:flex;gap:12px;}
     .back{
       display:inline-flex;align-items:center;gap:10px;
@@ -36,9 +48,10 @@
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.08);
       -webkit-tap-highlight-color:transparent;
+      position:relative; z-index:50;
     }
 
-    .wrap{max-width:460px;margin:0 auto;}
+    .wrap{max-width:460px;margin:0 auto; position:relative; z-index:1;}
     .wishLogo{display:flex;justify-content:center;margin:10px 0 6px;}
     .wishLogo img{height:60px;display:block;}
     .title{font-size:42px;font-weight:900;margin:14px 0 18px;text-align:center;}
@@ -51,6 +64,7 @@
       padding:18px;
       box-shadow:var(--shadow);
       position:relative;
+      z-index:1;
     }
 
     .box{
@@ -84,15 +98,11 @@
       margin-top:10px;
       font-size:16px;
       display:block;
+      position:relative; z-index:10;
     }
 
-    /* ✅ نخفي file input لأن كتير موبايلات بتخربط اللمس فوقه */
-    #receipt{
-      position:absolute;
-      left:-9999px;
-      width:1px;height:1px;
-      opacity:0;
-    }
+    /* ✅ hide real file input */
+    #receipt{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
 
     .fileBtn{
       width:100%;
@@ -109,8 +119,7 @@
       justify-content:space-between;
       gap:10px;
       -webkit-tap-highlight-color:transparent;
-      position:relative;
-      z-index:10;
+      position:relative; z-index:10;
     }
     .fileName{
       opacity:.75;
@@ -122,6 +131,7 @@
       white-space:nowrap;
     }
 
+    /* ✅ HARD: make button always clickable */
     .btn{
       width:100%;
       border:none;
@@ -135,20 +145,24 @@
       background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
       box-shadow:0 18px 45px rgba(37,99,235,.25);
       -webkit-tap-highlight-color:transparent;
+
       position:relative;
-      z-index:20;
+      z-index:9999 !important;
+      pointer-events:auto !important;
     }
     .btn:active{transform:scale(.99)}
     .btn:disabled{opacity:.6; cursor:not-allowed}
 
     .foot{text-align:center;color:var(--muted);margin-top:16px;opacity:.8;}
 
+    /* ✅ overlay never steals clicks unless shown */
     .overlay{
       position:fixed; inset:0;
       display:flex; align-items:center; justify-content:center;
       background:rgba(0,0,0,.55);
-      z-index:9999; padding:18px;
-      opacity:0; pointer-events:none;
+      z-index:99999; padding:18px;
+      opacity:0;
+      pointer-events:none;
       transition:.15s opacity;
     }
     .overlay.show{opacity:1; pointer-events:auto;}
@@ -169,48 +183,18 @@
       font-weight:900;cursor:pointer;
       background:rgba(255,255,255,.10);color:#fff;
     }
-
-    /* ✅ Debug مخفي، بيبين بس وقت الخطأ */
-    .debugWrap{
-      max-width:460px;
-      margin:10px auto 0;
-      display:none;
-      gap:10px;
-      flex-direction:column;
-    }
-    .debugBox{
-      white-space:pre-wrap;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:rgba(234,242,255,.95);
-      font-weight:800;
-      line-height:1.3;
-      opacity:.95;
-    }
-    .dbgBtn{
-      border:0;
-      padding:10px 12px;
-      border-radius:12px;
-      cursor:pointer;
-      background:rgba(255,255,255,.10);
-      color:#fff;
-      font-weight:900;
-      width:fit-content;
-    }
   </style>
 </head>
 
 <body>
+  <div id="dbg">Debug: JS NOT LOADED YET…</div>
+
   <div class="topbar">
-    <!-- ✅ relative path -->
     <a class="back" href="add-credit.html">← رجوع</a>
   </div>
 
   <div class="wrap">
     <div class="wishLogo">
-      <!-- ✅ relative path -->
       <img src="assets/wish.png" alt="Wish Money">
     </div>
 
@@ -238,29 +222,36 @@
         <span class="fileName" id="fileName">No file</span>
       </label>
 
-      <!-- ✅ أهم تعديل: type=button (بدون submit) -->
-      <button id="btnReq" class="btn" type="button">REQUEST</button>
+      <!-- ✅ onclick direct = radical fix -->
+      <button id="btnReq" class="btn" type="button" onclick="requestNow()">REQUEST</button>
 
       <div class="foot">© 2024 Baroud Services</div>
     </div>
-  </div>
-
-  <!-- ✅ Debug -->
-  <div class="debugWrap" id="debugWrap">
-    <button class="dbgBtn" id="dbgToggle" type="button">Hide debug</button>
-    <div class="debugBox" id="debugBox">Debug ready…</div>
   </div>
 
   <div class="overlay" id="overlay" aria-hidden="true">
     <div class="modal">
       <h3 id="ovTitle">Done</h3>
       <p id="ovMsg">...</p>
-      <button id="ovOk" class="ok" type="button">OK</button>
+      <button id="ovOk" class="ok" type="button" onclick="hideOverlay()">OK</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const dbgEl = document.getElementById("dbg");
+    function dbg(x){ dbgEl.textContent = "Debug: " + x; }
+
+    // ✅ if this doesn't show, you're NOT seeing latest file (cache)
+    dbg("JS LOADED ✅");
+
+    window.addEventListener("error", (e)=>{
+      dbg("JS ERROR: " + (e?.message || "unknown"));
+    });
+    window.addEventListener("unhandledrejection", (e)=>{
+      dbg("PROMISE ERROR: " + (e?.reason?.message || JSON.stringify(e?.reason) || "unknown"));
+    });
+
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -269,35 +260,9 @@
     const fileNameEl = document.getElementById("fileName");
     const btnReq = document.getElementById("btnReq");
 
-    const debugWrap = document.getElementById("debugWrap");
-    const debugBox = document.getElementById("debugBox");
-    const dbgToggle = document.getElementById("dbgToggle");
-
-    function dbg(msg){
-      // بيظهر فقط وقت الخطأ/التتبّع
-      debugWrap.style.display = "flex";
-      debugBox.textContent = String(msg);
-    }
-
-    dbgToggle.addEventListener("click", ()=>{
-      if(debugBox.style.display === "none"){
-        debugBox.style.display = "block";
-        dbgToggle.textContent = "Hide debug";
-      }else{
-        debugBox.style.display = "none";
-        dbgToggle.textContent = "Show debug";
-      }
-    });
-
-    window.addEventListener("error", (e)=>{
-      dbg("JS ERROR:\n" + (e?.message || "unknown") + "\n" + (e?.filename || "") + ":" + (e?.lineno || "") );
-    });
-    window.addEventListener("unhandledrejection", (e)=>{
-      dbg("PROMISE ERROR:\n" + (e?.reason?.message || JSON.stringify(e?.reason) || "unknown"));
-    });
-
     receipt.addEventListener("change", ()=>{
-      fileNameEl.textContent = receipt.files?.[0]?.name ? receipt.files[0].name : "No file";
+      fileNameEl.textContent = receipt.files?.[0]?.name || "No file";
+      dbg("file selected ✅");
     });
 
     function showOverlay(title, msg){
@@ -308,11 +273,14 @@
     function hideOverlay(){
       document.getElementById("overlay").classList.remove("show");
     }
-    document.getElementById("ovOk").addEventListener("click", hideOverlay);
+    window.hideOverlay = hideOverlay;
 
     let sending = false;
 
     async function requestNow(){
+      // ✅ this proves the click works 100%
+      dbg("REQUEST CLICKED ✅");
+
       if(sending) return;
       sending = true;
 
@@ -331,6 +299,7 @@
 
       btnReq.disabled = true;
       btnReq.textContent = "SENDING...";
+      dbg("SENDING...");
 
       try{
         const { data: s, error: sErr } = await supabase.auth.getSession();
@@ -338,42 +307,36 @@
 
         const user = s?.session?.user;
         if(!user){
-          // ✅ ما منعمل redirect إلا إذا مش عامل login
+          dbg("NO SESSION -> redirect login");
           location.replace("login.html?v=" + Date.now());
           return;
         }
 
-        // ✅ upload
         const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
         const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
-        const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
+        const filePath = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
 
-        const { error: upErr } = await supabase
-          .storage
-          .from("receipts")
-          .upload(fileName, file, { upsert:false });
-
+        const { error: upErr } = await supabase.storage.from("receipts").upload(filePath, file, { upsert:false });
         if(upErr) throw upErr;
 
-        // ✅ insert
         const { error: insErr } = await supabase.from("deposits").insert([{
           user_id: user.id,
           method: "Whish Money",
           amount,
-          receipt_path: fileName,
+          receipt_path: filePath,
           status: "pending"
         }]);
-
         if(insErr) throw insErr;
 
+        dbg("DONE ✅ inserted");
         showOverlay("Request sent ✅","Your deposit request is pending.");
+
         amountEl.value = "";
         receipt.value = "";
         fileNameEl.textContent = "No file";
 
       }catch(err){
-        // ✅ هون بيبين السبب الحقيقي (RLS / permission / bucket / ...)
-        dbg("REQUEST FAILED:\n" + (err?.message || JSON.stringify(err)));
+        dbg("FAILED: " + (err?.message || JSON.stringify(err)));
         showOverlay("Failed ❌", err?.message || "Unknown error");
       }finally{
         btnReq.disabled = false;
@@ -381,10 +344,7 @@
         sending = false;
       }
     }
-
-    // ✅ click + touch لتفادي مشاكل الموبايل
-    btnReq.addEventListener("click", requestNow, { passive:false });
-    btnReq.addEventListener("touchend", (e)=>{ e.preventDefault(); requestNow(); }, { passive:false });
+    window.requestNow = requestNow;
   </script>
 </body>
-</html>
+</html>ض
