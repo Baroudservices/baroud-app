@@ -27,7 +27,7 @@
       padding:18px;
     }
 
-    /* ✅ Debug banner always visible */
+    /* ✅ Always visible debug */
     #dbg{
       max-width:460px;margin:0 auto 10px;
       padding:10px 12px;border-radius:14px;
@@ -48,10 +48,9 @@
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.08);
       -webkit-tap-highlight-color:transparent;
-      position:relative; z-index:50;
     }
 
-    .wrap{max-width:460px;margin:0 auto; position:relative; z-index:1;}
+    .wrap{max-width:460px;margin:0 auto;}
     .wishLogo{display:flex;justify-content:center;margin:10px 0 6px;}
     .wishLogo img{height:60px;display:block;}
     .title{font-size:42px;font-weight:900;margin:14px 0 18px;text-align:center;}
@@ -64,7 +63,6 @@
       padding:18px;
       box-shadow:var(--shadow);
       position:relative;
-      z-index:1;
     }
 
     .box{
@@ -98,10 +96,9 @@
       margin-top:10px;
       font-size:16px;
       display:block;
-      position:relative; z-index:10;
     }
 
-    /* ✅ IMPORTANT: لا تعمل display:none للـ file input */
+    /* ✅ file input must NOT be display:none */
     #receipt{
       position:fixed;
       left:-9999px;
@@ -125,7 +122,6 @@
       justify-content:space-between;
       gap:10px;
       -webkit-tap-highlight-color:transparent;
-      position:relative; z-index:10;
       user-select:none;
     }
     .fileName{
@@ -151,11 +147,7 @@
       background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
       box-shadow:0 18px 45px rgba(37,99,235,.25);
       -webkit-tap-highlight-color:transparent;
-      position:relative;
-      z-index:9999 !important;
-      pointer-events:auto !important;
     }
-    .btn:active{transform:scale(.99)}
     .btn:disabled{opacity:.6; cursor:not-allowed}
 
     .foot{text-align:center;color:var(--muted);margin-top:16px;opacity:.8;}
@@ -191,10 +183,24 @@
 </head>
 
 <body>
-  <div id="dbg">JS NOT LOADED</div>
+  <div id="dbg">JS NOT STARTED</div>
+
+  <!-- ✅ INLINE JS يبدأ قبل أي شي -->
+  <script>
+    (function(){
+      const dbgEl = document.getElementById("dbg");
+      window.__dbg = function(msg){
+        dbgEl.textContent = "DEBUG: " + msg;
+      };
+      window.__dbg("INLINE JS RUNNING ✅ (if you see this, JS works)");
+
+      window.addEventListener("error", (e)=> window.__dbg("JS ERROR: " + (e?.message || "unknown")));
+      window.addEventListener("unhandledrejection", (e)=> window.__dbg("PROMISE ERROR: " + (e?.reason?.message || JSON.stringify(e?.reason) || "unknown")));
+    })();
+  </script>
 
   <div class="topbar">
-    <a class="back" href="add-credit.html">← رجوع</a>
+    <a class="back" href="add-credit.html?v=1">← رجوع</a>
   </div>
 
   <div class="wrap">
@@ -209,7 +215,9 @@
         <div style="color:var(--muted);font-weight:700;">
           Please send the amount to this number ID:
         </div>
+
         <div class="id">+961 70385398</div>
+
         <div style="margin-top:10px;color:var(--muted);font-weight:700;">
           The minimum deposit is <b style="color:var(--text)">10$</b><br/>
           It takes between <b style="color:var(--text)">1 & 15</b> minutes
@@ -219,13 +227,13 @@
       <input id="amount" type="number" placeholder="Enter amount $" inputmode="numeric" />
 
       <input id="receipt" type="file" accept="image/*" />
-      <!-- ✅ زر upload الحقيقي -->
-      <div class="fileBtn" onclick="pickFile()">
+
+      <div class="fileBtn" id="fileBtn">
         <span>📎 Upload receipt</span>
         <span class="fileName" id="fileName">No file</span>
       </div>
 
-      <button id="btnReq" class="btn" type="button" onclick="requestNow()">REQUEST</button>
+      <button id="btnReq" class="btn" type="button">REQUEST</button>
 
       <div class="foot">© 2024 Baroud Services</div>
     </div>
@@ -235,28 +243,17 @@
     <div class="modal">
       <h3 id="ovTitle">Done</h3>
       <p id="ovMsg">...</p>
-      <button id="ovOk" class="ok" type="button" onclick="hideOverlay()">OK</button>
+      <button id="ovOk" class="ok" type="button">OK</button>
     </div>
   </div>
 
-  <!-- ✅ حمّل supabase -->
+  <!-- ✅ supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    const dbgEl = document.getElementById("dbg");
-    function dbg(x){ dbgEl.textContent = "DEBUG: " + x; }
-
-    // ✅ إذا بقيت "JS NOT LOADED" يعني الملف اللي عم تشوفه مش آخر نسخة (Cache)
-    dbg("JS LOADED ✅");
-
-    window.addEventListener("error", (e)=>{
-      dbg("JS ERROR: " + (e?.message || "unknown"));
-    });
-    window.addEventListener("unhandledrejection", (e)=>{
-      dbg("PROMISE ERROR: " + (e?.reason?.message || JSON.stringify(e?.reason) || "unknown"));
-    });
-
+    // ✅ DOM refs
     const receipt = document.getElementById("receipt");
+    const fileBtn = document.getElementById("fileBtn");
     const fileNameEl = document.getElementById("fileName");
     const btnReq = document.getElementById("btnReq");
 
@@ -268,34 +265,32 @@
     function hideOverlay(){
       document.getElementById("overlay").classList.remove("show");
     }
+    document.getElementById("ovOk").addEventListener("click", hideOverlay);
 
-    // ✅ Upload picker 100% شغال
-    function pickFile(){
-      dbg("OPEN FILE PICKER...");
+    // ✅ Upload click (does NOT depend on supabase)
+    fileBtn.addEventListener("click", ()=>{
+      window.__dbg("UPLOAD CLICKED ✅ opening picker...");
       receipt.click();
-    }
+    });
 
     receipt.addEventListener("change", ()=>{
       fileNameEl.textContent = receipt.files?.[0]?.name || "No file";
-      dbg(receipt.files?.[0] ? "FILE SELECTED ✅" : "NO FILE");
+      window.__dbg(receipt.files?.[0] ? "FILE SELECTED ✅" : "NO FILE");
     });
 
-    // ✅ Supabase init مع تشخيص لو المكتبة مش محمّلة
+    // ✅ supabase init (with clear error if CDN blocked)
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
 
     if(!window.supabase){
-      dbg("Supabase JS NOT LOADED ❌ (CDN blocked / no internet)");
+      window.__dbg("Supabase JS NOT LOADED ❌ (CDN blocked?)");
     }
-
-    const supabase = window.supabase
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      : null;
+    const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     let sending = false;
 
-    async function requestNow(){
-      dbg("REQUEST CLICKED ✅");
+    btnReq.addEventListener("click", async ()=>{
+      window.__dbg("REQUEST CLICKED ✅");
 
       if(!supabase){
         return showOverlay("Error ❌","Supabase library not loaded.\nCheck internet / CDN blocked.");
@@ -318,7 +313,7 @@
 
       btnReq.disabled = true;
       btnReq.textContent = "SENDING...";
-      dbg("SENDING...");
+      window.__dbg("SENDING...");
 
       try{
         const { data: s, error: sErr } = await supabase.auth.getSession();
@@ -326,7 +321,7 @@
 
         const user = s?.session?.user;
         if(!user){
-          dbg("NO SESSION -> login");
+          window.__dbg("NO SESSION -> redirect login");
           location.replace("login.html?v=" + Date.now());
           return;
         }
@@ -335,11 +330,11 @@
         const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
         const filePath = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
 
-        dbg("UPLOADING...");
+        window.__dbg("UPLOADING...");
         const { error: upErr } = await supabase.storage.from("receipts").upload(filePath, file, { upsert:false });
         if(upErr) throw upErr;
 
-        dbg("INSERTING...");
+        window.__dbg("INSERTING...");
         const { error: insErr } = await supabase.from("deposits").insert([{
           user_id: user.id,
           method: "Whish Money",
@@ -349,7 +344,7 @@
         }]);
         if(insErr) throw insErr;
 
-        dbg("DONE ✅");
+        window.__dbg("DONE ✅");
         showOverlay("Request sent ✅","Your deposit request is pending.");
 
         document.getElementById("amount").value = "";
@@ -357,19 +352,17 @@
         fileNameEl.textContent = "No file";
 
       }catch(err){
-        dbg("FAILED: " + (err?.message || JSON.stringify(err)));
+        window.__dbg("FAILED: " + (err?.message || JSON.stringify(err)));
         showOverlay("Failed ❌", err?.message || "Unknown error");
       }finally{
         btnReq.disabled = false;
         btnReq.textContent = "REQUEST";
         sending = false;
       }
-    }
+    });
 
-    // expose functions for onclick
-    window.requestNow = requestNow;
-    window.pickFile = pickFile;
-    window.hideOverlay = hideOverlay;
+    // ✅ final confirmation
+    window.__dbg("READY ✅ (try Upload then Request)");
   </script>
 </body>
 </html>
