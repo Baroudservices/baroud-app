@@ -24,8 +24,8 @@ th{color:#93c5fd;text-align:left}
 .status{font-weight:bold}
 .ok{color:#22c55e}
 .no{color:#ef4444}
+.pending{color:#fbbf24}
 
-/* Buttons inside table */
 .actionBtn{
   padding:8px 10px;
   border-radius:10px;
@@ -39,13 +39,15 @@ th{color:#93c5fd;text-align:left}
 .actionBtn.okBtn{background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.35)}
 .actionBtn.noBtn{background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.35)}
 .actionBtn:disabled{opacity:.55; cursor:not-allowed; transform:none}
+
+.small{opacity:.75;font-size:12px}
 </style>
 </head>
 
 <body>
 <div class="wrap">
   <div class="top">
-    <h2>Admin – Deposit Requests</h2>
+    <h2 style="margin:0;">Admin – Deposit Requests</h2>
     <div>
       <button class="btn" id="btnRefresh">Refresh</button>
       <button class="btn" id="btnLogout">Logout</button>
@@ -89,13 +91,12 @@ function esc(s){
     .replaceAll("'","&#039;");
 }
 
-// إذا id رقم => bigint ، إذا uuid => string
+// ✅ deposits.id BIGINT فقط
 function normalizeDepositId(raw){
   const s = String(raw ?? "").trim();
-  // digits only => send as Number (bigint)
-  if (/^\d+$/.test(s)) return Number(s);
-  // otherwise keep as string (uuid)
-  return s;
+  const n = Number(s);
+  if(!Number.isFinite(n)) throw new Error("Invalid deposit id");
+  return n; // bigint
 }
 
 function setBusy(isBusy){
@@ -104,51 +105,76 @@ function setBusy(isBusy){
   rowsEl.querySelectorAll("button.actionBtn").forEach(b => b.disabled = isBusy);
 }
 
+async function requireSession(){
+  const { data: s, error: sErr } = await sb.auth.getSession();
+  if(sErr) throw sErr;
+  if(!s?.session){
+    location.href="login.html";
+    return null;
+  }
+  return s.session;
+}
+
+async function requireAdmin(session){
+  // ✅ Admin check من profiles (بدون RPC is_admin)
+  const { data: profile, error: pErr } = await sb
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", session.user.id)
+    .single();
+
+  if(pErr) throw pErr;
+
+  if(!profile?.is_admin){
+    alert("Not admin");
+    return false;
+  }
+  return true;
+}
+
 async function load(){
   rowsEl.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
   emptyEl.style.display = "none";
 
   try{
-  const { data: s, error: sErr } = await sb.auth.getSession();
-  if(sErr) throw sErr;
-  if(!s?.session){ location.href="login.html"; return; }
+    const session = await requireSession();
+    if(!session) return;
 
-  // ✅ Admin check (RLS-safe)
-  const { data: isAdmin, error: aErr } = await sb.rpc("is_admin");
-  if(aErr) throw aErr;
+    const okAdmin = await requireAdmin(session);
+    if(!okAdmin){
+      rowsEl.innerHTML = "";
+      return;
+    }
 
-  if(!isAdmin){
-    alert("Not admin");
-    rowsEl.innerHTML = "";
-    return;
-  }
+    // ✅ Load deposits
+    const { data, error } = await sb
+      .from("deposits")
+      .select("*")
+      .order("created_at", { ascending:false });
 
-  // ✅ Load deposits
-  const { data, error } = await sb
-    .from("deposits")
-    .select("*")
-    .order("created_at", { ascending:false });
+    if(error) throw error;
 
-  if(error) throw error;
+    if(!data || !data.length){
+      rowsEl.innerHTML = "";
+      emptyEl.style.display = "block";
+      return;
+    }
 
-  if(!data || !data.length){
-    rowsEl.innerHTML = "";
-    emptyEl.style.display = "block";
-    return;
-  }
-
-  // ... كمّل رندر التابل هون
-
-    // ✅ Render rows
+    // ✅ Render
     rowsEl.innerHTML = "";
     for(const d of data){
       const st = String(d.status || "pending");
-      const stClass = st==="approved" ? "ok" : st==="rejected" ? "no" : "";
+      const stClass =
+        st==="approved" ? "ok" :
+        st==="rejected" ? "no" : "pending";
+
       rowsEl.innerHTML += `
         <tr>
           <td>${esc(d.id)}</td>
-          <td>${esc(d.user_id)}</td>
-          <td>$${esc(d.amount)}</td>
+          <td>
+            <div class="small">${esc(d.user_id)}</div>
+          </td>
+          <td><b>$${esc(d.amount)}</b></td>
           <td>${esc(d.method)}</td>
           <td class="status ${stClass}">${esc(st)}</td>
           <td>
@@ -167,9 +193,15 @@ async function setStatus(rawId, status){
   try{
     setBusy(true);
 
+    const session = await requireSession();
+    if(!session) return;
+
+    const okAdmin = await requireAdmin(session);
+    if(!okAdmin) return;
+
     const id = normalizeDepositId(rawId);
 
-    // ✅ RPC (RLS safe) via function
+    // ✅ RPC موجودة عندك: admin_set_deposit_status(p_deposit_id bigint, p_status text)
     const { error } = await sb.rpc("admin_set_deposit_status", {
       p_deposit_id: id,
       p_status: status
