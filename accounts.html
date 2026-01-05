@@ -15,6 +15,7 @@
       --r:22px;
     }
     *{box-sizing:border-box}
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
@@ -161,60 +162,116 @@
     <div class="footer">©2025 Baroud Services</div>
   </main>
 
-  <script>
-    // ✅ نفس فكرة vipboxlb.shop: كروت + زر buy (هنا بس Demo)
-    // بعدين منربطها بجدول supabase اذا بدك
-    const items = [
-      { id:"iptv", icon:"📺", name:"IPTV Smarters", tags:["Live","Movies","Series"], price:10 },
-      { id:"netflix", icon:"🎬", name:"Netflix Account", tags:["Premium","HD"], price:8 },
-      { id:"shahid", icon:"⭐", name:"Shahid VIP", tags:["Arabic","Series"], price:7 },
-      { id:"osn", icon:"🍿", name:"OSN+", tags:["Movies","Series"], price:9 }
-    ];
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const grid = document.getElementById("grid");
-    const q = document.getElementById("q");
+  const grid = document.getElementById("grid");
+  const q = document.getElementById("q");
 
-    function render(list){
-      grid.innerHTML = "";
-      for(const it of list){
-        const el = document.createElement("div");
-        el.className = "card";
-        el.innerHTML = `
-          <div class="img">${it.icon}</div>
-          <div class="body">
-            <div class="name">${it.name}</div>
-            <div class="meta">
-              ${it.tags.map(t => `<span class="pill">${t}</span>`).join("")}
-            </div>
-            <div class="priceRow">
-              <div class="price">$${Number(it.price).toFixed(2)}</div>
-              <button class="buy" data-id="${it.id}">Buy</button>
-            </div>
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function render(list){
+    grid.innerHTML = "";
+    for(const it of list){
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `
+        <div class="img">⭐</div>
+        <div class="body">
+          <div class="name">${esc(it.title)}</div>
+          <div class="meta">
+            ${it.category ? `<span class="pill">${esc(it.category)}</span>` : ""}
+            <span class="pill">Available</span>
           </div>
-        `;
-        grid.appendChild(el);
-      }
-
-      // buy clicks
-      grid.querySelectorAll("button.buy").forEach(b=>{
-        b.addEventListener("click", (e)=>{
-          e.stopPropagation();
-          const id = b.getAttribute("data-id");
-          alert("Open product page: " + id + " (next step)");
-        });
-      });
+          <div class="priceRow">
+            <div class="price">$${Number(it.price).toFixed(2)}</div>
+            <button class="buy" data-id="${it.id}">Buy</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(el);
     }
 
-    render(items);
-
-    q.addEventListener("input", ()=>{
-      const v = q.value.trim().toLowerCase();
-      if(!v) return render(items);
-      render(items.filter(x =>
-        x.name.toLowerCase().includes(v) ||
-        x.tags.join(" ").toLowerCase().includes(v)
-      ));
+    grid.querySelectorAll("button.buy").forEach(b=>{
+      b.addEventListener("click", async (e)=>{
+        e.stopPropagation();
+        const pid = Number(b.getAttribute("data-id"));
+        await buyProduct(pid, b);
+      });
     });
-  </script>
+  }
+
+  async function loadProducts(){
+    const { data, error } = await sb
+      .from("products")
+      .select("id,title,price,category")
+      .eq("active", true)
+      .order("id", { ascending: true });
+
+    if(error) throw error;
+    return data || [];
+  }
+
+  async function buyProduct(productId, btn){
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = "Buying...";
+
+    try{
+      const { data: s } = await sb.auth.getSession();
+      if(!s?.session?.user){
+        location.href = "login.html?v=" + Date.now();
+        return;
+      }
+
+      // ✅ طلب داخل الموقع (RPC)
+      const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
+      if(error) throw error;
+
+      alert("✅ Order placed! Order ID: " + orderId);
+
+      // ✅ بعد الشراء: رجّع حدّث الرصيد (إذا انت عامل fetch بالـ services من profiles)
+      // هون خيارين:
+      // 1) نعمل redirect لصفحة my-payments.html
+      location.href = "my-payments.html?v=" + Date.now();
+
+    }catch(err){
+      alert(err?.message || "Failed");
+    }finally{
+      btn.disabled = false;
+      btn.textContent = old;
+    }
+  }
+
+  let all = [];
+
+  (async ()=>{
+    try{
+      all = await loadProducts();
+      render(all);
+
+      q.addEventListener("input", ()=>{
+        const v = q.value.trim().toLowerCase();
+        if(!v) return render(all);
+        render(all.filter(x =>
+          (x.title||"").toLowerCase().includes(v) ||
+          (x.category||"").toLowerCase().includes(v)
+        ));
+      });
+
+    }catch(e){
+      grid.innerHTML = `<div style="opacity:.7;padding:14px">Error: ${esc(e?.message || e)}</div>`;
+    }
+  })();
+</script>
 </body>
 </html>
