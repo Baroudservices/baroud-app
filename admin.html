@@ -24,6 +24,20 @@ th{color:#93c5fd;text-align:left}
 .status{font-weight:bold}
 .ok{color:#22c55e}
 .no{color:#ef4444}
+
+/* Buttons inside table */
+.actionBtn{
+  padding:8px 10px;
+  border-radius:10px;
+  border:0;
+  cursor:pointer;
+  background:#1e293b;
+  color:#fff;
+  margin-right:6px;
+}
+.actionBtn:active{transform:scale(.98)}
+.actionBtn.okBtn{background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.35)}
+.actionBtn.noBtn{background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.35)}
 </style>
 </head>
 
@@ -32,8 +46,8 @@ th{color:#93c5fd;text-align:left}
   <div class="top">
     <h2>Admin – Deposit Requests</h2>
     <div>
-      <button class="btn" onclick="load()">Refresh</button>
-      <button class="btn" onclick="logout()">Logout</button>
+      <button class="btn" id="btnRefresh">Refresh</button>
+      <button class="btn" id="btnLogout">Logout</button>
     </div>
   </div>
 
@@ -58,7 +72,12 @@ th{color:#93c5fd;text-align:left}
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
 
-const sb = (window.supabase?.createClient ? window.supabase : supabase).createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const rowsEl = document.getElementById("rows");
+const emptyEl = document.getElementById("empty");
+const btnRefresh = document.getElementById("btnRefresh");
+const btnLogout = document.getElementById("btnLogout");
 
 function esc(s){
   return String(s ?? "")
@@ -70,17 +89,15 @@ function esc(s){
 }
 
 async function load(){
-  const rows = document.getElementById("rows");
-  const empty = document.getElementById("empty");
-
-  rows.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
-  empty.style.display = "none";
+  rowsEl.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
+  emptyEl.style.display = "none";
 
   try{
     const { data: s, error: sErr } = await sb.auth.getSession();
     if(sErr) throw sErr;
     if(!s?.session){ location.href="login.html"; return; }
 
+    // ✅ Admin check
     const { data: profile, error: pErr } = await sb
       .from("profiles")
       .select("is_admin")
@@ -91,10 +108,11 @@ async function load(){
 
     if(!profile?.is_admin){
       alert("Not admin");
-      rows.innerHTML = "";
+      rowsEl.innerHTML = "";
       return;
     }
 
+    // ✅ Load deposits
     const { data, error } = await sb
       .from("deposits")
       .select("*")
@@ -103,44 +121,45 @@ async function load(){
     if(error) throw error;
 
     if(!data || !data.length){
-      rows.innerHTML = "";
-      empty.style.display = "block";
+      rowsEl.innerHTML = "";
+      emptyEl.style.display = "block";
       return;
     }
 
-    rows.innerHTML = "";
-    data.forEach(d=>{
-      const id = String(d.id); // ✅ مهم
-      rows.innerHTML += `
+    // ✅ Render rows (بدون onclick)
+    rowsEl.innerHTML = "";
+    for(const d of data){
+      const stClass = d.status==="approved" ? "ok" : d.status==="rejected" ? "no" : "";
+      rowsEl.innerHTML += `
         <tr>
           <td>${esc(d.id)}</td>
           <td>${esc(d.user_id)}</td>
           <td>$${esc(d.amount)}</td>
           <td>${esc(d.method)}</td>
-          <td class="status ${d.status==="approved"?"ok":d.status==="rejected"?"no":""}">
-            ${esc(d.status)}
-          </td>
+          <td class="status ${stClass}">${esc(d.status)}</td>
           <td>
-            <!-- ✅ أهم تعديل: حطّينا id بين quotes -->
-            <button onclick="setStatus('${esc(id)}','approved')">✔</button>
-            <button onclick="setStatus('${esc(id)}','rejected')">✖</button>
+            <button class="actionBtn okBtn" data-id="${esc(d.id)}" data-status="approved">✔</button>
+            <button class="actionBtn noBtn" data-id="${esc(d.id)}" data-status="rejected">✖</button>
           </td>
         </tr>`;
-    });
+    }
 
   }catch(e){
-    rows.innerHTML = `<tr><td colspan="6" style="color:#ffb4b4">Error: ${esc(e?.message || e)}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="6" style="color:#ffb4b4">Error: ${esc(e?.message || e)}</td></tr>`;
   }
 }
 
 async function setStatus(id, status){
-  const { error } = await sb.rpc("admin_set_deposit_status", {
-    p_deposit_id: id,
-    p_status: status
-  });
-  if(error){ alert(error.message); return; }
-  load();
-}catch(e){
+  try{
+    // ✅ Recommended (RLS safe) via RPC function
+    const { error } = await sb.rpc("admin_set_deposit_status", {
+      p_deposit_id: id,
+      p_status: status
+    });
+    if(error) throw error;
+
+    await load();
+  }catch(e){
     alert(e?.message || e);
   }
 }
@@ -150,8 +169,17 @@ async function logout(){
   location.href="login.html";
 }
 
-window.setStatus = setStatus;
-window.logout = logout;
+// ✅ Event delegation for action buttons
+rowsEl.addEventListener("click", (ev)=>{
+  const btn = ev.target.closest("button[data-id][data-status]");
+  if(!btn) return;
+  const id = btn.getAttribute("data-id");
+  const status = btn.getAttribute("data-status");
+  setStatus(id, status);
+});
+
+btnRefresh.addEventListener("click", load);
+btnLogout.addEventListener("click", logout);
 
 load();
 </script>
