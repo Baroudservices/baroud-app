@@ -1,10 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Deposits</title>
+  <title>Admin - Deposit Requests</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     :root{
       --bg1:#060b16; --bg2:#0a1330;
@@ -13,7 +16,7 @@
       --text:#eaf2ff;
       --muted:rgba(234,242,255,.65);
       --shadow:0 20px 60px rgba(0,0,0,.55);
-      --r:20px;
+      --r:22px;
     }
     *{box-sizing:border-box}
     body{
@@ -24,22 +27,34 @@
         radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
         radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
         linear-gradient(160deg,var(--bg1),var(--bg2));
-      padding:14px;
+      padding:18px;
     }
-    .wrap{max-width:900px;margin:0 auto;}
-    .top{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      margin:8px 0 14px;
+
+    .wrap{max-width:980px;margin:0 auto;}
+    .head{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+      margin:10px 0 14px;
     }
-    .title{font-size:22px;font-weight:900}
-    .btn{
-      border:0; cursor:pointer; font-weight:900;
-      padding:10px 14px; border-radius:14px;
+    h1{
+      margin:0;
+      font-size:32px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+
+    .btnTop{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
       color:#fff;
-      background:rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.12);
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:800;
     }
-    .panel{
+    .btnTop:active{transform:scale(.99)}
+
+    .card{
       border:1px solid var(--stroke);
       background:var(--card);
       backdrop-filter:blur(14px);
@@ -48,204 +63,354 @@
       box-shadow:var(--shadow);
       overflow:hidden;
     }
-    .row{
-      display:grid;
-      grid-template-columns: 80px 1fr 110px 150px 160px 220px;
-      gap:10px;
-      padding:10px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      align-items:center;
+
+    table{
+      width:100%;
+      border-collapse:collapse;
       font-size:14px;
     }
-    .row.head{font-weight:900; opacity:.9}
-    .badge{
+    thead th{
+      text-align:left;
+      color:rgba(234,242,255,.8);
+      font-weight:900;
+      padding:12px 10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    tbody td{
+      padding:12px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      vertical-align:middle;
+      color:rgba(234,242,255,.92);
+    }
+
+    .pill{
       display:inline-block;
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
       font-weight:900;
+      font-size:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.07);
+    }
+    .pending{background:rgba(245,158,11,.14); border-color:rgba(245,158,11,.3)}
+    .approved{background:rgba(34,197,94,.14); border-color:rgba(34,197,94,.3)}
+    .rejected{background:rgba(239,68,68,.14); border-color:rgba(239,68,68,.3)}
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      border:0;
+      cursor:pointer;
+      padding:8px 10px;
+      border-radius:12px;
+      font-weight:900;
+      color:#fff;
+      background:rgba(255,255,255,.12);
+    }
+    .ok{background:rgba(34,197,94,.22)}
+    .no{background:rgba(239,68,68,.22)}
+    .rc{background:rgba(59,130,246,.22)}
+    .btn:active{transform:scale(.99)}
+    .btn[disabled]{opacity:.6; cursor:not-allowed}
+
+    .muted{color:var(--muted)}
+    .empty{
+      padding:18px;
       text-align:center;
-      width:max-content;
+      color:rgba(234,242,255,.75);
     }
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .ok{
-      background:linear-gradient(90deg, rgba(34,197,94,.95), rgba(16,185,129,.95));
-      box-shadow:0 18px 45px rgba(16,185,129,.20);
+
+    /* overlay */
+    .overlay{
+      position:fixed; inset:0;
+      display:none;
+      align-items:center;justify-content:center;
+      background:rgba(0,0,0,.55);
+      z-index:9999;
+      padding:18px;
     }
-    .no{
-      background:linear-gradient(90deg, rgba(239,68,68,.95), rgba(244,63,94,.95));
-      box-shadow:0 18px 45px rgba(244,63,94,.20);
+    .overlay.show{display:flex}
+    .modal{
+      max-width:460px; width:100%;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(15,23,42,.92);
+      backdrop-filter:blur(12px);
+      padding:16px;
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
     }
-    .small{font-size:12px;color:var(--muted)}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
-    .notice{margin-top:10px;color:var(--muted);font-size:13px}
-    @media (max-width: 900px){
-      .row{grid-template-columns: 70px 1fr 90px 120px 140px 1fr;}
+    .modal h3{margin:0 0 8px;font-size:18px}
+    .modal p{margin:0;color:rgba(234,242,255,.8);line-height:1.4}
+    .modal .okBtn{
+      margin-top:14px;
+      width:100%;
+      padding:12px;
+      border-radius:14px;
+      border:0;
+      font-weight:900;
+      cursor:pointer;
+      background:rgba(255,255,255,.10);
+      color:#fff;
+    }
+
+    @media (max-width:760px){
+      table{font-size:13px}
+      h1{font-size:26px}
+      thead{display:none}
+      table, tbody, tr, td{display:block;width:100%}
+      tbody tr{
+        border-bottom:1px solid rgba(255,255,255,.10);
+        padding:10px 0;
+      }
+      tbody td{
+        border:0;
+        padding:6px 6px;
+      }
+      tbody td::before{
+        content:attr(data-label);
+        display:block;
+        color:rgba(234,242,255,.65);
+        font-weight:900;
+        margin-bottom:3px;
+        font-size:12px;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <div class="top">
-      <div class="title">Admin – Deposit Requests</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn" id="btnRefresh">Refresh</button>
-        <button class="btn" id="btnLogout">Logout</button>
+    <div class="head">
+      <h1>Admin – Deposit Requests</h1>
+      <div style="display:flex;gap:10px">
+        <button id="btnRefresh" class="btnTop">Refresh</button>
+        <button id="btnLogout" class="btnTop">Logout</button>
       </div>
     </div>
 
-    <div class="panel" id="panel">
-      <div class="row head">
-        <div>ID</div>
-        <div>User</div>
-        <div>Amount</div>
-        <div>Method</div>
-        <div>Status</div>
-        <div>Actions</div>
+    <div class="card">
+      <div id="statusLine" class="muted" style="padding:8px 6px 12px"></div>
+
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px">ID</th>
+              <th>User</th>
+              <th style="width:90px">Amount</th>
+              <th style="width:140px">Method</th>
+              <th style="width:120px">Status</th>
+              <th style="width:260px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="list"></tbody>
+        </table>
       </div>
-      <div id="list"></div>
-      <div class="notice" id="note"></div>
+
+      <div id="empty" class="empty" style="display:none;">
+        No deposits yet.
+      </div>
+    </div>
+  </div>
+
+  <!-- overlay -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3 id="ovTitle">Done</h3>
+      <p id="ovMsg">...</p>
+      <button class="okBtn" id="ovOk">OK</button>
     </div>
   </div>
 
   <script>
+    // ✅ Supabase Client
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const listEl = document.getElementById("list");
-    const noteEl = document.getElementById("note");
+    const emptyEl = document.getElementById("empty");
+    const statusLine = document.getElementById("statusLine");
 
-    function esc(s){ return (s ?? "").toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function showOverlay(title, msg){
+      document.getElementById("ovTitle").textContent = title;
+      document.getElementById("ovMsg").textContent = msg;
+      document.getElementById("overlay").classList.add("show");
+    }
+    function hideOverlay(){
+      document.getElementById("overlay").classList.remove("show");
+    }
 
-    async function ensureAdmin(){
+    function esc(v){
+      return String(v ?? "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      })[m]);
+    }
+
+    function pill(status){
+      const s = (status || "pending").toLowerCase();
+      const cls = s === "approved" ? "approved" : (s === "rejected" ? "rejected" : "pending");
+      return `<span class="pill ${cls}">${esc(s)}</span>`;
+    }
+
+    async function requireAdmin(){
+      // لازم المستخدم يكون عامل login
       const { data: sessionData } = await supabase.auth.getSession();
       const user = sessionData?.session?.user;
       if(!user){
         location.replace("login.html?v=" + Date.now());
-        return null;
+        return false;
       }
 
-      // check is_admin from profiles
-      const { data: prof, error } = await supabase
+      // لازم يكون is_admin=true بجدول profiles
+      const { data, error } = await supabase
         .from("profiles")
-        .select("id,is_admin")
+        .select("is_admin")
         .eq("id", user.id)
-        .maybeSingle();
+        .single();
 
-      if(error || !prof?.is_admin){
-        alert("Not admin ❌");
-        location.replace("index.html?v=" + Date.now());
-        return null;
+      if(error){
+        showOverlay("Error ❌", error.message);
+        return false;
       }
-      return user;
+      if(!data?.is_admin){
+        showOverlay("No access ❌", "You are not admin.");
+        return false;
+      }
+      return true;
     }
 
     async function loadDeposits(){
+      statusLine.textContent = "Loading...";
       listEl.innerHTML = "";
-      noteEl.textContent = "Loading...";
-      const user = await ensureAdmin();
-      if(!user) return;
+      emptyEl.style.display = "none";
 
-      // load pending first (and latest)
+      // ✅ الأفضل: اقرأ من VIEW اسمها admin_deposits
+      // لازم الـ view يرجّع email مع user_id (أنت عاملها من قبل)
       const { data, error } = await supabase
-        .from("deposits")
-        .select("id,user_id,amount,method,status,receipt_path,created_at")
-        .order("created_at", { ascending:false })
-        .limit(50);
+        .from("admin_deposits")
+        .select("id, created_at, user_id, email, amount, method, status, receipt_path")
+        .order("created_at", { ascending: false });
 
       if(error){
-        console.error(error);
-        noteEl.textContent = "Error: " + (error.message || "failed");
+        statusLine.textContent = "";
+        showOverlay("Failed ❌", error.message);
         return;
       }
 
-      if(!data || data.length === 0){
-        noteEl.textContent = "No deposits yet.";
+      statusLine.textContent = `Total: ${data.length}`;
+
+      if(!data.length){
+        emptyEl.style.display = "block";
         return;
       }
 
-      noteEl.textContent = "Showing last 50 requests.";
-      data.forEach(row => {
-        const status = row.status || "pending";
-        const receipt = row.receipt_path ? row.receipt_path : "";
-
-        const div = document.createElement("div");
-        div.className = "row";
-        div.innerHTML = `
-          <div class="mono">${esc(row.id)}</div>
-          <div class="mono small">${esc(row.user_id)}</div>
-          <div><span class="badge">$${esc(row.amount)}</span></div>
-          <div>${esc(row.method || "")}</div>
-          <div><span class="badge">${esc(status)}</span></div>
-          <div class="actions">
-            <button class="btn ok" data-act="approve" data-id="${esc(row.id)}" ${status!=="pending" ? "disabled" : ""}>Approve</button>
-            <button class="btn no" data-act="reject" data-id="${esc(row.id)}" ${status!=="pending" ? "disabled" : ""}>Reject</button>
-            ${receipt ? `<button class="btn" data-act="receipt" data-path="${esc(receipt)}">Receipt</button>` : `<span class="small">No receipt</span>`}
-          </div>
+      for(const row of data){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td data-label="ID">${esc(row.id)}</td>
+          <td data-label="User">${esc(row.email || row.user_id)}</td>
+          <td data-label="Amount">$${esc(row.amount)}</td>
+          <td data-label="Method">${esc(row.method)}</td>
+          <td data-label="Status">${pill(row.status)}</td>
+          <td data-label="Actions">
+            <div class="actions">
+              <button class="btn ok" data-act="approve" data-id="${esc(row.id)}">Approve</button>
+              <button class="btn no" data-act="reject" data-id="${esc(row.id)}">Reject</button>
+              <button class="btn rc" data-act="receipt" data-path="${esc(row.receipt_path)}">Receipt</button>
+            </div>
+          </td>
         `;
-        listEl.appendChild(div);
-      });
+        listEl.appendChild(tr);
+      }
     }
 
     async function openReceipt(path){
-      // نجيب public URL (اذا bucket public) أو signed URL (اذا private)
-      // ✅ جرّب public أولاً:
-      let { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
-      const publicUrl = pub?.publicUrl;
-
-      // إذا مش public أو ما اشتغل، اعمل signed url:
-      if(!publicUrl){
-        const { data, error } = await supabase.storage.from("receipts").createSignedUrl(path, 60);
-        if(error) return alert("Cannot open receipt: " + error.message);
-        window.open(data.signedUrl, "_blank");
+      if(!path){
+        showOverlay("Error ❌", "No receipt path found");
         return;
       }
 
-      window.open(publicUrl, "_blank");
+      // ✅ جرّب public URL
+      const { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
+      const publicUrl = pub?.publicUrl;
+
+      // إذا الباكت public، افتح مباشرة
+      if(publicUrl && typeof publicUrl === "string" && publicUrl.startsWith("http")){
+        window.open(publicUrl, "_blank");
+        return;
+      }
+
+      // إذا private: Signed URL
+      const { data, error } = await supabase.storage
+        .from("receipts")
+        .createSignedUrl(path, 60);
+
+      if(error){
+        showOverlay("Failed ❌", error.message);
+        return;
+      }
+      window.open(data.signedUrl, "_blank");
     }
 
     async function updateStatus(id, newStatus){
+      if(!id) return;
       if(!confirm(`Set deposit #${id} to ${newStatus}?`)) return;
 
+      // ✅ Update جدول deposits (مش view)
       const { error } = await supabase
         .from("deposits")
         .update({ status: newStatus })
         .eq("id", id);
 
       if(error){
-        console.error(error);
-        alert("Failed: " + (error.message || "error"));
+        showOverlay("Failed ❌", error.message);
         return;
       }
 
-      // ✅ إذا عندك trigger: الرصيد بينضاف تلقائي لما يصير approved
-      alert(newStatus === "approved"
-        ? "Approved ✅ (balance will be credited automatically)"
-        : "Rejected ✅"
-      );
-
-      loadDeposits();
+      showOverlay("Done ✅", `Deposit #${id} set to ${newStatus}`);
+      await loadDeposits();
     }
 
-    document.getElementById("btnRefresh").addEventListener("click", loadDeposits);
-
-    document.getElementById("btnLogout").addEventListener("click", async ()=>{
+    async function logout(){
       await supabase.auth.signOut();
       location.replace("login.html?v=" + Date.now());
-    });
+    }
 
-    document.addEventListener("click", (e)=>{
-      const btn = e.target.closest("button");
-      if(!btn) return;
-      const act = btn.dataset.act;
-      if(act === "approve") updateStatus(btn.dataset.id, "approved");
-      if(act === "reject")  updateStatus(btn.dataset.id, "rejected");
-      if(act === "receipt") openReceipt(btn.dataset.path);
-    });
+    function bindEvents(){
+      document.getElementById("btnRefresh").addEventListener("click", loadDeposits);
+      document.getElementById("btnLogout").addEventListener("click", logout);
+      document.getElementById("ovOk").addEventListener("click", hideOverlay);
 
-    loadDeposits();
+      document.addEventListener("click", (e)=>{
+        const btn = e.target.closest("button");
+        if(!btn) return;
+
+        const act = btn.dataset.act;
+        if(act === "approve") return updateStatus(btn.dataset.id, "approved");
+        if(act === "reject")  return updateStatus(btn.dataset.id, "rejected");
+        if(act === "receipt") return openReceipt(btn.dataset.path);
+      });
+    }
+
+    async function init(){
+      if(!window.supabase || !window.supabase.createClient){
+        showOverlay("Error ❌", "Supabase library not loaded (CDN). Refresh and check internet.");
+        return;
+      }
+
+      bindEvents();
+
+      const ok = await requireAdmin();
+      if(!ok) return;
+
+      await loadDeposits();
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
   </script>
 </body>
 </html>
