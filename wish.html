@@ -27,7 +27,7 @@
       padding:18px;
     }
 
-    /* ✅ Debug banner */
+    /* Debug banner (مخفي) */
     #dbg{
       max-width:460px;margin:0 auto 10px;
       padding:10px 12px;border-radius:14px;
@@ -37,6 +37,7 @@
       white-space:pre-wrap;
       position:relative;
       z-index:999999;
+      display:none;
     }
 
     .topbar{max-width:460px;margin:6px auto 10px;display:flex;gap:12px;}
@@ -98,7 +99,7 @@
       display:block;
     }
 
-    /* ✅ file input مخفي بس مش display none */
+    /* file input مخفي */
     #receipt{
       position:fixed;
       left:-9999px;
@@ -183,7 +184,8 @@
 </head>
 
 <body>
-  <div id="dbg" style="display:none"></div>
+  <div id="dbg"></div>
+
   <div class="topbar">
     <a class="back" href="add-credit.html?v=1">← رجوع</a>
   </div>
@@ -232,22 +234,15 @@
     </div>
   </div>
 
-  <!-- ✅ IMPORTANT: include supabase-js ONCE فقط -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     const dbgEl = document.getElementById("dbg");
-    const dbg = (m)=> dbgEl.textContent = "DEBUG: " + m;
-
-    window.addEventListener("error", (e)=> dbg("JS ERROR: " + (e?.message || "unknown")));
-    window.addEventListener("unhandledrejection", (e)=> dbg("PROMISE ERROR: " + (e?.reason?.message || JSON.stringify(e?.reason) || "unknown")));
-
-    dbg("JS LOADED ✅");
+    const dbg = (m)=> { dbgEl.textContent = "DEBUG: " + m; };
 
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
 
-    // ✅ لا نستعمل اسم supabase كمتغيّر — نستخدم sb
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const receipt = document.getElementById("receipt");
@@ -265,23 +260,25 @@
     }
     document.getElementById("ovOk").addEventListener("click", hideOverlay);
 
-    // ✅ Upload picker
+    // ✅ picker
     fileBtn.addEventListener("click", ()=>{
-      dbg("OPENING PICKER…");
       receipt.click();
     });
 
     receipt.addEventListener("change", ()=>{
       const f = receipt.files?.[0];
       fileNameEl.textContent = f?.name || "No file";
-      dbg(f ? "FILE SELECTED ✅" : "NO FILE");
     });
+
+    // ✅ helper: get public url from storage path
+    function publicReceiptUrl(path){
+      const { data } = sb.storage.from("receipts").getPublicUrl(path);
+      return data?.publicUrl || "";
+    }
 
     let sending = false;
 
     btnReq.addEventListener("click", async ()=>{
-      dbg("REQUEST CLICKED ✅");
-
       if(sending) return;
       sending = true;
 
@@ -299,7 +296,6 @@
 
       btnReq.disabled = true;
       btnReq.textContent = "SENDING...";
-      dbg("SENDING…");
 
       try{
         const { data: s, error: sErr } = await sb.auth.getSession();
@@ -307,7 +303,6 @@
 
         const user = s?.session?.user;
         if(!user){
-          dbg("NO SESSION -> login");
           location.replace("login.html?v=" + Date.now());
           return;
         }
@@ -316,21 +311,27 @@
         const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
         const filePath = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
 
-        dbg("UPLOADING…");
-        const { error: upErr } = await sb.storage.from("receipts").upload(filePath, file, { upsert:false });
+        // ✅ Upload
+        const { error: upErr } = await sb.storage
+          .from("receipts")
+          .upload(filePath, file, { upsert:false });
+
         if(upErr) throw upErr;
 
-        dbg("INSERTING…");
+        // ✅ Build public url (bucket لازم يكون public)
+        const receiptUrl = publicReceiptUrl(filePath);
+
+        // ✅ Insert: نخزن path + url
         const { error: insErr } = await sb.from("deposits").insert([{
           user_id: user.id,
           method: "Whish Money",
           amount,
           receipt_path: filePath,
+          receipt_url: receiptUrl,   // ✅ الجديد
           status: "pending"
         }]);
         if(insErr) throw insErr;
 
-        dbg("DONE ✅");
         showOverlay("Request sent ✅","Your deposit request is pending.");
 
         document.getElementById("amount").value = "";
@@ -338,7 +339,6 @@
         fileNameEl.textContent = "No file";
 
       }catch(err){
-        dbg("FAILED: " + (err?.message || JSON.stringify(err)));
         showOverlay("Failed ❌", err?.message || "Unknown error");
       }finally{
         btnReq.disabled = false;
@@ -346,8 +346,6 @@
         sending = false;
       }
     });
-
-    dbg("READY ✅ (Upload then Request)");
   </script>
 </body>
 </html>
