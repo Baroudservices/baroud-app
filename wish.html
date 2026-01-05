@@ -5,44 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Whish Money</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     :root{
       --bg1:#060b16; --bg2:#0a1330;
-      --card: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.10);
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.10);
       --text:#eaf2ff;
-      --muted: rgba(234,242,255,.65);
-      --shadow: 0 20px 60px rgba(0,0,0,.55);
-      --r: 26px; --r2: 18px;
+      --muted:rgba(234,242,255,.65);
+      --shadow:0 20px 60px rgba(0,0,0,.55);
+      --r:26px; --r2:18px;
     }
     *{box-sizing:border-box}
     body{
       margin:0; min-height:100vh;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
       background:
         radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
         radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
-        linear-gradient(160deg, var(--bg1), var(--bg2));
+        linear-gradient(160deg,var(--bg1),var(--bg2));
       padding:18px;
     }
-    .wishLogo{
-  display:flex;
-  justify-content:center;
-  margin:10px 0 6px;
-}
-.wishLogo img{
-  height:60px;
-  background:none;
-  box-shadow:none;
-}
 
     .topbar{
-      max-width: 460px;
-      margin: 6px auto 10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      max-width:460px;
+      margin:6px auto 10px;
+      display:flex;align-items:center;justify-content:space-between;
       gap:12px;
     }
     .back{
@@ -51,72 +41,119 @@
       user-select:none;
       opacity:.95;
     }
+
     .wrap{max-width:460px;margin:0 auto;}
+    .wishLogo{
+      display:flex;justify-content:center;
+      margin:10px 0 6px;
+    }
+    .wishLogo img{
+      height:60px;
+      background:none;
+      box-shadow:none;
+    }
+
     .title{
       font-size:42px;
       font-weight:900;
-      margin: 14px 0 18px;
+      margin:14px 0 18px;
+      text-align:center;
+      letter-spacing:.2px;
     }
 
     .glass{
       border:1px solid var(--stroke);
       background:var(--card);
-      backdrop-filter: blur(14px);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
+      backdrop-filter:blur(14px);
+      border-radius:var(--r);
       padding:18px;
+      box-shadow:var(--shadow);
     }
-
     .box{
-      background: rgba(255,255,255,.06);
+      background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.08);
-      border-radius: 22px;
-      padding: 14px;
-      margin-bottom: 14px;
+      border-radius:22px;
+      padding:14px;
+      margin-bottom:14px;
     }
 
     .id{
       width:100%;
       text-align:center;
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,.06);
+      padding:14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.08);
       font-weight:900;
       letter-spacing:.4px;
-      margin: 10px 0 4px;
+      margin:10px 0 4px;
     }
 
     input{
       width:100%;
-      padding: 16px;
-      border-radius: 18px;
+      padding:16px;
+      border-radius:18px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      color: var(--text);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
       outline:none;
-      margin-top: 10px;
+      margin-top:10px;
       font-size:16px;
     }
 
     .btn{
       width:100%;
       border:none;
-      padding: 18px;
-      border-radius: 18px;
-      margin-top: 14px;
+      padding:18px;
+      border-radius:18px;
+      margin-top:14px;
       cursor:pointer;
       color:white;
       font-weight:900;
       font-size:16px;
-      background: linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
-      box-shadow: 0 18px 45px rgba(37,99,235,.25);
+      background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
+      box-shadow:0 18px 45px rgba(37,99,235,.25);
     }
     .btn:active{transform:scale(.99)}
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+
     .foot{
       text-align:center;
-      color: var(--muted);
-      margin-top: 16px;
+      color:var(--muted);
+      margin-top:16px;
+      opacity:.8;
+    }
+
+    /* success/error overlay بدل alert */
+    .overlay{
+      position:fixed; inset:0;
+      display:none;
+      align-items:center;justify-content:center;
+      background:rgba(0,0,0,.55);
+      z-index:9999;
+      padding:18px;
+    }
+    .modal{
+      max-width:420px; width:100%;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(15,23,42,.92);
+      backdrop-filter:blur(12px);
+      padding:16px;
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
+    }
+    .modal h3{margin:0 0 8px;font-size:18px}
+    .modal p{margin:0;color:rgba(234,242,255,.8);line-height:1.4}
+    .modal .ok{
+      margin-top:14px;
+      width:100%;
+      padding:12px;
+      border-radius:14px;
+      border:0;
+      font-weight:900;
+      cursor:pointer;
+      background:rgba(255,255,255,.10);
+      color:#fff;
     }
   </style>
 </head>
@@ -128,20 +165,22 @@
   </div>
 
   <div class="wrap">
+    <div class="wishLogo">
+      <img src="assets/wish.png" alt="Wish Money">
+    </div>
 
-  <!-- Wish Logo -->
-  <div class="wishLogo">
-    <img src="assets/wish.png" alt="Wish Money">
-  </div>
+    <div class="title">Whish Money $</div>
 
-  <div class="title">Whish Money $</div>
     <div class="glass">
       <div class="box">
-        <div style="color:var(--muted);font-weight:700;">Please send the amount to this number ID:</div>
+        <div style="color:var(--muted);font-weight:700;">
+          Please send the amount to this number ID:
+        </div>
+        <!-- ✅ عدّل رقمك هون -->
         <div class="id">+961 70385398</div>
 
         <div style="margin-top:10px;color:var(--muted);font-weight:700;">
-          The minimum deposit is <b style="color:var(--text)">6$</b><br/>
+          The minimum deposit is <b style="color:var(--text)">10$</b><br/>
           It takes between <b style="color:var(--text)">1 & 15</b> minutes
         </div>
       </div>
@@ -149,96 +188,113 @@
       <input id="amount" type="number" placeholder="Enter amount $" />
       <input id="receipt" type="file" accept="image/*" />
 
-      <button class="btn" onclick="requestNow()">REQUEST</button>
+      <button id="btnReq" class="btn" onclick="requestNow()">REQUEST</button>
 
       <div class="foot">© 2024 Baroud Services</div>
     </div>
   </div>
 
+  <!-- overlay -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3 id="ovTitle">Done</h3>
+      <p id="ovMsg">...</p>
+      <button class="ok" onclick="hideOverlay()">OK</button>
+    </div>
+  </div>
+
   <script>
-  // ✅ Supabase Client
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ✅ Supabase Client
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // ✅ رجوع مضمون (بدون history)
-  function goBack(){
-    window.location.replace("add-credit.html?v=" + Date.now());
-  }
-
-  // ✅ إرسال طلب Whish Money
-  async function requestNow(){
-    const amountEl = document.getElementById("amount");
-    const fileEl   = document.getElementById("receipt");
-
-    const amount = Number(amountEl.value);
-    const file   = fileEl.files?.[0];
-
-    if(!amount || amount < 10){
-      alert("Minimum deposit is 10$");
-      return;
-    }
-    if(!file){
-      alert("Please upload receipt image");
-      return;
+    // ✅ رجوع مضمون
+    function goBack(){
+      window.location.replace("add-credit.html?v=" + Date.now());
     }
 
-    // ✅ تأكد إنو المستخدم عامل Login
-    const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
-    if (sessionErr){
-      console.error(sessionErr);
-      alert("Session error, please login again.");
-      location.replace("login.html?v=" + Date.now());
-      return;
+    function showOverlay(title, msg){
+      document.getElementById("ovTitle").textContent = title;
+      document.getElementById("ovMsg").textContent = msg;
+      document.getElementById("overlay").style.display = "flex";
+    }
+    function hideOverlay(){
+      document.getElementById("overlay").style.display = "none";
     }
 
-    const user = sessionData.session?.user;
-    if(!user){
-      alert("Please login first");
-      location.replace("login.html?v=" + Date.now());
-      return;
+    async function requestNow(){
+      const btn = document.getElementById("btnReq");
+      const amountEl = document.getElementById("amount");
+      const fileEl   = document.getElementById("receipt");
+
+      const amount = Number(amountEl.value);
+      const file = fileEl.files?.[0];
+
+      if(!amount || amount < 10){
+        showOverlay("Error ❌", "Minimum deposit is 10$");
+        return;
+      }
+      if(!file){
+        showOverlay("Error ❌", "Please upload receipt image");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "SENDING...";
+
+      try{
+        // ✅ 1) تأكد من session
+        const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+        if(sessionErr) throw sessionErr;
+
+        const user = sessionData?.session?.user;
+        if(!user){
+          window.location.replace("login.html?v=" + Date.now());
+          return;
+        }
+
+        // ✅ 2) Upload للreceipt على bucket: receipts
+        const extRaw = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const safeExt = ["jpg","jpeg","png","webp"].includes(extRaw) ? extRaw : "jpg";
+        const fileName = `${user.id}/${Date.now()}.${safeExt}`;
+
+        const { error: uploadErr } = await supabase
+          .storage
+          .from("receipts")
+          .upload(fileName, file, { upsert: false });
+
+        if(uploadErr) throw uploadErr;
+
+        // ✅ 3) Insert بالجدول deposits
+        // ملاحظة: لازم جدول deposits فيه الأعمدة:
+        // user_id (uuid), method (text), amount (numeric), receipt_path (text), status (text)
+        const { error: insertErr } = await supabase
+          .from("deposits")
+          .insert([{
+            user_id: user.id,
+            method: "Whish Money",
+            amount: amount,
+            receipt_path: fileName,
+            status: "pending"
+          }]);
+
+        if(insertErr) throw insertErr;
+
+        // ✅ نجاح
+        showOverlay("Request sent ✅", "Your deposit request is pending. We will review it soon.");
+        amountEl.value = "";
+        fileEl.value = "";
+
+      }catch(e){
+        console.error(e);
+        showOverlay("Failed ❌", (e?.message || "Something went wrong"));
+      }finally{
+        btn.disabled = false;
+        btn.textContent = "REQUEST";
+      }
     }
-
-    // ✅ 1) رفع الصورة على Storage bucket: receipts
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
-    const fileName = `${user.id}/${Date.now()}.${safeExt}`;
-
-    const { error: uploadError } = await supabase
-      .storage
-      .from("receipts")
-      .upload(fileName, file, { upsert: false });
-
-    if(uploadError){
-      console.error(uploadError);
-      alert("Upload failed ❌");
-      return;
-    }
-
-    // ✅ 2) إدخال الطلب بجدول deposits
-    const { error: insertError } = await supabase
-      .from("deposits")
-      .insert({
-        user_id: user.id,
-        method: "Whish Money",
-        amount: amount,
-        receipt_path: fileName,
-        status: "pending"
-      });
-
-    if(insertError){
-      console.error(insertError);
-      alert("Failed to save request ❌");
-      return;
-    }
-
-    alert("Request sent ✅");
-
-    // ✅ تنظيف الفورم
-    amountEl.value = "";
-    fileEl.value = "";
-  }
-</script>
+  </script>
 
 </body>
 </html>
