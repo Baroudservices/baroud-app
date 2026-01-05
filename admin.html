@@ -27,20 +27,19 @@
       background:rgba(255,255,255,.06);
       border-radius:18px; padding:14px;
     }
+    .statusBar{
+      margin:10px 0 12px; padding:10px 12px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:rgba(234,242,255,.9);
+      font-weight:800;
+    }
     .errorBox{
       display:none;
       margin:12px 0; padding:12px; border-radius:14px;
       border:1px solid rgba(255,80,80,.35);
       background:rgba(255,80,80,.10);
       color:#ffd6d6; font-weight:700;
-      white-space:pre-wrap;
-    }
-    .infoBox{
-      margin:12px 0; padding:12px; border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:rgba(234,242,255,.85);
-      font-weight:700;
       white-space:pre-wrap;
     }
     table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px;}
@@ -67,10 +66,8 @@
     </div>
 
     <div class="card">
+      <div id="statusBar" class="statusBar">Loading…</div>
       <div id="errorBox" class="errorBox"></div>
-
-      <!-- ✅ Debug مهم: بيقلك إذا في session + إذا انت admin -->
-      <div id="infoBox" class="infoBox">Checking session...</div>
 
       <table>
         <thead>
@@ -93,18 +90,18 @@
   </div>
 
   <script>
+    // ✅ لازم Anon Public Key (بيبلّش eyJ...) مش sb_publishable
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9....";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ"; // <-- بدّلها
 
-    const rowsEl  = document.getElementById("rows");
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const rowsEl = document.getElementById("rows");
     const emptyEl = document.getElementById("empty");
-    const errorBox= document.getElementById("errorBox");
-    const infoBox = document.getElementById("infoBox");
+    const errorBox = document.getElementById("errorBox");
+    const statusBar = document.getElementById("statusBar");
 
-    let cachedUser = null;
-    let cachedIsAdmin = false;
-
+    function setStatus(msg){ statusBar.textContent = msg; }
     function showError(msg){
       errorBox.style.display = "block";
       errorBox.textContent = msg;
@@ -113,42 +110,39 @@
       errorBox.style.display = "none";
       errorBox.textContent = "";
     }
-    function setInfo(msg){
-      infoBox.textContent = msg;
-    }
 
-    async function requireAdmin(){
-      clearError();
+    async function mustGetUser(){
+      setStatus("Checking session…");
+      const { data, error } = await supabase.auth.getSession();
+      if(error) throw error;
 
-      // ✅ 1) session
-      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
-      if(sessionErr) throw sessionErr;
-
-      const user = sessionData?.session?.user;
+      const user = data?.session?.user;
       if(!user){
-        setInfo("No session ❌ (Not logged in)\nRedirecting to login...");
+        setStatus("Not logged in → redirecting…");
         location.replace("login.html?v=" + Date.now());
         return null;
       }
+      return user;
+    }
 
-      // ✅ 2) read profile => is_admin
+    async function requireAdmin(){
+      const user = await mustGetUser();
+      if(!user) return null;
+
+      setStatus("Checking admin role…");
       const { data: prof, error: profErr } = await supabase
         .from("profiles")
-        .select("id, is_admin")
+        .select("id,is_admin")
         .eq("id", user.id)
         .single();
 
       if(profErr) throw profErr;
 
       if(!prof?.is_admin){
-        setInfo("Logged in ✅\nUser: " + user.id + "\nAdmin: NO ❌");
-        showError("Access denied: you are not admin.");
+        setStatus("Access denied (not admin).");
+        showError("Access denied: your profile is not admin.\nSet profiles.is_admin=true for your user.");
         return null;
       }
-
-      cachedUser = user;
-      cachedIsAdmin = true;
-      setInfo("Logged in ✅\nUser: " + user.id + "\nAdmin: YES ✅\nOrigin: " + location.origin);
 
       return user;
     }
@@ -158,90 +152,95 @@
       rowsEl.innerHTML = "";
       emptyEl.style.display = "none";
 
-      const adminUser = await requireAdmin();
-      if(!adminUser) return;
+      try{
+        const admin = await requireAdmin();
+        if(!admin) return;
 
-      const { data, error } = await supabase
-        .from("deposits")
-        .select("id, created_at, user_id, amount, method, status, receipt_path")
-        .order("created_at", { ascending: false })
-        .limit(100);
+        setStatus("Loading deposits…");
+        const { data, error } = await supabase
+          .from("deposits")
+          .select("id,created_at,user_id,amount,method,status,receipt_path")
+          .order("created_at", { ascending: false })
+          .limit(100);
 
-      if(error){
-        showError("LOAD ERROR:\n" + (error.message || JSON.stringify(error)));
-        return;
-      }
+        if(error) throw error;
 
-      if(!data || data.length === 0){
-        emptyEl.style.display = "block";
-        return;
-      }
+        if(!data || data.length === 0){
+          setStatus("No deposits found.");
+          emptyEl.style.display = "block";
+          return;
+        }
 
-      for(const r of data){
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${r.id}</td>
-          <td style="font-size:12px; opacity:.9;">${r.user_id || "-"}</td>
-          <td><b>${r.amount ?? "-"}</b></td>
-          <td>${r.method || "-"}</td>
-          <td style="font-weight:900;">${r.status || "-"}</td>
-          <td>
-            <button class="miniBtn ok" data-act="approve" data-id="${r.id}">Approve</button>
-            <button class="miniBtn no" data-act="reject" data-id="${r.id}">Reject</button>
-            <button class="miniBtn" data-act="receipt" data-path="${r.receipt_path || ""}">Receipt</button>
-          </td>
-        `;
-        rowsEl.appendChild(tr);
+        setStatus(`Loaded ${data.length} deposit(s).`);
+
+        for(const r of data){
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${r.id}</td>
+            <td style="font-size:12px; opacity:.9;">${r.user_id || "-"}</td>
+            <td><b>${r.amount ?? "-"}</b></td>
+            <td>${r.method || "-"}</td>
+            <td><b>${r.status || "-"}</b></td>
+            <td>
+              <button class="miniBtn ok" data-act="approve" data-id="${r.id}">Approve</button>
+              <button class="miniBtn no" data-act="reject" data-id="${r.id}">Reject</button>
+              <button class="miniBtn" data-act="receipt" data-path="${r.receipt_path || ""}">Receipt</button>
+            </td>
+          `;
+          rowsEl.appendChild(tr);
+        }
+
+      }catch(e){
+        console.error(e);
+        setStatus("Error.");
+        showError("ERROR:\n" + (e?.message || JSON.stringify(e)));
       }
     }
 
     async function openReceipt(path){
       if(!path) return alert("No receipt path");
 
-      // ✅ إذا bucket public بيشتغل publicUrl
-      const { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
-      const publicUrl = pub?.publicUrl;
-
-      // جرّب public أولًا
-      if(publicUrl){
-        // ملاحظة: publicUrl موجود دائمًا، بس إذا bucket private ممكن الرابط يفتح error
-        // لذلك منجرّب signed كخيار “آمن”
-      }
-
-      // ✅ Signed URL (شغّال حتى لو bucket private)
-      const { data, error } = await supabase.storage
+      // ✅ إذا bucket receipts private: نعمل signed url
+      const { data: signed, error } = await supabase.storage
         .from("receipts")
-        .createSignedUrl(path, 60 * 10); // 10 min
+        .createSignedUrl(path, 60);
 
       if(error){
-        alert("Cannot open receipt: " + error.message);
+        // fallback: public url إذا البكت public
+        const { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
+        const url = pub?.publicUrl;
+        if(!url) return alert("Cannot open receipt. Check bucket settings.");
+        window.open(url, "_blank");
         return;
       }
 
-      window.open(data.signedUrl, "_blank");
+      window.open(signed.signedUrl, "_blank");
     }
 
     async function updateStatus(id, newStatus){
       clearError();
+      try{
+        const admin = await requireAdmin();
+        if(!admin) return;
 
-      const adminUser = await requireAdmin();
-      if(!adminUser) return;
+        if(!confirm(`Set deposit #${id} to ${newStatus}?`)) return;
 
-      const ok = confirm(`Set deposit #${id} to ${newStatus}?`);
-      if(!ok) return;
+        setStatus("Updating…");
+        const { error } = await supabase
+          .from("deposits")
+          .update({ status: newStatus })
+          .eq("id", id);
 
-      const { error } = await supabase
-        .from("deposits")
-        .update({ status: newStatus })
-        .eq("id", id);
+        if(error) throw error;
 
-      if(error){
-        showError("UPDATE ERROR:\n" + (error.message || JSON.stringify(error)));
-        return;
+        alert(newStatus === "approved" ? "Approved ✅" : "Rejected ✅");
+        loadDeposits();
+
+      }catch(e){
+        console.error(e);
+        setStatus("Error.");
+        showError("UPDATE ERROR:\n" + (e?.message || JSON.stringify(e)));
       }
-
-      alert(newStatus === "approved" ? "Approved ✅" : "Rejected ✅");
-      loadDeposits();
     }
 
     document.addEventListener("click", (e)=>{
@@ -260,13 +259,6 @@
       location.replace("login.html?v=" + Date.now());
     });
 
-    // ✅ مهم: استنى auth يثبت (حل مشكلة “فاضي”)
-    supabase.auth.onAuthStateChange((_event, session) => {
-      if(session) loadDeposits();
-      else setInfo("No session ❌ (Not logged in)\nOrigin: " + location.origin);
-    });
-
-    // أول تحميل
     loadDeposits();
   </script>
 </body>
