@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Payments – Baroud Services</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --bg1:#06162a;
+      --bg2:#020b14;
+      --text:#ffffff;
+      --glass:rgba(255,255,255,.07);
+      --stroke:rgba(255,255,255,.09);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#0b1424,#050a14);
+      color:#fff;
+      min-height:100vh;
+    }
+    .wrap{
+      max-width:520px;
+      margin:0 auto;
+      padding:14px 14px 40px;
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:6px;
+      margin-bottom:12px;
+    }
+    .btn{
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background:var(--glass);
+      color:#fff;
+      cursor:pointer;
+      font-weight:800;
+    }
+    .title{
+      font-weight:950;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+
+    .card{
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      padding:14px;
+      backdrop-filter: blur(14px);
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .muted{opacity:.65;font-weight:800}
+    .big{
+      font-size:22px;
+      font-weight:950;
+      color:#1bc7ff;
+    }
+
+    .list{
+      margin-top:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .item{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .left{min-width:0}
+    .right{text-align:right; flex:0 0 auto}
+    .id{
+      font-weight:900;
+      opacity:.9;
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:220px;
+    }
+    .meta{
+      margin-top:6px;
+      font-size:13px;
+      opacity:.7;
+      font-weight:700;
+    }
+    .amt{
+      font-weight:950;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .badge{
+      margin-top:6px;
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      font-weight:900;
+      font-size:12px;
+      opacity:.95;
+    }
+    .approved{ color:#22c55e; border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.10); }
+    .pending{ color:#fbbf24; border-color:rgba(251,191,36,.35); background:rgba(251,191,36,.10); }
+    .rejected{ color:#ef4444; border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.10); }
+
+    .empty{
+      text-align:center;
+      opacity:.6;
+      font-weight:900;
+      margin-top:14px;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="wrap">
+    <div class="top">
+      <button class="btn" id="btnBack">← Back</button>
+      <div class="title">My Payments</div>
+      <button class="btn" id="btnRefresh">Refresh</button>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="muted">Current Balance</div>
+          <div class="big" id="bal">0.00</div>
+        </div>
+        <div style="font-size:22px">🇺🇸</div>
+      </div>
+    </div>
+
+    <div class="list" id="list"></div>
+    <div class="empty" id="empty" style="display:none;">No payments yet</div>
+  </main>
+
+  <script>
+    // ✅ Supabase
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const elBal = document.getElementById("bal");
+    const elList = document.getElementById("list");
+    const elEmpty = document.getElementById("empty");
+
+    document.getElementById("btnBack").addEventListener("click", ()=>{
+      location.href = "services.html";
+    });
+    document.getElementById("btnRefresh").addEventListener("click", load);
+
+    function esc(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function fmtDate(iso){
+      try{
+        const d = new Date(iso);
+        return d.toLocaleString();
+      }catch(e){
+        return iso || "";
+      }
+    }
+
+    async function load(){
+      elList.innerHTML = "";
+      elEmpty.style.display = "none";
+
+      // ✅ Gate
+      const { data } = await sb.auth.getSession();
+      if(!data.session?.user){
+        location.replace("login.html?v=" + Date.now());
+        return;
+      }
+      const uid = data.session.user.id;
+
+      // ✅ Load balance from profiles
+      const { data: prof, error: pErr } = await sb
+        .from("profiles")
+        .select("balance")
+        .eq("id", uid)
+        .single();
+
+      if(!pErr && prof){
+        const b = Number(prof.balance || 0).toFixed(2);
+        elBal.textContent = b;
+        // optional: sync localStorage
+        localStorage.setItem("balance", b);
+      }else{
+        // fallback from localStorage
+        elBal.textContent = Number(localStorage.getItem("balance") || 0).toFixed(2);
+      }
+
+      // ✅ Load deposits history
+      const { data: deps, error } = await sb
+        .from("deposits")
+        .select("id,amount,method,status,created_at")
+        .eq("user_id", uid)
+        .order("created_at", { ascending:false });
+
+      if(error){
+        elList.innerHTML = `<div class="empty" style="color:#ffb4b4">Error: ${esc(error.message)}</div>`;
+        return;
+      }
+
+      if(!deps || deps.length === 0){
+        elEmpty.style.display = "block";
+        return;
+      }
+
+      deps.forEach(d=>{
+        const st = String(d.status || "pending").toLowerCase();
+        const cls = st === "approved" ? "approved" : st === "rejected" ? "rejected" : "pending";
+        elList.innerHTML += `
+          <div class="item">
+            <div class="left">
+              <div class="id">Deposit #${esc(d.id)}</div>
+              <div class="meta">${esc(d.method || "—")} • ${esc(fmtDate(d.created_at))}</div>
+              <div class="badge ${cls}">${esc(st)}</div>
+            </div>
+            <div class="right">
+              <div class="amt">$${esc(Number(d.amount || 0).toFixed(2))}</div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    load();
+  </script>
+</body>
+</html>
