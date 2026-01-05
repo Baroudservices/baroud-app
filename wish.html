@@ -40,6 +40,10 @@
       display:flex;align-items:center;gap:10px;
       user-select:none;
       opacity:.95;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
     }
 
     .wrap{max-width:460px;margin:0 auto;}
@@ -113,6 +117,8 @@
       font-size:16px;
       background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
       box-shadow:0 18px 45px rgba(37,99,235,.25);
+      position:relative;
+      z-index:2;
     }
     .btn:active{transform:scale(.99)}
     .btn:disabled{opacity:.6; cursor:not-allowed}
@@ -124,7 +130,7 @@
       opacity:.8;
     }
 
-    /* success/error overlay بدل alert */
+    /* overlay */
     .overlay{
       position:fixed; inset:0;
       display:none;
@@ -132,6 +138,13 @@
       background:rgba(0,0,0,.55);
       z-index:9999;
       padding:18px;
+
+      /* مهم: لما تكون مخفية ما تاكل الكليكات */
+      pointer-events:none;
+    }
+    .overlay.show{
+      display:flex;
+      pointer-events:auto;
     }
     .modal{
       max-width:420px; width:100%;
@@ -161,7 +174,7 @@
 <body>
 
   <div class="topbar">
-    <div class="back" onclick="goBack()">← رجوع</div>
+    <div class="back" id="btnBack">← رجوع</div>
   </div>
 
   <div class="wrap">
@@ -176,7 +189,6 @@
         <div style="color:var(--muted);font-weight:700;">
           Please send the amount to this number ID:
         </div>
-        <!-- ✅ عدّل رقمك هون -->
         <div class="id">+961 70385398</div>
 
         <div style="margin-top:10px;color:var(--muted);font-weight:700;">
@@ -188,7 +200,8 @@
       <input id="amount" type="number" placeholder="Enter amount $" />
       <input id="receipt" type="file" accept="image/*" />
 
-      <button id="btnReq" class="btn" onclick="requestNow()">REQUEST</button>
+      <!-- مهم: type="button" -->
+      <button id="btnReq" type="button" class="btn">REQUEST</button>
 
       <div class="foot">© 2024 Baroud Services</div>
     </div>
@@ -199,17 +212,16 @@
     <div class="modal">
       <h3 id="ovTitle">Done</h3>
       <p id="ovMsg">...</p>
-      <button class="ok" onclick="hideOverlay()">OK</button>
+      <button class="ok" id="ovOk">OK</button>
     </div>
   </div>
 
   <script>
-    // ✅ Supabase Client
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ✅ رجوع مضمون
+    let supabase = null;
+
     function goBack(){
       window.location.replace("add-credit.html?v=" + Date.now());
     }
@@ -217,10 +229,10 @@
     function showOverlay(title, msg){
       document.getElementById("ovTitle").textContent = title;
       document.getElementById("ovMsg").textContent = msg;
-      document.getElementById("overlay").style.display = "flex";
+      document.getElementById("overlay").classList.add("show");
     }
     function hideOverlay(){
-      document.getElementById("overlay").style.display = "none";
+      document.getElementById("overlay").classList.remove("show");
     }
 
     async function requestNow(){
@@ -240,11 +252,17 @@
         return;
       }
 
+      // إذا supabase ما تهيّأ
+      if(!supabase){
+        showOverlay("Error ❌", "Supabase not loaded. Check internet or refresh the page.");
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = "SENDING...";
 
       try{
-        // ✅ 1) تأكد من session
+        // 1) session
         const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
         if(sessionErr) throw sessionErr;
 
@@ -254,7 +272,7 @@
           return;
         }
 
-        // ✅ 2) Upload للreceipt على bucket: receipts
+        // 2) upload receipt
         const extRaw = (file.name.split(".").pop() || "jpg").toLowerCase();
         const safeExt = ["jpg","jpeg","png","webp"].includes(extRaw) ? extRaw : "jpg";
         const fileName = `${user.id}/${Date.now()}.${safeExt}`;
@@ -266,9 +284,7 @@
 
         if(uploadErr) throw uploadErr;
 
-        // ✅ 3) Insert بالجدول deposits
-        // ملاحظة: لازم جدول deposits فيه الأعمدة:
-        // user_id (uuid), method (text), amount (numeric), receipt_path (text), status (text)
+        // 3) insert deposits
         const { error: insertErr } = await supabase
           .from("deposits")
           .insert([{
@@ -281,7 +297,6 @@
 
         if(insertErr) throw insertErr;
 
-        // ✅ نجاح
         showOverlay("Request sent ✅", "Your deposit request is pending. We will review it soon.");
         amountEl.value = "";
         fileEl.value = "";
@@ -294,6 +309,23 @@
         btn.textContent = "REQUEST";
       }
     }
+
+    function init(){
+      // ربط الأزرار
+      document.getElementById("btnBack").addEventListener("click", goBack);
+      document.getElementById("btnReq").addEventListener("click", requestNow);
+      document.getElementById("ovOk").addEventListener("click", hideOverlay);
+
+      // تهيئة supabase بشكل آمن
+      if(window.supabase && window.supabase.createClient){
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }else{
+        // إذا CDN ما حمل
+        showOverlay("Error ❌", "Supabase library failed to load. Refresh the page or check internet.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
   </script>
 
 </body>
