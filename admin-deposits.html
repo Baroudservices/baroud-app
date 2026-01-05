@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -9,409 +8,221 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    :root{
-      --bg1:#060b16; --bg2:#0a1330;
-      --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --text:#eaf2ff;
-      --muted:rgba(234,242,255,.65);
-      --shadow:0 20px 60px rgba(0,0,0,.55);
-      --r:22px;
-    }
-    *{box-sizing:border-box}
     body{
-      margin:0; min-height:100vh;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
-        radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
-        linear-gradient(160deg,var(--bg1),var(--bg2));
-      padding:18px;
+      margin:0; min-height:100vh; font-family:system-ui,Arial;
+      background:linear-gradient(160deg,#060b16,#0a1330);
+      color:#eaf2ff; padding:16px;
     }
-
-    .wrap{max-width:980px;margin:0 auto;}
-    .head{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px;
-      margin:10px 0 14px;
-    }
-    h1{
-      margin:0;
-      font-size:32px;
-      font-weight:900;
-      letter-spacing:.2px;
-    }
-
-    .btnTop{
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.08);
-      color:#fff;
-      padding:10px 14px;
-      border-radius:14px;
-      cursor:pointer;
-      font-weight:800;
-    }
-    .btnTop:active{transform:scale(.99)}
-
-    .card{
-      border:1px solid var(--stroke);
-      background:var(--card);
-      backdrop-filter:blur(14px);
-      border-radius:var(--r);
-      padding:14px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:14px;
-    }
-    thead th{
-      text-align:left;
-      color:rgba(234,242,255,.8);
-      font-weight:900;
-      padding:12px 10px;
-      border-bottom:1px solid rgba(255,255,255,.10);
-    }
-    tbody td{
-      padding:12px 10px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      vertical-align:middle;
-      color:rgba(234,242,255,.92);
-    }
-
-    .pill{
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      font-weight:900;
-      font-size:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.07);
-    }
-    .pending{background:rgba(245,158,11,.14); border-color:rgba(245,158,11,.3)}
-    .approved{background:rgba(34,197,94,.14); border-color:rgba(34,197,94,.3)}
-    .rejected{background:rgba(239,68,68,.14); border-color:rgba(239,68,68,.3)}
-
-    .actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
+    .wrap{max-width:900px;margin:0 auto;}
+    .top{
+      display:flex; justify-content:space-between; align-items:center;
+      gap:10px; margin-bottom:14px;
     }
     .btn{
-      border:0;
-      cursor:pointer;
-      padding:8px 10px;
-      border-radius:12px;
-      font-weight:900;
-      color:#fff;
+      border:0; padding:10px 14px; border-radius:12px; cursor:pointer;
+      background:rgba(255,255,255,.10); color:#fff; font-weight:800;
+    }
+    .card{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      border-radius:18px; padding:14px;
+    }
+    .errorBox{
+      display:none;
+      margin:12px 0; padding:12px; border-radius:14px;
+      border:1px solid rgba(255,80,80,.35);
+      background:rgba(255,80,80,.10);
+      color:#ffd6d6; font-weight:700;
+      white-space:pre-wrap;
+    }
+    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px;}
+    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); font-size:14px;}
+    th{color:rgba(234,242,255,.75); text-align:left; font-weight:900;}
+    .status{font-weight:900;}
+    .ok{background:rgba(34,197,94,.18); border:1px solid rgba(34,197,94,.25)}
+    .no{background:rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.25)}
+    .miniBtn{
+      padding:8px 10px; border-radius:10px; border:0; cursor:pointer;
+      color:#fff; font-weight:900; margin-right:6px;
       background:rgba(255,255,255,.12);
     }
-    .ok{background:rgba(34,197,94,.22)}
-    .no{background:rgba(239,68,68,.22)}
-    .rc{background:rgba(59,130,246,.22)}
-    .btn:active{transform:scale(.99)}
-    .btn[disabled]{opacity:.6; cursor:not-allowed}
-
-    .muted{color:var(--muted)}
-    .empty{
-      padding:18px;
-      text-align:center;
-      color:rgba(234,242,255,.75);
-    }
-
-    /* overlay */
-    .overlay{
-      position:fixed; inset:0;
-      display:none;
-      align-items:center;justify-content:center;
-      background:rgba(0,0,0,.55);
-      z-index:9999;
-      padding:18px;
-    }
-    .overlay.show{display:flex}
-    .modal{
-      max-width:460px; width:100%;
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(15,23,42,.92);
-      backdrop-filter:blur(12px);
-      padding:16px;
-      box-shadow:0 30px 80px rgba(0,0,0,.55);
-    }
-    .modal h3{margin:0 0 8px;font-size:18px}
-    .modal p{margin:0;color:rgba(234,242,255,.8);line-height:1.4}
-    .modal .okBtn{
-      margin-top:14px;
-      width:100%;
-      padding:12px;
-      border-radius:14px;
-      border:0;
-      font-weight:900;
-      cursor:pointer;
-      background:rgba(255,255,255,.10);
-      color:#fff;
-    }
-
-    @media (max-width:760px){
-      table{font-size:13px}
-      h1{font-size:26px}
-      thead{display:none}
-      table, tbody, tr, td{display:block;width:100%}
-      tbody tr{
-        border-bottom:1px solid rgba(255,255,255,.10);
-        padding:10px 0;
-      }
-      tbody td{
-        border:0;
-        padding:6px 6px;
-      }
-      tbody td::before{
-        content:attr(data-label);
-        display:block;
-        color:rgba(234,242,255,.65);
-        font-weight:900;
-        margin-bottom:3px;
-        font-size:12px;
-      }
-    }
+    .miniBtn.ok{background:rgba(34,197,94,.22)}
+    .miniBtn.no{background:rgba(239,68,68,.22)}
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="head">
-      <h1>Admin – Deposit Requests</h1>
-      <div style="display:flex;gap:10px">
-        <button id="btnRefresh" class="btnTop">Refresh</button>
-        <button id="btnLogout" class="btnTop">Logout</button>
+    <div class="top">
+      <h2 style="margin:0;">Admin – Deposit Requests</h2>
+      <div>
+        <button class="btn" id="btnRefresh">Refresh</button>
+        <button class="btn" id="btnLogout">Logout</button>
       </div>
     </div>
 
     <div class="card">
-      <div id="statusLine" class="muted" style="padding:8px 6px 12px"></div>
+      <div id="errorBox" class="errorBox"></div>
 
-      <div style="overflow:auto;">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:70px">ID</th>
-              <th>User</th>
-              <th style="width:90px">Amount</th>
-              <th style="width:140px">Method</th>
-              <th style="width:120px">Status</th>
-              <th style="width:260px">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="list"></tbody>
-        </table>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+
+      <div id="empty" style="opacity:.7; padding:14px; display:none;">
+        No deposits found.
       </div>
-
-      <div id="empty" class="empty" style="display:none;">
-        No deposits yet.
-      </div>
-    </div>
-  </div>
-
-  <!-- overlay -->
-  <div class="overlay" id="overlay">
-    <div class="modal">
-      <h3 id="ovTitle">Done</h3>
-      <p id="ovMsg">...</p>
-      <button class="okBtn" id="ovOk">OK</button>
     </div>
   </div>
 
   <script>
-    // ✅ Supabase Client
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const listEl = document.getElementById("list");
+    const rowsEl = document.getElementById("rows");
     const emptyEl = document.getElementById("empty");
-    const statusLine = document.getElementById("statusLine");
+    const errorBox = document.getElementById("errorBox");
 
-    function showOverlay(title, msg){
-      document.getElementById("ovTitle").textContent = title;
-      document.getElementById("ovMsg").textContent = msg;
-      document.getElementById("overlay").classList.add("show");
+    function showError(msg){
+      errorBox.style.display = "block";
+      errorBox.textContent = msg;
     }
-    function hideOverlay(){
-      document.getElementById("overlay").classList.remove("show");
-    }
-
-    function esc(v){
-      return String(v ?? "").replace(/[&<>"']/g, m => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      })[m]);
-    }
-
-    function pill(status){
-      const s = (status || "pending").toLowerCase();
-      const cls = s === "approved" ? "approved" : (s === "rejected" ? "rejected" : "pending");
-      return `<span class="pill ${cls}">${esc(s)}</span>`;
+    function clearError(){
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
     }
 
     async function requireAdmin(){
-      // لازم المستخدم يكون عامل login
-      const { data: sessionData } = await supabase.auth.getSession();
+      // 1) لازم session
+      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
+      if(sessionErr) throw sessionErr;
+
       const user = sessionData?.session?.user;
       if(!user){
+        showError("Not logged in. Redirecting to login...");
         location.replace("login.html?v=" + Date.now());
-        return false;
+        return null;
       }
 
-      // لازم يكون is_admin=true بجدول profiles
-      const { data, error } = await supabase
+      // 2) لازم يقدر يقرا profiles ليتأكد is_admin
+      const { data: prof, error: profErr } = await supabase
         .from("profiles")
-        .select("is_admin")
+        .select("id, is_admin")
         .eq("id", user.id)
         .single();
 
-      if(error){
-        showOverlay("Error ❌", error.message);
-        return false;
+      if(profErr) throw profErr;
+
+      if(!prof?.is_admin){
+        showError("Access denied: you are not admin.");
+        return null;
       }
-      if(!data?.is_admin){
-        showOverlay("No access ❌", "You are not admin.");
-        return false;
-      }
-      return true;
+
+      return user;
     }
 
     async function loadDeposits(){
-      statusLine.textContent = "Loading...";
-      listEl.innerHTML = "";
+      clearError();
+      rowsEl.innerHTML = "";
       emptyEl.style.display = "none";
 
-      // ✅ الأفضل: اقرأ من VIEW اسمها admin_deposits
-      // لازم الـ view يرجّع email مع user_id (أنت عاملها من قبل)
+      const adminUser = await requireAdmin();
+      if(!adminUser) return;
+
       const { data, error } = await supabase
         .from("deposits")
         .select("id, created_at, user_id, amount, method, status, receipt_path")
-.order("created_at", { ascending: false });
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50);
 
       if(error){
-        statusLine.textContent = "";
-        showOverlay("Failed ❌", error.message);
+        // 👇 هون رح يبينلك سبب المشكلة الحقيقي (RLS / table name / JWT...)
+        showError("LOAD ERROR:\n" + (error.message || JSON.stringify(error)));
         return;
       }
 
-      statusLine.textContent = `Total: ${data.length}`;
-
-      if(!data.length){
+      if(!data || data.length === 0){
         emptyEl.style.display = "block";
         return;
       }
 
-      for(const row of data){
+      for(const r of data){
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td data-label="ID">${esc(row.id)}</td>
-          <td data-label="User">${esc(row.email || row.user_id)}</td>
-          <td data-label="Amount">$${esc(row.amount)}</td>
-          <td data-label="Method">${esc(row.method)}</td>
-          <td data-label="Status">${pill(row.status)}</td>
-          <td data-label="Actions">
-            <div class="actions">
-              <button class="btn ok" data-act="approve" data-id="${esc(row.id)}">Approve</button>
-              <button class="btn no" data-act="reject" data-id="${esc(row.id)}">Reject</button>
-              <button class="btn rc" data-act="receipt" data-path="${esc(row.receipt_path)}">Receipt</button>
-            </div>
+          <td>${r.id}</td>
+          <td style="font-size:12px; opacity:.9;">${r.user_id || "-"}</td>
+          <td><b>${r.amount ?? "-"}</b></td>
+          <td>${r.method || "-"}</td>
+          <td class="status">${r.status || "-"}</td>
+          <td>
+            <button class="miniBtn ok" data-act="approve" data-id="${r.id}">Approve</button>
+            <button class="miniBtn no" data-act="reject" data-id="${r.id}">Reject</button>
+            <button class="miniBtn" data-act="receipt" data-path="${r.receipt_path || ""}">Receipt</button>
           </td>
         `;
-        listEl.appendChild(tr);
+        rowsEl.appendChild(tr);
       }
     }
 
     async function openReceipt(path){
-      if(!path){
-        showOverlay("Error ❌", "No receipt path found");
-        return;
-      }
-
-      // ✅ جرّب public URL
-      const { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
-      const publicUrl = pub?.publicUrl;
-
-      // إذا الباكت public، افتح مباشرة
-      if(publicUrl && typeof publicUrl === "string" && publicUrl.startsWith("http")){
-        window.open(publicUrl, "_blank");
-        return;
-      }
-
-      // إذا private: Signed URL
-      const { data, error } = await supabase.storage
-        .from("receipts")
-        .createSignedUrl(path, 60);
-
-      if(error){
-        showOverlay("Failed ❌", error.message);
-        return;
-      }
-      window.open(data.signedUrl, "_blank");
+      if(!path) return alert("No receipt path");
+      // bucket receipts public: getPublicUrl
+      const { data } = supabase.storage.from("receipts").getPublicUrl(path);
+      const url = data?.publicUrl;
+      if(!url) return alert("No public URL (check bucket public)");
+      window.open(url, "_blank");
     }
 
     async function updateStatus(id, newStatus){
-      if(!id) return;
-      if(!confirm(`Set deposit #${id} to ${newStatus}?`)) return;
+      clearError();
 
-      // ✅ Update جدول deposits (مش view)
+      const adminUser = await requireAdmin();
+      if(!adminUser) return;
+
+      const ok = confirm(`Set deposit #${id} to ${newStatus}?`);
+      if(!ok) return;
+
       const { error } = await supabase
         .from("deposits")
         .update({ status: newStatus })
         .eq("id", id);
 
       if(error){
-        showOverlay("Failed ❌", error.message);
+        showError("UPDATE ERROR:\n" + (error.message || JSON.stringify(error)));
         return;
       }
 
-      showOverlay("Done ✅", `Deposit #${id} set to ${newStatus}`);
-      await loadDeposits();
+      alert(newStatus === "approved" ? "Approved ✅" : "Rejected ✅");
+      loadDeposits();
     }
 
-    async function logout(){
+    document.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button");
+      if(!btn) return;
+
+      const act = btn.dataset.act;
+      if(act === "approve") return updateStatus(btn.dataset.id, "approved");
+      if(act === "reject")  return updateStatus(btn.dataset.id, "rejected");
+      if(act === "receipt") return openReceipt(btn.dataset.path);
+    });
+
+    document.getElementById("btnRefresh").addEventListener("click", loadDeposits);
+    document.getElementById("btnLogout").addEventListener("click", async ()=>{
       await supabase.auth.signOut();
       location.replace("login.html?v=" + Date.now());
-    }
+    });
 
-    function bindEvents(){
-      document.getElementById("btnRefresh").addEventListener("click", loadDeposits);
-      document.getElementById("btnLogout").addEventListener("click", logout);
-      document.getElementById("ovOk").addEventListener("click", hideOverlay);
-
-      document.addEventListener("click", (e)=>{
-        const btn = e.target.closest("button");
-        if(!btn) return;
-
-        const act = btn.dataset.act;
-        if(act === "approve") return updateStatus(btn.dataset.id, "approved");
-        if(act === "reject")  return updateStatus(btn.dataset.id, "rejected");
-        if(act === "receipt") return openReceipt(btn.dataset.path);
-      });
-    }
-
-    async function init(){
-      if(!window.supabase || !window.supabase.createClient){
-        showOverlay("Error ❌", "Supabase library not loaded (CDN). Refresh and check internet.");
-        return;
-      }
-
-      bindEvents();
-
-      const ok = await requireAdmin();
-      if(!ok) return;
-
-      await loadDeposits();
-    }
-
-    document.addEventListener("DOMContentLoaded", init);
+    loadDeposits();
   </script>
 </body>
 </html>
