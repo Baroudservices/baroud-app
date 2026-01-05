@@ -291,8 +291,9 @@
       // ✅ الأفضل: اقرأ من VIEW اسمها admin_deposits
       // لازم الـ view يرجّع email مع user_id (أنت عاملها من قبل)
       const { data, error } = await supabase
-        .from("admin_deposits")
-        .select("id, created_at, user_id, email, amount, method, status, receipt_path")
+        .from("deposits")
+        .select("id, created_at, user_id, amount, method, status, receipt_path")
+.order("created_at", { ascending: false });
         .order("created_at", { ascending: false });
 
       if(error){
