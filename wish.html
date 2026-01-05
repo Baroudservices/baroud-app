@@ -113,110 +113,126 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const debugEl = document.getElementById("debug");
-    function debug(msg){
-      debugEl.style.display = "block";
-      debugEl.textContent = msg;
-    }
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const debugEl = document.getElementById("debug");
+  function debug(msg){
+    debugEl.style.display = "block";
+    debugEl.textContent = msg;
+  }
 
-    // ✅ global error catcher
-    window.addEventListener("error", (e)=>{
-      debug("JS Error:\n" + (e?.message || "unknown") + "\n" + (e?.filename||"") + ":" + (e?.lineno||"") );
-    });
-    window.addEventListener("unhandledrejection", (e)=>{
-      debug("Unhandled Promise:\n" + (e?.reason?.message || String(e?.reason || "unknown")));
-    });
+  window.addEventListener("error", (e)=>{
+    debug("JS Error:\n" + (e?.message || "unknown") + "\n" + (e?.filename||"") + ":" + (e?.lineno||""));
+  });
+  window.addEventListener("unhandledrejection", (e)=>{
+    debug("Unhandled Promise:\n" + (e?.reason?.message || String(e?.reason || "unknown")));
+  });
 
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const btnReq  = document.getElementById("btnReq");
-    const btnBack = document.getElementById("btnBack");
-    const ovOk    = document.getElementById("ovOk");
+  const btnReq  = document.getElementById("btnReq");
+  const btnBack = document.getElementById("btnBack");
+  const ovOk    = document.getElementById("ovOk");
 
-    function showOverlay(title, msg){
-      document.getElementById("ovTitle").textContent = title;
-      document.getElementById("ovMsg").textContent = msg;
-      document.getElementById("overlay").classList.add("show");
-    }
+  function showOverlay(title, msg){
+    document.getElementById("ovTitle").textContent = title;
+    document.getElementById("ovMsg").textContent = msg;
+    document.getElementById("overlay").classList.add("show");
+  }
+  function hideOverlay(){
+    document.getElementById("overlay").classList.remove("show");
+  }
 
-    btnBack.addEventListener("click", () => {
-      // ✅ absolute path
-      location.replace("/baroud-app/add-credit.html?v=" + Date.now());
-    });
+  btnBack.addEventListener("click", () => {
+    location.href = "/baroud-app/add-credit.html?v=" + Date.now();
+  });
 
-    ovOk.addEventListener("click", () => {
-      document.getElementById("overlay").classList.remove("show");
-    });
+  ovOk.addEventListener("click", () => hideOverlay());
 
-    // ✅ prevent any default navigation
-    btnReq.addEventListener("click", (e)=>{
-      e.preventDefault();
-      requestNow();
-    });
+  btnReq.addEventListener("click", async (e)=>{
+    e.preventDefault();
+    await requestNow();
+  });
 
-    async function requestNow(){
-      const amountEl = document.getElementById("amount");
-      const fileEl   = document.getElementById("receipt");
+  async function requestNow(){
+    debugEl.style.display = "none";
+    debugEl.textContent = "";
 
-      const amount = Number(amountEl.value);
-      const file   = fileEl.files?.[0];
+    const amountEl = document.getElementById("amount");
+    const fileEl   = document.getElementById("receipt");
 
-      if(!amount || amount < 10) return showOverlay("Error ❌","Minimum deposit is 10$");
-      if(!file) return showOverlay("Error ❌","Please upload receipt image");
+    const amount = Number(amountEl.value);
+    const file   = fileEl.files?.[0];
 
-      btnReq.disabled = true;
-      btnReq.textContent = "SENDING...";
+    if(!amount || amount < 10) return showOverlay("Error ❌","Minimum deposit is 10$");
+    if(!file) return showOverlay("Error ❌","Please upload receipt image");
 
-      try{
-        const { data: s, error: sErr } = await supabase.auth.getSession();
-        if(sErr) throw sErr;
+    btnReq.disabled = true;
+    btnReq.textContent = "SENDING...";
 
-        const user = s?.session?.user;
-        if(!user){
-          // ✅ absolute path
-          location.replace("/baroud-app/login.html?v=" + Date.now());
-          return;
-        }
+    // ✅ timeout safety (15s)
+    const timeout = new Promise((_, rej)=> setTimeout(()=> rej(new Error("Timeout: request stuck (15s)")), 15000));
 
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-        const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
+    try{
+      debug("1) Checking session...");
+      const sessionRes = await Promise.race([supabase.auth.getSession(), timeout]);
+      const sErr = sessionRes?.error;
+      if(sErr) throw sErr;
 
-        // ✅ unique path per upload
-        const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
+      const user = sessionRes?.data?.session?.user;
+      if(!user){
+        debug("No session found -> redirecting to login");
+        location.href = "/baroud-app/login.html?v=" + Date.now();
+        return;
+      }
 
-        const { error: upErr } = await supabase.storage
-          .from("receipts")
-          .upload(fileName, file, { upsert: false });
+      debug("2) Got user: " + user.id);
 
-        if(upErr) throw upErr;
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
+      const fileName = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
 
-        const { error: insErr } = await supabase.from("deposits").insert([{
+      debug("3) Uploading receipt to bucket: receipts\nPath: " + fileName);
+
+      const upRes = await Promise.race([
+        supabase.storage.from("receipts").upload(fileName, file, { upsert:false }),
+        timeout
+      ]);
+
+      if(upRes.error) throw upRes.error;
+
+      debug("4) Upload OK ✅\n5) Inserting deposit row...");
+
+      const insRes = await Promise.race([
+        supabase.from("deposits").insert([{
           user_id: user.id,
           method: "Whish Money",
           amount,
           receipt_path: fileName,
           status: "pending"
-        }]);
+        }]),
+        timeout
+      ]);
 
-        if(insErr) throw insErr;
+      if(insRes.error) throw insRes.error;
 
-        showOverlay("Request sent ✅","Your deposit request is pending.");
-        amountEl.value = "";
-        fileEl.value = "";
+      debug("6) Insert OK ✅ DONE");
+      showOverlay("Request sent ✅","Your deposit request is pending.");
 
-      }catch(e){
-        // ✅ show real error instead of redirect confusion
-        const msg = e?.message || JSON.stringify(e);
-        showOverlay("Failed ❌", msg);
-        debug("REQUEST ERROR:\n" + msg);
-      }finally{
-        btnReq.disabled = false;
-        btnReq.textContent = "REQUEST";
-      }
+      amountEl.value = "";
+      fileEl.value = "";
+
+    }catch(e){
+      const msg = e?.message || JSON.stringify(e);
+      debug("FAILED ❌\n" + msg);
+      showOverlay("Failed ❌", msg);
+    }finally{
+      btnReq.disabled = false;
+      btnReq.textContent = "REQUEST";
     }
-  </script>
+  }
+</script>
 </body>
 </html>
