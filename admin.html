@@ -1,265 +1,163 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin - Deposit Requests</title>
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  // ✅ حط هون anon public key (eyJ...):
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
 
-  <style>
-    body{
-      margin:0; min-height:100vh; font-family:system-ui,Arial;
-      background:linear-gradient(160deg,#060b16,#0a1330);
-      color:#eaf2ff; padding:16px;
+  // ✅ نفس storageKey بكل الصفحات (login/admin/wish)
+  const STORAGE_KEY = "baroud_auth_v1";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storageKey: STORAGE_KEY
     }
-    .wrap{max-width:900px;margin:0 auto;}
-    .top{
-      display:flex; justify-content:space-between; align-items:center;
-      gap:10px; margin-bottom:14px;
-    }
-    .btn{
-      border:0; padding:10px 14px; border-radius:12px; cursor:pointer;
-      background:rgba(255,255,255,.10); color:#fff; font-weight:800;
-    }
-    .card{
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      border-radius:18px; padding:14px;
-    }
-    .statusBar{
-      margin:10px 0 12px; padding:10px 12px; border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:rgba(234,242,255,.9);
-      font-weight:800;
-    }
-    .errorBox{
-      display:none;
-      margin:12px 0; padding:12px; border-radius:14px;
-      border:1px solid rgba(255,80,80,.35);
-      background:rgba(255,80,80,.10);
-      color:#ffd6d6; font-weight:700;
-      white-space:pre-wrap;
-    }
-    table{width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px;}
-    th,td{padding:10px; border-bottom:1px solid rgba(255,255,255,.08); font-size:14px;}
-    th{color:rgba(234,242,255,.75); text-align:left; font-weight:900;}
-    .miniBtn{
-      padding:8px 10px; border-radius:10px; border:0; cursor:pointer;
-      color:#fff; font-weight:900; margin-right:6px;
-      background:rgba(255,255,255,.12);
-    }
-    .miniBtn.ok{background:rgba(34,197,94,.22)}
-    .miniBtn.no{background:rgba(239,68,68,.22)}
-  </style>
-</head>
+  });
 
-<body>
-  <div class="wrap">
-    <div class="top">
-      <h2 style="margin:0;">Admin – Deposit Requests</h2>
-      <div>
-        <button class="btn" id="btnRefresh">Refresh</button>
-        <button class="btn" id="btnLogout">Logout</button>
-      </div>
-    </div>
+  const msg = document.getElementById("msg");
+  const loginBtn = document.getElementById("loginBtn");
+  const registerBtn = document.getElementById("registerBtn");
+  const resetBtn = document.getElementById("resetBtn");
 
-    <div class="card">
-      <div id="statusBar" class="statusBar">Loading…</div>
-      <div id="errorBox" class="errorBox"></div>
+  function showMsg(text, ok=false){
+    msg.style.display="block";
+    msg.className = "msg " + (ok ? "ok" : "err");
+    msg.textContent = text;
+  }
+  function hideMsg(){
+    msg.style.display="none";
+    msg.textContent="";
+  }
+  function setLoading(isLoading, text){
+    loginBtn.disabled = isLoading;
+    registerBtn.disabled = isLoading;
+    resetBtn.disabled = isLoading;
+    loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
+  }
 
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>User</th>
-            <th>Amount</th>
-            <th>Method</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
+  // ✅ إذا عامل login already -> روح services
+  (async ()=>{
+    try{
+      const { data, error } = await sb.auth.getSession();
+      if(error) console.log(error);
+      if (data.session?.user) location.replace("services.html?v=" + Date.now());
+    }catch(e){}
+  })();
 
-      <div id="empty" style="opacity:.7; padding:14px; display:none;">
-        No deposits found.
-      </div>
-    </div>
-  </div>
+  async function doLogin(){
+    hideMsg();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("pass").value;
 
-  <script>
-    // ✅ لازم Anon Public Key (بيبلّش eyJ...) مش sb_publishable
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ"; // <-- بدّلها
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const rowsEl = document.getElementById("rows");
-    const emptyEl = document.getElementById("empty");
-    const errorBox = document.getElementById("errorBox");
-    const statusBar = document.getElementById("statusBar");
-
-    function setStatus(msg){ statusBar.textContent = msg; }
-    function showError(msg){
-      errorBox.style.display = "block";
-      errorBox.textContent = msg;
-    }
-    function clearError(){
-      errorBox.style.display = "none";
-      errorBox.textContent = "";
+    if(!email || !password){
+      showMsg("Fill email and password.");
+      return;
     }
 
-    async function mustGetUser(){
-      setStatus("Checking session…");
-      const { data, error } = await supabase.auth.getSession();
-      if(error) throw error;
+    setLoading(true, "Signing in...");
 
-      const user = data?.session?.user;
-      if(!user){
-        setStatus("Not logged in → redirecting…");
-        location.replace("login.html?v=" + Date.now());
-        return null;
-      }
-      return user;
-    }
+    try{
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
-    async function requireAdmin(){
-      const user = await mustGetUser();
-      if(!user) return null;
-
-      setStatus("Checking admin role…");
-      const { data: prof, error: profErr } = await supabase
-        .from("profiles")
-        .select("id,is_admin")
-        .eq("id", user.id)
-        .single();
-
-      if(profErr) throw profErr;
-
-      if(!prof?.is_admin){
-        setStatus("Access denied (not admin).");
-        showError("Access denied: your profile is not admin.\nSet profiles.is_admin=true for your user.");
-        return null;
-      }
-
-      return user;
-    }
-
-    async function loadDeposits(){
-      clearError();
-      rowsEl.innerHTML = "";
-      emptyEl.style.display = "none";
-
-      try{
-        const admin = await requireAdmin();
-        if(!admin) return;
-
-        setStatus("Loading deposits…");
-        const { data, error } = await supabase
-          .from("deposits")
-          .select("id,created_at,user_id,amount,method,status,receipt_path")
-          .order("created_at", { ascending: false })
-          .limit(100);
-
-        if(error) throw error;
-
-        if(!data || data.length === 0){
-          setStatus("No deposits found.");
-          emptyEl.style.display = "block";
-          return;
-        }
-
-        setStatus(`Loaded ${data.length} deposit(s).`);
-
-        for(const r of data){
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${r.id}</td>
-            <td style="font-size:12px; opacity:.9;">${r.user_id || "-"}</td>
-            <td><b>${r.amount ?? "-"}</b></td>
-            <td>${r.method || "-"}</td>
-            <td><b>${r.status || "-"}</b></td>
-            <td>
-              <button class="miniBtn ok" data-act="approve" data-id="${r.id}">Approve</button>
-              <button class="miniBtn no" data-act="reject" data-id="${r.id}">Reject</button>
-              <button class="miniBtn" data-act="receipt" data-path="${r.receipt_path || ""}">Receipt</button>
-            </td>
-          `;
-          rowsEl.appendChild(tr);
-        }
-
-      }catch(e){
-        console.error(e);
-        setStatus("Error.");
-        showError("ERROR:\n" + (e?.message || JSON.stringify(e)));
-      }
-    }
-
-    async function openReceipt(path){
-      if(!path) return alert("No receipt path");
-
-      // ✅ إذا bucket receipts private: نعمل signed url
-      const { data: signed, error } = await supabase.storage
-        .from("receipts")
-        .createSignedUrl(path, 60);
-
-      if(error){
-        // fallback: public url إذا البكت public
-        const { data: pub } = supabase.storage.from("receipts").getPublicUrl(path);
-        const url = pub?.publicUrl;
-        if(!url) return alert("Cannot open receipt. Check bucket settings.");
-        window.open(url, "_blank");
+      if (error){
+        showMsg(error.message || "Login failed.");
         return;
       }
 
-      window.open(signed.signedUrl, "_blank");
-    }
+      const user = data?.user;
+      const confirmedAt = user?.email_confirmed_at || user?.confirmed_at;
 
-    async function updateStatus(id, newStatus){
-      clearError();
-      try{
-        const admin = await requireAdmin();
-        if(!admin) return;
-
-        if(!confirm(`Set deposit #${id} to ${newStatus}?`)) return;
-
-        setStatus("Updating…");
-        const { error } = await supabase
-          .from("deposits")
-          .update({ status: newStatus })
-          .eq("id", id);
-
-        if(error) throw error;
-
-        alert(newStatus === "approved" ? "Approved ✅" : "Rejected ✅");
-        loadDeposits();
-
-      }catch(e){
-        console.error(e);
-        setStatus("Error.");
-        showError("UPDATE ERROR:\n" + (e?.message || JSON.stringify(e)));
+      if(!confirmedAt){
+        await sb.auth.signOut();
+        showMsg("Please confirm your email first 📧 (Check your inbox).");
+        return;
       }
+
+      showMsg("Login successful ✅", true);
+      setTimeout(()=> location.replace("services.html?v=" + Date.now()), 250);
+
+    }catch(e){
+      showMsg("Network error. Try again.");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  async function doRegister(){
+    hideMsg();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("pass").value;
+
+    if(!email || !password){
+      showMsg("Fill email and password.");
+      return;
+    }
+    if(password.length < 6){
+      showMsg("Password must be at least 6 characters.");
+      return;
     }
 
-    document.addEventListener("click", (e)=>{
-      const btn = e.target.closest("button");
-      if(!btn) return;
+    setLoading(true, "Creating...");
 
-      const act = btn.dataset.act;
-      if(act === "approve") return updateStatus(btn.dataset.id, "approved");
-      if(act === "reject")  return updateStatus(btn.dataset.id, "rejected");
-      if(act === "receipt") return openReceipt(btn.dataset.path);
-    });
+    try{
+      const { error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: "https://baroudservices.github.io/baroud-app/confirmed.html"
+        }
+      });
 
-    document.getElementById("btnRefresh").addEventListener("click", loadDeposits);
-    document.getElementById("btnLogout").addEventListener("click", async ()=>{
-      await supabase.auth.signOut();
-      location.replace("login.html?v=" + Date.now());
-    });
+      if (error){
+        showMsg(error.message || "Register failed.");
+        return;
+      }
 
-    loadDeposits();
-  </script>
-</body>
-</html>
+      showMsg("Register successful ✅ Check your email 📧", true);
+
+    }catch(e){
+      showMsg("Network error. Try again.");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  async function doReset(){
+    hideMsg();
+    const email = document.getElementById("email").value.trim();
+    if(!email){
+      showMsg("Enter your email first.");
+      return;
+    }
+
+    setLoading(true, "Sending...");
+
+    try{
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://baroudservices.github.io/baroud-app/login.html"
+      });
+
+      if(error){
+        showMsg(error.message || "Reset failed.");
+        return;
+      }
+
+      showMsg("Reset email sent ✅ Check your inbox 📧", true);
+
+    }catch(e){
+      showMsg("Network error. Try again.");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  loginBtn.addEventListener("click", doLogin);
+  registerBtn.addEventListener("click", doRegister);
+  resetBtn.addEventListener("click", doReset);
+
+  document.getElementById("pass").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") doLogin();
+  });
+</script>
