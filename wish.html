@@ -216,103 +216,85 @@
     </div>
   </div>
 
-  <script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ"; // eyJ...
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storageKey: "baroud_auth_v1"
-    }
-  });
-
-  const btnReq = document.getElementById("btnReq");
-  const ovOk   = document.getElementById("ovOk");
-
-  // زر الرجوع عندك بالأعلى onclick="goBack()" خلّيه مثل ما هو، أو إذا بدك هون:
-  window.goBack = function(){
-    window.location.replace("add-credit.html?v=" + Date.now());
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ✅ Debug يظهر الأخطاء بدل صفحة بيضا
+  window.onerror = function (msg, src, line, col, err) {
+    document.body.innerHTML = `
+      <div style="padding:16px;font-family:system-ui;background:#111;color:#fff">
+        <h2>JS Error</h2>
+        <pre style="white-space:pre-wrap">${msg}\n${src}:${line}:${col}\n\n${err?.stack || ""}</pre>
+      </div>`;
   };
 
-  ovOk.addEventListener("click", () => {
-    document.getElementById("overlay").style.display = "none";
-  });
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const btnReq = document.getElementById("btnReq");
+  const btnBack = document.getElementById("btnBack");
+  const ovOk = document.getElementById("ovOk");
 
   function showOverlay(title, msg){
     document.getElementById("ovTitle").textContent = title;
     document.getElementById("ovMsg").textContent = msg;
-    document.getElementById("overlay").style.display = "flex";
+    document.getElementById("overlay").classList.add("show");
   }
 
-  btnReq.addEventListener("click", requestNow);
+  btnBack?.addEventListener("click", () => {
+    location.replace("add-credit.html?v=" + Date.now());
+  });
+
+  ovOk?.addEventListener("click", () => {
+    document.getElementById("overlay").classList.remove("show");
+  });
+
+  btnReq?.addEventListener("click", requestNow);
 
   async function requestNow(){
     const amountEl = document.getElementById("amount");
     const fileEl   = document.getElementById("receipt");
 
     const amount = Number(amountEl.value);
-    const file = fileEl.files?.[0];
+    const file   = fileEl.files?.[0];
 
-    if(!amount || amount < 10){
-      showOverlay("Error ❌", "Minimum deposit is 10$");
-      return;
-    }
-    if(!file){
-      showOverlay("Error ❌", "Please upload receipt image");
-      return;
-    }
+    if(!amount || amount < 10) return showOverlay("Error ❌","Minimum deposit is 10$");
+    if(!file) return showOverlay("Error ❌","Please upload receipt image");
 
     btnReq.disabled = true;
     btnReq.textContent = "SENDING...";
 
     try{
-      // ✅ session
-      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
-      if(sessionErr) throw sessionErr;
-
-      const user = sessionData?.session?.user;
+      const { data: s } = await supabase.auth.getSession();
+      const user = s?.session?.user;
       if(!user){
-        window.location.replace("login.html?v=" + Date.now());
+        location.replace("login.html?v=" + Date.now());
         return;
       }
 
-      // ✅ upload receipt
-      const extRaw = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const safeExt = ["jpg","jpeg","png","webp"].includes(extRaw) ? extRaw : "jpg";
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
       const fileName = `${user.id}/${Date.now()}.${safeExt}`;
 
-      const { error: uploadErr } = await supabase
-        .storage
-        .from("receipts")
-        .upload(fileName, file, { upsert: false });
+      const { error: upErr } = await supabase.storage.from("receipts").upload(fileName, file);
+      if(upErr) throw upErr;
 
-      if(uploadErr) throw uploadErr;
+      const { error: insErr } = await supabase.from("deposits").insert([{
+        user_id: user.id,
+        method: "Whish Money",
+        amount,
+        receipt_path: fileName,
+        status: "pending"
+      }]);
+      if(insErr) throw insErr;
 
-      // ✅ insert deposit
-      const { error: insertErr } = await supabase
-        .from("deposits")
-        .insert([{
-          user_id: user.id,
-          method: "Whish Money",
-          amount: amount,
-          receipt_path: fileName,
-          status: "pending"
-        }]);
-
-      if(insertErr) throw insertErr;
-
-      showOverlay("Request sent ✅", "Your deposit request is pending.");
+      showOverlay("Request sent ✅","Your deposit request is pending.");
       amountEl.value = "";
       fileEl.value = "";
 
     }catch(e){
-      console.error(e);
-      showOverlay("Failed ❌", (e?.message || "Something went wrong"));
+      showOverlay("Failed ❌", e?.message || "Unknown error");
     }finally{
       btnReq.disabled = false;
       btnReq.textContent = "REQUEST";
