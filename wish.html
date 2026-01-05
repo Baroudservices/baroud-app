@@ -6,7 +6,6 @@
   <title>Whish Money</title>
 
   <!-- مهم: نخليه defer ليضمن يحمّل قبل ما نعمل createClient -->
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root{
@@ -217,110 +216,99 @@
     </div>
   </div>
 
-  <script>
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    let supabase = null;
+  <script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    function goBack(){
-      window.location.replace("add-credit.html?v=" + Date.now());
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const btnReq = document.getElementById("btnReq");
+  const btnBack = document.getElementById("btnBack");
+  const ovOk = document.getElementById("ovOk");
+
+  btnBack.addEventListener("click", () => {
+    window.location.replace("add-credit.html?v=" + Date.now());
+  });
+
+  ovOk.addEventListener("click", () => {
+    document.getElementById("overlay").classList.remove("show");
+  });
+
+  btnReq.addEventListener("click", requestNow);
+
+  function showOverlay(title, msg){
+    document.getElementById("ovTitle").textContent = title;
+    document.getElementById("ovMsg").textContent = msg;
+    document.getElementById("overlay").classList.add("show");
+  }
+
+  async function requestNow(){
+    const amountEl = document.getElementById("amount");
+    const fileEl = document.getElementById("receipt");
+
+    const amount = Number(amountEl.value);
+    const file = fileEl.files[0];
+
+    if(!amount || amount < 10){
+      showOverlay("Error ❌", "Minimum deposit is 10$");
+      return;
+    }
+    if(!file){
+      showOverlay("Error ❌", "Please upload receipt image");
+      return;
     }
 
-    function showOverlay(title, msg){
-      document.getElementById("ovTitle").textContent = title;
-      document.getElementById("ovMsg").textContent = msg;
-      document.getElementById("overlay").classList.add("show");
-    }
-    function hideOverlay(){
-      document.getElementById("overlay").classList.remove("show");
-    }
+    btnReq.disabled = true;
+    btnReq.textContent = "SENDING...";
 
-    async function requestNow(){
-      const btn = document.getElementById("btnReq");
-      const amountEl = document.getElementById("amount");
-      const fileEl   = document.getElementById("receipt");
-
-      const amount = Number(amountEl.value);
-      const file = fileEl.files && fileEl.files[0];
-
-      if(!amount || amount < 10){
-        showOverlay("Error ❌", "Minimum deposit is 10$");
+    try{
+      // session
+      const { data } = await supabase.auth.getSession();
+      const user = data?.session?.user;
+      if(!user){
+        window.location.replace("login.html");
         return;
       }
-      if(!file){
-        showOverlay("Error ❌", "Please upload receipt image");
-        return;
-      }
-      if(!supabase){
-        showOverlay("Error ❌", "Supabase not loaded. Refresh the page and check internet.");
-        return;
-      }
 
-      btn.disabled = true;
-      btn.textContent = "SENDING...";
+      // upload receipt
+      const ext = file.name.split(".").pop().toLowerCase();
+      const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
+      const fileName = `${user.id}/${Date.now()}.${safeExt}`;
 
-      try{
-        const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
-        if(sessionErr) throw sessionErr;
+      const { error: uploadErr } = await supabase
+        .storage
+        .from("receipts")
+        .upload(fileName, file);
 
-        const user = sessionData?.session?.user;
-        if(!user){
-          window.location.replace("login.html?v=" + Date.now());
-          return;
-        }
+      if(uploadErr) throw uploadErr;
 
-        const extRaw = (file.name.split(".").pop() || "jpg").toLowerCase();
-        const safeExt = ["jpg","jpeg","png","webp"].includes(extRaw) ? extRaw : "jpg";
-        const fileName = `${user.id}/${Date.now()}.${safeExt}`;
+      // insert deposit
+      const { error: insertErr } = await supabase
+        .from("deposits")
+        .insert({
+          user_id: user.id,
+          method: "Whish Money",
+          amount: amount,
+          receipt_path: fileName,
+          status: "pending"
+        });
 
-        const { error: uploadErr } = await supabase
-          .storage
-          .from("receipts")
-          .upload(fileName, file, { upsert: false });
+      if(insertErr) throw insertErr;
 
-        if(uploadErr) throw uploadErr;
+      showOverlay("Request sent ✅", "Your deposit request is pending.");
+      amountEl.value = "";
+      fileEl.value = "";
 
-        const { error: insertErr } = await supabase
-          .from("deposits")
-          .insert([{
-            user_id: user.id,
-            method: "Whish Money",
-            amount: amount,
-            receipt_path: fileName,
-            status: "pending"
-          }]);
-
-        if(insertErr) throw insertErr;
-
-        showOverlay("Request sent ✅", "Your deposit request is pending. We will review it soon.");
-        amountEl.value = "";
-        fileEl.value = "";
-
-      }catch(e){
-        console.error(e);
-        showOverlay("Failed ❌", e?.message || "Something went wrong");
-      }finally{
-        btn.disabled = false;
-        btn.textContent = "REQUEST";
-      }
+    }catch(err){
+      console.error(err);
+      showOverlay("Failed ❌", err.message || "Error");
+    }finally{
+      btnReq.disabled = false;
+      btnReq.textContent = "REQUEST";
     }
-
-    function init(){
-      // اربط الازرار (هلق IDs موجودين أكيد)
-      document.getElementById("btnBack").addEventListener("click", goBack);
-      document.getElementById("btnReq").addEventListener("click", requestNow);
-      document.getElementById("ovOk").addEventListener("click", hideOverlay);
-
-      // تهيئة supabase بعد ما مكتبة supabase-js تكون موجودة
-      if(window.supabase && window.supabase.createClient){
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      }else{
-        showOverlay("Error ❌", "Supabase library failed to load. Refresh the page.");
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", init);
-  </script>
-
+  }
+</script>
 </body>
 </html>
