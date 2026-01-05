@@ -60,62 +60,115 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function load(){
+function showEmpty(msg){
+  const empty = document.getElementById("empty");
+  if(!empty) return;
+  empty.style.display = "block";
+  empty.textContent = msg || "No data";
+}
+
+function clearUI(){
   const rows = document.getElementById("rows");
   const empty = document.getElementById("empty");
-  rows.innerHTML="";
-  empty.style.display="none";
+  if(rows) rows.innerHTML = "";
+  if(empty) empty.style.display = "none";
+}
 
-  const { data: s } = await sb.auth.getSession();
-  if(!s.session){ location.href="login.html"; return; }
+async function load(){
+  try{
+    clearUI();
+    showEmpty("Loading...");
 
-  const { data: profile } = await sb
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", s.session.user.id)
-    .single();
+    // 1) Session
+    const { data: s, error: sErr } = await sb.auth.getSession();
+    if (sErr) throw sErr;
+    if(!s?.session){
+      location.href = "login.html";
+      return;
+    }
 
-  if(!profile?.is_admin){
-    alert("Not admin");
-    return;
+    const userId = s.session.user.id;
+
+    // 2) Admin check (بدون single لأن عندك duplicates)
+    const { data: profRows, error: pErr } = await sb
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", userId);
+
+    if (pErr) throw pErr;
+
+    const isAdmin = Array.isArray(profRows) && profRows.some(r => r.is_admin === true);
+
+    if(!isAdmin){
+      alert("Not admin");
+      showEmpty("Not admin");
+      return;
+    }
+
+    // 3) Fetch deposits
+    const { data, error } = await sb
+      .from("deposits")
+      .select("*")
+      .order("created_at",{ascending:false});
+
+    if(error) throw error;
+
+    if(!data || data.length === 0){
+      showEmpty("No deposit requests yet.");
+      return;
+    }
+
+    // 4) Render
+    const rows = document.getElementById("rows");
+    if(!rows) return;
+
+    rows.innerHTML = "";
+    document.getElementById("empty").style.display = "none";
+
+    data.forEach(d=>{
+      rows.innerHTML += `
+        <tr>
+          <td>${d.id}</td>
+          <td>${d.user_id}</td>
+          <td>$${d.amount}</td>
+          <td>${d.method || ""}</td>
+          <td class="status ${d.status==="approved"?"ok":d.status==="rejected"?"no":""}">
+            ${d.status || "pending"}
+          </td>
+          <td>
+            <button onclick="setStatus('${d.id}','approved')">✔</button>
+            <button onclick="setStatus('${d.id}','rejected')">✖</button>
+          </td>
+        </tr>`;
+    });
+
+  }catch(e){
+    alert(e?.message || "Error");
+    showEmpty("Error: " + (e?.message || "Unknown"));
   }
-
-  const { data, error } = await sb
-    .from("deposits")
-    .select("*")
-    .order("created_at",{ascending:false});
-
-  if(error){ alert(error.message); return; }
-
-  if(!data.length){ empty.style.display="block"; return; }
-
-  data.forEach(d=>{
-    rows.innerHTML += `
-      <tr>
-        <td>${d.id}</td>
-        <td>${d.user_id}</td>
-        <td>$${d.amount}</td>
-        <td>${d.method}</td>
-        <td class="status ${d.status==="approved"?"ok":d.status==="rejected"?"no":""}">
-          ${d.status}
-        </td>
-        <td>
-          <button onclick="setStatus(${d.id},'approved')">✔</button>
-          <button onclick="setStatus(${d.id},'rejected')">✖</button>
-        </td>
-      </tr>`;
-  });
 }
 
 async function setStatus(id,status){
-  await sb.from("deposits").update({status}).eq("id",id);
-  load();
+  try{
+    const { error } = await sb
+      .from("deposits")
+      .update({ status })
+      .eq("id", id);
+
+    if(error) throw error;
+    load();
+  }catch(e){
+    alert(e?.message || "Update failed");
+  }
 }
 
 async function logout(){
   await sb.auth.signOut();
   location.href="login.html";
 }
+
+window.setStatus = setStatus;
+window.logout = logout;
 
 load();
 </script>
