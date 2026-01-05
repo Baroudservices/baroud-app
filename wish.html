@@ -1,371 +1,232 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Whish Money</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whish Money</title>
 
-  <style>
-    :root{
-      --bg1:#060b16; --bg2:#0a1330;
-      --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --text:#eaf2ff;
-      --muted:rgba(234,242,255,.65);
-      --shadow:0 20px 60px rgba(0,0,0,.55);
-      --r:26px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
-        radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
-        linear-gradient(160deg,var(--bg1),var(--bg2));
-      padding:18px;
-    }
-
-    /* ✅ Debug banner always visible */
-    #dbg{
-      max-width:460px;margin:0 auto 10px;
-      padding:10px 12px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:#fff;font-weight:900;
-      white-space:pre-wrap;
-      position:relative;
-      z-index:999999;
-    }
-
-    .topbar{max-width:460px;margin:6px auto 10px;display:flex;gap:12px;}
-    .back{
-      display:inline-flex;align-items:center;gap:10px;
-      text-decoration:none;color:var(--text);
-      user-select:none;opacity:.95;
-      padding:10px 12px;border-radius:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      -webkit-tap-highlight-color:transparent;
-      position:relative; z-index:50;
-    }
-
-    .wrap{max-width:460px;margin:0 auto; position:relative; z-index:1;}
-    .wishLogo{display:flex;justify-content:center;margin:10px 0 6px;}
-    .wishLogo img{height:60px;display:block;}
-    .title{font-size:42px;font-weight:900;margin:14px 0 18px;text-align:center;}
-
-    .glass{
-      border:1px solid var(--stroke);
-      background:var(--card);
-      backdrop-filter:blur(14px);
-      border-radius:var(--r);
-      padding:18px;
-      box-shadow:var(--shadow);
-      position:relative;
-      z-index:1;
-    }
-
-    .box{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:22px;
-      padding:14px;
-      margin-bottom:14px;
-    }
-
-    .id{
-      width:100%;
-      text-align:center;
-      padding:14px;
-      border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      font-weight:900;
-      letter-spacing:.4px;
-      margin:10px 0 4px;
-    }
-
-    input[type="number"]{
-      width:100%;
-      padding:16px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.22);
-      color:var(--text);
-      outline:none;
-      margin-top:10px;
-      font-size:16px;
-      display:block;
-      position:relative; z-index:10;
-    }
-
-    .fileBtn{
-      width:100%;
-      margin-top:10px;
-      padding:14px 16px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:rgba(234,242,255,.95);
-      font-weight:900;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      -webkit-tap-highlight-color:transparent;
-      position:relative; z-index:10;
-    }
-    .fileName{
-      opacity:.75;
-      font-weight:800;
-      font-size:12px;
-      max-width:55%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    /* ✅ NEW: wrapper makes input clickable 100% on mobile */
-    .fileWrap{
-      position:relative;
-      margin-top:10px;
-      z-index:20;
-    }
-    .fileInput{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      opacity:0;            /* شفاف */
-      cursor:pointer;
-      z-index:9999;         /* فوق زر الرفع */
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    /* ✅ HARD: make button always clickable */
-    .btn{
-      width:100%;
-      border:none;
-      padding:18px;
-      border-radius:18px;
-      margin-top:14px;
-      cursor:pointer;
-      color:white;
-      font-weight:900;
-      font-size:16px;
-      background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
-      box-shadow:0 18px 45px rgba(37,99,235,.25);
-      -webkit-tap-highlight-color:transparent;
-
-      position:relative;
-      z-index:9999 !important;
-      pointer-events:auto !important;
-    }
-    .btn:active{transform:scale(.99)}
-    .btn:disabled{opacity:.6; cursor:not-allowed}
-
-    .foot{text-align:center;color:var(--muted);margin-top:16px;opacity:.8;}
-
-    /* ✅ overlay never steals clicks unless shown */
-    .overlay{
-      position:fixed; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,.55);
-      z-index:99999; padding:18px;
-      opacity:0;
-      pointer-events:none;
-      transition:.15s opacity;
-    }
-    .overlay.show{opacity:1; pointer-events:auto;}
-    .modal{
-      max-width:420px; width:100%;
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(15,23,42,.92);
-      backdrop-filter:blur(12px);
-      padding:16px;
-      box-shadow:0 30px 80px rgba(0,0,0,.55);
-    }
-    .modal h3{margin:0 0 8px;font-size:18px}
-    .modal p{margin:0;color:rgba(234,242,255,.8);line-height:1.4}
-    .modal .ok{
-      margin-top:14px;width:100%;
-      padding:12px;border-radius:14px;border:0;
-      font-weight:900;cursor:pointer;
-      background:rgba(255,255,255,.10);color:#fff;
-    }
-  </style>
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:linear-gradient(160deg,#060b16,#0a1330);
+  color:#fff;
+  min-height:100vh;
+  padding:16px;
+}
+.container{
+  max-width:420px;
+  margin:auto;
+}
+.back{
+  display:inline-block;
+  padding:10px 14px;
+  border-radius:12px;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  text-decoration:none;
+  margin-bottom:10px;
+}
+.logo{
+  text-align:center;
+  margin:10px 0;
+}
+.logo img{height:60px}
+h1{
+  text-align:center;
+  margin:10px 0 20px;
+}
+.card{
+  background:rgba(255,255,255,.06);
+  border-radius:22px;
+  padding:16px;
+}
+.info{
+  background:rgba(255,255,255,.06);
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.id{
+  text-align:center;
+  font-weight:900;
+  margin:10px 0;
+}
+input{
+  width:100%;
+  padding:14px;
+  border-radius:16px;
+  border:none;
+  margin-top:10px;
+  font-size:16px;
+}
+#receipt{display:none}
+.fileBtn{
+  margin-top:10px;
+  padding:14px;
+  border-radius:16px;
+  background:rgba(255,255,255,.08);
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  font-weight:700;
+}
+button{
+  width:100%;
+  margin-top:14px;
+  padding:16px;
+  border-radius:18px;
+  border:none;
+  font-size:17px;
+  font-weight:900;
+  color:#fff;
+  background:linear-gradient(90deg,#0ea5e9,#2563eb);
+}
+button:disabled{opacity:.6}
+.footer{
+  text-align:center;
+  opacity:.7;
+  margin-top:14px;
+}
+#debug{
+  margin:10px auto;
+  max-width:420px;
+  background:rgba(255,255,255,.08);
+  padding:10px;
+  border-radius:12px;
+  font-weight:800;
+}
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.overlay.show{display:flex}
+.modal{
+  background:#0f172a;
+  padding:16px;
+  border-radius:18px;
+  max-width:300px;
+}
+.modal button{
+  margin-top:12px;
+  background:rgba(255,255,255,.1);
+}
+</style>
 </head>
 
 <body>
-  <div id="dbg">Debug: JS NOT LOADED YET…</div>
 
-  <div class="topbar">
-    <a class="back" href="add-credit.html">← رجوع</a>
+<div id="debug">JS NOT LOADED</div>
+
+<div class="container">
+  <a class="back" href="add-credit.html">← رجوع</a>
+
+  <div class="logo">
+    <img src="assets/wish.png">
   </div>
 
-  <div class="wrap">
-    <div class="wishLogo">
-      <img src="assets/wish.png" alt="Wish Money">
+  <h1>Whish Money $</h1>
+
+  <div class="card">
+    <div class="info">
+      Please send the amount to this number ID:
+      <div class="id">+961 70385398</div>
+      Minimum deposit is <b>10$</b><br>
+      It takes between <b>1 & 15</b> minutes
     </div>
 
-    <div class="title">Whish Money $</div>
+    <input id="amount" type="number" placeholder="Enter amount $">
 
-    <div class="glass">
-      <div class="box">
-        <div style="color:var(--muted);font-weight:700;">
-          Please send the amount to this number ID:
-        </div>
+    <input id="receipt" type="file" accept="image/*">
+    <label class="fileBtn" for="receipt">
+      📎 Upload receipt
+      <span id="fileName">No file</span>
+    </label>
 
-        <div class="id">+961 70385398</div>
+    <button id="btnReq" onclick="requestNow()">REQUEST</button>
 
-        <div style="margin-top:10px;color:var(--muted);font-weight:700;">
-          The minimum deposit is <b style="color:var(--text)">10$</b><br/>
-          It takes between <b style="color:var(--text)">1 & 15</b> minutes
-        </div>
-      </div>
-
-      <input id="amount" type="number" placeholder="Enter amount $" inputmode="numeric" />
-
-      <!-- ✅ FIXED Upload (مضمون على الموبايل) -->
-      <div class="fileWrap">
-        <div class="fileBtn">
-          <span>📎 Upload receipt</span>
-          <span class="fileName" id="fileName">No file</span>
-        </div>
-        <input
-          id="receipt"
-          class="fileInput"
-          type="file"
-          accept="image/*"
-          capture="environment"
-        />
-      </div>
-
-      <!-- ✅ onclick direct = radical fix -->
-      <button id="btnReq" class="btn" type="button" onclick="requestNow()">REQUEST</button>
-
-      <div class="foot">© 2024 Baroud Services</div>
-    </div>
+    <div class="footer">© 2024 Baroud Services</div>
   </div>
+</div>
 
-  <div class="overlay" id="overlay" aria-hidden="true">
-    <div class="modal">
-      <h3 id="ovTitle">Done</h3>
-      <p id="ovMsg">...</p>
-      <button id="ovOk" class="ok" type="button" onclick="hideOverlay()">OK</button>
-    </div>
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="ovTitle"></h3>
+    <p id="ovMsg"></p>
+    <button onclick="hideOverlay()">OK</button>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const dbgEl = document.getElementById("dbg");
-    function dbg(x){ dbgEl.textContent = "Debug: " + x; }
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    dbg("JS LOADED ✅");
+<script>
+const dbg = (t)=>document.getElementById("debug").innerText="DEBUG: "+t;
+dbg("JS LOADED ✅");
 
-    window.addEventListener("error", (e)=>{
-      dbg("JS ERROR: " + (e?.message || "unknown"));
-    });
-    window.addEventListener("unhandledrejection", (e)=>{
-      dbg("PROMISE ERROR: " + (e?.reason?.message || JSON.stringify(e?.reason) || "unknown"));
-    });
+const supabase = window.supabase.createClient(
+  "https://pqrwitolonhfbfwtsnde.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ"
+);
 
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const receipt = document.getElementById("receipt");
+receipt.onchange = ()=> {
+  document.getElementById("fileName").innerText =
+    receipt.files[0]?.name || "No file";
+};
 
-    const receipt = document.getElementById("receipt");
-    const fileNameEl = document.getElementById("fileName");
-    const btnReq = document.getElementById("btnReq");
+function showOverlay(t,m){
+  document.getElementById("ovTitle").innerText=t;
+  document.getElementById("ovMsg").innerText=m;
+  document.getElementById("overlay").classList.add("show");
+}
+function hideOverlay(){
+  document.getElementById("overlay").classList.remove("show");
+}
 
-    receipt.addEventListener("change", ()=>{
-      const f = receipt.files?.[0];
-      fileNameEl.textContent = f?.name || "No file";
-      dbg("file selected ✅ " + (f ? (f.name + " (" + f.size + "b)") : "none"));
-    });
+async function requestNow(){
+  dbg("CLICKED REQUEST");
 
-    function showOverlay(title, msg){
-      document.getElementById("ovTitle").textContent = title;
-      document.getElementById("ovMsg").textContent = msg;
-      document.getElementById("overlay").classList.add("show");
-    }
-    function hideOverlay(){
-      document.getElementById("overlay").classList.remove("show");
-    }
-    window.hideOverlay = hideOverlay;
+  const amount = Number(document.getElementById("amount").value);
+  const file = receipt.files[0];
 
-    let sending = false;
+  if(!amount || amount < 10)
+    return showOverlay("Error","Minimum deposit is 10$");
+  if(!file)
+    return showOverlay("Error","Upload receipt image");
 
-    async function requestNow(){
-      dbg("REQUEST CLICKED ✅");
+  document.getElementById("btnReq").disabled=true;
 
-      if(sending) return;
-      sending = true;
+  const {data} = await supabase.auth.getSession();
+  if(!data.session){
+    location.href="login.html";
+    return;
+  }
 
-      const amountEl = document.getElementById("amount");
-      const amount = Number(amountEl.value);
-      const file = receipt.files?.[0];
+  const user = data.session.user;
+  const path = user.id+"/"+Date.now()+"."+file.name.split(".").pop();
 
-      if(!amount || amount < 10){
-        sending = false;
-        return showOverlay("Error ❌","Minimum deposit is 10$");
-      }
-      if(!file){
-        sending = false;
-        return showOverlay("Error ❌","Please upload receipt image");
-      }
+  const up = await supabase.storage.from("receipts").upload(path,file);
+  if(up.error) return showOverlay("Upload error",up.error.message);
 
-      btnReq.disabled = true;
-      btnReq.textContent = "SENDING...";
-      dbg("SENDING...");
+  const ins = await supabase.from("deposits").insert([{
+    user_id:user.id,
+    method:"Whish Money",
+    amount,
+    receipt_path:path,
+    status:"pending"
+  }]);
 
-      try{
-        const { data: s, error: sErr } = await supabase.auth.getSession();
-        if(sErr) throw sErr;
+  if(ins.error) return showOverlay("DB error",ins.error.message);
 
-        const user = s?.session?.user;
-        if(!user){
-          dbg("NO SESSION -> redirect login");
-          location.replace("login.html?v=" + Date.now());
-          return;
-        }
+  showOverlay("Success","Request sent ✅");
+  document.getElementById("btnReq").disabled=false;
+}
+</script>
 
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-        const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
-        const filePath = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
-
-        const { error: upErr } = await supabase.storage.from("receipts").upload(filePath, file, { upsert:false });
-        if(upErr) throw upErr;
-
-        const { error: insErr } = await supabase.from("deposits").insert([{
-          user_id: user.id,
-          method: "Whish Money",
-          amount,
-          receipt_path: filePath,
-          status: "pending"
-        }]);
-        if(insErr) throw insErr;
-
-        dbg("DONE ✅ inserted");
-        showOverlay("Request sent ✅","Your deposit request is pending.");
-
-        amountEl.value = "";
-        receipt.value = "";
-        fileNameEl.textContent = "No file";
-
-      }catch(err){
-        dbg("FAILED: " + (err?.message || JSON.stringify(err)));
-        showOverlay("Failed ❌", err?.message || "Unknown error");
-      }finally{
-        btnReq.disabled = false;
-        btnReq.textContent = "REQUEST";
-        sending = false;
-      }
-    }
-    window.requestNow = requestNow;
-  </script>
 </body>
 </html>
