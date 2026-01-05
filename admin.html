@@ -34,10 +34,15 @@ th{color:#93c5fd;text-align:left}
   background:#1e293b;
   color:#fff;
   margin-right:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none; /* مهم للرابط */
 }
 .actionBtn:active{transform:scale(.98)}
 .actionBtn.okBtn{background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.35)}
 .actionBtn.noBtn{background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.35)}
+.actionBtn.viewBtn{background:rgba(59,130,246,.15); border:1px solid rgba(59,130,246,.35)}
 .actionBtn:disabled{opacity:.55; cursor:not-allowed; transform:none}
 
 .small{opacity:.75;font-size:12px}
@@ -62,6 +67,7 @@ th{color:#93c5fd;text-align:left}
         <th>Amount</th>
         <th>Method</th>
         <th>Status</th>
+        <th>Receipt</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -116,7 +122,7 @@ async function requireSession(){
 }
 
 async function requireAdmin(session){
-  // ✅ Admin check من profiles (بدون RPC is_admin)
+  // ✅ Admin check من profiles
   const { data: profile, error: pErr } = await sb
     .from("profiles")
     .select("is_admin")
@@ -133,7 +139,7 @@ async function requireAdmin(session){
 }
 
 async function load(){
-  rowsEl.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
+  rowsEl.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
   emptyEl.style.display = "none";
 
   try{
@@ -146,10 +152,10 @@ async function load(){
       return;
     }
 
-    // ✅ Load deposits
+    // ✅ Load deposits (ضيفنا receipt_url)
     const { data, error } = await sb
       .from("deposits")
-      .select("*")
+      .select("id,user_id,amount,method,status,created_at,receipt_url")
       .order("created_at", { ascending:false });
 
     if(error) throw error;
@@ -168,6 +174,8 @@ async function load(){
         st==="approved" ? "ok" :
         st==="rejected" ? "no" : "pending";
 
+      const receipt = (d.receipt_url ?? "").toString().trim();
+
       rowsEl.innerHTML += `
         <tr>
           <td>${esc(d.id)}</td>
@@ -177,6 +185,15 @@ async function load(){
           <td><b>$${esc(d.amount)}</b></td>
           <td>${esc(d.method)}</td>
           <td class="status ${stClass}">${esc(st)}</td>
+
+          <td>
+            ${
+              receipt
+                ? `<a class="actionBtn viewBtn" href="${esc(receipt)}" target="_blank" rel="noopener">View</a>`
+                : `<span class="small" style="opacity:.55">—</span>`
+            }
+          </td>
+
           <td>
             <button class="actionBtn okBtn" data-id="${esc(d.id)}" data-status="approved" title="Approve">✔</button>
             <button class="actionBtn noBtn" data-id="${esc(d.id)}" data-status="rejected" title="Reject">✖</button>
@@ -185,7 +202,7 @@ async function load(){
     }
 
   }catch(e){
-    rowsEl.innerHTML = `<tr><td colspan="6" style="color:#ffb4b4">Error: ${esc(e?.message || e)}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="7" style="color:#ffb4b4">Error: ${esc(e?.message || e)}</td></tr>`;
   }
 }
 
@@ -201,7 +218,7 @@ async function setStatus(rawId, status){
 
     const id = normalizeDepositId(rawId);
 
-    // ✅ RPC موجودة عندك: admin_set_deposit_status(p_deposit_id bigint, p_status text)
+    // ✅ RPC: admin_set_deposit_status(p_deposit_id bigint, p_status text)
     const { error } = await sb.rpc("admin_set_deposit_status", {
       p_deposit_id: id,
       p_status: status
