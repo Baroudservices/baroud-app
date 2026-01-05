@@ -101,9 +101,6 @@
       position:relative; z-index:10;
     }
 
-    /* ✅ hide real file input */
-    #receipt{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
-
     .fileBtn{
       width:100%;
       margin-top:10px;
@@ -113,7 +110,6 @@
       background:rgba(255,255,255,.06);
       color:rgba(234,242,255,.95);
       font-weight:900;
-      cursor:pointer;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -129,6 +125,23 @@
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
+    }
+
+    /* ✅ NEW: wrapper makes input clickable 100% on mobile */
+    .fileWrap{
+      position:relative;
+      margin-top:10px;
+      z-index:20;
+    }
+    .fileInput{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      opacity:0;            /* شفاف */
+      cursor:pointer;
+      z-index:9999;         /* فوق زر الرفع */
+      -webkit-tap-highlight-color:transparent;
     }
 
     /* ✅ HARD: make button always clickable */
@@ -216,11 +229,20 @@
 
       <input id="amount" type="number" placeholder="Enter amount $" inputmode="numeric" />
 
-      <input id="receipt" type="file" accept="image/*" />
-      <label class="fileBtn" for="receipt">
-        <span>📎 Upload receipt</span>
-        <span class="fileName" id="fileName">No file</span>
-      </label>
+      <!-- ✅ FIXED Upload (مضمون على الموبايل) -->
+      <div class="fileWrap">
+        <div class="fileBtn">
+          <span>📎 Upload receipt</span>
+          <span class="fileName" id="fileName">No file</span>
+        </div>
+        <input
+          id="receipt"
+          class="fileInput"
+          type="file"
+          accept="image/*"
+          capture="environment"
+        />
+      </div>
 
       <!-- ✅ onclick direct = radical fix -->
       <button id="btnReq" class="btn" type="button" onclick="requestNow()">REQUEST</button>
@@ -242,7 +264,6 @@
     const dbgEl = document.getElementById("dbg");
     function dbg(x){ dbgEl.textContent = "Debug: " + x; }
 
-    // ✅ if this doesn't show, you're NOT seeing latest file (cache)
     dbg("JS LOADED ✅");
 
     window.addEventListener("error", (e)=>{
@@ -261,8 +282,9 @@
     const btnReq = document.getElementById("btnReq");
 
     receipt.addEventListener("change", ()=>{
-      fileNameEl.textContent = receipt.files?.[0]?.name || "No file";
-      dbg("file selected ✅");
+      const f = receipt.files?.[0];
+      fileNameEl.textContent = f?.name || "No file";
+      dbg("file selected ✅ " + (f ? (f.name + " (" + f.size + "b)") : "none"));
     });
 
     function showOverlay(title, msg){
@@ -278,7 +300,6 @@
     let sending = false;
 
     async function requestNow(){
-      // ✅ this proves the click works 100%
       dbg("REQUEST CLICKED ✅");
 
       if(sending) return;
@@ -347,4 +368,4 @@
     window.requestNow = requestNow;
   </script>
 </body>
-</html>ض
+</html>
