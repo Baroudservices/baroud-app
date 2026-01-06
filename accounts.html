@@ -222,40 +222,26 @@
   }
 
   async function buyProduct(productId, btn){
-  // ✅ Confirm قبل أي شي
-  const ok = await window.confirmMsg(
-    "Confirm Purchase",
-    "Are you sure you want to buy this product?"
-  );
-  if(!ok) return;
-
-  btn.disabled = true;
-  const old = btn.textContent;
-  btn.textContent = "Buying...";
-
-  try{
-    const { data: s } = await sb.auth.getSession();
-    if(!s?.session?.user){
-      location.href = "login.html?v=" + Date.now();
-      return;
+    // ✅ Confirm قبل أي شي
+    // إذا confirmMsg مش موجودة رح نعمل fallback لـ confirm العادي
+    let ok = true;
+    if (typeof window.confirmMsg === "function") {
+      ok = await window.confirmMsg("Confirm Purchase", "Are you sure you want to buy this product?");
+    } else {
+      ok = confirm("Are you sure you want to buy this product?");
     }
+    if(!ok) return;
 
-    // ✅ طلب داخل الموقع (RPC)
-    const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
-    if(error) throw error;
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = "Buying...";
 
-    alert("✅ Order placed! Order ID: " + orderId);
-
-    // ✅ بعد الشراء روح على my-orders بدل my-payments
-    location.href = "my-orders.html?v=" + Date.now();
-
-  }catch(err){
-    alert(err?.message || "Failed");
-  }finally{
-    btn.disabled = false;
-    btn.textContent = old;
-  }
-}
+    try{
+      const { data: s } = await sb.auth.getSession();
+      if(!s?.session?.user){
+        location.href = "login.html?v=" + Date.now();
+        return;
+      }
 
       // ✅ طلب داخل الموقع (RPC)
       const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
@@ -263,9 +249,7 @@
 
       alert("✅ Order placed! Order ID: " + orderId);
 
-      // ✅ بعد الشراء: رجّع حدّث الرصيد (إذا انت عامل fetch بالـ services من profiles)
-      // هون خيارين:
-      // 1) نعمل redirect لصفحة my-payments.html
+      // ✅ بعد الشراء روح على my-orders
       location.href = "my-orders.html?v=" + Date.now();
 
     }catch(err){
