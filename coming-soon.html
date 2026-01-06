@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Baroud Services — Coming Soon</title>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg1:#0b1424;
@@ -17,6 +17,64 @@
     --text:#fff;
   }
   *{box-sizing:border-box}
+  <script>
+  // ===== Supabase =====
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // الصفحة يلي بدنا نعدّها
+  const PAGE_KEY = "coming-soon";
+
+  // عدّاد يظهر عندك (إذا بدك تحط رقم بالموقع)
+  // إذا ما عندك مكان تعرض الرقم، عادي بتتركه.
+  function setViewsNumber(n){
+    // مثال: إذا بتحب تحط div id="viewsCount"
+    const el = document.getElementById("viewsCount");
+    if(el) el.textContent = String(n);
+  }
+
+  async function bumpView(){
+    try{
+      // يزيد 1
+      await sb.rpc("increment_page_view", { p_page: PAGE_KEY });
+    }catch(e){
+      // ignore
+      console.log("increment error", e?.message || e);
+    }
+  }
+
+  async function refreshView(){
+    try{
+      const { data, error } = await sb.rpc("get_page_view", { p_page: PAGE_KEY });
+      if(error) throw error;
+      setViewsNumber(Number(data || 0));
+    }catch(e){
+      console.log("get view error", e?.message || e);
+    }
+  }
+
+  // ✅ أول ما تفتح الصفحة:
+  bumpView();
+  refreshView();
+
+  // ✅ realtime: أي تحديث على coming-soon ينعكس فوراً
+  const channel = sb.channel("page_views_live")
+    .on("postgres_changes", {
+      event: "*",
+      schema: "public",
+      table: "page_views",
+      filter: `page=eq.${PAGE_KEY}`
+    }, (payload) => {
+      const row = payload.new || payload.old;
+      if(row && typeof row.count !== "undefined"){
+        setViewsNumber(Number(row.count || 0));
+      }else{
+        refreshView();
+      }
+    })
+    .subscribe();
+</script>
   body{
     margin:0;
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
@@ -222,5 +280,6 @@
     ss.textContent=pad(t%60);
   },250);
 </script>
+  
 </body>
 </html>
