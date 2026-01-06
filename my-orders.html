@@ -91,7 +91,7 @@ h2{margin:0;font-size:22px}
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.55);
+  background:rgba(0,0,0,.84);
   display:none;
   align-items:center;
   justify-content:center;
@@ -221,13 +221,17 @@ function esc(s){
 }
 
 function openReplyModal(text, productTitle){
-  lastReplyText = String(text || "").trim();
   const safeTitle = String(productTitle || "order").trim() || "order";
+  lastReplyText = String(text || "").trim();
 
-  // ✅ الجملة المطلوبة
-  replyModalTitle.textContent = `Your ${safeTitle} is :`;
+  // العنوان خليه ثابت
+  replyModalTitle.textContent = "Reply";
 
-  replyModalText.textContent = lastReplyText || "No details yet";
+  // الجملة صارت جوّا الربلاي
+  replyModalText.textContent =
+    `Your ${safeTitle} is :\n\n` +
+    (lastReplyText || "No details yet");
+
   replyModal.style.display = "flex";
   replyShare.style.display = lastReplyText ? "inline-block" : "none";
 }
