@@ -367,8 +367,28 @@
           return;
         }
 
-        // ✅ السعر الحقيقي حسب الخطة
-        const finalPrice = calcPrice(selectedPlan);
+        // ✅ final price بدون ضرب (بياخد السعر الجاهز من الخطة إذا موجود)
+        function getFinalPrice(){
+          // إذا الخطة فيها price جاهز من DB
+          if (selectedPlan && Number.isFinite(Number(selectedPlan.price))) {
+            return Number(selectedPlan.price);
+          }
+
+          // إذا عندك متغير selectedPrice شغال
+          if (typeof selectedPrice !== "undefined" && Number.isFinite(Number(selectedPrice))) {
+            return Number(selectedPrice);
+          }
+
+          // fallback (إذا بعدك مستخدم calcPrice بمحل تاني)
+          if (typeof calcPrice === "function") {
+            return Number(calcPrice(selectedPlan)) || 0;
+          }
+
+          return 0;
+        }
+
+        // ✅ السعر الحقيقي حسب الخطة (بدون ضرب)
+        const finalPrice = getFinalPrice();
 
         // ✅ RPC مع السعر + مدة + نوت
         const { data: orderId, error } = await sb.rpc("place_order", {
@@ -385,7 +405,7 @@
         // ✅ مرّق السعر الحقيقي للـ my-orders
         const planPrice = Number.isFinite(finalPrice)
           ? finalPrice.toFixed(2)
-          : calcPrice(selectedPlan).toFixed(2);
+          : (Number(finalPrice) || 0).toFixed(2);
 
         const go = () => {
           location.href =
@@ -438,7 +458,6 @@
       }
     })();
   </script>
-
   <script src="app-ui.js?v=4"></script>
 </body>
 </html>
