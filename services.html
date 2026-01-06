@@ -359,9 +359,12 @@
     <div class="sep"></div>
 
     <div class="social">
-      <a href="#" onclick="alert('TikTok')">♪</a>
-      <a href="https://wa.me/96181812024" target="_blank">WA</a>
-    </div>
+  <a href="#" onclick="alert('TikTok')">♪</a>
+  <a href="https://wa.me/96181812024" target="_blank">WA</a>
+
+  <!-- ✅ زر اللغة -->
+  <a href="#" id="langBtn" title="Language" onclick="toggleLang(); return false;">🌐</a>
+</div>
 
     <div class="hint">© Baroud Services</div>
   </aside>
@@ -436,6 +439,33 @@
   </main>
 
   <script>
+    // ✅ Language toggle (simple)
+function toggleLang(){
+  const cur = (localStorage.getItem("lang") || "en");
+  const next = cur === "en" ? "ar" : "en";
+  localStorage.setItem("lang", next);
+
+  // تطبيق سريع (على هالصفحة)
+  document.documentElement.lang = next;
+  document.documentElement.dir  = (next === "ar") ? "rtl" : "ltr";
+
+  // تغيير رمز الزر حسب اللغة
+  const b = document.getElementById("langBtn");
+  if(b) b.textContent = (next === "ar") ? "EN" : "AR";
+
+  // إذا بدك تعمل reload لتطبق على باقي الصفحات
+  location.reload();
+}
+
+// ✅ set initial state (on load)
+(function(){
+  const cur = (localStorage.getItem("lang") || "en");
+  document.documentElement.lang = cur;
+  document.documentElement.dir  = (cur === "ar") ? "rtl" : "ltr";
+
+  const b = document.getElementById("langBtn");
+  if(b) b.textContent = (cur === "ar") ? "EN" : "AR";
+})();
     // ✅ Supabase
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
