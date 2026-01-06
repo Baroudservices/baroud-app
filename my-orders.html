@@ -92,6 +92,24 @@ h2{margin:0;font-size:22px}
   text-align:center;
   margin-top:40px;
 }
+  .noteBox{
+  margin-bottom:12px;
+  padding:12px;
+  border-radius:16px;
+  background:rgba(56,189,248,.10);
+  border:1px solid rgba(56,189,248,.25);
+}
+.noteTitle{
+  font-weight:950;
+  font-size:12px;
+  opacity:.8;
+}
+.noteText{
+  margin-top:6px;
+  font-weight:950;
+  opacity:.9;
+  line-height:1.35;
+}
 </style>
 </head>
 
@@ -102,7 +120,10 @@ h2{margin:0;font-size:22px}
     <div class="back" onclick="history.back()">←</div>
     <h2>My Orders</h2>
   </div>
-
+<div id="noteBox" class="noteBox" style="display:none">
+  <div class="noteTitle">Last Order Note</div>
+  <div class="noteText" id="noteText"></div>
+</div>
   <div id="list"></div>
   <div id="empty" class="empty" style="display:none">
     No orders yet
@@ -112,11 +133,16 @@ h2{margin:0;font-size:22px}
 
 <script>
   const u = new URL(location.href);
-const note = u.searchParams.get("note") || localStorage.getItem("last_order_note");
+const note = u.searchParams.get("note") || localStorage.getItem("last_order_note") || "";
+
+const noteBox = document.getElementById("noteBox");
+const noteText = document.getElementById("noteText");
+
 if(note){
-  // اعرضها بأي مكان بدك
-  console.log("NOTE:", note);
+  noteBox.style.display = "block";
+  noteText.textContent = note;
 }
+
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
