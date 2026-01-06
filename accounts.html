@@ -222,16 +222,40 @@
   }
 
   async function buyProduct(productId, btn){
-    btn.disabled = true;
-    const old = btn.textContent;
-    btn.textContent = "Buying...";
+  // ✅ Confirm قبل أي شي
+  const ok = await window.confirmMsg(
+    "Confirm Purchase",
+    "Are you sure you want to buy this product?"
+  );
+  if(!ok) return;
 
-    try{
-      const { data: s } = await sb.auth.getSession();
-      if(!s?.session?.user){
-        location.href = "login.html?v=" + Date.now();
-        return;
-      }
+  btn.disabled = true;
+  const old = btn.textContent;
+  btn.textContent = "Buying...";
+
+  try{
+    const { data: s } = await sb.auth.getSession();
+    if(!s?.session?.user){
+      location.href = "login.html?v=" + Date.now();
+      return;
+    }
+
+    // ✅ طلب داخل الموقع (RPC)
+    const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
+    if(error) throw error;
+
+    alert("✅ Order placed! Order ID: " + orderId);
+
+    // ✅ بعد الشراء روح على my-orders بدل my-payments
+    location.href = "my-orders.html?v=" + Date.now();
+
+  }catch(err){
+    alert(err?.message || "Failed");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = old;
+  }
+}
 
       // ✅ طلب داخل الموقع (RPC)
       const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
@@ -273,6 +297,6 @@
     }
   })();
 </script>
-<script src="app-ui.js?v=3"></script>
+<script src="app-ui.js?v=4"></script>
 </body>
 </html>
