@@ -256,6 +256,28 @@
     const pillsEl = document.getElementById("pills");
     const featsEl = document.getElementById("features");
     const buyBtn  = document.getElementById("buyBtn");
+    let basePrice = 0;
+let selectedPlan = DURATION_LIST[0]; // default 1 month
+let selectedPrice = 0;
+
+function calcPrice(plan){
+  const v = Number(basePrice) * Number(plan.mult);
+  return Number.isFinite(v) ? v : 0;
+}
+
+function setSelectedPlan(plan, product){
+  selectedPlan = plan;
+  selectedPrice = calcPrice(plan);
+
+  // غيّر السعر اللي فوق
+  priceEl.textContent = "$" + selectedPrice.toFixed(2);
+
+  // خزّن note تلقائي (لـ my-orders)
+  const note = `${product?.title || "Product"} | ${plan.label} | $${selectedPrice.toFixed(2)}`;
+  localStorage.setItem("last_order_note", note);
+  localStorage.setItem("last_order_plan", plan.key);
+  localStorage.setItem("last_order_price", String(selectedPrice.toFixed(2)));
+}
 
     // Dropdown refs
     const ordersDD   = document.getElementById("ordersDD");
@@ -263,12 +285,12 @@
     const ordersMenu = document.getElementById("ordersMenu");
 
     const DURATION_LIST = [
-      { key: "1m", label: "1 month" },
-      { key: "3m", label: "3 months" },
-      { key: "6m", label: "6 months" },
-      { key: "1y", label: "1 year" },
-      { key: "2y", label: "2 years" },
-    ];
+  { key: "1m", label: "1 month",  mult: 1  },
+  { key: "3m", label: "3 months", mult: 3  },
+  { key: "6m", label: "6 months", mult: 6  },
+  { key: "1y", label: "1 year",   mult: 12 },
+  { key: "2y", label: "2 years",  mult: 24 },
+];
 
     function esc(s){
       return String(s ?? "")
@@ -313,29 +335,34 @@
     }
 
     function renderOrdersMenu(availability, productId){
-      ordersMenu.innerHTML = "";
+  ordersMenu.innerHTML = "";
 
-      for(const d of DURATION_LIST){
-        const ok = !!availability[d.key];
+  for(const d of DURATION_LIST){
+    const ok = !!availability[d.key];
+    const p = calcPrice(d);
 
-        const item = document.createElement("div");
-        item.className = "ordersItem" + (ok ? "" : " disabled");
-        item.innerHTML = `
-          <span>${esc(d.label)}</span>
-          <span class="badge ${ok ? "ok" : "no"}">${ok ? "Available" : "Not available"}</span>
-        `;
+    const item = document.createElement("div");
+    item.className = "ordersItem" + (ok ? "" : " disabled");
+    item.innerHTML = `
+      <span>${esc(d.label)}</span>
+      <span class="badge ${ok ? "ok" : "no"}">$${p.toFixed(2)}</span>
+    `;
 
-        if(ok){
-          item.addEventListener("click", (e) => {
-            e.stopPropagation();
-            ordersMenu.hidden = true;
-            location.href = `my-orders.html?v=${Date.now()}&product_id=${encodeURIComponent(productId)}&duration=${encodeURIComponent(d.key)}`;
-          });
-        }
+    if(ok){
+      item.addEventListener("click", (e) => {
+        e.stopPropagation();
 
-        ordersMenu.appendChild(item);
-      }
+        // ✅ اختار الخطة + غيّر السعر فوق
+        setSelectedPlan(d, window.__currentProduct);
+
+        // ✅ سكّر اللست
+        ordersMenu.hidden = true;
+      });
     }
+
+    ordersMenu.appendChild(item);
+  }
+}
 
     function setupOrdersDropdown(product, productId){
       const availability = getDurationAvailability(product);
@@ -361,7 +388,14 @@
       catEl.textContent = p?.category ? ("Category: " + p.category) : "";
       const priceNum = Number(p?.price);
       priceEl.textContent = "$" + (Number.isFinite(priceNum) ? priceNum.toFixed(2) : "0.00");
+      
+basePrice = Number.isFinite(priceNum) ? priceNum : 0;
 
+// خزن المنتج globally لنستخدمه بالمنيو
+window.__currentProduct = p;
+
+// default اختيار 1 month وتحديث السعر فوق
+setSelectedPlan(DURATION_LIST[0], p);
       pillsEl.innerHTML = "";
       if(p?.active === false){
         pillsEl.innerHTML += `<span class="pill">Unavailable</span>`;
@@ -407,7 +441,16 @@
       try{
         const { data: s } = await sb.auth.getSession();
         if(!s?.session?.user){
-          location.href = "login.html?v=" + Date.now();
+          const note = localStorage.getItem("last_order_note") || "";
+const planKey = localStorage.getItem("last_order_plan") || selectedPlan.key;
+const planPrice = localStorage.getItem("last_order_price") || selectedPrice.toFixed(2);
+
+location.href =
+  "my-orders.html?v=" + Date.now() +
+  "&product_id=" + encodeURIComponent(productId) +
+  "&duration=" + encodeURIComponent(planKey) +
+  "&price=" + encodeURIComponent(planPrice) +
+  "&note=" + encodeURIComponent(note);
           return;
         }
 
