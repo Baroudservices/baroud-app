@@ -276,39 +276,89 @@
   }
 
   async function buyProduct(productId, btn){
-    // ✅ Confirm قبل أي شي
-    let ok = true;
-    if (typeof window.confirmMsg === "function") {
-      ok = await window.confirmMsg("Confirm Purchase", "Are you sure you want to buy this product?");
-    } else {
-      ok = confirm("Are you sure you want to buy this product?");
-    }
-    if(!ok) return;
-
-    btn.disabled = true;
-    const old = btn.textContent;
-    btn.textContent = "Buying...";
-
-    try{
-      const { data: s } = await sb.auth.getSession();
-      if(!s?.session?.user){
-        location.href = "login.html?v=" + Date.now();
-        return;
-      }
-
-      const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
-      if(error) throw error;
-
-      alert("✅ Order placed! Order ID: " + orderId);
-      location.href = "my-orders.html?v=" + Date.now();
-
-    }catch(err){
-      alert(err?.message || "Failed");
-    }finally{
-      btn.disabled = false;
-      btn.textContent = old;
-    }
+  // ✅ Confirm قبل أي شي
+  let ok = true;
+  if (typeof window.confirmMsg === "function") {
+    ok = await window.confirmMsg("Confirm Purchase", "Are you sure you want to buy this product?");
+  } else {
+    ok = confirm("Are you sure you want to buy this product?");
   }
+  if(!ok) return;
+
+  btn.disabled = true;
+  const old = btn.textContent;
+  btn.textContent = "Buying...";
+
+  try{
+    const { data: s } = await sb.auth.getSession();
+    if(!s?.session?.user){
+      location.href = "login.html?v=" + Date.now();
+      return;
+    }
+
+    const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
+    if(error) throw error;
+
+    // ✅ Success popup + progress ناعم + تحويل بعد OK بـ 600ms
+    const htmlMsg = `✅ Order placed! Order ID: ${orderId}\n\nRedirecting...`;
+
+    if (typeof window.showMsg === "function") {
+      // حط رسالة و "onClose" للـ OK
+      window.showMsg("Success", htmlMsg, () => {
+        // ✅ delay 600ms قبل التحويل
+        setTimeout(() => {
+          location.href = "my-orders.html?v=" + Date.now();
+        }, 600);
+      });
+
+      // ✅ Progress ناعم داخل نفس المودال
+      // (بنحقن بار بسيط تحت النص)
+      setTimeout(() => {
+        const msgEl = document.getElementById("appModalMsg");
+        if(!msgEl) return;
+
+        // إذا موجود قبل ما نعيده
+        if (document.getElementById("appModalProgress")) return;
+
+        const bar = document.createElement("div");
+        bar.id = "appModalProgress";
+        bar.style.marginTop = "12px";
+        bar.innerHTML = `
+          <div style="height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;">
+            <div id="appModalProgressFill" style="
+              height:100%;
+              width:0%;
+              border-radius:999px;
+              background:linear-gradient(90deg,#0ea5e9,#2563eb);
+              transition:width .6s ease;
+            "></div>
+          </div>
+          <div style="margin-top:8px;font-size:12px;opacity:.75">Please wait...</div>
+        `;
+        msgEl.appendChild(bar);
+
+        // خليها توصل 100% خلال 600ms (نفس وقت التحويل)
+        requestAnimationFrame(() => {
+          const fill = document.getElementById("appModalProgressFill");
+          if(fill) fill.style.width = "100%";
+        });
+      }, 0);
+
+    } else {
+      // fallback إذا ما في showMsg
+      alert("✅ Order placed! Order ID: " + orderId);
+      setTimeout(() => {
+        location.href = "my-orders.html?v=" + Date.now();
+      }, 600);
+    }
+
+  }catch(err){
+    alert(err?.message || "Failed");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = old;
+  }
+}
 
   let all = [];
 
