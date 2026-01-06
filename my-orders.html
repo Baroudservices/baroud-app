@@ -136,17 +136,18 @@ function esc(s){
 
   // ✅ جبت admin_reply (+ admin_reply_at اختياري)
   const { data, error } = await sb
-    .from("orders")
-    .select(`
-      id,
-      price,
-      status,
-      created_at,
-      admin_reply,
-      admin_reply_at,
-      products(title)
-    `)
-    .order("created_at",{ascending:false});
+  .from("orders")
+  .select(`
+    id,
+    price,
+    status,
+    created_at,
+    admin_reply,
+    admin_reply_at,
+    products(title)
+  `)
+  .eq("user_id", s.session.user.id)   // ✅ هون الحل
+  .order("created_at",{ascending:false});
 
   if(error){
     listEl.innerHTML = `<div class="empty">Error loading orders</div>`;
