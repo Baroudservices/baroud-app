@@ -229,20 +229,25 @@
     }
   }
 
-  // ✅ NEW: bigint safe
+  // ✅ NEW: فتح صفحة المنتج (id bigint safe)
   function openProduct(rawId){
     const s = String(rawId ?? "").trim();
     const n = Number(s);
-    if(!Number.isFinite(n)){
+    if(!Number.isFinite(n) || n <= 0){
       alert("Invalid product id");
       return;
     }
-    // ✅ نخليها رقم لأن id عندك bigint
     location.href = `account.html?id=${n}`;
   }
 
   function render(list){
     grid.innerHTML = "";
+
+    if(!list || !list.length){
+      grid.innerHTML = `<div style="opacity:.8;padding:14px">No accounts available.</div>`;
+      return;
+    }
+
     for(const it of list){
       const el = document.createElement("div");
       el.className = "card";
@@ -260,7 +265,7 @@
           </div>
           <div class="priceRow">
             <div class="price">$${priceTxt}</div>
-            <button class="buy" data-id="${it.id}">Open</button>
+            <button class="buy" type="button" data-id="${it.id}">Open</button>
           </div>
         </div>
       `;
@@ -275,8 +280,7 @@
     grid.querySelectorAll("button.buy").forEach(b=>{
       b.addEventListener("click", (e)=>{
         e.stopPropagation();
-        const pid = b.getAttribute("data-id");
-        openProduct(pid);
+        openProduct(b.getAttribute("data-id"));
       });
     });
   }
@@ -288,16 +292,27 @@
       .eq("active", true)
       .order("id", { ascending: true });
 
-    if(error) throw error;
+    if(error) throw new Error(error.message || "Products query failed");
     return data || [];
   }
 
   let all = [];
 
   (async ()=>{
+    showLoading(6);
+
+    // ✅ timeout إذا طولت
+    const t = setTimeout(()=>{
+      grid.innerHTML = `
+        <div style="opacity:.85;padding:14px">
+          Loading is taking too long…<br/>
+          If this keeps happening: products may be empty or blocked.
+        </div>`;
+    }, 7000);
+
     try{
-      showLoading(6);
       all = await loadProducts();
+      clearTimeout(t);
       render(all);
 
       q.addEventListener("input", ()=>{
@@ -310,7 +325,8 @@
       });
 
     }catch(e){
-      grid.innerHTML = `<div style="opacity:.7;padding:14px">Error: ${esc(e?.message || e)}</div>`;
+      clearTimeout(t);
+      grid.innerHTML = `<div style="opacity:.9;padding:14px">Error: ${esc(e?.message || e)}</div>`;
     }
   })();
 </script>
