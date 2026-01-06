@@ -111,6 +111,12 @@ h2{margin:0;font-size:22px}
 </div>
 
 <script>
+  const u = new URL(location.href);
+const note = u.searchParams.get("note") || localStorage.getItem("last_order_note");
+if(note){
+  // اعرضها بأي مكان بدك
+  console.log("NOTE:", note);
+}
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
