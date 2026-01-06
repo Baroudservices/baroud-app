@@ -100,7 +100,7 @@ h2{margin:0;font-size:22px}
 }
 .modalCard{
   width:min(520px,100%);
-  background:rgba(12, 16, 24, 0.98);;
+  background:rgba(12, 16, 24, 0.98);
   border:1px solid rgba(255,255,255,.12);
   border-radius:18px;
   box-shadow:0 18px 60px rgba(0,0,0,.45);
@@ -179,7 +179,6 @@ h2{margin:0;font-size:22px}
 <div id="replyModal" class="modal">
   <div class="modalCard">
     <div class="modalTop">
-      <!-- ✅ title صار ديناميك -->
       <div class="modalTitle" id="replyModalTitle"></div>
       <button class="modalX" id="replyClose" type="button">✕</button>
     </div>
@@ -209,7 +208,7 @@ const replyClose = document.getElementById("replyClose");
 const replyOk = document.getElementById("replyOk");
 const replyShare = document.getElementById("replyShare");
 
-let lastReplyText = "";
+let lastShareText = "";
 
 function esc(s){
   return String(s ?? "")
@@ -220,25 +219,34 @@ function esc(s){
     .replaceAll("'","&#039;");
 }
 
-function openReplyModal(text, productTitle){
-  const safeTitle = String(productTitle || "order").trim() || "order";
-  lastReplyText = String(text || "").trim();
+function decodeEscaped(htmlEsc){
+  const t = document.createElement("textarea");
+  t.innerHTML = htmlEsc;
+  return t.value;
+}
 
-  // العنوان خليه ثابت
+function openReplyModal(replyText, productTitle){
+  const safeTitle = String(productTitle || "order").trim() || "order";
+  const cleanReply = String(replyText || "").trim();
+
+  // Title فوق ثابت
   replyModalTitle.textContent = "Reply";
 
-  // الجملة صارت جوّا الربلاي
-  replyModalText.textContent =
+  // ✅ النص اللي بدنا يبين + ينشهر
+  lastShareText =
     `Your ${safeTitle} is :\n\n` +
-    (lastReplyText || "No details yet");
+    (cleanReply || "No details yet");
+
+  // ✅ نفس النص داخل المودال
+  replyModalText.textContent = lastShareText;
 
   replyModal.style.display = "flex";
-  replyShare.style.display = lastReplyText ? "inline-block" : "none";
+  replyShare.style.display = cleanReply ? "inline-block" : "none";
 }
 
 function closeReplyModal(){
   replyModal.style.display = "none";
-  lastReplyText = "";
+  lastShareText = "";
 }
 
 replyClose.addEventListener("click", closeReplyModal);
@@ -248,7 +256,7 @@ replyModal.addEventListener("click", (e)=>{
 });
 
 replyShare.addEventListener("click", async ()=>{
-  const text = lastReplyText.trim();
+  const text = (lastShareText || "").trim();
   if(!text) return;
 
   try{
@@ -332,7 +340,6 @@ replyShare.addEventListener("click", async ()=>{
           <div class="replyToggle">${hasReply ? 'Tap to view' : ''}</div>
         </div>
 
-        <!-- مخفي دايمًا -->
         <div class="replyText">${hasReply ? esc(replyRaw) : "No details yet"}</div>
       </div>
     `;
@@ -348,16 +355,10 @@ replyShare.addEventListener("click", async ()=>{
     const fullEsc = box.getAttribute("data-full") || "";
     const titleEsc = box.getAttribute("data-title") || "order";
 
-    // decode entities لأننا حاطين esc
-    const tmp1 = document.createElement("textarea");
-    tmp1.innerHTML = fullEsc;
-    const decodedReply = tmp1.value;
+    const decodedReply = decodeEscaped(fullEsc);
+    const decodedTitle = decodeEscaped(titleEsc);
 
-    const tmp2 = document.createElement("textarea");
-    tmp2.innerHTML = titleEsc;
-    const decodedTitle = tmp2.value;
-
-    if(!decodedReply.trim()) return; // إذا ما في reply ما تفتح شي
+    if(!decodedReply.trim()) return;
     openReplyModal(decodedReply, decodedTitle);
   });
 
