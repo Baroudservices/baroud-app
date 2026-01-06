@@ -172,6 +172,7 @@ function esc(s){
       id,
       price,
       status,
+      note,
       created_at,
       admin_reply,
       admin_reply_at,
@@ -201,28 +202,33 @@ function esc(s){
     el.className = "card";
 
     el.innerHTML = `
-      <div class="row">
-        <div>
-          <div class="name">${esc(o.products?.title || "Product")}</div>
-          <div class="small">${new Date(o.created_at).toLocaleString()}</div>
-        </div>
-        <div class="price">$${Number(o.price).toFixed(2)}</div>
-      </div>
+  <div class="row">
+    <div>
+      <div class="name">${esc(o.products?.title || "Product")}</div>
+      <div class="small">${new Date(o.created_at).toLocaleString()}</div>
 
-      <div class="row" style="margin-top:8px">
-        <div class="small">Order #${esc(o.id)}</div>
-        <div class="status ${stClass}">${esc(o.status)}</div>
-      </div>
+      ${o.duration ? `<div class="small">Plan: ${esc(o.duration)}</div>` : ""}
+      ${o.note ? `<div class="small">${esc(o.note)}</div>` : ""}
+    </div>
 
-      <div class="replyBox">
-        <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
-          Status: ${hasReply ? 'Done' : 'Pending'}
-        </div>
+    <div class="price">$${Number(o.price).toFixed(2)}</div>
+  </div>
 
-        <div class="replyText">
-          ${hasReply ? esc(o.admin_reply) : "No details yet"}
-        </div>
-      </div>
+  <div class="row" style="margin-top:8px">
+    <div class="small">Order #${esc(o.id)}</div>
+    <div class="status ${stClass}">${esc(o.status)}</div>
+  </div>
+
+  <div class="replyBox">
+    <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
+      Status: ${hasReply ? 'Done' : 'Pending'}
+    </div>
+
+    <div class="replyText">
+      ${hasReply ? esc(o.admin_reply) : "No details yet"}
+    </div>
+  </div>
+`;
     `;
 
     listEl.appendChild(el);
