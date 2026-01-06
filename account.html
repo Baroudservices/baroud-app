@@ -135,6 +135,8 @@
       box-shadow:0 14px 40px rgba(0,0,0,.25);
     }
     .buyBtn:disabled{opacity:.6; cursor:not-allowed}
+
+    /* بدل My Orders زر dropdown بنفس ستايل smallBtn */
     .smallBtn{
       padding:14px 14px;
       border-radius:16px;
@@ -144,7 +146,9 @@
       cursor:pointer;
       font-weight:900;
       white-space:nowrap;
+      -webkit-tap-highlight-color:transparent;
     }
+
     .footer{
       margin-top:18px;
       text-align:center;
@@ -153,6 +157,46 @@
       letter-spacing:1px;
     }
     .muted{opacity:.7;font-weight:800}
+
+    /* Dropdown menu styles */
+    .ordersDD{ position:relative; display:inline-block; }
+    .ordersMenu{
+      position:absolute;
+      right:0;
+      top:calc(100% + 10px);
+      width:240px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:#0b0f17;
+      overflow:hidden;
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      z-index:9999;
+    }
+    .ordersItem{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      color:#e5e7eb;
+      cursor:pointer;
+      user-select:none;
+    }
+    .ordersItem:hover{ background: rgba(255,255,255,.06); }
+    .ordersItem.disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+    .badge{
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:950;
+      color:#fff;
+      white-space:nowrap;
+    }
+    .badge.ok{ background:#19c37d; }
+    .badge.no{ background:#6b7280; }
   </style>
 </head>
 
@@ -179,7 +223,14 @@
 
         <div class="buyRow">
           <button class="buyBtn" id="buyBtn">Buy</button>
-          <button class="smallBtn" onclick="location.href='my-orders.html'">My Orders</button>
+
+          <!-- My Orders صار Dropdown -->
+          <div class="ordersDD" id="ordersDD">
+            <button class="smallBtn" id="myOrdersBtn" type="button">
+              My Orders ▾
+            </button>
+            <div class="ordersMenu" id="ordersMenu" hidden></div>
+          </div>
         </div>
       </div>
     </div>
@@ -198,6 +249,20 @@
     const pillsEl = document.getElementById("pills");
     const featsEl = document.getElementById("features");
     const buyBtn  = document.getElementById("buyBtn");
+
+    // Dropdown refs
+    const ordersDD   = document.getElementById("ordersDD");
+    const ordersBtn  = document.getElementById("myOrdersBtn");
+    const ordersMenu = document.getElementById("ordersMenu");
+
+    // المطلوب list
+    const DURATION_LIST = [
+      { key: "1m", label: "1 month" },
+      { key: "3m", label: "3 months" },
+      { key: "6m", label: "6 months" },
+      { key: "1y", label: "1 year" },
+      { key: "2y", label: "2 years" },
+    ];
 
     function esc(s){
       return String(s ?? "")
@@ -234,6 +299,59 @@
       if(fErr) throw fErr;
 
       return { product: p, features: (f || []) };
+    }
+
+    // availability حسب "الأمر منك"
+    // حاليا: اذا المنتج Unavailable => كل الخيارات Not available
+    // اذا Available => كل الخيارات Available
+    // (بتقدر تبدلها لاحقاً لتجيبها من Supabase)
+    function getDurationAvailability(product){
+      const all = {};
+      const ok = (product?.active !== false);
+      for(const d of DURATION_LIST) all[d.key] = ok;
+      return all;
+    }
+
+    function renderOrdersMenu(availability, productId){
+      ordersMenu.innerHTML = "";
+
+      for(const d of DURATION_LIST){
+        const ok = !!availability[d.key];
+
+        const item = document.createElement("div");
+        item.className = "ordersItem" + (ok ? "" : " disabled");
+        item.innerHTML = `
+          <span>${esc(d.label)}</span>
+          <span class="badge ${ok ? "ok" : "no"}">${ok ? "Available" : "Not available"}</span>
+        `;
+
+        if(ok){
+          item.addEventListener("click", () => {
+            ordersMenu.hidden = true;
+
+            // هون شو بدك يصير عند الاختيار؟
+            // مثال: تروح على my-orders.html وتمرق duration + product id
+            location.href = `my-orders.html?v=${Date.now()}&product_id=${encodeURIComponent(productId)}&duration=${encodeURIComponent(d.key)}`;
+          });
+        }
+
+        ordersMenu.appendChild(item);
+      }
+    }
+
+    function setupOrdersDropdown(product, productId){
+      const availability = getDurationAvailability(product);
+
+      // Toggle open
+      ordersBtn.onclick = (e) => {
+        e.stopPropagation();
+        renderOrdersMenu(availability, productId);
+        ordersMenu.hidden = !ordersMenu.hidden;
+      };
+
+      // Close on outside click
+      document.addEventListener("click", () => { ordersMenu.hidden = true; });
+      ordersDD.addEventListener("click", (e) => e.stopPropagation());
     }
 
     function renderProduct(p, features){
@@ -330,6 +448,9 @@
         renderProduct(product, features);
 
         buyBtn.onclick = () => buyProduct(id);
+
+        // Dropdown setup
+        setupOrdersDropdown(product, id);
 
       }catch(e){
         titleEl.textContent = "Error loading product";
