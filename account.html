@@ -163,7 +163,7 @@
     </div>
 
     <div class="card" id="card">
-      <div class="hero">
+      <div class="hero" id="hero">
         <div>
           <h1 class="title" id="pTitle">Loading...</h1>
           <div class="sub" id="pCat"></div>
@@ -200,6 +200,7 @@
     const pillsEl = document.getElementById("pills");
     const featsEl = document.getElementById("features");
     const buyBtn  = document.getElementById("buyBtn");
+    const heroEl  = document.getElementById("hero");
 
     const ordersDD   = document.getElementById("ordersDD");
     const ordersBtn  = document.getElementById("myOrdersBtn");
@@ -225,6 +226,24 @@
       const u = new URL(location.href);
       const id = Number(u.searchParams.get("id"));
       return Number.isFinite(id) ? id : null;
+    }
+
+    /* ✅ صورة حسب اسم المنتج: Netflix Account => Netflix-Account.jpg */
+    function getProductImageByTitle(title){
+      if(!title) return null;
+      const safeName = String(title).trim().replaceAll(" ", "-");
+      return `/assets/products/${safeName}.jpg`;
+    }
+
+    function applyHeroImage(title){
+      const imgUrl = getProductImageByTitle(title);
+      if(!imgUrl) return;
+
+      // overlay + image
+      heroEl.style.backgroundImage =
+        `linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.70)), url('${imgUrl}')`;
+      heroEl.style.backgroundSize = "cover";
+      heroEl.style.backgroundPosition = "center";
     }
 
     function setSelectedPlan(plan){
@@ -333,6 +352,9 @@
 
       titleEl.textContent = p?.title || "Product";
       catEl.textContent = p?.category ? ("Category: " + p.category) : "";
+
+      // ✅ حط صورة ورا المنتج حسب الاسم
+      applyHeroImage(p?.title);
 
       pillsEl.innerHTML = "";
       if(p?.active === false){
@@ -455,6 +477,15 @@
         return;
       }
 
+      /* ✅ مهم: reset لكل منتج حتى ما تنتقل الخطط بين المنتجات */
+      PLAN_LIST = [];
+      selectedPlan = null;
+
+      // (ما حذفت فنكشنك) - بس مش مستخدمة هون
+      function getProductImage(id){
+        return `/assets/products/${id}.jpg`;
+      }
+
       try{
         // 1) حمل المنتج + الفيتشرز
         const { product, features } = await loadProduct(id);
@@ -467,7 +498,6 @@
         if(PLAN_LIST.length){
           setSelectedPlan(PLAN_LIST[0]);
         }else{
-          // إذا ما في خطط، خلي السعر 0
           priceEl.textContent = "$0.00";
         }
 
