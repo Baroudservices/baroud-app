@@ -134,20 +134,19 @@ function esc(s){
     return;
   }
 
-  // ✅ جبت admin_reply (+ admin_reply_at اختياري)
   const { data, error } = await sb
-  .from("orders")
-  .select(`
-    id,
-    price,
-    status,
-    created_at,
-    admin_reply,
-    admin_reply_at,
-    products(title)
-  `)
-  .eq("user_id", s.session.user.id)   // ✅ هون الحل
-  .order("created_at",{ascending:false});
+    .from("orders")
+    .select(`
+      id,
+      price,
+      status,
+      created_at,
+      admin_reply,
+      admin_reply_at,
+      products(title)
+    `)
+    .eq("user_id", s.session.user.id)
+    .order("created_at",{ascending:false});
 
   if(error){
     listEl.innerHTML = `<div class="empty">Error loading orders</div>`;
@@ -164,10 +163,10 @@ function esc(s){
       o.status === "paid" ? "paid" :
       o.status === "pending" ? "pending" : "cancelled";
 
+    const hasReply = !!(o.admin_reply && String(o.admin_reply).trim().length);
+
     const el = document.createElement("div");
     el.className = "card";
-
-    const hasReply = !!(o.admin_reply && String(o.admin_reply).trim().length);
 
     el.innerHTML = `
       <div class="row">
@@ -179,20 +178,18 @@ function esc(s){
       </div>
 
       <div class="row" style="margin-top:8px">
-        <div class="small">Order #${o.id}</div>
+        <div class="small">Order #${esc(o.id)}</div>
         <div class="status ${stClass}">${esc(o.status)}</div>
       </div>
 
-      <!-- ✅ Admin Reply -->
       <div class="replyBox">
-  <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
-    Status: ${hasReply ? 'Done' : 'Pending'}
-  </div>
+        <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
+          Status: ${hasReply ? 'Done' : 'Pending'}
+        </div>
 
-  <div class="replyText">
-    ${hasReply ? esc(o.admin_reply) : "No details yet"}
-  </div>
-</div>
+        <div class="replyText">
+          ${hasReply ? esc(o.admin_reply) : "No details yet"}
+        </div>
       </div>
     `;
 
