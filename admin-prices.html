@@ -138,7 +138,8 @@ const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const PLAN_LIST = [
+/* ✅ صار LET مش CONST (مهم) */
+let PLAN_LIST = [
   { key:"1m", label:"1 month"  },
   { key:"3m", label:"3 months" },
   { key:"6m", label:"6 months" },
@@ -216,12 +217,29 @@ async function loadProducts(){
 async function loadPlans(productId){
   const { data, error } = await sb
     .from("product_plan_prices")
-    .select("plan_key, plan_label, price, active")
-    .eq("product_id", productId);
+    .select("plan_key, plan_label, price, active, updated_at")
+    .eq("product_id", productId)
+    .order("updated_at", { ascending:false });
   if(error) throw error;
 
   const map = {};
   for(const r of (data || [])) map[r.plan_key] = r;
+
+  /* ✅ هون الإصلاح: إذا في plans بالـ DB اعمل PLAN_LIST منها */
+  if(data && data.length){
+    const preferredOrder = ["1m","3m","6m","1y","2y"];
+    const keys = data.map(x=>x.plan_key);
+
+    const sorted = [
+      ...preferredOrder.filter(k=>keys.includes(k)).map(k=>map[k]),
+      ...data.filter(x=>!preferredOrder.includes(x.plan_key))
+    ];
+
+    PLAN_LIST = sorted.map(x => ({
+      key: x.plan_key,
+      label: x.plan_label || x.plan_key
+    }));
+  }
 
   // build editor UI
   const productOpt = productSelect.options[productSelect.selectedIndex];
@@ -275,6 +293,7 @@ async function loadPlans(productId){
 async function savePlans(productId){
   if(!IS_ADMIN) return;
   msg.textContent = "Saving...";
+
   const rows = PLAN_LIST.map(pl=>{
     const priceEl = editor.querySelector(`input[data-price="${pl.key}"]`);
     const activeEl = editor.querySelector(`input[data-active="${pl.key}"]`);
@@ -332,7 +351,7 @@ async function loadPlansForManage(productId){
 
   const { data, error } = await sb
     .from("product_plan_prices")
-    .select("plan_key, plan_label, price, active")
+    .select("plan_key, plan_label, price, active, updated_at")
     .eq("product_id", productId)
     .order("updated_at", { ascending:false });
 
@@ -410,7 +429,9 @@ async function savePlansForManage(){
     if(delErr) throw delErr;
   }
 
+  /* ✅ بعد ما نحفظ، رجّع اعرض الخطط من DB (وبتتحدث PLAN_LIST تلقائياً) */
   await loadPlans(productId);
+
   closePlansModal();
   msg.textContent = "Plans updated ✅";
 }
