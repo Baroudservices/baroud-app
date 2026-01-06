@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Orders</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:linear-gradient(160deg,#060b16,#0a1330);
+  color:#fff;
+  padding:16px;
+}
+.wrap{max-width:1000px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;background:#1e293b;color:#fff}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #334155;font-size:14px;vertical-align:top}
+th{color:#93c5fd;text-align:left}
+.small{opacity:.75;font-size:12px}
+.badge{font-weight:900}
+.done{color:#22c55e}
+.pending{color:#fbbf24}
+
+textarea{
+  width:100%;
+  min-height:70px;
+  resize:vertical;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.25);
+  color:#fff;
+  padding:10px;
+  outline:none;
+  font-family:inherit;
+}
+select{
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.25);
+  color:#fff;
+  padding:10px;
+  outline:none;
+}
+.actionBtn{
+  padding:10px 12px;border-radius:12px;border:0;cursor:pointer;
+  background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+  color:#fff;font-weight:900;
+}
+.actionBtn:disabled{opacity:.6;cursor:not-allowed}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="top">
+    <h2 style="margin:0">Admin – Orders</h2>
+    <div>
+      <button class="btn" id="btnRefresh">Refresh</button>
+      <button class="btn" id="btnLogout">Logout</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>User</th>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Reply</th>
+        <th>Save</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <p id="empty" style="display:none;opacity:.6">No orders found</p>
+</div>
+
+<script>
+const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const rowsEl = document.getElementById("rows");
+const emptyEl = document.getElementById("empty");
+const btnRefresh = document.getElementById("btnRefresh");
+const btnLogout = document.getElementById("btnLogout");
+
+function esc(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+async function requireSession(){
+  const { data: s, error } = await sb.auth.getSession();
+  if(error) throw error;
+  if(!s?.session){ location.href="login.html"; return null; }
+  return s.session;
+}
+
+async function requireAdmin(session){
+  const { data: profile, error } = await sb
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", session.user.id)
+    .single();
+  if(error) throw error;
+  if(!profile?.is_admin){ alert("Not admin"); return false; }
+  return true;
+}
+
+function setBusy(isBusy){
+  btnRefresh.disabled = isBusy;
+  btnLogout.disabled = isBusy;
+  rowsEl.querySelectorAll("button.actionBtn").forEach(b => b.disabled = isBusy);
+}
+
+async function load(){
+  rowsEl.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
+  emptyEl.style.display = "none";
+
+  try{
+    const session = await requireSession();
+    if(!session) return;
+
+    const okAdmin = await requireAdmin(session);
+    if(!okAdmin){ rowsEl.innerHTML = ""; return; }
+
+    const { data, error } = await sb
+      .from("orders")
+      .select(`
+        id,
+        user_id,
+        price,
+        status,
+        delivery_status,
+        admin_reply,
+        created_at,
+        products(title)
+      `)
+      .order("created_at", { ascending:false });
+
+    if(error) throw error;
+
+    if(!data || !data.length){
+      rowsEl.innerHTML = "";
+      emptyEl.style.display = "block";
+      return;
+    }
+
+    rowsEl.innerHTML = "";
+    for(const o of data){
+      const ds = String(o.delivery_status || "pending");
+      const dsClass = ds === "done" ? "done" : "pending";
+
+      const replyVal = o.admin_reply || "";
+      const title = o.products?.title || "Product";
+
+      rowsEl.innerHTML += `
+        <tr>
+          <td>
+            <div><b>#${esc(o.id)}</b></div>
+            <div class="small">${new Date(o.created_at).toLocaleString()}</div>
+          </td>
+          <td class="small">${esc(o.user_id)}</td>
+          <td>${esc(title)}</td>
+          <td><b>$${Number(o.price || 0).toFixed(2)}</b></td>
+          <td>
+            <div class="badge ${dsClass}">${esc(ds)}</div>
+            <div class="small">paid status: ${esc(o.status)}</div>
+          </td>
+          <td style="min-width:240px">
+            <textarea data-reply-for="${esc(o.id)}" placeholder="Write details for customer...">${esc(replyVal)}</textarea>
+          </td>
+          <td style="min-width:160px">
+            <select data-status-for="${esc(o.id)}">
+              <option value="pending" ${ds==="pending" ? "selected" : ""}>pending</option>
+              <option value="done" ${ds==="done" ? "selected" : ""}>done</option>
+            </select>
+            <div style="height:8px"></div>
+            <button class="actionBtn" data-save="${esc(o.id)}">Save</button>
+          </td>
+        </tr>
+      `;
+    }
+
+  }catch(e){
+    rowsEl.innerHTML = `<tr><td colspan="7" style="color:#ffb4b4">Error: ${esc(e?.message || e)}</td></tr>`;
+  }
+}
+
+rowsEl.addEventListener("click", async (ev)=>{
+  const btn = ev.target.closest("button[data-save]");
+  if(!btn) return;
+
+  try{
+    setBusy(true);
+
+    const orderId = Number(btn.getAttribute("data-save"));
+    const replyEl = rowsEl.querySelector(`textarea[data-reply-for="${orderId}"]`);
+    const stEl = rowsEl.querySelector(`select[data-status-for="${orderId}"]`);
+
+    const reply = replyEl ? replyEl.value : "";
+    const deliveryStatus = stEl ? stEl.value : "pending";
+
+    const session = await requireSession();
+    if(!session) return;
+
+    const okAdmin = await requireAdmin(session);
+    if(!okAdmin) return;
+
+    const { error } = await sb.rpc("admin_update_order", {
+      p_order_id: orderId,
+      p_reply: reply,
+      p_delivery_status: deliveryStatus
+    });
+    if(error) throw error;
+
+    await load();
+    alert("Saved ✅");
+  }catch(e){
+    alert(e?.message || e);
+  }finally{
+    setBusy(false);
+  }
+});
+
+btnRefresh.addEventListener("click", load);
+btnLogout.addEventListener("click", async ()=>{
+  await sb.auth.signOut();
+  location.href="login.html";
+});
+
+load();
+</script>
+</body>
+</html>
