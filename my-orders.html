@@ -185,15 +185,13 @@ function esc(s){
 
       <!-- ✅ Admin Reply -->
       <div class="replyBox">
-  <div class="replyStatus ${o.admin_reply ? 'done' : 'pending'}">
-    Status: ${o.admin_reply ? 'Done' : 'Pending'}
+  <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
+    Status: ${hasReply ? 'Done' : 'Pending'}
   </div>
 
-  ${o.admin_reply ? `
-    <div class="replyText">${esc(o.admin_reply)}</div>
-  ` : `
-    <div class="replyText">Waiting for reply…</div>
-  `}
+  <div class="replyText">
+    ${hasReply ? esc(o.admin_reply) : "No details yet"}
+  </div>
 </div>
       </div>
     `;
