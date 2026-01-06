@@ -229,9 +229,16 @@
     }
   }
 
-  // ✅ NEW: يفتح صفحة المنتج
-  function openProduct(id){
-    location.href = `account.html?id=${encodeURIComponent(id)}`;
+  // ✅ NEW: bigint safe
+  function openProduct(rawId){
+    const s = String(rawId ?? "").trim();
+    const n = Number(s);
+    if(!Number.isFinite(n)){
+      alert("Invalid product id");
+      return;
+    }
+    // ✅ نخليها رقم لأن id عندك bigint
+    location.href = `account.html?id=${n}`;
   }
 
   function render(list){
