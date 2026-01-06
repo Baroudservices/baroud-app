@@ -52,6 +52,28 @@ select{
   color:#fff;font-weight:900;
 }
 .actionBtn:disabled{opacity:.6;cursor:not-allowed}
+
+/* ✅ note box */
+.noteBox{
+  margin-top:6px;
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(56,189,248,.25);
+  background:rgba(56,189,248,.08);
+}
+.noteTitle{
+  font-weight:950;
+  font-size:12px;
+  opacity:.85;
+}
+.noteText{
+  margin-top:4px;
+  font-weight:900;
+  font-size:12px;
+  opacity:.95;
+  line-height:1.35;
+  word-break:break-word;
+}
 </style>
 </head>
 
@@ -137,6 +159,7 @@ async function load(){
     const okAdmin = await requireAdmin(session);
     if(!okAdmin){ rowsEl.innerHTML = ""; return; }
 
+    // ✅ add duration + note
     const { data, error } = await sb
       .from("orders")
       .select(`
@@ -144,6 +167,8 @@ async function load(){
         user_id,
         price,
         status,
+        duration,
+        note,
         delivery_status,
         admin_reply,
         created_at,
@@ -167,22 +192,40 @@ async function load(){
       const replyVal = o.admin_reply || "";
       const title = o.products?.title || "Product";
 
+      const planTxt = o.duration ? `Plan: ${esc(o.duration)}` : "";
+      const noteTxt = o.note ? esc(o.note) : "";
+
       rowsEl.innerHTML += `
         <tr>
           <td>
             <div><b>#${esc(o.id)}</b></div>
             <div class="small">${new Date(o.created_at).toLocaleString()}</div>
           </td>
+
           <td class="small">${esc(o.user_id)}</td>
-          <td>${esc(title)}</td>
+
+          <td>
+            <div>${esc(title)}</div>
+
+            ${(planTxt || noteTxt) ? `
+              <div class="noteBox">
+                ${planTxt ? `<div class="noteTitle">${planTxt}</div>` : `<div class="noteTitle">Order Note</div>`}
+                ${noteTxt ? `<div class="noteText">${noteTxt}</div>` : ``}
+              </div>
+            ` : ``}
+          </td>
+
           <td><b>$${Number(o.price || 0).toFixed(2)}</b></td>
+
           <td>
             <div class="badge ${dsClass}">${esc(ds)}</div>
             <div class="small">paid status: ${esc(o.status)}</div>
           </td>
+
           <td style="min-width:240px">
             <textarea data-reply-for="${esc(o.id)}" placeholder="Write details for customer...">${esc(replyVal)}</textarea>
           </td>
+
           <td style="min-width:160px">
             <select data-status-for="${esc(o.id)}">
               <option value="pending" ${ds==="pending" ? "selected" : ""}>pending</option>
