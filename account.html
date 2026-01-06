@@ -9,13 +9,10 @@
 
   <style>
     :root{
-      --bg1:#06162a;
-      --bg2:#020b14;
       --text:#ffffff;
       --glass:rgba(255,255,255,.07);
       --stroke:rgba(255,255,255,.10);
       --shadow:0 18px 60px rgba(0,0,0,.35);
-      --r:22px;
       --blue:#1bc7ff;
     }
     *{box-sizing:border-box}
@@ -27,48 +24,35 @@
       min-height:100vh;
       padding:14px;
     }
-    .wrap{max-width:520px;margin:0 auto;padding-bottom:28px}
-    .top{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      margin-top:6px;
-    }
-    .btn{
+    .wrap{max-width:520px;margin:0 auto}
+    .btn,.smallBtn{
       border:1px solid var(--stroke);
       background:var(--glass);
       color:#fff;
-      padding:12px 14px;
+      padding:14px 16px;
       border-radius:16px;
       cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color:transparent;
+      font-weight:900;
+    }
+    #myOrdersBtn{
+      font-size:18px;
+      padding:14px 18px;
     }
     .card{
       margin-top:14px;
       background:var(--glass);
       border:1px solid var(--stroke);
       border-radius:22px;
-      overflow:hidden;
       box-shadow:var(--shadow);
+      overflow:hidden;
     }
     .hero{
       height:170px;
-      background:radial-gradient(600px 260px at 20% 20%, rgba(42,116,255,.25), transparent 60%),
-                 radial-gradient(600px 260px at 80% 20%, rgba(27,199,255,.15), transparent 60%),
-                 rgba(0,0,0,.22);
-      display:flex;align-items:flex-end;justify-content:space-between;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
       padding:14px;
-    }
-    .hero .title{
-      font-weight:950;
-      font-size:22px;
-      letter-spacing:.2px;
-      margin:0;
-    }
-    .hero .sub{
-      margin-top:6px;
-      opacity:.8;
-      font-weight:800;
-      font-size:12px;
+      background:rgba(0,0,0,.25);
     }
     .pricePill{
       background:rgba(255,255,255,.07);
@@ -77,390 +61,92 @@
       border-radius:16px;
       font-weight:950;
       color:var(--blue);
-      white-space:nowrap;
     }
-
-    .body{
-      padding:14px;
-    }
-    .pills{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:12px;
-    }
-    .pill{
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      font-weight:900;
-      font-size:12px;
-      opacity:.95;
-    }
-
-    .features{
-      margin-top:14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .feature{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(0,0,0,.18);
-    }
-    .fLabel{font-weight:950; opacity:.9}
-    .fValue{font-weight:900; opacity:.85; text-align:right}
-
-    .buyRow{
-      margin-top:14px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
+    .body{padding:14px}
+    .buyRow{display:flex;gap:10px}
     .buyBtn{
       flex:1;
-      padding:14px 14px;
+      padding:14px;
       border-radius:16px;
       border:0;
-      cursor:pointer;
       font-weight:950;
       color:#fff;
       background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      box-shadow:0 14px 40px rgba(0,0,0,.25);
-    }
-    .buyBtn:disabled{opacity:.6; cursor:not-allowed}
-
-    /* بدل My Orders زر dropdown بنفس ستايل smallBtn */
-    .smallBtn{
-      padding:14px 14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
       cursor:pointer;
-      font-weight:900;
-      white-space:nowrap;
-      -webkit-tap-highlight-color:transparent;
     }
 
-    .footer{
-      margin-top:18px;
-      text-align:center;
-      opacity:.55;
-      font-weight:800;
-      letter-spacing:1px;
-    }
-    .muted{opacity:.7;font-weight:800}
-
-    /* Dropdown menu styles */
-    .ordersDD{ position:relative; display:inline-block; }
+    /* Dropdown */
+    .ordersDD{position:relative}
     .ordersMenu{
       position:absolute;
       right:0;
       top:calc(100% + 10px);
-      width:240px;
+      width:220px;
+      background:#0b0f17;
       border-radius:16px;
       border:1px solid rgba(255,255,255,.12);
-      background:#0b0f17;
-      overflow:hidden;
       box-shadow:0 18px 40px rgba(0,0,0,.35);
-      z-index:9999;
+      z-index:999;
     }
     .ordersItem{
+      padding:12px 14px;
       display:flex;
       justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      padding:12px 14px;
-      color:#e5e7eb;
       cursor:pointer;
-      user-select:none;
     }
-    .ordersItem:hover{ background: rgba(255,255,255,.06); }
-    .ordersItem.disabled{
-      opacity:.55;
-      cursor:not-allowed;
-    }
+    .ordersItem:hover{background:rgba(255,255,255,.06)}
     .badge{
       padding:4px 10px;
       border-radius:999px;
       font-size:12px;
-      font-weight:950;
+      font-weight:900;
       color:#fff;
-      white-space:nowrap;
     }
-    .badge.ok{ background:#19c37d; }
-    .badge.no{ background:#6b7280; }
+    .ok{background:#19c37d}
   </style>
 </head>
 
 <body>
-  <main class="wrap">
-    <div class="top">
-      <button class="btn" onclick="history.back()">← Back</button>
-      <button class="btn" onclick="location.href='services.html'">Home</button>
+<main class="wrap">
+  <div class="card">
+    <div class="hero">
+      <h1>Product</h1>
+      <div class="pricePill">$0.00</div>
     </div>
 
-    <div class="card" id="card">
-      <div class="hero">
-        <div>
-          <h1 class="title" id="pTitle">Loading...</h1>
-          <div class="sub" id="pCat"> </div>
-        </div>
-        <div class="pricePill" id="pPrice">$0.00</div>
-      </div>
+    <div class="body">
+      <div class="buyRow">
+        <button class="buyBtn">Buy</button>
 
-      <div class="body">
-        <div class="pills" id="pills"></div>
-
-        <div class="features" id="features"></div>
-
-        <div class="buyRow">
-          <button class="buyBtn" id="buyBtn">Buy</button>
-
-          <!-- My Orders صار Dropdown -->
-          <div class="ordersDD" id="ordersDD">
-            <button class="smallBtn" id="myOrdersBtn" type="button">
-              My Orders ▾
-            </button>
-            <div class="ordersMenu" id="ordersMenu" hidden></div>
+        <div class="ordersDD" id="ordersDD">
+          <button class="smallBtn" id="myOrdersBtn">▾</button>
+          <div class="ordersMenu" id="ordersMenu" hidden>
+            <div class="ordersItem"><span>1 month</span><span class="badge ok">Available</span></div>
+            <div class="ordersItem"><span>3 months</span><span class="badge ok">Available</span></div>
+            <div class="ordersItem"><span>6 months</span><span class="badge ok">Available</span></div>
+            <div class="ordersItem"><span>1 year</span><span class="badge ok">Available</span></div>
+            <div class="ordersItem"><span>2 years</span><span class="badge ok">Available</span></div>
           </div>
         </div>
+
       </div>
     </div>
+  </div>
+</main>
 
-    <div class="footer">©2025 Baroud Services</div>
-  </main>
+<script>
+  const btn = document.getElementById("myOrdersBtn");
+  const menu = document.getElementById("ordersMenu");
+  const wrap = document.getElementById("ordersDD");
 
-  <script>
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  btn.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    menu.hidden = !menu.hidden;
+  });
 
-    const titleEl = document.getElementById("pTitle");
-    const catEl   = document.getElementById("pCat");
-    const priceEl = document.getElementById("pPrice");
-    const pillsEl = document.getElementById("pills");
-    const featsEl = document.getElementById("features");
-    const buyBtn  = document.getElementById("buyBtn");
-
-    // Dropdown refs
-    const ordersDD   = document.getElementById("ordersDD");
-    const ordersBtn  = document.getElementById("myOrdersBtn");
-    const ordersMenu = document.getElementById("ordersMenu");
-
-    // المطلوب list
-    const DURATION_LIST = [
-      { key: "1m", label: "1 month" },
-      { key: "3m", label: "3 months" },
-      { key: "6m", label: "6 months" },
-      { key: "1y", label: "1 year" },
-      { key: "2y", label: "2 years" },
-    ];
-
-    function esc(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    function getId(){
-      const u = new URL(location.href);
-      const id = u.searchParams.get("id");
-      const n = Number(id);
-      if(!Number.isFinite(n)) return null;
-      return n; // bigint
-    }
-
-    async function loadProduct(productId){
-      // product
-      const { data: p, error: pErr } = await sb
-        .from("products")
-        .select("id,title,price,category,active")
-        .eq("id", productId)
-        .single();
-      if(pErr) throw pErr;
-
-      // features
-      const { data: f, error: fErr } = await sb
-        .from("product_features")
-        .select("label,value,sort")
-        .eq("product_id", productId)
-        .order("sort", { ascending:true });
-      if(fErr) throw fErr;
-
-      return { product: p, features: (f || []) };
-    }
-
-    // availability حسب "الأمر منك"
-    // حاليا: اذا المنتج Unavailable => كل الخيارات Not available
-    // اذا Available => كل الخيارات Available
-    // (بتقدر تبدلها لاحقاً لتجيبها من Supabase)
-    function getDurationAvailability(product){
-      const all = {};
-      const ok = (product?.active !== false);
-      for(const d of DURATION_LIST) all[d.key] = ok;
-      return all;
-    }
-
-    function renderOrdersMenu(availability, productId){
-      ordersMenu.innerHTML = "";
-
-      for(const d of DURATION_LIST){
-        const ok = !!availability[d.key];
-
-        const item = document.createElement("div");
-        item.className = "ordersItem" + (ok ? "" : " disabled");
-        item.innerHTML = `
-          <span>${esc(d.label)}</span>
-          <span class="badge ${ok ? "ok" : "no"}">${ok ? "Available" : "Not available"}</span>
-        `;
-
-        if(ok){
-          item.addEventListener("click", () => {
-            ordersMenu.hidden = true;
-
-            // هون شو بدك يصير عند الاختيار؟
-            // مثال: تروح على my-orders.html وتمرق duration + product id
-            location.href = `my-orders.html?v=${Date.now()}&product_id=${encodeURIComponent(productId)}&duration=${encodeURIComponent(d.key)}`;
-          });
-        }
-
-        ordersMenu.appendChild(item);
-      }
-    }
-
-    function setupOrdersDropdown(product, productId){
-      const availability = getDurationAvailability(product);
-
-      // Toggle open
-      ordersBtn.onclick = (e) => {
-        e.stopPropagation();
-        renderOrdersMenu(availability, productId);
-        ordersMenu.hidden = !ordersMenu.hidden;
-      };
-
-      // Close on outside click
-      document.addEventListener("click", () => { ordersMenu.hidden = true; });
-      ordersDD.addEventListener("click", (e) => e.stopPropagation());
-    }
-
-    function renderProduct(p, features){
-      titleEl.textContent = p?.title || "Product";
-      catEl.textContent = p?.category ? ("Category: " + p.category) : "";
-      const priceNum = Number(p?.price);
-      priceEl.textContent = "$" + (Number.isFinite(priceNum) ? priceNum.toFixed(2) : "0.00");
-
-      pillsEl.innerHTML = "";
-      if(p?.active === false){
-        pillsEl.innerHTML += `<span class="pill">Unavailable</span>`;
-        buyBtn.disabled = true;
-      }else{
-        pillsEl.innerHTML += `<span class="pill">Available</span>`;
-        buyBtn.disabled = false;
-      }
-
-      if(p?.category){
-        pillsEl.innerHTML += `<span class="pill">${esc(p.category)}</span>`;
-      }
-
-      featsEl.innerHTML = "";
-      if(!features.length){
-        featsEl.innerHTML = `<div class="muted">No details yet</div>`;
-        return;
-      }
-
-      for(const x of features){
-        featsEl.innerHTML += `
-          <div class="feature">
-            <div class="fLabel">${esc(x.label)}</div>
-            <div class="fValue">${esc(x.value)}</div>
-          </div>
-        `;
-      }
-    }
-
-    async function buyProduct(productId){
-      // Confirm قبل أي شي
-      let ok = true;
-      if (typeof window.confirmMsg === "function") {
-        ok = await window.confirmMsg("Confirm Purchase", "Are you sure you want to buy this product?");
-      } else {
-        ok = confirm("Are you sure you want to buy this product?");
-      }
-      if(!ok) return;
-
-      buyBtn.disabled = true;
-      const old = buyBtn.textContent;
-      buyBtn.textContent = "Buying...";
-
-      try{
-        const { data: s } = await sb.auth.getSession();
-        if(!s?.session?.user){
-          location.href = "login.html?v=" + Date.now();
-          return;
-        }
-
-        const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
-        if(error) throw error;
-
-        // Success popup + redirect بعد OK بـ 600ms
-        if (typeof window.showMsg === "function") {
-          window.showMsg("Success", `✅ Order placed!\nOrder ID: ${orderId}`, () => {
-            setTimeout(() => {
-              location.href = "my-orders.html?v=" + Date.now();
-            }, 600);
-          });
-        } else {
-          alert("✅ Order placed! Order ID: " + orderId);
-          setTimeout(() => {
-            location.href = "my-orders.html?v=" + Date.now();
-          }, 600);
-        }
-
-      }catch(err){
-        alert(err?.message || "Failed");
-      }finally{
-        buyBtn.disabled = false;
-        buyBtn.textContent = old;
-      }
-    }
-
-    (async ()=>{
-      const id = getId();
-      if(!id){
-        titleEl.textContent = "Invalid product";
-        buyBtn.disabled = true;
-        return;
-      }
-
-      try{
-        const { product, features } = await loadProduct(id);
-        renderProduct(product, features);
-
-        buyBtn.onclick = () => buyProduct(id);
-
-        // Dropdown setup
-        setupOrdersDropdown(product, id);
-
-      }catch(e){
-        titleEl.textContent = "Error loading product";
-        featsEl.innerHTML = `<div class="muted">Error: ${esc(e?.message || e)}</div>`;
-        buyBtn.disabled = true;
-      }
-    })();
-  </script>
-
-  <!-- app-ui (confirmMsg + modal) -->
-  <script src="app-ui.js?v=4"></script>
+  document.addEventListener("click", ()=> menu.hidden = true);
+  wrap.addEventListener("click", e => e.stopPropagation());
+</script>
 </body>
 </html>
+
