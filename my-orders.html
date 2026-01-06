@@ -47,9 +47,7 @@ h2{margin:0;font-size:22px}
 .small{opacity:.65;font-size:12px}
 .price{font-weight:900;color:#38bdf8}
 
-.status{
-  font-weight:900;
-}
+.status{font-weight:900}
 .paid{color:#22c55e}
 .pending{color:#fbbf24}
 .cancelled{color:#ef4444}
@@ -61,17 +59,10 @@ h2{margin:0;font-size:22px}
   background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.08);
 }
-.replyLabel{
-  opacity:.7;
-  font-weight:900;
-  font-size:12px;
-}
 .replyText{
   margin-top:6px;
   font-weight:900;
   line-height:1.35;
-}
-.replyText{
   opacity:.85;
   font-size:14px;
 }
@@ -79,20 +70,17 @@ h2{margin:0;font-size:22px}
   font-weight:900;
   margin-bottom:6px;
 }
+.replyStatus.pending{ color:#fbbf24; }
+.replyStatus.done{ color:#22c55e; }
 
-.replyStatus.pending{
-  color:#fbbf24; /* أصفر */
-}
-
-.replyStatus.done{
-  color:#22c55e; /* أخضر */
-}
 .empty{
   opacity:.6;
   text-align:center;
   margin-top:40px;
 }
-  .noteBox{
+
+/* Note box */
+.noteBox{
   margin-bottom:12px;
   padding:12px;
   border-radius:16px;
@@ -120,11 +108,14 @@ h2{margin:0;font-size:22px}
     <div class="back" onclick="history.back()">←</div>
     <h2>My Orders</h2>
   </div>
-<div id="noteBox" class="noteBox" style="display:none">
-  <div class="noteTitle">Last Order Note</div>
-  <div class="noteText" id="noteText"></div>
-</div>
+
+  <div id="noteBox" class="noteBox" style="display:none">
+    <div class="noteTitle">Last Order Note</div>
+    <div class="noteText" id="noteText"></div>
+  </div>
+
   <div id="list"></div>
+
   <div id="empty" class="empty" style="display:none">
     No orders yet
   </div>
@@ -132,23 +123,22 @@ h2{margin:0;font-size:22px}
 </div>
 
 <script>
-  const u = new URL(location.href);
-const note = u.searchParams.get("note") || localStorage.getItem("last_order_note") || "";
-
-const noteBox = document.getElementById("noteBox");
-const noteText = document.getElementById("noteText");
-
-if(note){
-  noteBox.style.display = "block";
-  noteText.textContent = note;
-}
-
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const listEl = document.getElementById("list");
 const emptyEl = document.getElementById("empty");
+
+// Note (from URL or localStorage)
+const u = new URL(location.href);
+const note = u.searchParams.get("note") || localStorage.getItem("last_order_note") || "";
+const noteBox = document.getElementById("noteBox");
+const noteText = document.getElementById("noteText");
+if(note){
+  noteBox.style.display = "block";
+  noteText.textContent = note;
+}
 
 function esc(s){
   return String(s ?? "")
@@ -172,6 +162,7 @@ function esc(s){
       id,
       price,
       status,
+      duration,
       note,
       created_at,
       admin_reply,
@@ -202,39 +193,37 @@ function esc(s){
     el.className = "card";
 
     el.innerHTML = `
-  <div class="row">
-    <div>
-      <div class="name">${esc(o.products?.title || "Product")}</div>
-      <div class="small">${new Date(o.created_at).toLocaleString()}</div>
+      <div class="row">
+        <div>
+          <div class="name">${esc(o.products?.title || "Product")}</div>
+          <div class="small">${new Date(o.created_at).toLocaleString()}</div>
+          ${o.duration ? `<div class="small">Plan: ${esc(o.duration)}</div>` : ""}
+          ${o.note ? `<div class="small">${esc(o.note)}</div>` : ""}
+        </div>
+        <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
+      </div>
 
-      ${o.duration ? `<div class="small">Plan: ${esc(o.duration)}</div>` : ""}
-      ${o.note ? `<div class="small">${esc(o.note)}</div>` : ""}
-    </div>
+      <div class="row" style="margin-top:8px">
+        <div class="small">Order #${esc(o.id)}</div>
+        <div class="status ${stClass}">${esc(o.status)}</div>
+      </div>
 
-    <div class="price">$${Number(o.price).toFixed(2)}</div>
-  </div>
+      <div class="replyBox">
+        <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
+          Status: ${hasReply ? 'Done' : 'Pending'}
+        </div>
 
-  <div class="row" style="margin-top:8px">
-    <div class="small">Order #${esc(o.id)}</div>
-    <div class="status ${stClass}">${esc(o.status)}</div>
-  </div>
-
-  <div class="replyBox">
-    <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
-      Status: ${hasReply ? 'Done' : 'Pending'}
-    </div>
-
-    <div class="replyText">
-      ${hasReply ? esc(o.admin_reply) : "No details yet"}
-    </div>
-  </div>
-`;
+        <div class="replyText">
+          ${hasReply ? esc(o.admin_reply) : "No details yet"}
+        </div>
+      </div>
     `;
 
     listEl.appendChild(el);
   }
 })();
 </script>
+
 <script src="app-ui.js?v=3"></script>
 </body>
 </html>
