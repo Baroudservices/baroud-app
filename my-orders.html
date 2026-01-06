@@ -109,11 +109,6 @@ h2{margin:0;font-size:22px}
     <h2>My Orders</h2>
   </div>
 
-  <div id="noteBox" class="noteBox" style="display:none">
-    <div class="noteTitle">Last Order Note</div>
-    <div class="noteText" id="noteText"></div>
-  </div>
-
   <div id="list"></div>
 
   <div id="empty" class="empty" style="display:none">
@@ -131,14 +126,6 @@ const listEl = document.getElementById("list");
 const emptyEl = document.getElementById("empty");
 
 // Note (from URL or localStorage)
-const u = new URL(location.href);
-const note = u.searchParams.get("note") || localStorage.getItem("last_order_note") || "";
-const noteBox = document.getElementById("noteBox");
-const noteText = document.getElementById("noteText");
-if(note){
-  noteBox.style.display = "block";
-  noteText.textContent = note;
-}
 
 function esc(s){
   return String(s ?? "")
