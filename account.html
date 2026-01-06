@@ -366,7 +366,12 @@
           return;
         }
 
-        const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: currentProductId });
+        const { data: orderId, error } =
+  await sb.rpc("place_order", {
+    p_product_id: productId,
+    p_duration: selectedPlan.label,
+    p_note: localStorage.getItem("last_order_note")
+  });
         if(error) throw error;
 
         const note = localStorage.getItem("last_order_note") || "";
