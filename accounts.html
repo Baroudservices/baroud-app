@@ -142,6 +142,33 @@
       font-weight:800;
       letter-spacing:1px;
     }
+
+    /* ===== Loading Skeleton ===== */
+    .skeleton{
+      position:relative;
+      overflow:hidden;
+      background:rgba(255,255,255,.05);
+    }
+    .skeleton::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      transform:translateX(-100%);
+      background:linear-gradient(90deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,.10) 45%,
+        rgba(255,255,255,0) 100%);
+      animation:shimmer 1.05s infinite;
+    }
+    @keyframes shimmer{
+      to{ transform:translateX(100%); }
+    }
+    .sk-img{ height:120px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .sk-line{ height:14px; border-radius:10px; }
+    .sk-line.big{ height:18px; }
+    .sk-row{ display:flex; gap:10px; align-items:center; }
+    .mt8{ margin-top:8px; }
+    .mt10{ margin-top:10px; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -179,11 +206,38 @@
       .replaceAll("'","&#039;");
   }
 
+  function showLoading(n=6){
+    grid.innerHTML = "";
+    for(let i=0;i<n;i++){
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `
+        <div class="img skeleton sk-img"></div>
+        <div class="body">
+          <div class="skeleton sk-line big" style="width:75%"></div>
+          <div class="sk-row mt10">
+            <div class="skeleton sk-line" style="width:38%"></div>
+            <div class="skeleton sk-line" style="width:30%"></div>
+          </div>
+          <div class="sk-row mt10" style="justify-content:space-between">
+            <div class="skeleton sk-line" style="width:35%"></div>
+            <div class="skeleton sk-line" style="width:30%; height:36px; border-radius:14px;"></div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(el);
+    }
+  }
+
   function render(list){
     grid.innerHTML = "";
     for(const it of list){
       const el = document.createElement("div");
       el.className = "card";
+
+      const priceNum = Number(it.price);
+      const priceTxt = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "0.00";
+
       el.innerHTML = `
         <div class="img">⭐</div>
         <div class="body">
@@ -193,7 +247,7 @@
             <span class="pill">Available</span>
           </div>
           <div class="priceRow">
-            <div class="price">$${Number(it.price).toFixed(2)}</div>
+            <div class="price">$${priceTxt}</div>
             <button class="buy" data-id="${it.id}">Buy</button>
           </div>
         </div>
@@ -223,7 +277,6 @@
 
   async function buyProduct(productId, btn){
     // ✅ Confirm قبل أي شي
-    // إذا confirmMsg مش موجودة رح نعمل fallback لـ confirm العادي
     let ok = true;
     if (typeof window.confirmMsg === "function") {
       ok = await window.confirmMsg("Confirm Purchase", "Are you sure you want to buy this product?");
@@ -243,13 +296,10 @@
         return;
       }
 
-      // ✅ طلب داخل الموقع (RPC)
       const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
       if(error) throw error;
 
       alert("✅ Order placed! Order ID: " + orderId);
-
-      // ✅ بعد الشراء روح على my-orders
       location.href = "my-orders.html?v=" + Date.now();
 
     }catch(err){
@@ -264,7 +314,8 @@
 
   (async ()=>{
     try{
-      all = await loadProducts();
+      showLoading(6);              // ✅ هون بيبين فورا
+      all = await loadProducts();  // تحميل
       render(all);
 
       q.addEventListener("input", ()=>{
@@ -281,6 +332,7 @@
     }
   })();
 </script>
+
 <script src="app-ui.js?v=4"></script>
 </body>
 </html>
