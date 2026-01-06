@@ -35,7 +35,6 @@
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
     }
     .card{
       margin-top:14px;
@@ -118,18 +117,31 @@
       touch-action:manipulation;
     }
 
-    #myOrdersBtn{font-size:18px;font-weight:950;padding:14px 18px;line-height:1}
+    /* زر السهم فقط */
+    #myOrdersBtn{
+      font-size:18px;
+      font-weight:950;
+      padding:14px 18px;
+      line-height:1;
+    }
 
     .footer{margin-top:18px;text-align:center;opacity:.55;font-weight:800;letter-spacing:1px}
     .muted{opacity:.7;font-weight:800}
 
+    /* Dropdown */
     .ordersDD{position:relative;display:inline-block;z-index:99999}
     .ordersMenu{
-      position:absolute;right:0;top:calc(100% + 10px);
-      width:260px;border-radius:16px;border:1px solid rgba(255,255,255,.12);
-      background:#0b0f17;overflow:auto;
+      position:absolute;
+      right:0;
+      top:calc(100% + 10px);
+      width:260px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:#0b0f17;
+      overflow:auto;
       box-shadow:0 18px 40px rgba(0,0,0,.35);
-      z-index:99999;max-height:260px;
+      z-index:99999;
+      max-height:260px;
     }
     .ordersItem{
       display:flex;justify-content:space-between;align-items:center;gap:12px;
@@ -285,6 +297,7 @@
 
     function renderProduct(p, features){
       currentProduct = p;
+
       titleEl.textContent = p?.title || "Product";
       catEl.textContent = p?.category ? ("Category: " + p.category) : "";
 
@@ -354,9 +367,13 @@
           return;
         }
 
-        // ✅ FIX: use currentProductId (not productId)
+        // ✅ السعر الحقيقي حسب الخطة
+        const finalPrice = calcPrice(selectedPlan);
+
+        // ✅ RPC مع السعر + مدة + نوت
         const { data: orderId, error } = await sb.rpc("place_order", {
           p_product_id: currentProductId,
+          p_price: finalPrice,
           p_duration: selectedPlan.label,
           p_note: localStorage.getItem("last_order_note") || null
         });
@@ -364,7 +381,11 @@
 
         const note = localStorage.getItem("last_order_note") || "";
         const planKey = localStorage.getItem("last_order_plan") || selectedPlan.key;
-        const planPrice = localStorage.getItem("last_order_price") || calcPrice(selectedPlan).toFixed(2);
+
+        // ✅ مرّق السعر الحقيقي للـ my-orders
+        const planPrice = Number.isFinite(finalPrice)
+          ? finalPrice.toFixed(2)
+          : calcPrice(selectedPlan).toFixed(2);
 
         const go = () => {
           location.href =
@@ -391,7 +412,6 @@
       }
     }
 
-    // Buy handler
     buyBtn.addEventListener("click", (e)=>{
       e.preventDefault();
       e.stopPropagation();
