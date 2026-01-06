@@ -58,13 +58,34 @@ h2{margin:0;font-size:22px}
   border-radius:14px;
   background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+}
+  .replyHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+  .replyToggle{
+  font-weight:900;
+  opacity:.7;
+  font-size:12px;
+}
+  .replyBox .replyText{
+  max-height: 60px;
+  overflow: hidden;
+  transition: max-height .3s ease;
 }
 .replyText{
-  margin-top:6px;
+  margin-top:8px;
   font-weight:900;
   line-height:1.35;
   opacity:.85;
   font-size:14px;
+  display:none;
+}
+  .replyBox.open .replyText{
+  display:block; /* 👈 يظهر عند الفتح */
+    max-height: 1000px;
 }
 .replyStatus{
   font-weight:900;
@@ -170,44 +191,41 @@ function esc(s){
   }
 
   for(const o of data){
-    const stClass =
-      o.status === "paid" ? "paid" :
-      o.status === "pending" ? "pending" : "cancelled";
+  const stClass =
+    o.status === "paid" ? "paid" :
+    o.status === "pending" ? "pending" : "cancelled";
 
-    const hasReply = !!(o.admin_reply && String(o.admin_reply).trim().length);
+  const hasReply = !!(o.admin_reply && String(o.admin_reply).trim().length);
 
-    const el = document.createElement("div");
-    el.className = "card";
+  const el = document.createElement("div");
+  el.className = "card";
 
-    el.innerHTML = `
-      <div class="row">
-        <div>
-          <div class="name">${esc(o.products?.title || "Product")}</div>
-          <div class="small">${new Date(o.created_at).toLocaleString()}</div>
-          ${o.duration ? `<div class="small">Plan: ${esc(o.duration)}</div>` : ""}
-          ${o.note ? `<div class="small">${esc(o.note)}</div>` : ""}
-        </div>
-        <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
-      </div>
-
-      <div class="row" style="margin-top:8px">
-        <div class="small">Order #${esc(o.id)}</div>
-        <div class="status ${stClass}">${esc(o.status)}</div>
-      </div>
-
-      <div class="replyBox">
+  el.innerHTML = `
+    ...
+    <div class="replyBox">
+      <div class="replyHeader">
         <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
           Status: ${hasReply ? 'Done' : 'Pending'}
         </div>
-
-        <div class="replyText">
-          ${hasReply ? esc(o.admin_reply) : "No details yet"}
-        </div>
+        <div class="replyToggle">Tap to view</div>
       </div>
-    `;
 
-    listEl.appendChild(el);
-  }
+      <div class="replyText">
+        ${hasReply ? esc(o.admin_reply) : "No details yet"}
+      </div>
+    </div>
+  `;
+
+  listEl.appendChild(el);
+}
+
+/* ⬇️⬇️⬇️ هون بالزبط */
+document.addEventListener("click", (e)=>{
+  const box = e.target.closest(".replyBox");
+  if(!box) return;
+  box.classList.toggle("open");
+});
+
 })();
 </script>
 
