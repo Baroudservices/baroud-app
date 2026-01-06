@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Page Views</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{margin:0;font-family:system-ui,Arial;background:linear-gradient(160deg,#060b16,#0a1330);color:#fff;padding:16px}
+.wrap{max-width:900px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;background:#1e293b;color:#fff;font-weight:900}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:14px}
+.small{opacity:.75;font-size:12px;font-weight:800}
+.table{width:100%;border-collapse:collapse;margin-top:12px}
+.table th,.table td{border-bottom:1px solid rgba(255,255,255,.10);padding:12px;font-size:13px}
+.table th{text-align:left;opacity:.85}
+.badge{padding:6px 10px;border-radius:999px;background:rgba(27,199,255,.12);border:1px solid rgba(27,199,255,.25);font-weight:950}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div style="font-weight:950;font-size:20px">Admin — Page Views</div>
+      <div class="small">Live page view totals</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn" id="btnRefresh">Refresh</button>
+      <button class="btn" id="btnLogout">Logout</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="msg" class="small"></div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th style="width:140px">Views</th>
+          <th style="width:220px">Updated</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const tbody = document.getElementById("tbody");
+const msg = document.getElementById("msg");
+const btnRefresh = document.getElementById("btnRefresh");
+const btnLogout = document.getElementById("btnLogout");
+
+let IS_ADMIN = false;
+
+async function requireSession(){
+  const { data: s, error } = await sb.auth.getSession();
+  if(error) throw error;
+  if(!s?.session){ location.href="login.html"; return null; }
+  return s.session;
+}
+
+async function requireAdmin(session){
+  const { data: profile, error } = await sb
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", session.user.id)
+    .single();
+  if(error) throw error;
+  if(!profile?.is_admin){
+    alert("Not admin");
+    location.href="services.html";
+    return false;
+  }
+  IS_ADMIN = true;
+  return true;
+}
+
+function renderRows(rows){
+  tbody.innerHTML = "";
+  for(const r of rows){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><span class="badge">${r.page}</span></td>
+      <td style="font-weight:950">${Number(r.count||0)}</td>
+      <td class="small">${new Date(r.updated_at).toLocaleString()}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function loadAll(){
+  if(!IS_ADMIN) return;
+  msg.textContent = "Loading...";
+  const { data, error } = await sb
+    .from("page_views")
+    .select("page,count,updated_at")
+    .order("count", { ascending:false });
+  if(error){
+    msg.textContent = "Error: " + (error.message || error);
+    return;
+  }
+  msg.textContent = "Live ✅";
+  renderRows(data || []);
+}
+
+btnRefresh.addEventListener("click", loadAll);
+btnLogout.addEventListener("click", async ()=>{
+  await sb.auth.signOut();
+  location.href="login.html";
+});
+
+(async ()=>{
+  try{
+    const session = await requireSession();
+    if(!session) return;
+
+    const ok = await requireAdmin(session);
+    if(!ok) return;
+
+    await loadAll();
+
+    // realtime: أي تغيير بجدول page_views يحدث لحاله
+    sb.channel("admin_page_views_live")
+      .on("postgres_changes", { event:"*", schema:"public", table:"page_views" }, () => loadAll())
+      .subscribe();
+
+  }catch(e){
+    msg.textContent = "Error: " + (e?.message || e);
+  }
+})();
+</script>
+</body>
+</html>
