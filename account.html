@@ -205,18 +205,12 @@
     const ordersBtn  = document.getElementById("myOrdersBtn");
     const ordersMenu = document.getElementById("ordersMenu");
 
-    const DURATION_LIST = [
-      { key:"1m", label:"1 month",  mult: 1  },
-      { key:"3m", label:"3 months", mult: 3  },
-      { key:"6m", label:"6 months", mult: 6  },
-      { key:"1y", label:"1 year",   mult: 12 },
-      { key:"2y", label:"2 years",  mult: 24 },
-    ];
+    /* ✅ بدل DURATION_LIST: هيدي بتيجي من DB حسب المنتج */
+    let PLAN_LIST = [];
 
     let currentProductId = null;
     let currentProduct = null;
-    let basePrice = 0;
-    let selectedPlan = DURATION_LIST[0];
+    let selectedPlan = null; // ✅ رح تتحدد بعد ما نجيب الخطط
 
     function esc(s){
       return String(s ?? "")
@@ -233,30 +227,38 @@
       return Number.isFinite(id) ? id : null;
     }
 
-    function calcPrice(plan){
-      const v = Number(basePrice) * Number(plan.mult);
-      return Number.isFinite(v) ? v : 0;
-    }
-
     function setSelectedPlan(plan){
+      if(!plan) return;
       selectedPlan = plan;
-      const p = calcPrice(plan);
-      priceEl.textContent = "$" + p.toFixed(2);
+
+      const p = Number(plan.price || 0);
+      priceEl.textContent = "$" + (Number.isFinite(p) ? p.toFixed(2) : "0.00");
 
       const title = currentProduct?.title || "Product";
-      const note = `${title} | ${plan.label} | $${p.toFixed(2)}`;
+      const label = plan.label || plan.key || "";
+      const note = `${title} | ${label} | $${(Number.isFinite(p) ? p.toFixed(2) : "0.00")}`;
+
       localStorage.setItem("last_order_note", note);
-      localStorage.setItem("last_order_plan", plan.key);
-      localStorage.setItem("last_order_price", p.toFixed(2));
+      localStorage.setItem("last_order_plan", plan.key || "");
+      localStorage.setItem("last_order_price", (Number.isFinite(p) ? p.toFixed(2) : "0.00"));
     }
 
     function renderMenu(){
       ordersMenu.innerHTML = "";
-      for(const d of DURATION_LIST){
-        const p = calcPrice(d);
+
+      if(!PLAN_LIST.length){
         const item = document.createElement("div");
         item.className = "ordersItem";
-        item.innerHTML = `<span>${esc(d.label)}</span><span class="badge">$${p.toFixed(2)}</span>`;
+        item.innerHTML = `<span>No plans</span><span class="badge">$0.00</span>`;
+        ordersMenu.appendChild(item);
+        return;
+      }
+
+      for(const d of PLAN_LIST){
+        const p = Number(d.price || 0);
+        const item = document.createElement("div");
+        item.className = "ordersItem";
+        item.innerHTML = `<span>${esc(d.label || d.key)}</span><span class="badge">$${(Number.isFinite(p)?p.toFixed(2):"0.00")}</span>`;
         item.addEventListener("click", (e)=>{
           e.stopPropagation();
           setSelectedPlan(d);
@@ -295,14 +297,42 @@
       return { product: p, features: (f || []) };
     }
 
+    /* ✅ جيب الخطط من product_plan_prices */
+    async function loadPlansFromDb(productId){
+      const { data, error } = await sb
+        .from("product_plan_prices")
+        .select("plan_key, plan_label, price, active, updated_at")
+        .eq("product_id", productId)
+        .eq("active", true)
+        .order("updated_at", { ascending:false });
+
+      if(error) throw error;
+
+      const rows = (data || []);
+
+      // ترتيب: الافتراضيين أولاً إذا موجودين، وبعدها الباقي
+      const preferredOrder = ["1m","3m","6m","1y","2y"];
+      const map = {};
+      rows.forEach(r=>{ map[r.plan_key] = r; });
+
+      const keys = rows.map(r=>r.plan_key);
+      const sorted = [
+        ...preferredOrder.filter(k=>keys.includes(k)).map(k=>map[k]),
+        ...rows.filter(r=>!preferredOrder.includes(r.plan_key))
+      ];
+
+      return sorted.map(r=>({
+        key: r.plan_key,
+        label: r.plan_label || r.plan_key,
+        price: Number(r.price || 0)
+      }));
+    }
+
     function renderProduct(p, features){
       currentProduct = p;
 
       titleEl.textContent = p?.title || "Product";
       catEl.textContent = p?.category ? ("Category: " + p.category) : "";
-
-      basePrice = Number(p?.price);
-      if(!Number.isFinite(basePrice)) basePrice = 0;
 
       pillsEl.innerHTML = "";
       if(p?.active === false){
@@ -315,9 +345,6 @@
       if(p?.category){
         pillsEl.innerHTML += `<span class="pill">${esc(p.category)}</span>`;
       }
-
-      // default: 1 month
-      setSelectedPlan(selectedPlan);
 
       featsEl.innerHTML = "";
       if(!features.length){
@@ -347,6 +374,10 @@
         alert("Unavailable");
         return;
       }
+      if(!selectedPlan){
+        alert("Select a plan");
+        return;
+      }
 
       let ok = true;
       if (typeof window.confirmMsg === "function") {
@@ -367,30 +398,9 @@
           return;
         }
 
-        // ✅ final price بدون ضرب (بياخد السعر الجاهز من الخطة إذا موجود)
-        function getFinalPrice(){
-          // إذا الخطة فيها price جاهز من DB
-          if (selectedPlan && Number.isFinite(Number(selectedPlan.price))) {
-            return Number(selectedPlan.price);
-          }
+        // ✅ السعر الحقيقي من DB (بدون ضرب)
+        const finalPrice = Number(selectedPlan.price || 0);
 
-          // إذا عندك متغير selectedPrice شغال
-          if (typeof selectedPrice !== "undefined" && Number.isFinite(Number(selectedPrice))) {
-            return Number(selectedPrice);
-          }
-
-          // fallback (إذا بعدك مستخدم calcPrice بمحل تاني)
-          if (typeof calcPrice === "function") {
-            return Number(calcPrice(selectedPlan)) || 0;
-          }
-
-          return 0;
-        }
-
-        // ✅ السعر الحقيقي حسب الخطة (بدون ضرب)
-        const finalPrice = getFinalPrice();
-
-        // ✅ RPC مع السعر + مدة + نوت
         const { data: orderId, error } = await sb.rpc("place_order", {
           p_product_id: currentProductId,
           p_price: finalPrice,
@@ -402,10 +412,7 @@
         const note = localStorage.getItem("last_order_note") || "";
         const planKey = localStorage.getItem("last_order_plan") || selectedPlan.key;
 
-        // ✅ مرّق السعر الحقيقي للـ my-orders
-        const planPrice = Number.isFinite(finalPrice)
-          ? finalPrice.toFixed(2)
-          : (Number(finalPrice) || 0).toFixed(2);
+        const planPrice = Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : "0.00";
 
         const go = () => {
           location.href =
@@ -449,8 +456,21 @@
       }
 
       try{
+        // 1) حمل المنتج + الفيتشرز
         const { product, features } = await loadProduct(id);
         renderProduct(product, features);
+
+        // 2) حمل البلانات من DB
+        PLAN_LIST = await loadPlansFromDb(id);
+
+        // 3) اختر أول بلان افتراضيًا إذا موجود
+        if(PLAN_LIST.length){
+          setSelectedPlan(PLAN_LIST[0]);
+        }else{
+          // إذا ما في خطط، خلي السعر 0
+          priceEl.textContent = "$0.00";
+        }
+
       }catch(e){
         titleEl.textContent = "Error loading product";
         featsEl.innerHTML = `<div class="muted">Error: ${esc(e?.message || e)}</div>`;
