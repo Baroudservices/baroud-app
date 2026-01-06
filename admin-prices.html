@@ -36,8 +36,42 @@ select{
   padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
   background:rgba(0,0,0,.25);color:#fff;outline:none;font-weight:900
 }
+
+/* ===== Manage Plans Modal (added) ===== */
+.modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:none; align-items:center; justify-content:center;
+  padding:16px; z-index:99999;
+}
+.modalCard{
+  width:min(720px,100%);
+  background:rgba(18, 22, 34, 0.96);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  box-shadow:0 18px 60px rgba(0,0,0,.45);
+  padding:14px;
+}
+.modalTop{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.modalTitle{font-weight:950;font-size:16px}
+.modalX{
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  color:#fff; border-radius:12px;
+  padding:8px 10px; cursor:pointer;
+}
+.plansTable{width:100%;border-collapse:collapse;margin-top:12px}
+.plansTable th,.plansTable td{border-bottom:1px solid rgba(255,255,255,.10);padding:10px;font-size:13px;vertical-align:top}
+.plansTable th{opacity:.85;text-align:left}
+.pillBtn{
+  padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font-weight:900
+}
+.danger{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35)}
+.modalBtns{margin-top:12px;display:flex;gap:10px;justify-content:flex-end}
 </style>
 </head>
+
 <body>
 <div class="wrap">
   <div class="top">
@@ -63,6 +97,42 @@ select{
   <div id="msg" class="small"></div>
 </div>
 
+<!-- ✅ Manage Plans Modal (added) -->
+<div id="plansModal" class="modal">
+  <div class="modalCard">
+    <div class="modalTop">
+      <div class="modalTitle">Manage Plans</div>
+      <button class="modalX" id="plansClose" type="button">✕</button>
+    </div>
+
+    <div class="small" style="margin-top:6px">
+      Add / edit durations for this product. plan_key لازم يكون unique داخل نفس المنتج (مثلاً: 1m, 45d, vip, 2y).
+    </div>
+
+    <table class="plansTable">
+      <thead>
+        <tr>
+          <th style="width:160px">plan_key</th>
+          <th>plan_label</th>
+          <th style="width:140px">price</th>
+          <th style="width:110px">active</th>
+          <th style="width:120px">remove</th>
+        </tr>
+      </thead>
+      <tbody id="plansTbody"></tbody>
+    </table>
+
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="pillBtn" id="btnAddPlan" type="button">+ Add plan</button>
+    </div>
+
+    <div class="modalBtns">
+      <button class="pillBtn" id="btnPlansCancel" type="button">Cancel</button>
+      <button class="pillBtn" id="btnPlansSave" type="button" style="background:linear-gradient(90deg,#0aa0ff,#2a74ff);border:0">Save Plans</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
@@ -82,6 +152,18 @@ const msg = document.getElementById("msg");
 const btnRefresh = document.getElementById("btnRefresh");
 const btnLogout = document.getElementById("btnLogout");
 const btnOpen = document.getElementById("btnOpen");
+
+/* ===== Manage Plans Modal refs (added) ===== */
+const plansModal = document.getElementById("plansModal");
+const plansClose = document.getElementById("plansClose");
+const plansTbody = document.getElementById("plansTbody");
+const btnAddPlan = document.getElementById("btnAddPlan");
+const btnPlansCancel = document.getElementById("btnPlansCancel");
+const btnPlansSave = document.getElementById("btnPlansSave");
+let _currentPlansProductId = null;
+
+/* ===== Admin lock (added) ===== */
+let IS_ADMIN = false;
 
 function esc(s){
   return String(s ?? "")
@@ -106,7 +188,12 @@ async function requireAdmin(session){
     .eq("id", session.user.id)
     .single();
   if(error) throw error;
-  if(!profile?.is_admin){ alert("Not admin"); return false; }
+  if(!profile?.is_admin){
+    alert("Not admin");
+    location.href = "services.html";
+    return false;
+  }
+  IS_ADMIN = true;
   return true;
 }
 
@@ -164,15 +251,29 @@ async function loadPlans(productId){
       </div>
 
       <div class="actions">
+        <button class="btn" id="btnManagePlans">Manage Plans</button>
         <button class="btn save" id="btnSave">Save</button>
       </div>
     </div>
   `;
 
   document.getElementById("btnSave").addEventListener("click", ()=> savePlans(productId));
+
+  // ✅ Manage Plans open (added)
+  document.getElementById("btnManagePlans").addEventListener("click", async ()=>{
+    try{
+      if(!IS_ADMIN) return;
+      _currentPlansProductId = productId;
+      await loadPlansForManage(productId);
+      openPlansModal();
+    }catch(e){
+      alert(e?.message || e);
+    }
+  });
 }
 
 async function savePlans(productId){
+  if(!IS_ADMIN) return;
   msg.textContent = "Saving...";
   const rows = PLAN_LIST.map(pl=>{
     const priceEl = editor.querySelector(`input[data-price="${pl.key}"]`);
@@ -201,6 +302,128 @@ async function savePlans(productId){
   msg.textContent = "Saved ✅";
 }
 
+/* ===== Manage Plans logic (added) ===== */
+function openPlansModal(){ plansModal.style.display = "flex"; }
+function closePlansModal(){
+  plansModal.style.display = "none";
+  plansTbody.innerHTML = "";
+  _currentPlansProductId = null;
+}
+
+plansClose.addEventListener("click", closePlansModal);
+btnPlansCancel.addEventListener("click", closePlansModal);
+plansModal.addEventListener("click", (e)=>{ if(e.target === plansModal) closePlansModal(); });
+
+function renderPlanRow(row){
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td><input data-k value="${esc(row.plan_key || "")}" placeholder="e.g. 45d" /></td>
+    <td><input data-l value="${esc(row.plan_label || "")}" placeholder="e.g. 45 days" /></td>
+    <td><input data-p type="number" step="0.01" min="0" value="${esc(Number(row.price||0).toFixed(2))}" /></td>
+    <td style="text-align:center"><input data-a type="checkbox" ${row.active !== false ? "checked":""} /></td>
+    <td><button class="pillBtn danger" data-del type="button">Delete</button></td>
+  `;
+  tr.querySelector("[data-del]").addEventListener("click", ()=> tr.remove());
+  plansTbody.appendChild(tr);
+}
+
+async function loadPlansForManage(productId){
+  if(!IS_ADMIN) return;
+
+  const { data, error } = await sb
+    .from("product_plan_prices")
+    .select("plan_key, plan_label, price, active")
+    .eq("product_id", productId)
+    .order("updated_at", { ascending:false });
+
+  if(error) throw error;
+
+  plansTbody.innerHTML = "";
+  const rows = (data || []);
+  if(!rows.length){
+    renderPlanRow({ plan_key:"1m", plan_label:"1 month", price:0, active:true });
+    return;
+  }
+  rows.forEach(renderPlanRow);
+}
+
+btnAddPlan.addEventListener("click", ()=>{
+  if(!IS_ADMIN) return;
+  renderPlanRow({ plan_key:"", plan_label:"", price:0, active:true });
+});
+
+async function savePlansForManage(){
+  if(!IS_ADMIN) return;
+
+  const productId = Number(_currentPlansProductId);
+  if(!Number.isFinite(productId)) return;
+
+  const trs = Array.from(plansTbody.querySelectorAll("tr"));
+  const upsertRows = [];
+
+  for(const tr of trs){
+    const k = (tr.querySelector("[data-k]")?.value || "").trim();
+    const l = (tr.querySelector("[data-l]")?.value || "").trim();
+    const p = Number(tr.querySelector("[data-p]")?.value || 0);
+    const a = !!tr.querySelector("[data-a]")?.checked;
+
+    if(!k) continue;
+    upsertRows.push({
+      product_id: productId,
+      plan_key: k,
+      plan_label: l || k,
+      price: Number.isFinite(p) ? p : 0,
+      active: a,
+      updated_at: new Date().toISOString()
+    });
+  }
+
+  if(!upsertRows.length){
+    alert("Add at least 1 plan_key");
+    return;
+  }
+
+  // upsert
+  const { error: upErr } = await sb
+    .from("product_plan_prices")
+    .upsert(upsertRows, { onConflict: "product_id,plan_key" });
+  if(upErr) throw upErr;
+
+  // delete removed keys
+  const keysNow = new Set(upsertRows.map(x=>x.plan_key));
+  const { data: existing, error: exErr } = await sb
+    .from("product_plan_prices")
+    .select("plan_key")
+    .eq("product_id", productId);
+  if(exErr) throw exErr;
+
+  const toDelete = (existing || [])
+    .map(x=>x.plan_key)
+    .filter(k=>!keysNow.has(k));
+
+  if(toDelete.length){
+    const { error: delErr } = await sb
+      .from("product_plan_prices")
+      .delete()
+      .eq("product_id", productId)
+      .in("plan_key", toDelete);
+    if(delErr) throw delErr;
+  }
+
+  await loadPlans(productId);
+  closePlansModal();
+  msg.textContent = "Plans updated ✅";
+}
+
+btnPlansSave.addEventListener("click", async ()=>{
+  try{
+    await savePlansForManage();
+  }catch(e){
+    alert(e?.message || e);
+  }
+});
+
+/* ===== boot ===== */
 async function boot(){
   try{
     const session = await requireSession();
