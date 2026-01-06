@@ -242,7 +242,7 @@
       // ✅ بعد الشراء: رجّع حدّث الرصيد (إذا انت عامل fetch بالـ services من profiles)
       // هون خيارين:
       // 1) نعمل redirect لصفحة my-payments.html
-      location.href = "my-payments.html?v=" + Date.now();
+      location.href = "my-orders.html?v=" + Date.now();
 
     }catch(err){
       alert(err?.message || "Failed");
