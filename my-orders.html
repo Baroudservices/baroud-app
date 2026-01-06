@@ -214,15 +214,19 @@ function esc(s){
 
   /* ✅ التوغل الصح */
   document.addEventListener("click",(e)=>{
-    const box = e.target.closest(".replyBox");
-    if(!box) return;
+  const box = e.target.closest(".replyBox");
+  if(!box) return;
 
-    const text = box.querySelector(".replyText");
-    if(!text) return;
-    if(text.textContent.trim() === "No details yet") return;
+  const full = box.getAttribute("data-full") || "";
+  if(!full.trim()) return;
 
-    box.classList.toggle("open");
-  });
+  // مودال ديزاينكم (app-ui.js)
+  if (typeof window.showMsg === "function") {
+    window.showMsg("Reply", full);
+  } else {
+    alert(full);
+  }
+});
 
 })();
 </script>
