@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- لو عامل app-ui.js للـ alert/modal -->
+  <script src="app-ui.js?v=1"></script>
+
+  <style>
+    :root{
+      --bg1:#06162a;
+      --bg2:#020b14;
+      --text:#ffffff;
+      --glass:rgba(255,255,255,.07);
+      --stroke:rgba(255,255,255,.10);
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --r:22px;
+      --ok:#22c55e;
+      --warn:#fbbf24;
+      --bad:#ef4444;
+      --blue:#38bdf8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#0b1424,#050a14);
+      color:var(--text);
+      min-height:100vh;
+      padding:16px;
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:520px;margin:auto}
+
+    .top{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin-bottom:14px;
+    }
+    .btn{
+      border:1px solid var(--stroke);
+      background:var(--glass);
+      color:#fff;
+      padding:12px 14px;
+      border-radius:16px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      font-weight:900;
+    }
+    h2{margin:0;font-size:22px;font-weight:950}
+
+    .card{
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:12px;
+      box-shadow:var(--shadow);
+    }
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .title{font-weight:950;font-size:16px}
+    .small{opacity:.7;font-size:12px;line-height:1.35}
+    .pill{
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      font-weight:900;font-size:12px;
+      white-space:nowrap;
+    }
+    .pill.ok{color:var(--ok);border-color:rgba(34,197,94,.25)}
+    .pill.warn{color:var(--warn);border-color:rgba(251,191,36,.25)}
+    .pill.bad{color:var(--bad);border-color:rgba(239,68,68,.25)}
+    .divider{height:1px;background:rgba(255,255,255,.10);margin:12px 0}
+    input{
+      width:100%;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:#fff;
+      outline:none;
+      margin-top:10px;
+      font-size:15px;
+    }
+    .actions{display:flex;gap:10px;margin-top:10px}
+    .actions .btn{flex:1}
+    .primary{
+      border:0;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      box-shadow:0 14px 40px rgba(0,0,0,.25);
+    }
+    .danger{
+      border:1px solid rgba(239,68,68,.35);
+      background:rgba(239,68,68,.14);
+      color:#ffd2d2;
+    }
+    .mutedBtn{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+    }
+    .footer{margin-top:18px;text-align:center;opacity:.55;font-weight:800;letter-spacing:1px}
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="top">
+      <button class="btn" onclick="history.back()">← Back</button>
+      <h2>Security</h2>
+      <button class="btn" onclick="location.href='services.html'">Home</button>
+    </div>
+
+    <!-- Email verify -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="title">Email verification</div>
+          <div class="small" id="emailText">Checking...</div>
+        </div>
+        <div class="pill warn" id="emailPill">...</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn mutedBtn" id="btnResend">Resend</button>
+        <button class="btn primary" id="btnRefreshEmail">Refresh</button>
+      </div>
+    </div>
+
+    <!-- Change password -->
+    <div class="card">
+      <div class="title">Change password</div>
+      <div class="small">We will send a reset link to your email.</div>
+      <div class="actions">
+        <button class="btn primary" id="btnReset">Send reset link</button>
+      </div>
+      <div class="small" style="margin-top:10px;opacity:.6">
+        Tip: Check spam if you don’t receive it.
+      </div>
+    </div>
+
+    <!-- PIN -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="title">PIN code</div>
+          <div class="small">Use a 4–8 digits PIN to confirm purchases.</div>
+        </div>
+        <div class="pill" id="pinPill">...</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="small">Set / Update PIN</div>
+      <input id="pin1" inputmode="numeric" placeholder="New PIN (4-8 digits)"/>
+      <input id="pin2" inputmode="numeric" placeholder="Confirm PIN"/>
+      <div class="actions">
+        <button class="btn primary" id="btnSavePin">Save PIN</button>
+        <button class="btn mutedBtn" id="btnTestPin">Test PIN</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="small">Test PIN (optional)</div>
+      <input id="pinTest" inputmode="numeric" placeholder="Enter PIN to test"/>
+    </div>
+
+    <!-- Activity -->
+    <div class="card">
+      <div class="title">Activity</div>
+      <div class="small" id="activityText">Loading...</div>
+      <div class="actions">
+        <button class="btn mutedBtn" id="btnTouch">Update last seen</button>
+        <button class="btn primary" id="btnReloadActivity">Reload</button>
+      </div>
+    </div>
+
+    <!-- Delete account -->
+    <div class="card">
+      <div class="title" style="color:#ffd2d2">Delete account</div>
+      <div class="small">
+        This will request account deletion (soft delete). Your login may be disabled later by admin.
+      </div>
+      <div class="actions">
+        <button class="btn danger" id="btnDelete">Request delete</button>
+      </div>
+      <div class="small" style="margin-top:10px;opacity:.6" id="deleteHint"></div>
+    </div>
+
+    <div class="footer">©2025 Baroud Services</div>
+  </main>
+
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const emailText = document.getElementById("emailText");
+  const emailPill = document.getElementById("emailPill");
+  const btnResend = document.getElementById("btnResend");
+  const btnRefreshEmail = document.getElementById("btnRefreshEmail");
+
+  const pinPill = document.getElementById("pinPill");
+  const pin1 = document.getElementById("pin1");
+  const pin2 = document.getElementById("pin2");
+  const pinTest = document.getElementById("pinTest");
+  const btnSavePin = document.getElementById("btnSavePin");
+  const btnTestPin = document.getElementById("btnTestPin");
+
+  const activityText = document.getElementById("activityText");
+  const btnTouch = document.getElementById("btnTouch");
+  const btnReloadActivity = document.getElementById("btnReloadActivity");
+
+  const btnReset = document.getElementById("btnReset");
+  const btnDelete = document.getElementById("btnDelete");
+  const deleteHint = document.getElementById("deleteHint");
+
+  function msg(t){ (window.showMsg ? showMsg("Notice", t) : alert(t)); }
+
+  async function requireUser(){
+    const { data, error } = await sb.auth.getSession();
+    if(error) throw error;
+    const user = data?.session?.user;
+    if(!user){
+      location.replace("login.html?v=" + Date.now());
+      return null;
+    }
+    return user;
+  }
+
+  async function loadEmailStatus(){
+    const user = await requireUser(); if(!user) return;
+
+    const confirmedAt = user.email_confirmed_at || user.confirmed_at;
+    const email = user.email || "your email";
+
+    if(confirmedAt){
+      emailText.textContent = email + " is verified.";
+      emailPill.textContent = "Verified";
+      emailPill.className = "pill ok";
+    }else{
+      emailText.textContent = email + " is not verified.";
+      emailPill.textContent = "Not verified";
+      emailPill.className = "pill warn";
+    }
+  }
+
+  async function resendVerification(){
+    const user = await requireUser(); if(!user) return;
+
+    // Supabase v2: resend عبر admin عادةً، بس signup confirmation أحياناً بتكون تلقائي
+    // الأسهل: نعمل signUp مرة تانية لنفس الإيميل؟ لا.
+    // حل عملي: نطلب من المستخدم يعمل Register من جديد إذا ما وصلته.
+    // أو: إذا عندك Email confirmations ON، بتظهر "resend" بالDashboard.
+    msg("If you didn't receive the confirmation email, please check Spam.\nIf still not received, tell admin to resend from Supabase Auth.");
+  }
+
+  async function loadPinStatus(){
+    const user = await requireUser(); if(!user) return;
+
+    const { data, error } = await sb
+      .from("profiles")
+      .select("pin_hash, deleted_at, last_seen_at, updated_at")
+      .eq("id", user.id)
+      .single();
+
+    if(error){
+      pinPill.textContent = "Unknown";
+      pinPill.className = "pill warn";
+      return;
+    }
+
+    const hasPin = !!(data?.pin_hash);
+    pinPill.textContent = hasPin ? "PIN set" : "No PIN";
+    pinPill.className = "pill " + (hasPin ? "ok" : "warn");
+
+    // delete hint
+    if(data?.deleted_at){
+      deleteHint.textContent = "Delete requested at: " + new Date(data.deleted_at).toLocaleString();
+    }else{
+      deleteHint.textContent = "";
+    }
+  }
+
+  async function savePin(){
+    const a = (pin1.value || "").trim();
+    const b = (pin2.value || "").trim();
+
+    if(!/^\d{4,8}$/.test(a)) return msg("PIN must be 4-8 digits.");
+    if(a !== b) return msg("PIN confirmation does not match.");
+
+    btnSavePin.disabled = true;
+    try{
+      const { error } = await sb.rpc("set_pin", { p_pin: a });
+      if(error) throw error;
+
+      pin1.value = "";
+      pin2.value = "";
+      msg("PIN saved ✅");
+      await loadPinStatus();
+    }catch(e){
+      msg(e?.message || "Failed");
+    }finally{
+      btnSavePin.disabled = false;
+    }
+  }
+
+  async function testPin(){
+    const p = (pinTest.value || "").trim();
+    if(!/^\d{4,8}$/.test(p)) return msg("Enter a valid PIN (4-8 digits).");
+
+    btnTestPin.disabled = true;
+    try{
+      const { data, error } = await sb.rpc("check_pin", { p_pin: p });
+      if(error) throw error;
+
+      msg(data ? "PIN correct ✅" : "PIN wrong ❌");
+    }catch(e){
+      msg(e?.message || "Failed");
+    }finally{
+      btnTestPin.disabled = false;
+    }
+  }
+
+  async function loadActivity(){
+    const user = await requireUser(); if(!user) return;
+
+    const { data, error } = await sb
+      .from("profiles")
+      .select("last_seen_at, updated_at, created_at")
+      .eq("id", user.id)
+      .single();
+
+    if(error){
+      activityText.textContent = "Error loading activity.";
+      return;
+    }
+
+    const lastSeen = data?.last_seen_at ? new Date(data.last_seen_at).toLocaleString() : "Not available";
+    const updated = data?.updated_at ? new Date(data.updated_at).toLocaleString() : "Not available";
+    const created = data?.created_at ? new Date(data.created_at).toLocaleString() : "Not available";
+
+    activityText.textContent =
+      "Account created: " + created + "\n" +
+      "Last seen: " + lastSeen + "\n" +
+      "Last profile update: " + updated;
+  }
+
+  async function touchLastSeen(){
+    btnTouch.disabled = true;
+    try{
+      const { error } = await sb.rpc("touch_last_seen");
+      if(error) throw error;
+      await loadActivity();
+      msg("Updated ✅");
+    }catch(e){
+      msg(e?.message || "Failed");
+    }finally{
+      btnTouch.disabled = false;
+    }
+  }
+
+  async function sendReset(){
+    const user = await requireUser(); if(!user) return;
+    const email = user.email;
+
+    btnReset.disabled = true;
+    try{
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://baroudservices.github.io/baroud-app/login.html"
+      });
+      if(error) throw error;
+      msg("Reset link sent ✅ Check your email.");
+    }catch(e){
+      msg(e?.message || "Failed");
+    }finally{
+      btnReset.disabled = false;
+    }
+  }
+
+  async function requestDelete(){
+    const user = await requireUser(); if(!user) return;
+
+    const ok = confirm("Are you sure you want to request account deletion?");
+    if(!ok) return;
+
+    btnDelete.disabled = true;
+    try{
+      const { error } = await sb.rpc("request_delete_account");
+      if(error) throw error;
+
+      msg("Delete request sent ✅");
+      await loadPinStatus();
+    }catch(e){
+      msg(e?.message || "Failed");
+    }finally{
+      btnDelete.disabled = false;
+    }
+  }
+
+  // wiring
+  btnRefreshEmail.addEventListener("click", loadEmailStatus);
+  btnResend.addEventListener("click", resendVerification);
+
+  btnSavePin.addEventListener("click", savePin);
+  btnTestPin.addEventListener("click", testPin);
+
+  btnTouch.addEventListener("click", touchLastSeen);
+  btnReloadActivity.addEventListener("click", loadActivity);
+
+  btnReset.addEventListener("click", sendReset);
+  btnDelete.addEventListener("click", requestDelete);
+
+  // init
+  (async ()=>{
+    await requireUser();
+    await loadEmailStatus();
+    await loadPinStatus();
+    await loadActivity();
+  })();
+</script>
+
+</body>
+</html>
