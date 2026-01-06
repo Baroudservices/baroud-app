@@ -1,6 +1,7 @@
 /* =========================
    Baroud App UI (Global)
    - Custom Alert Modal (override alert)
+   - Confirm Modal (confirmMsg)
    - Language Toggle (EN/AR) + auto apply
    - Auto add 🌐 button next to WA (if exists)
    ========================= */
@@ -16,8 +17,47 @@
     if (window.__customAlertLoaded) return;
     window.__customAlertLoaded = true;
 
-    let overlay, titleEl, msgEl, okBtn;
+    let overlay, titleEl, msgEl, okBtn, cancelBtn;
     let pendingMsg = null;
+
+    function ensureCancelBtn(){
+      if (!overlay) return;
+
+      cancelBtn = document.getElementById("appModalCancel");
+      if (cancelBtn) return cancelBtn;
+
+      cancelBtn = document.createElement("button");
+      cancelBtn.id = "appModalCancel";
+      cancelBtn.textContent = "Cancel";
+      cancelBtn.style.cssText = `
+        width:100%;
+        padding:12px;
+        border-radius:14px;
+        border:1px solid rgba(255,255,255,.12);
+        background:rgba(255,255,255,.06);
+        color:#fff;
+        font-weight:900;
+        cursor:pointer;
+        margin-top:10px;
+        display:none;
+      `;
+      okBtn.parentElement.appendChild(cancelBtn);
+      return cancelBtn;
+    }
+
+    function resetButtonsToAlertMode(){
+      if (!overlay) return;
+
+      const c = ensureCancelBtn();
+      c.style.display = "none";
+
+      // رجّع OK للـ alert/showMsg العادي
+      okBtn.onclick = () => {
+        overlay.style.display = "none";
+        if (overlay.__onClose) overlay.__onClose();
+        overlay.__onClose = null;
+      };
+    }
 
     function buildModal() {
       if (overlay) return;
@@ -77,11 +117,8 @@
       msgEl = document.getElementById("appModalMsg");
       okBtn = document.getElementById("appModalOk");
 
-      okBtn.onclick = () => {
-        overlay.style.display = "none";
-        if (overlay.__onClose) overlay.__onClose();
-        overlay.__onClose = null;
-      };
+      ensureCancelBtn();
+      resetButtonsToAlertMode();
 
       if (pendingMsg !== null) {
         showAlert(pendingMsg);
@@ -94,24 +131,66 @@
         pendingMsg = message;
         return;
       }
+      resetButtonsToAlertMode();
       titleEl.textContent = "Notice";
       msgEl.textContent = message ?? "";
       overlay.style.display = "flex";
     }
 
+    // Override alert()
     window.alert = function (message) {
       showAlert(message);
     };
 
+    // Custom showMsg()
     window.showMsg = function (title, message, onClose) {
       if (!overlay) {
         pendingMsg = message;
         return;
       }
+      resetButtonsToAlertMode();
       titleEl.textContent = title || "Notice";
       msgEl.textContent = message ?? "";
       overlay.__onClose = onClose || null;
       overlay.style.display = "flex";
+    };
+
+    /* =========================
+       ✅ Confirm Modal (Promise)
+       ========================= */
+    window.confirmMsg = function(title, message){
+      return new Promise((resolve)=>{
+        if (!overlay) {
+          // fallback
+          resolve(window.confirm(message || ""));
+          return;
+        }
+
+        titleEl.textContent = title || "Confirm";
+        msgEl.textContent = message ?? "";
+
+        const c = ensureCancelBtn();
+        c.style.display = "block";
+
+        // نظف onClose تبع showMsg
+        overlay.__onClose = null;
+
+        okBtn.onclick = () => {
+          overlay.style.display = "none";
+          c.style.display = "none";
+          resetButtonsToAlertMode();
+          resolve(true);
+        };
+
+        c.onclick = () => {
+          overlay.style.display = "none";
+          c.style.display = "none";
+          resetButtonsToAlertMode();
+          resolve(false);
+        };
+
+        overlay.style.display = "flex";
+      });
     };
 
     if (document.readyState === "loading") {
@@ -133,22 +212,17 @@
   function applyLang(lang){
     document.documentElement.lang = lang;
     document.documentElement.dir  = (lang === "ar") ? "rtl" : "ltr";
-
-    // اختياري: Class تساعدك بالـ CSS إذا بدك
     document.documentElement.classList.toggle("rtl", lang === "ar");
   }
 
-  // global function so any page can call it
   window.toggleLang = function(){
     const cur = getLang();
     const next = (cur === "en") ? "ar" : "en";
     localStorage.setItem("lang", next);
     applyLang(next);
-    // reload لتطبق على كل العناصر/الصفحة الحالية بسهولة
     location.reload();
   };
 
-  // apply immediately (حتى قبل DOM)
   applyLang(getLang());
 
 
@@ -157,19 +231,14 @@
      ========================= */
 
   function ensureLangButton(){
-    // إذا موجود ما نعيده
     if (document.getElementById("langBtn")) return;
 
-    // ندوّر على زر WA بالطريقتين:
-    // 1) رابط فيه wa.me
-    // 2) أو نصه "WA"
     const wa =
       document.querySelector('.social a[href*="wa.me"]') ||
       [...document.querySelectorAll(".social a")].find(a => (a.textContent || "").trim().toUpperCase() === "WA");
 
     if (!wa) return;
 
-    // نفس ستايل الروابط الموجودة
     const a = document.createElement("a");
     a.href = "#";
     a.id = "langBtn";
@@ -177,9 +246,7 @@
     a.style.userSelect = "none";
     a.style.webkitTapHighlightColor = "transparent";
 
-    // الرمز حسب الوضع
     const cur = getLang();
-    // إذا عربي نخلي الزر يكتب EN (يعني كبسة بتروح EN) والعكس
     a.textContent = (cur === "ar") ? "EN" : "AR";
 
     a.addEventListener("click", function(e){
@@ -187,7 +254,6 @@
       window.toggleLang();
     });
 
-    // حطه بعد WA مباشرة
     wa.insertAdjacentElement("afterend", a);
   }
 
