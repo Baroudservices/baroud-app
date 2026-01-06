@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Account Details</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --bg1:#06162a;
+      --bg2:#020b14;
+      --text:#ffffff;
+      --glass:rgba(255,255,255,.07);
+      --stroke:rgba(255,255,255,.10);
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --r:22px;
+      --blue:#1bc7ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#0b1424,#050a14);
+      color:var(--text);
+      min-height:100vh;
+      padding:14px;
+    }
+    .wrap{max-width:520px;margin:0 auto;padding-bottom:28px}
+    .top{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin-top:6px;
+    }
+    .btn{
+      border:1px solid var(--stroke);
+      background:var(--glass);
+      color:#fff;
+      padding:12px 14px;
+      border-radius:16px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .card{
+      margin-top:14px;
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .hero{
+      height:170px;
+      background:radial-gradient(600px 260px at 20% 20%, rgba(42,116,255,.25), transparent 60%),
+                 radial-gradient(600px 260px at 80% 20%, rgba(27,199,255,.15), transparent 60%),
+                 rgba(0,0,0,.22);
+      display:flex;align-items:flex-end;justify-content:space-between;
+      padding:14px;
+    }
+    .hero .title{
+      font-weight:950;
+      font-size:22px;
+      letter-spacing:.2px;
+      margin:0;
+    }
+    .hero .sub{
+      margin-top:6px;
+      opacity:.8;
+      font-weight:800;
+      font-size:12px;
+    }
+    .pricePill{
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.10);
+      padding:10px 12px;
+      border-radius:16px;
+      font-weight:950;
+      color:var(--blue);
+      white-space:nowrap;
+    }
+
+    .body{
+      padding:14px;
+    }
+    .pills{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:12px;
+    }
+    .pill{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      font-weight:900;
+      font-size:12px;
+      opacity:.95;
+    }
+
+    .features{
+      margin-top:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .feature{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.18);
+    }
+    .fLabel{font-weight:950; opacity:.9}
+    .fValue{font-weight:900; opacity:.85; text-align:right}
+
+    .buyRow{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .buyBtn{
+      flex:1;
+      padding:14px 14px;
+      border-radius:16px;
+      border:0;
+      cursor:pointer;
+      font-weight:950;
+      color:#fff;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      box-shadow:0 14px 40px rgba(0,0,0,.25);
+    }
+    .buyBtn:disabled{opacity:.6; cursor:not-allowed}
+    .smallBtn{
+      padding:14px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      cursor:pointer;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      opacity:.55;
+      font-weight:800;
+      letter-spacing:1px;
+    }
+    .muted{opacity:.7;font-weight:800}
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="top">
+      <button class="btn" onclick="history.back()">← Back</button>
+      <button class="btn" onclick="location.href='services.html'">Home</button>
+    </div>
+
+    <div class="card" id="card">
+      <div class="hero">
+        <div>
+          <h1 class="title" id="pTitle">Loading...</h1>
+          <div class="sub" id="pCat"> </div>
+        </div>
+        <div class="pricePill" id="pPrice">$0.00</div>
+      </div>
+
+      <div class="body">
+        <div class="pills" id="pills"></div>
+
+        <div class="features" id="features"></div>
+
+        <div class="buyRow">
+          <button class="buyBtn" id="buyBtn">Buy</button>
+          <button class="smallBtn" onclick="location.href='my-orders.html'">My Orders</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">©2025 Baroud Services</div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const titleEl = document.getElementById("pTitle");
+    const catEl   = document.getElementById("pCat");
+    const priceEl = document.getElementById("pPrice");
+    const pillsEl = document.getElementById("pills");
+    const featsEl = document.getElementById("features");
+    const buyBtn  = document.getElementById("buyBtn");
+
+    function esc(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function getId(){
+      const u = new URL(location.href);
+      const id = u.searchParams.get("id");
+      const n = Number(id);
+      if(!Number.isFinite(n)) return null;
+      return n; // bigint
+    }
+
+    async function loadProduct(productId){
+      // product
+      const { data: p, error: pErr } = await sb
+        .from("products")
+        .select("id,title,price,category,active")
+        .eq("id", productId)
+        .single();
+      if(pErr) throw pErr;
+
+      // features
+      const { data: f, error: fErr } = await sb
+        .from("product_features")
+        .select("label,value,sort")
+        .eq("product_id", productId)
+        .order("sort", { ascending:true });
+      if(fErr) throw fErr;
+
+      return { product: p, features: (f || []) };
+    }
+
+    function renderProduct(p, features){
+      titleEl.textContent = p?.title || "Product";
+      catEl.textContent = p?.category ? ("Category: " + p.category) : "";
+      const priceNum = Number(p?.price);
+      priceEl.textContent = "$" + (Number.isFinite(priceNum) ? priceNum.toFixed(2) : "0.00");
+
+      pillsEl.innerHTML = "";
+      if(p?.active === false){
+        pillsEl.innerHTML += `<span class="pill">Unavailable</span>`;
+        buyBtn.disabled = true;
+      }else{
+        pillsEl.innerHTML += `<span class="pill">Available</span>`;
+        buyBtn.disabled = false;
+      }
+
+      if(p?.category){
+        pillsEl.innerHTML += `<span class="pill">${esc(p.category)}</span>`;
+      }
+
+      featsEl.innerHTML = "";
+      if(!features.length){
+        featsEl.innerHTML = `<div class="muted">No details yet</div>`;
+        return;
+      }
+
+      for(const x of features){
+        featsEl.innerHTML += `
+          <div class="feature">
+            <div class="fLabel">${esc(x.label)}</div>
+            <div class="fValue">${esc(x.value)}</div>
+          </div>
+        `;
+      }
+    }
+
+    async function buyProduct(productId){
+      // Confirm قبل أي شي
+      let ok = true;
+      if (typeof window.confirmMsg === "function") {
+        ok = await window.confirmMsg("Confirm Purchase", "Are you sure you want to buy this product?");
+      } else {
+        ok = confirm("Are you sure you want to buy this product?");
+      }
+      if(!ok) return;
+
+      buyBtn.disabled = true;
+      const old = buyBtn.textContent;
+      buyBtn.textContent = "Buying...";
+
+      try{
+        const { data: s } = await sb.auth.getSession();
+        if(!s?.session?.user){
+          location.href = "login.html?v=" + Date.now();
+          return;
+        }
+
+        const { data: orderId, error } = await sb.rpc("place_order", { p_product_id: productId });
+        if(error) throw error;
+
+        // Success popup + redirect بعد OK بـ 600ms
+        if (typeof window.showMsg === "function") {
+          window.showMsg("Success", `✅ Order placed!\nOrder ID: ${orderId}`, () => {
+            setTimeout(() => {
+              location.href = "my-orders.html?v=" + Date.now();
+            }, 600);
+          });
+        } else {
+          alert("✅ Order placed! Order ID: " + orderId);
+          setTimeout(() => {
+            location.href = "my-orders.html?v=" + Date.now();
+          }, 600);
+        }
+
+      }catch(err){
+        alert(err?.message || "Failed");
+      }finally{
+        buyBtn.disabled = false;
+        buyBtn.textContent = old;
+      }
+    }
+
+    (async ()=>{
+      const id = getId();
+      if(!id){
+        titleEl.textContent = "Invalid product";
+        buyBtn.disabled = true;
+        return;
+      }
+
+      try{
+        const { product, features } = await loadProduct(id);
+        renderProduct(product, features);
+
+        buyBtn.onclick = () => buyProduct(id);
+
+      }catch(e){
+        titleEl.textContent = "Error loading product";
+        featsEl.innerHTML = `<div class="muted">Error: ${esc(e?.message || e)}</div>`;
+        buyBtn.disabled = true;
+      }
+    })();
+  </script>
+
+  <!-- app-ui (confirmMsg + modal) -->
+  <script src="app-ui.js?v=4"></script>
+</body>
+</html>
