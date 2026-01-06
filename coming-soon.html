@@ -23,25 +23,42 @@
     background:linear-gradient(180deg,var(--bg1),var(--bg2));
     color:var(--text);
     min-height:100vh;
-    padding:18px;
+
+    /* ✅ FULL SCREEN */
+    padding:0;                 /* كان 18px */
     display:flex;
-    align-items:center;
-    justify-content:center;
+    align-items:stretch;       /* بدل center */
+    justify-content:stretch;   /* بدل center */
   }
 
-  .wrap{width:min(560px,100%); margin:auto}
+  /* ✅ FULL SCREEN */
+  .wrap{
+    width:100%;
+    height:100vh;
+    max-width:none;            /* كان min(560px,100%) */
+    margin:0;
+  }
   .card{
+    width:100%;
+    height:100vh;              /* ✅ */
     background:var(--glass);
     border:1px solid var(--stroke);
-    border-radius:22px;
+    border-radius:0;           /* ✅ يغطي الصفحة (إذا بدك مدوّر قلي) */
     box-shadow:var(--shadow);
     overflow:hidden;
     position:relative;
+
+    display:flex;              /* ✅ خلي الفوتر ينزل تحت */
+    flex-direction:column;
   }
 
   /* Poster image area */
   .poster{
-    height:360px;
+    /* ✅ FULL SCREEN */
+    flex:1;
+    height:auto;               /* كان 360px */
+    min-height:0;
+
     background:
       radial-gradient(700px 320px at 20% 25%, rgba(42,116,255,.22), transparent 60%),
       radial-gradient(700px 320px at 85% 20%, rgba(27,199,255,.18), transparent 60%),
@@ -71,6 +88,8 @@
     z-index:2;
     padding:18px 16px 16px;
     text-align:center;
+    width:min(560px,100%);     /* ✅ خلي المحتوى مرتب بالنص */
+    margin:auto;
   }
 
   .brand{
