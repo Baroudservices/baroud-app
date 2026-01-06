@@ -138,14 +138,17 @@ const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ✅ صار LET مش CONST (مهم) */
-let PLAN_LIST = [
+/* ✅ Default plans (ثابتين) */
+const DEFAULT_PLAN_LIST = [
   { key:"1m", label:"1 month"  },
   { key:"3m", label:"3 months" },
   { key:"6m", label:"6 months" },
   { key:"1y", label:"1 year"   },
   { key:"2y", label:"2 years"  },
 ];
+
+/* ✅ هيدا بيتبدّل حسب المنتج */
+let PLAN_LIST = DEFAULT_PLAN_LIST.slice();
 
 const productSelect = document.getElementById("productSelect");
 const editor = document.getElementById("editor");
@@ -215,6 +218,9 @@ async function loadProducts(){
 }
 
 async function loadPlans(productId){
+  /* ✅ أهم سطر: كل منتج بيرجع Default قبل ما نبني من DB */
+  PLAN_LIST = DEFAULT_PLAN_LIST.slice();
+
   const { data, error } = await sb
     .from("product_plan_prices")
     .select("plan_key, plan_label, price, active, updated_at")
@@ -225,9 +231,9 @@ async function loadPlans(productId){
   const map = {};
   for(const r of (data || [])) map[r.plan_key] = r;
 
-  /* ✅ هون الإصلاح: إذا في plans بالـ DB اعمل PLAN_LIST منها */
+  /* ✅ إذا في plans للمنتج، اعمل PLAN_LIST منها (بس لهيدا المنتج) */
   if(data && data.length){
-    const preferredOrder = ["1m","3m","6m","1y","2y"];
+    const preferredOrder = DEFAULT_PLAN_LIST.map(x=>x.key);
     const keys = data.map(x=>x.plan_key);
 
     const sorted = [
@@ -239,6 +245,9 @@ async function loadPlans(productId){
       key: x.plan_key,
       label: x.plan_label || x.plan_key
     }));
+  } else {
+    /* ✅ إذا ما في شي بالـ DB لهيدا المنتج، خلي default */
+    PLAN_LIST = DEFAULT_PLAN_LIST.slice();
   }
 
   // build editor UI
@@ -408,7 +417,7 @@ async function savePlansForManage(){
     .upsert(upsertRows, { onConflict: "product_id,plan_key" });
   if(upErr) throw upErr;
 
-  // delete removed keys
+  // delete removed keys (for THIS product only)
   const keysNow = new Set(upsertRows.map(x=>x.plan_key));
   const { data: existing, error: exErr } = await sb
     .from("product_plan_prices")
@@ -429,7 +438,7 @@ async function savePlansForManage(){
     if(delErr) throw delErr;
   }
 
-  /* ✅ بعد ما نحفظ، رجّع اعرض الخطط من DB (وبتتحدث PLAN_LIST تلقائياً) */
+  /* ✅ بعد ما نحفظ، رجّع اعرض الخطط للمنتج الحالي فقط */
   await loadPlans(productId);
 
   closePlansModal();
