@@ -309,6 +309,38 @@
       font-weight:900;opacity:.9;
     }
     .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
+    /* ===== DESKTOP / PC FIX ===== */
+@media (min-width: 992px){
+  .wrap{
+    max-width: 1600px;          /* كبّر الصفحة */
+    padding: 28px 28px 70px;
+  }
+
+  html{ font-size: 18px; }
+
+  /* كبّر البانر */
+  .slide, .slide img{ height: 320px; }
+
+  /* خلي الكروت 4 أعمدة */
+  .grid{
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+  }
+  .tile img{ height: 190px; }
+
+  /* topbar أكبر شوي */
+  .iconBtn{ width:60px; height:60px; border-radius:20px; }
+  .balancePill{ height:56px; border-radius:22px; padding:10px 12px; }
+  .balTop{ font-size:20px; }
+  .addBtn{ width:40px; height:40px; border-radius:16px; line-height:40px; }
+  .logoTop{ height:52px; }
+
+  /* search/support أكبر */
+  .support{ padding: 16px 18px; }
+  .searchBox{ padding: 16px 18px; }
+  .searchBox input{ font-size: 18px; }
+}
+
   </style>
 </head>
 
