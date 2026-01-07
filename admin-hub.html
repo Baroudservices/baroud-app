@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Admin Hub</title>
+    <style>
+        body { background: #050a14; color: white; font-family: sans-serif; padding: 20px; text-align: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 600px; margin: 40px auto; }
+        .admin-card {
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .admin-card:hover { background: #2a74ff; transform: translateY(-5px); }
+        #loginPanel { max-width: 400px; margin: 100px auto; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; }
+        button { width: 100%; padding: 12px; background: #2a74ff; border: none; color: white; border-radius: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="loginPanel">
+        <h2>Admin Login</h2>
+        <input type="password" id="adminPass" placeholder="Enter Admin Password">
+        <button onclick="checkAdmin()">Login</button>
+    </div>
+
+    <div id="adminPanel" style="display:none">
+        <h1>Welcome Boss 👑</h1>
+        <div class="grid">
+            <div class="admin-card" onclick="location.href='manage-orders.html'">📦 Orders</div>
+            <div class="admin-card" onclick="location.href='manage-products.html'">🏷️ Products</div>
+            <div class="admin-card" onclick="location.href='view-reports.html'">⚠️ Reports</div>
+            <div class="admin-card" onclick="location.href='users-list.html'">👥 Users</div>
+        </div>
+    </div>
+
+    <script>
+        function checkAdmin() {
+            const pass = document.getElementById('adminPass').value;
+            // حط الباسورد اللي بدك اياه هون
+            if(pass === "Baroud2025") {
+                document.getElementById('loginPanel').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+            } else {
+                alert("Wrong password!");
+            }
+        }
+    </script>
+</body>
+</html>
