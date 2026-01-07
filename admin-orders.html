@@ -236,7 +236,8 @@ async function load(){
           <td style="min-width:160px">
             <select data-status-for="${esc(o.id)}">
               <option value="pending" ${ds==="pending" ? "selected" : ""}>pending</option>
-              <option value="done" ${ds==="done" ? "selected" : ""}>done</option>
+<option value="done" ${ds==="done" ? "selected" : ""}>done</option>
+<option value="rejected" ${ds==="rejected" ? "selected" : ""}>rejected</option>
               <!-- ✅ added -->
               <option value="rejected" ${ds==="rejected" ? "selected" : ""}>rejected</option>
             </select>
