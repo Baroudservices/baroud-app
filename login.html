@@ -6,7 +6,8 @@
   <title>Login</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/layout.css">
+
   <style>
     *{box-sizing:border-box}
     body{
@@ -15,13 +16,21 @@
       background:linear-gradient(180deg,#06162a,#020b14);
       color:#fff;
       min-height:100vh;
+      padding:18px;
+    }
+
+    .wrap{
+      width:100%;
+      margin:0 auto;
+      max-width:520px;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:18px;
+      min-height:calc(100vh - 36px);
     }
+
     .card{
-      width:min(520px,92vw);
+      width:100%;
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.06);
       border-radius:26px;
@@ -29,9 +38,12 @@
       box-shadow:0 30px 80px rgba(0,0,0,.5);
       position:relative;
     }
-    <main class="wrap">
-  <!-- المحتوى -->
-</main>
+
+    @media (min-width: 992px){
+      .wrap{ max-width:1200px; }
+      .card{ max-width:560px; }
+      h1{ font-size:52px; }
+    }
 
     .back{
       position:absolute;left:16px;top:16px;
@@ -103,41 +115,46 @@
 </head>
 
 <body>
-  <div class="card">
-    <button class="back" onclick="location.href='index.html'">←</button>
 
-    <div class="titleRow">
-      <div></div>
-      <div class="brand">Baroud Services</div>
+  <!-- ✅ هون الإضافة الوحيدة -->
+  <main class="wrap">
+
+    <div class="card">
+      <button class="back" onclick="location.href='index.html'">←</button>
+
+      <div class="titleRow">
+        <div></div>
+        <div class="brand">Baroud Services</div>
+      </div>
+
+      <h1>Login</h1>
+      <p>Sign in to continue.</p>
+
+      <div id="msg" class="msg"></div>
+
+      <div class="field">
+        <span>👤</span>
+        <input id="email" type="email" placeholder="Email" autocomplete="username"/>
+      </div>
+
+      <div class="field">
+        <span>🔒</span>
+        <input id="pass" type="password" placeholder="Password" autocomplete="current-password"/>
+      </div>
+
+      <button class="btn" id="loginBtn">Login</button>
+
+      <div class="row">
+        <button class="btn secondary" id="registerBtn">Register</button>
+        <button class="btn secondary" id="resetBtn">Reset</button>
+      </div>
+
+      <div class="hint" id="smallHint">REGISTER (Check your email 📧)</div>
     </div>
 
-    <h1>Login</h1>
-    <p>Sign in to continue.</p>
-
-    <div id="msg" class="msg"></div>
-
-    <div class="field">
-      <span>👤</span>
-      <input id="email" type="email" placeholder="Email" autocomplete="username"/>
-    </div>
-
-    <div class="field">
-      <span>🔒</span>
-      <input id="pass" type="password" placeholder="Password" autocomplete="current-password"/>
-    </div>
-
-    <button class="btn" id="loginBtn">Login</button>
-
-    <div class="row">
-      <button class="btn secondary" id="registerBtn">Register</button>
-      <button class="btn secondary" id="resetBtn">Reset</button>
-    </div>
-
-    <div class="hint" id="smallHint">REGISTER (Check your email 📧)</div>
-  </div>
+  </main>
 
   <script>
-    // ✅ Supabase
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -164,7 +181,6 @@
       loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
     }
 
-    // ✅ إذا عامل login already -> روح services
     (async ()=>{
       try{
         const { data } = await sb.auth.getSession();
@@ -192,14 +208,12 @@
           return;
         }
 
-        // ✅ منع الدخول إذا الإيميل مش confirmed
         const user = data?.user;
         const confirmedAt = user?.email_confirmed_at || user?.confirmed_at;
 
         if(!confirmedAt){
-          // نعمل signOut مباشرة
           await sb.auth.signOut();
-          showMsg("Please confirm your email first 📧 (Check your inbox).");
+          showMsg("Please confirm your email first 📧");
           return;
         }
 
@@ -230,16 +244,15 @@
       setLoading(true, "Creating...");
 
       try{
-        const { data, error } = await sb.auth.signUp({
+        const { error } = await sb.auth.signUp({
           email,
           password,
-          options: {
-            // ✅ صفحة بعد confirmation
-            emailRedirectTo: "https://baroudservices.github.io/baroud-app/confirmed.html"
+          options:{
+            emailRedirectTo:"https://baroudservices.github.io/baroud-app/confirmed.html"
           }
         });
 
-        if (error){
+        if(error){
           showMsg(error.message || "Register failed.");
           return;
         }
@@ -264,8 +277,8 @@
       setLoading(true, "Sending...");
 
       try{
-        const { error } = await sb.auth.resetPasswordForEmail(email, {
-          redirectTo: "https://baroudservices.github.io/baroud-app/login.html"
+        const { error } = await sb.auth.resetPasswordForEmail(email,{
+          redirectTo:"https://baroudservices.github.io/baroud-app/login.html"
         });
 
         if(error){
@@ -273,7 +286,7 @@
           return;
         }
 
-        showMsg("Reset email sent ✅ Check your inbox 📧", true);
+        showMsg("Reset email sent ✅ Check inbox 📧", true);
 
       }catch(e){
         showMsg("Network error. Try again.");
@@ -286,11 +299,11 @@
     registerBtn.addEventListener("click", doRegister);
     resetBtn.addEventListener("click", doReset);
 
-    // Enter key
-    document.getElementById("pass").addEventListener("keydown", (e)=>{
-      if(e.key === "Enter") doLogin();
+    document.getElementById("pass").addEventListener("keydown", e=>{
+      if(e.key==="Enter") doLogin();
     });
   </script>
-<script src="app-ui.js?v=3"></script>
+
+  <script src="app-ui.js?v=3"></script>
 </body>
 </html>
