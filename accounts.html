@@ -90,15 +90,15 @@
       justify-content:center;
       font-size:46px;
       position:relative;
-      overflow:hidden;
+      overflow:hidden; /* ✅ مهم */
     }
 
-    /* ✅ NEW: product image inside Accounts cards */
+    /* ✅ FIX: خلي الصورة تعبي المربع */
     .pImg{
-      width:86px;
-      height:86px;
-      object-fit:contain;
-      filter: drop-shadow(0 14px 30px rgba(0,0,0,.45));
+      width:100%;
+      height:100%;
+      object-fit:cover; /* بدل contain */
+      display:block;
       user-select:none;
       -webkit-user-drag:none;
     }
@@ -220,13 +220,16 @@
       .replaceAll("'","&#039;");
   }
 
+  // ✅ FIX: skeleton جوّا .img حتى يطابق المربع
   function showLoading(n=6){
     grid.innerHTML = "";
     for(let i=0;i<n;i++){
       const el = document.createElement("div");
       el.className = "card";
       el.innerHTML = `
-        <div class="img skeleton sk-img"></div>
+        <div class="img">
+          <div class="skeleton sk-img" style="width:100%;height:100%"></div>
+        </div>
         <div class="body">
           <div class="skeleton sk-line big" style="width:75%"></div>
           <div class="sk-row mt10">
@@ -243,7 +246,7 @@
     }
   }
 
-  // ✅ NEW: فتح صفحة المنتج (id bigint safe)
+  // ✅ فتح صفحة المنتج (id bigint safe)
   function openProduct(rawId){
     const s = String(rawId ?? "").trim();
     const n = Number(s);
@@ -254,7 +257,7 @@
     location.href = `account.html?id=${n}`;
   }
 
-  /* ✅ NEW: image path from /assets/products/{id}.jpg (with fallback) */
+  // ✅ image path from /assets/products/{id}.jpg (with fallback)
   function productImgUrl(id){
     return `assets/products/${id}.jpg`;
   }
@@ -279,6 +282,7 @@
           <img class="pImg"
                src="${esc(productImgUrl(it.id))}"
                alt="${esc(it.title)}"
+               loading="lazy"
                onerror="this.onerror=null; this.src='assets/products/default.png';">
         </div>
 
@@ -326,7 +330,6 @@
   (async ()=>{
     showLoading(6);
 
-    // ✅ timeout إذا طولت
     const t = setTimeout(()=>{
       grid.innerHTML = `
         <div style="opacity:.85;padding:14px">
