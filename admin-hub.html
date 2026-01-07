@@ -1,53 +1,99 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Admin Hub</title>
-    <style>
-        body { background: #050a14; color: white; font-family: sans-serif; padding: 20px; text-align: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 600px; margin: 40px auto; }
-        .admin-card {
-            background: rgba(255,255,255,0.05);
-            padding: 30px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .admin-card:hover { background: #2a74ff; transform: translateY(-5px); }
-        #loginPanel { max-width: 400px; margin: 100px auto; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; }
-        button { width: 100%; padding: 12px; background: #2a74ff; border: none; color: white; border-radius: 10px; cursor: pointer; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Hub</title>
+<style>
+body{
+  margin:0; font-family:system-ui,Arial;
+  background:linear-gradient(160deg,#060b16,#0a1330);
+  color:#fff; min-height:100vh;
+  display:flex; align-items:center; justify-content:center; padding:16px;
+}
+.hub-card{
+  width:100%; max-width:500px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:24px; padding:24px; text-align:center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+}
+h1{ margin:0 0 10px 0; font-size:24px; font-weight:950; }
+.small{ opacity:.6; font-size:13px; margin-bottom:24px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.nav-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px 10px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 900;
+  font-size: 14px;
+}
+.nav-item:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: #38bdf8;
+  transform: translateY(-3px);
+}
+.logout-btn {
+  margin-top: 20px; width: 100%; padding: 12px;
+  border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1); color: #ef4444;
+  font-weight: 900; cursor: pointer;
+}
+/* Login UI */
+input {
+  width: 100%; padding: 14px; margin-bottom: 12px;
+  border-radius: 12px; border: 1px solid rgba(255,255,255,.1);
+  background: rgba(0,0,0,.3); color: #fff; text-align: center; font-size: 16px;
+}
+.login-btn {
+  width: 100%; padding: 14px; border-radius: 12px; border: 0;
+  background: linear-gradient(90deg,#0aa0ff,#2a74ff);
+  color: #fff; font-weight: 950; cursor: pointer;
+}
+</style>
 </head>
 <body>
 
-    <div id="loginPanel">
-        <h2>Admin Login</h2>
-        <input type="password" id="adminPass" placeholder="Enter Admin Password">
-        <button onclick="checkAdmin()">Login</button>
-    </div>
+<div class="hub-card" id="loginBox">
+  <h1>Admin Login</h1>
+  <p class="small">Enter management password</p>
+  <input type="password" id="passInput" placeholder="••••••••">
+  <button class="login-btn" onclick="checkLogin()">Access Panel</button>
+</div>
 
-    <div id="adminPanel" style="display:none">
-        <h1>Welcome Boss 👑</h1>
-        <div class="grid">
-            <div class="admin-card" onclick="location.href='manage-orders.html'">📦 Orders</div>
-            <div class="admin-card" onclick="location.href='manage-products.html'">🏷️ Products</div>
-            <div class="admin-card" onclick="location.href='view-reports.html'">⚠️ Reports</div>
-            <div class="admin-card" onclick="location.href='users-list.html'">👥 Users</div>
-        </div>
-    </div>
+<div class="hub-card" id="menuBox" style="display:none">
+  <h1>Admin Hub 👑</h1>
+  <p class="small">Manage your store operations</p>
+  
+  <div class="grid">
+    <div class="nav-item" onclick="location.href='admin-orders.html'">📦 Orders</div>
+    <div class="nav-item" onclick="location.href='admin-prices.html'">💰 Prices</div>
+    <div class="nav-item" onclick="location.href='admin-deposits.html'">🏦 Deposits</div>
+    <div class="nav-item" onclick="location.href='admin-reports.html'">⚠️ Reports</div>
+  </div>
 
-    <script>
-        function checkAdmin() {
-            const pass = document.getElementById('adminPass').value;
-            // حط الباسورد اللي بدك اياه هون
-            if(pass === "Baroud2025") {
-                document.getElementById('loginPanel').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'block';
-            } else {
-                alert("Wrong password!");
-            }
-        }
-    </script>
+  <button class="logout-btn" onclick="location.reload()">Logout</button>
+</div>
+
+<script>
+function checkLogin() {
+  const p = document.getElementById('passInput').value;
+  // كلمة المرور الخاصة بك
+  if(p === "BAROUD123") {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('menuBox').style.display = 'block';
+  } else {
+    alert("Wrong Password!");
+  }
+}
+</script>
 </body>
 </html>
