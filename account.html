@@ -152,6 +152,34 @@
       padding:4px 10px;border-radius:999px;font-size:12px;font-weight:950;color:#fff;white-space:nowrap;
       background:#19c37d;
     }
+
+    /* ✅ NOTE UI (added) */
+    .noteWrap{
+      margin-top:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      border-radius:16px;
+      padding:10px;
+    }
+    .noteLbl{
+      font-size:12px;
+      font-weight:950;
+      opacity:.85;
+      margin-bottom:8px;
+      letter-spacing:.3px;
+    }
+    .noteInput{
+      width:100%;
+      min-height:44px;
+      resize:vertical;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      padding:10px 12px;
+      outline:none;
+      font-weight:900;
+    }
   </style>
 </head>
 
@@ -163,7 +191,7 @@
     </div>
 
     <div class="card" id="card">
-      <div class="hero" id="hero">
+      <div class="hero">
         <div>
           <h1 class="title" id="pTitle">Loading...</h1>
           <div class="sub" id="pCat"></div>
@@ -174,6 +202,12 @@
       <div class="body">
         <div class="pills" id="pills"></div>
         <div class="features" id="features"></div>
+
+        <!-- ✅ Note box (added) -->
+        <div class="noteWrap">
+          <div class="noteLbl">Customer note (optional)</div>
+          <textarea id="customerNote" class="noteInput" placeholder="Write note for this order..."></textarea>
+        </div>
 
         <div class="buyRow">
           <button class="buyBtn" id="buyBtn" type="button">Buy</button>
@@ -200,11 +234,14 @@
     const pillsEl = document.getElementById("pills");
     const featsEl = document.getElementById("features");
     const buyBtn  = document.getElementById("buyBtn");
-    const heroEl  = document.getElementById("hero");
 
     const ordersDD   = document.getElementById("ordersDD");
     const ordersBtn  = document.getElementById("myOrdersBtn");
     const ordersMenu = document.getElementById("ordersMenu");
+
+    /* ✅ NOTE refs (added) */
+    const customerNoteEl = document.getElementById("customerNote");
+    const NOTE_KEY = "last_order_customer_note";
 
     /* ✅ بدل DURATION_LIST: هيدي بتيجي من DB حسب المنتج */
     let PLAN_LIST = [];
@@ -228,22 +265,29 @@
       return Number.isFinite(id) ? id : null;
     }
 
-    /* ✅ صورة حسب اسم المنتج: Netflix Account => Netflix-Account.jpg */
-    function getProductImageByTitle(title){
-      if(!title) return null;
-      const safeName = String(title).trim().replaceAll(" ", "-");
-      return `/assets/products/${safeName}.jpg`;
+    /* ✅ keep note always (added) */
+    function getCustomerNote(){
+      return (customerNoteEl?.value || "").trim();
     }
+    function setCustomerNote(v){
+      if(customerNoteEl) customerNoteEl.value = String(v || "");
+    }
+    function persistCustomerNote(){
+      try{ localStorage.setItem(NOTE_KEY, getCustomerNote()); }catch(e){}
+    }
+    customerNoteEl.addEventListener("input", persistCustomerNote);
 
-    function applyHeroImage(title){
-      const imgUrl = getProductImageByTitle(title);
-      if(!imgUrl) return;
+    function buildOrderNote(){
+      const title = currentProduct?.title || "Product";
+      const label = selectedPlan?.label || selectedPlan?.key || "";
+      const p = Number(selectedPlan?.price || 0);
+      const priceTxt = Number.isFinite(p) ? p.toFixed(2) : "0.00";
+      const userNote = getCustomerNote();
 
-      // overlay + image
-      heroEl.style.backgroundImage =
-        `linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.70)), url('${imgUrl}')`;
-      heroEl.style.backgroundSize = "cover";
-      heroEl.style.backgroundPosition = "center";
+      // note للطلب: plan + price + customer note
+      return userNote
+        ? `${title} | ${label} | $${priceTxt} | Note: ${userNote}`
+        : `${title} | ${label} | $${priceTxt}`;
     }
 
     function setSelectedPlan(plan){
@@ -253,13 +297,12 @@
       const p = Number(plan.price || 0);
       priceEl.textContent = "$" + (Number.isFinite(p) ? p.toFixed(2) : "0.00");
 
-      const title = currentProduct?.title || "Product";
-      const label = plan.label || plan.key || "";
-      const note = `${title} | ${label} | $${(Number.isFinite(p) ? p.toFixed(2) : "0.00")}`;
-
-      localStorage.setItem("last_order_note", note);
+      // ✅ خزّن plan + price + note جاهز
       localStorage.setItem("last_order_plan", plan.key || "");
       localStorage.setItem("last_order_price", (Number.isFinite(p) ? p.toFixed(2) : "0.00"));
+
+      // ✅ خزّن note مبني (مع customer note إذا موجود)
+      localStorage.setItem("last_order_note", buildOrderNote());
     }
 
     function renderMenu(){
@@ -353,9 +396,6 @@
       titleEl.textContent = p?.title || "Product";
       catEl.textContent = p?.category ? ("Category: " + p.category) : "";
 
-      // ✅ حط صورة ورا المنتج حسب الاسم
-      applyHeroImage(p?.title);
-
       pillsEl.innerHTML = "";
       if(p?.active === false){
         pillsEl.innerHTML += `<span class="pill">Unavailable</span>`;
@@ -423,15 +463,20 @@
         // ✅ السعر الحقيقي من DB (بدون ضرب)
         const finalPrice = Number(selectedPlan.price || 0);
 
+        // ✅ خلي note دايمًا آخر شي قبل الإرسال
+        persistCustomerNote();
+        const finalNote = buildOrderNote();
+        localStorage.setItem("last_order_note", finalNote);
+
         const { data: orderId, error } = await sb.rpc("place_order", {
           p_product_id: currentProductId,
           p_price: finalPrice,
           p_duration: selectedPlan.label,
-          p_note: localStorage.getItem("last_order_note") || null
+          p_note: finalNote || null
         });
         if(error) throw error;
 
-        const note = localStorage.getItem("last_order_note") || "";
+        const note = finalNote || "";
         const planKey = localStorage.getItem("last_order_plan") || selectedPlan.key;
 
         const planPrice = Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : "0.00";
@@ -477,14 +522,10 @@
         return;
       }
 
-      /* ✅ مهم: reset لكل منتج حتى ما تنتقل الخطط بين المنتجات */
-      PLAN_LIST = [];
-      selectedPlan = null;
-
-      // (ما حذفت فنكشنك) - بس مش مستخدمة هون
-      function getProductImage(id){
-        return `/assets/products/${id}.jpg`;
-      }
+      // ✅ restore note if exists (added)
+      try{
+        setCustomerNote(localStorage.getItem(NOTE_KEY) || "");
+      }catch(e){}
 
       try{
         // 1) حمل المنتج + الفيتشرز
@@ -498,6 +539,7 @@
         if(PLAN_LIST.length){
           setSelectedPlan(PLAN_LIST[0]);
         }else{
+          // إذا ما في خطط، خلي السعر 0
           priceEl.textContent = "$0.00";
         }
 
