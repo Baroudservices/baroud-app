@@ -310,17 +310,17 @@
     });
   }
 
-  async function loadProducts(){
-    const { data, error } = await sb
-      .from("products")
-      .select("id,title,price,category")
-      .eq("active", true)
-      .eq("category", "Games")
-      .order("id", { ascending: true });
+async function loadProducts(){
+  const { data, error } = await sb
+    .from("products")
+    .select("id,title,price,category,page")
+    .eq("active", true)
+    .eq("page", "games")
+    .order("id", { ascending: true });
 
-    if(error) throw new Error(error.message || "Products query failed");
-    return data || [];
-  }
+  if(error) throw new Error(error.message || "Products query failed");
+  return data || [];
+}
 
   let all = [];
 
