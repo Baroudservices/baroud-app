@@ -6,7 +6,8 @@
   <title>Account Details</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/layout.css">
+
   <style>
     :root{
       --text:#ffffff;
@@ -52,15 +53,11 @@
       overflow:hidden;
       border-top-left-radius:22px;
       border-top-right-radius:22px;
-
-      /* ✅ خلفية موحدة ثابتة دايمًا */
       background:
         radial-gradient(700px 260px at 15% 25%, rgba(42,116,255,.35), transparent 60%),
         radial-gradient(700px 260px at 85% 20%, rgba(27,199,255,.22), transparent 60%),
         linear-gradient(160deg, rgba(6,22,42,.95), rgba(2,11,20,.95));
     }
-
-    /* ✅ صورة المنتج (hero image) فوق الخلفية */
     .heroImg{
       position:absolute;
       inset:0;
@@ -68,13 +65,11 @@
       height:100%;
       object-fit:cover;
       display:block;
-      opacity:.82;                 /* خفيفة حتى تبين الخلفية الموحدة */
+      opacity:.82;
       transform:scale(1.02);
       filter:contrast(1.02) saturate(1.05);
       z-index:1;
     }
-
-    /* ✅ overlay لتغميق ووضوح النص */
     .heroOverlay{
       position:absolute;
       inset:0;
@@ -87,8 +82,6 @@
       pointer-events:none;
       z-index:2;
     }
-
-    /* ✅ المحتوى فوق الكل */
     .heroContent{
       position:absolute;
       left:0; right:0; bottom:0;
@@ -198,6 +191,19 @@
       background:#19c37d;
     }
 
+    /* ✅ HIGH PRICE (RED PULSE) */
+    .priceHigh{
+      background: linear-gradient(90deg, #ff3b3b, #ff0000) !important;
+      color: #fff !important;
+      box-shadow: 0 0 12px rgba(255,0,0,.85);
+      animation: pulseRed 1.2s infinite;
+    }
+    @keyframes pulseRed{
+      0%   { box-shadow: 0 0 6px rgba(255,0,0,.6); }
+      50%  { box-shadow: 0 0 16px rgba(255,0,0,1); }
+      100% { box-shadow: 0 0 6px rgba(255,0,0,.6); }
+    }
+
     .noteWrap{
       margin-top:12px;
       border:1px solid rgba(255,255,255,.10);
@@ -235,7 +241,6 @@
     </div>
 
     <div class="card" id="card">
-
       <div class="hero">
         <img id="heroImg" class="heroImg" src="assets/products/default.png" alt="Product">
         <div class="heroOverlay"></div>
@@ -283,7 +288,6 @@
     const pillsEl = document.getElementById("pills");
     const featsEl = document.getElementById("features");
     const buyBtn  = document.getElementById("buyBtn");
-
     const heroImgEl = document.getElementById("heroImg");
 
     const ordersDD   = document.getElementById("ordersDD");
@@ -372,10 +376,17 @@
       }
 
       for(const d of PLAN_LIST){
-        const p = Number(d.price || 0);
+        const priceNum = Number(d.price || 0);
+        const priceTxt = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "0.00";
+        const highClass = priceNum > 10000 ? "priceHigh" : "";
+
         const item = document.createElement("div");
         item.className = "ordersItem";
-        item.innerHTML = `<span>${esc(d.label || d.key)}</span><span class="badge">$${(Number.isFinite(p)?p.toFixed(2):"0.00")}</span>`;
+        item.innerHTML = `
+          <span>${esc(d.label || d.key)}</span>
+          <span class="badge ${highClass}">$${priceTxt}</span>
+        `;
+
         item.addEventListener("click", (e)=>{
           e.stopPropagation();
           setSelectedPlan(d);
@@ -424,17 +435,7 @@
       if(error) throw error;
 
       const rows = (data || []);
-      const preferredOrder = ["1m","3m","6m","1y","2y"];
-      const map = {};
-      rows.forEach(r=>{ map[r.plan_key] = r; });
-
-      const keys = rows.map(r=>r.plan_key);
-      const sorted = [
-        ...preferredOrder.filter(k=>keys.includes(k)).map(k=>map[k]),
-        ...rows.filter(r=>!preferredOrder.includes(r.plan_key))
-      ];
-
-      return sorted.map(r=>({
+      return rows.map(r=>({
         key: r.plan_key,
         label: r.plan_label || r.plan_key,
         price: Number(r.price || 0)
@@ -507,18 +508,17 @@
         const finalNote = buildOrderNote();
         localStorage.setItem("last_order_note", finalNote);
 
-     const { data: orderId, error } = await sb.rpc("place_order", {
-  p_product_id: currentProductId,
-  p_price: finalPrice,
-  p_duration: selectedPlan.label,
-  p_note: finalNote || null
-});
-if(error) throw error;
+        const { data: orderId, error } = await sb.rpc("place_order", {
+          p_product_id: currentProductId,
+          p_price: finalPrice,
+          p_duration: selectedPlan.label,
+          p_note: finalNote || null
+        });
+        if(error) throw error;
 
-// ✅ clear customer note after successful order
-setCustomerNote("");
-try{ localStorage.removeItem(NOTE_KEY); }catch(e){}
-try{ localStorage.removeItem("last_order_customer_note"); }catch(e){}
+        /* ✅ clear customer note after successful order */
+        setCustomerNote("");
+        try{ localStorage.removeItem(NOTE_KEY); }catch(e){}
 
         const note = finalNote || "";
         const planKey = localStorage.getItem("last_order_plan") || selectedPlan.key;
@@ -565,6 +565,7 @@ try{ localStorage.removeItem("last_order_customer_note"); }catch(e){}
         return;
       }
 
+      /* ✅ restore note (if still exists) */
       try{ setCustomerNote(localStorage.getItem(NOTE_KEY) || ""); }catch(e){}
 
       setHeroImage(id);
