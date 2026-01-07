@@ -107,7 +107,7 @@ h2{margin:0;font-size:22px}
   padding:14px;
   animation: pop .18s ease-out;
 }
-  @keyframes pop{
+@keyframes pop{
   from{transform:scale(.96);opacity:0}
   to{transform:scale(1);opacity:1}
 }
@@ -230,19 +230,23 @@ function decodeEscaped(htmlEsc){
   return t.value;
 }
 
+// ✅ remove [STATUS:...] tag from reply before showing user
+function stripStatusTag(reply){
+  return String(reply || "").replace(/^\s*\[STATUS:(pending|done|rejected)\]\s*/i, "");
+}
+
 function openReplyModal(replyText, productTitle){
   const safeTitle = String(productTitle || "order").trim() || "order";
-  const cleanReply = String(replyText || "").trim();
 
-  // Title فوق ثابت
+  // ✅ clean reply (no status tag)
+  const cleanReply = stripStatusTag(String(replyText || "")).trim();
+
   replyModalTitle.textContent = "Reply";
 
-  // ✅ النص اللي بدنا يبين + ينشهر
   lastShareText =
     `Your ${safeTitle} is :\n\n` +
     (cleanReply || "No details yet");
 
-  // ✅ نفس النص داخل المودال
   replyModalText.textContent = lastShareText;
 
   replyModal.style.display = "flex";
@@ -314,7 +318,9 @@ replyShare.addEventListener("click", async ()=>{
       o.status === "pending" ? "pending" : "cancelled";
 
     const replyRaw = String(o.admin_reply || "");
-    const hasReply = !!replyRaw.trim();
+    const replyClean = stripStatusTag(replyRaw);
+    const hasReply = !!replyClean.trim();
+
     const productTitle = String(o.products?.title || "order");
 
     const el = document.createElement("div");
@@ -345,14 +351,13 @@ replyShare.addEventListener("click", async ()=>{
           <div class="replyToggle">${hasReply ? 'Tap to view' : ''}</div>
         </div>
 
-        <div class="replyText">${hasReply ? esc(replyRaw) : "No details yet"}</div>
+        <div class="replyText">${hasReply ? esc(replyClean) : "No details yet"}</div>
       </div>
     `;
 
     listEl.appendChild(el);
   }
 
-  // ✅ click => open modal with full reply + dynamic title
   document.addEventListener("click", (e)=>{
     const box = e.target.closest(".replyBox");
     if(!box) return;
@@ -363,7 +368,10 @@ replyShare.addEventListener("click", async ()=>{
     const decodedReply = decodeEscaped(fullEsc);
     const decodedTitle = decodeEscaped(titleEsc);
 
-    if(!decodedReply.trim()) return;
+    // ✅ don't open if empty after cleaning
+    const clean = stripStatusTag(decodedReply).trim();
+    if(!clean) return;
+
     openReplyModal(decodedReply, decodedTitle);
   });
 
