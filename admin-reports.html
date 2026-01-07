@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Reports</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:linear-gradient(160deg,#060b16,#0a1330);
+  color:#fff;
+  padding:16px;
+}
+.wrap{max-width:1000px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;background:#1e293b;color:#fff}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;border-bottom:1px solid #334155;font-size:14px;vertical-align:top}
+th{color:#93c5fd;text-align:left}
+.small{opacity:.75;font-size:12px}
+.status{font-weight:900}
+.pending{color:#fbbf24}
+.solved{color:#22c55e}
+
+/* ✅ Message Box */
+.msgBox {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 12px;
+  line-height: 1.4;
+  word-break: break-word;
+  max-width: 350px;
+}
+
+.actionBtn{
+  padding:8px 12px; border-radius:10px; border:0; cursor:pointer;
+  background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.35);
+  color:#fff; font-weight:900; font-size: 12px;
+}
+.deleteBtn{
+  background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.35);
+  color:#ef4444; margin-left: 5px;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="top">
+    <h2 style="margin:0">Admin – User Reports</h2>
+    <div>
+      <button class="btn" id="btnRefresh">Refresh</button>
+      <button class="btn" onclick="location.href='admin-hub.html'">Back</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Order ID</th>
+        <th>User ID</th>
+        <th>Problem Message</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <p id="empty" style="display:none; text-align:center; opacity:.6; margin-top: 40px;">No reports found</p>
+</div>
+
+<script>
+const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const rowsEl = document.getElementById("rows");
+const emptyEl = document.getElementById("empty");
+
+async function loadReports() {
+  rowsEl.innerHTML = `<tr><td colspan="6">Loading...</td></tr>`;
+  
+  const { data, error } = await sb
+    .from('reports')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    rowsEl.innerHTML = `<tr><td colspan="6" style="color:#ef4444">Error: ${error.message}</td></tr>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    rowsEl.innerHTML = "";
+    emptyEl.style.display = "block";
+    return;
+  }
+
+  emptyEl.style.display = "none";
+  rowsEl.innerHTML = "";
+  
+  data.forEach(r => {
+    const isSolved = r.status === 'solved';
+    rowsEl.innerHTML += `
+      <tr>
+        <td class="small">${new Date(r.created_at).toLocaleString()}</td>
+        <td><b>#${r.order_id}</b></td>
+        <td class="small">${r.user_id}</td>
+        <td><div class="msgBox">${String(r.message || "")}</div></td>
+        <td class="status ${isSolved ? 'solved' : 'pending'}">${r.status || 'pending'}</td>
+        <td>
+          ${!isSolved ? `<button class="actionBtn" onclick="markSolved(${r.id})">Mark Solved</button>` : ''}
+          <button class="actionBtn deleteBtn" onclick="deleteReport(${r.id})">🗑️</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function markSolved(id) {
+  const { error } = await sb.from('reports').update({ status: 'solved' }).eq('id', id);
+  if (error) alert(error.message);
+  else loadReports();
+}
+
+async function deleteReport(id) {
+  if (!confirm("Delete this report?")) return;
+  const { error } = await sb.from('reports').delete().eq('id', id);
+  if (error) alert(error.message);
+  else loadReports();
+}
+
+document.getElementById("btnRefresh").onclick = loadReports;
+loadReports();
+</script>
+</body>
+</html>
