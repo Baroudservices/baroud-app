@@ -37,7 +37,7 @@ th{color:#93c5fd;text-align:left}
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  text-decoration:none; /* مهم للرابط */
+  text-decoration:none;
 }
 .actionBtn:active{transform:scale(.98)}
 .actionBtn.okBtn{background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.35)}
@@ -68,6 +68,7 @@ th{color:#93c5fd;text-align:left}
         <th>Method</th>
         <th>Status</th>
         <th>Receipt</th>
+        <th>Transfer #</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -102,7 +103,7 @@ function normalizeDepositId(raw){
   const s = String(raw ?? "").trim();
   const n = Number(s);
   if(!Number.isFinite(n)) throw new Error("Invalid deposit id");
-  return n; // bigint
+  return n;
 }
 
 function setBusy(isBusy){
@@ -122,7 +123,6 @@ async function requireSession(){
 }
 
 async function requireAdmin(session){
-  // ✅ Admin check من profiles
   const { data: profile, error: pErr } = await sb
     .from("profiles")
     .select("is_admin")
@@ -139,7 +139,7 @@ async function requireAdmin(session){
 }
 
 async function load(){
-  rowsEl.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
+  rowsEl.innerHTML = `<tr><td colspan="8">Loading...</td></tr>`;
   emptyEl.style.display = "none";
 
   try{
@@ -152,10 +152,10 @@ async function load(){
       return;
     }
 
-    // ✅ Load deposits (ضيفنا receipt_url)
+    // ✅ Load deposits (receipt_url + transfer_number)
     const { data, error } = await sb
       .from("deposits")
-      .select("id,user_id,amount,method,status,created_at,receipt_url")
+      .select("id,user_id,amount,method,status,created_at,receipt_url,transfer_number")
       .order("created_at", { ascending:false });
 
     if(error) throw error;
@@ -166,7 +166,6 @@ async function load(){
       return;
     }
 
-    // ✅ Render
     rowsEl.innerHTML = "";
     for(const d of data){
       const st = String(d.status || "pending");
@@ -175,21 +174,32 @@ async function load(){
         st==="rejected" ? "no" : "pending";
 
       const receipt = (d.receipt_url ?? "").toString().trim();
+      const transferNum = (d.transfer_number ?? "").toString().trim();
 
       rowsEl.innerHTML += `
         <tr>
           <td>${esc(d.id)}</td>
-          <td>
-            <div class="small">${esc(d.user_id)}</div>
-          </td>
+
+          <td><div class="small">${esc(d.user_id)}</div></td>
+
           <td><b>$${esc(d.amount)}</b></td>
+
           <td>${esc(d.method)}</td>
+
           <td class="status ${stClass}">${esc(st)}</td>
 
           <td>
             ${
               receipt
                 ? `<a class="actionBtn viewBtn" href="${esc(receipt)}" target="_blank" rel="noopener">View</a>`
+                : `<span class="small" style="opacity:.55">—</span>`
+            }
+          </td>
+
+          <td>
+            ${
+              transferNum
+                ? `<span style="font-weight:900">${esc(transferNum)}</span>`
                 : `<span class="small" style="opacity:.55">—</span>`
             }
           </td>
@@ -202,7 +212,7 @@ async function load(){
     }
 
   }catch(e){
-    rowsEl.innerHTML = `<tr><td colspan="7" style="color:#ffb4b4">Error: ${esc(e?.message || e)}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="8" style="color:#ffb4b4">Error: ${esc(e?.message || e)}</td></tr>`;
   }
 }
 
@@ -218,7 +228,6 @@ async function setStatus(rawId, status){
 
     const id = normalizeDepositId(rawId);
 
-    // ✅ RPC: admin_set_deposit_status(p_deposit_id bigint, p_status text)
     const { error } = await sb.rpc("admin_set_deposit_status", {
       p_deposit_id: id,
       p_status: status
@@ -239,7 +248,6 @@ async function logout(){
   location.href="login.html";
 }
 
-// ✅ Event delegation
 rowsEl.addEventListener("click", (ev)=>{
   const btn = ev.target.closest("button[data-id][data-status]");
   if(!btn) return;
