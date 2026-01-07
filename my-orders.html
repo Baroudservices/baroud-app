@@ -1,6 +1,3 @@
-<!-- =========================
-       my-orders.html
-========================= -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -54,7 +51,6 @@ h2{margin:0;font-size:22px}
 .paid{color:#22c55e}
 .pending{color:#fbbf24}
 .cancelled{color:#ef4444}
-/* ✅ refunded when rejected */
 .refunded{color:#38bdf8}
 
 /* ===== Reply ===== */
@@ -81,23 +77,42 @@ h2{margin:0;font-size:22px}
 .replyStatus{font-weight:900}
 .replyStatus.pending{color:#fbbf24}
 .replyStatus.done{color:#22c55e}
-.replyStatus.rejected{color:#ef4444} /* ✅ added */
+.replyStatus.rejected{color:#ef4444}
 
-/* ❌ ممنوع يبين الرد قبل الكبس */
 .replyText{ display:none !important; }
 
-/* ===== Empty ===== */
-.empty{
-  opacity:.6;
-  text-align:center;
-  margin-top:40px;
+/* ===== Report Button & Textarea ===== */
+.reportBtn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  font-weight: 900;
+  cursor: pointer;
+  font-size: 13px;
+  -webkit-tap-highlight-color:transparent;
+}
+#reportText {
+  width: 100%;
+  height: 120px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #fff;
+  padding: 12px;
+  margin-top: 10px;
+  font-family: inherit;
+  outline: none;
 }
 
-/* ===== Modal (Design like your glass UI) ===== */
+/* ===== Modal ===== */
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.150);
+  background:rgba(0,0,0,.7);
   display:none;
   align-items:center;
   justify-content:center;
@@ -110,7 +125,7 @@ h2{margin:0;font-size:22px}
   border:1px solid rgba(255,255,255,.12);
   border-radius:18px;
   box-shadow:0 18px 60px rgba(0,0,0,.45);
-  padding:14px;
+  padding:16px;
   animation: pop .18s ease-out;
 }
 @keyframes pop{
@@ -167,38 +182,51 @@ h2{margin:0;font-size:22px}
   background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.12);
 }
+#submitReport { background: #ef4444; }
+
+.empty{
+  opacity:.6;
+  text-align:center;
+  margin-top:40px;
+}
 </style>
 </head>
 
 <body>
 <div class="wrap">
-
   <div class="top">
     <div class="back" onclick="history.back()">←</div>
     <h2>My Orders</h2>
   </div>
 
   <div id="list"></div>
-
-  <div id="empty" class="empty" style="display:none">
-    No orders yet
-  </div>
-
+  <div id="empty" class="empty" style="display:none">No orders yet</div>
 </div>
 
-<!-- ✅ Reply Modal -->
 <div id="replyModal" class="modal">
   <div class="modalCard">
     <div class="modalTop">
       <div class="modalTitle" id="replyModalTitle"></div>
       <button class="modalX" id="replyClose" type="button">✕</button>
     </div>
-
     <div class="modalBody" id="replyModalText"></div>
-
     <div class="modalBtns">
       <button class="modalBtn ghost" id="replyShare" type="button">Share</button>
       <button class="modalBtn" id="replyOk" type="button">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="reportModal" class="modal">
+  <div class="modalCard">
+    <div class="modalTop">
+      <div class="modalTitle">Report Issue - Order #<span id="targetOrder"></span></div>
+      <button class="modalX" onclick="closeReport()">✕</button>
+    </div>
+    <textarea id="reportText" placeholder="Describe the problem clearly..."></textarea>
+    <div class="modalBtns">
+      <button class="modalBtn ghost" onclick="closeReport()">Cancel</button>
+      <button class="modalBtn" id="submitReport">Submit Report</button>
     </div>
   </div>
 </div>
@@ -211,23 +239,18 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const listEl = document.getElementById("list");
 const emptyEl = document.getElementById("empty");
 
-// Modal elements
+// Modals
 const replyModal = document.getElementById("replyModal");
-const replyModalTitle = document.getElementById("replyModalTitle");
+const reportModal = document.getElementById("reportModal");
 const replyModalText = document.getElementById("replyModalText");
-const replyClose = document.getElementById("replyClose");
-const replyOk = document.getElementById("replyOk");
-const replyShare = document.getElementById("replyShare");
+const targetOrderSpan = document.getElementById("targetOrder");
+const reportTextarea = document.getElementById("reportText");
 
 let lastShareText = "";
+let currentOrderId = null;
 
 function esc(s){
-  return String(s ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+  return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
 
 function decodeEscaped(htmlEsc){
@@ -236,108 +259,59 @@ function decodeEscaped(htmlEsc){
   return t.value;
 }
 
+// --- Report Functions ---
+function openReport(id) {
+    currentOrderId = id;
+    targetOrderSpan.textContent = id;
+    reportModal.style.display = "flex";
+}
+function closeReport() {
+    reportModal.style.display = "none";
+    reportTextarea.value = "";
+}
+
+// --- Reply Functions ---
 function openReplyModal(replyText, productTitle){
   const safeTitle = String(productTitle || "order").trim() || "order";
   const cleanReply = String(replyText || "").trim();
-
-  replyModalTitle.textContent = "Reply";
-
-  lastShareText =
-    `Your ${safeTitle} is :\n\n` +
-    (cleanReply || "No details yet");
-
+  document.getElementById("replyModalTitle").textContent = "Reply";
+  lastShareText = `Your ${safeTitle} is :\n\n` + (cleanReply || "No details yet");
   replyModalText.textContent = lastShareText;
-
   replyModal.style.display = "flex";
-  replyShare.style.display = cleanReply ? "inline-block" : "none";
+  document.getElementById("replyShare").style.display = cleanReply ? "inline-block" : "none";
 }
+function closeReplyModal(){ replyModal.style.display = "none"; }
 
-function closeReplyModal(){
-  replyModal.style.display = "none";
-  lastShareText = "";
-}
-
-replyClose.addEventListener("click", closeReplyModal);
-replyOk.addEventListener("click", closeReplyModal);
-replyModal.addEventListener("click", (e)=>{
-  if(e.target === replyModal) closeReplyModal();
-});
-
-replyShare.addEventListener("click", async ()=>{
-  const text = (lastShareText || "").trim();
-  if(!text) return;
-
-  try{
-    if(navigator.share){
-      await navigator.share({ text });
-    }else{
-      await navigator.clipboard.writeText(text);
-      alert("Copied ✅");
-    }
-  }catch(e){
-    // ignore cancel
-  }
-});
+document.getElementById("replyClose").onclick = closeReplyModal;
+document.getElementById("replyOk").onclick = closeReplyModal;
+replyModal.onclick = (e) => { if(e.target === replyModal) closeReplyModal(); };
 
 (async ()=>{
   const { data: s } = await sb.auth.getSession();
-  if(!s?.session?.user){
-    location.replace("login.html");
-    return;
-  }
+  if(!s?.session?.user){ location.replace("login.html"); return; }
 
   const { data, error } = await sb
     .from("orders")
-    .select(`
-      id,
-      price,
-      status,
-      delivery_status,
-      duration,
-      note,
-      created_at,
-      admin_reply,
-      products(title)
-    `)
+    .select(`id, price, status, delivery_status, duration, note, created_at, admin_reply, products(title)`)
     .eq("user_id", s.session.user.id)
     .order("created_at",{ascending:false});
 
-  if(error){
-    listEl.innerHTML = `<div class="empty">Error loading orders</div>`;
-    return;
-  }
-
-  if(!data || !data.length){
-    emptyEl.style.display = "block";
-    return;
-  }
+  if(error){ listEl.innerHTML = `<div class="empty">Error loading orders</div>`; return; }
+  if(!data || !data.length){ emptyEl.style.display = "block"; return; }
 
   for(const o of data){
     const delivery = String(o.delivery_status || "pending").toLowerCase();
-    const deliveryClass =
-      delivery === "done" ? "done" :
-      delivery === "rejected" ? "rejected" :
-      "pending";
-
-    // ✅ paid status: if rejected => refunded
+    const deliveryClass = delivery === "done" ? "done" : delivery === "rejected" ? "rejected" : "pending";
     const paidLabel = (delivery === "rejected") ? "refunded" : String(o.status || "");
-    const stClass =
-      paidLabel === "paid" ? "paid" :
-      paidLabel === "pending" ? "pending" :
-      paidLabel === "refunded" ? "refunded" :
-      "cancelled";
-
+    const stClass = paidLabel === "paid" ? "paid" : paidLabel === "pending" ? "pending" : paidLabel === "refunded" ? "refunded" : "cancelled";
+    
     const replyRaw = String(o.admin_reply || "");
     const productTitle = String(o.products?.title || "order");
-
-    // ✅ ignore fake status-only replies
-    const replyTrim = replyRaw.trim();
-    const isOnlyStatusTag = /^(\[STATUS:\s*(pending|done|rejected)\s*\])$/i.test(replyTrim);
-    const hasReply = !!replyTrim && !isOnlyStatusTag;
+    const isOnlyStatusTag = /^(\[STATUS:\s*(pending|done|rejected)\s*\])$/i.test(replyRaw.trim());
+    const hasReply = !!replyRaw.trim() && !isOnlyStatusTag;
 
     const el = document.createElement("div");
     el.className = "card";
-
     el.innerHTML = `
       <div class="row">
         <div>
@@ -347,53 +321,49 @@ replyShare.addEventListener("click", async ()=>{
         </div>
         <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
       </div>
-
       <div class="row" style="margin-top:8px">
         <div class="small">Order #${esc(o.id)}</div>
         <div class="status ${stClass}">${esc(paidLabel)}</div>
       </div>
-
-      <div class="replyBox"
-           data-full="${esc(replyRaw)}"
-           data-title="${esc(productTitle)}"
-           style="${hasReply ? "" : "cursor:default;"}">
+      <div class="replyBox" data-full="${esc(replyRaw)}" data-title="${esc(productTitle)}" style="${hasReply ? "" : "cursor:default;"}">
         <div class="replyHeader">
-          <div class="replyStatus ${deliveryClass}">
-            Status: ${delivery === "done" ? "Done" : delivery === "rejected" ? "Rejected" : "Pending"}
-          </div>
+          <div class="replyStatus ${deliveryClass}">Status: ${delivery.toUpperCase()}</div>
           <div class="replyToggle">${hasReply ? 'Tap to view' : ''}</div>
         </div>
-
         <div class="replyText">${hasReply ? esc(replyRaw) : "No details yet"}</div>
       </div>
+      <button class="reportBtn" onclick="openReport('${o.id}')">⚠️ Report a Problem</button>
     `;
-
     listEl.appendChild(el);
   }
 
+  // Submit Report Logic
+  document.getElementById("submitReport").onclick = async () => {
+    const msg = reportTextarea.value.trim();
+    if(!msg) return alert("Please write your problem");
+
+    const { error: err } = await sb.from("reports").insert([
+        { order_id: currentOrderId, message: msg, user_id: s.session.user.id }
+    ]);
+
+    if(err) alert("Error: " + err.message);
+    else {
+        alert("Report sent to admin ✅");
+        closeReport();
+    }
+  };
+
+  // Click handler for replyBox
   document.addEventListener("click", (e)=>{
     const box = e.target.closest(".replyBox");
     if(!box) return;
-
-    const fullEsc = box.getAttribute("data-full") || "";
-    const titleEsc = box.getAttribute("data-title") || "order";
-
-    let decodedReply = decodeEscaped(fullEsc);
-    const decodedTitle = decodeEscaped(titleEsc);
-
-    // ✅ block status-only reply
-    const cleaned = decodedReply.trim();
-    if(/^(\[STATUS:\s*(pending|done|rejected)\s*\])$/i.test(cleaned)){
-      decodedReply = "";
-    }
-
-    if(!decodedReply.trim()) return;
-    openReplyModal(decodedReply, decodedTitle);
+    const full = box.getAttribute("data-full") || "";
+    if(!full.trim() || /^(\[STATUS:\s*(pending|done|rejected)\s*\])$/i.test(full.trim())) return;
+    openReplyModal(decodeEscaped(full), decodeEscaped(box.getAttribute("data-title")));
   });
 
 })();
 </script>
-
 <script src="app-ui.js?v=3"></script>
 </body>
 </html>
