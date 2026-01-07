@@ -41,21 +41,45 @@
       background:var(--glass);
       border:1px solid var(--stroke);
       border-radius:22px;
-      overflow:visible;
+      overflow:hidden; /* ✅ مهم للهيرو */
       box-shadow:var(--shadow);
     }
+
+    /* ===== HERO IMAGE (NEW) ===== */
     .hero{
-      height:170px;
-      background:radial-gradient(600px 260px at 20% 20%, rgba(42,116,255,.25), transparent 60%),
-                 radial-gradient(600px 260px at 80% 20%, rgba(27,199,255,.15), transparent 60%),
-                 rgba(0,0,0,.22);
-      display:flex;align-items:flex-end;justify-content:space-between;
-      padding:14px;
-      border-top-left-radius:22px;
-      border-top-right-radius:22px;
+      height:210px;
+      position:relative;
+      overflow:hidden;
+      background:rgba(0,0,0,.22);
     }
-    .hero .title{font-weight:950;font-size:22px;letter-spacing:.2px;margin:0}
-    .hero .sub{margin-top:6px;opacity:.8;font-weight:800;font-size:12px}
+    .heroImg{
+      width:100%;
+      height:100%;
+      object-fit:cover;   /* ✅ hero fills */
+      display:block;
+      transform:scale(1.02);
+      filter:contrast(1.02) saturate(1.05);
+    }
+    .heroOverlay{
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.70) 100%),
+        radial-gradient(600px 260px at 20% 20%, rgba(42,116,255,.25), transparent 60%),
+        radial-gradient(600px 260px at 80% 20%, rgba(27,199,255,.15), transparent 60%);
+      pointer-events:none;
+    }
+    .heroContent{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      padding:14px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .heroTitle{font-weight:950;font-size:22px;letter-spacing:.2px;margin:0}
+    .heroSub{margin-top:6px;opacity:.82;font-weight:800;font-size:12px}
     .pricePill{
       background:rgba(255,255,255,.07);
       border:1px solid rgba(255,255,255,.10);
@@ -64,6 +88,7 @@
       font-weight:950;
       color:var(--blue);
       white-space:nowrap;
+      backdrop-filter: blur(6px);
     }
 
     .body{padding:14px}
@@ -117,7 +142,6 @@
       touch-action:manipulation;
     }
 
-    /* زر السهم فقط */
     #myOrdersBtn{
       font-size:18px;
       font-weight:950;
@@ -153,7 +177,7 @@
       background:#19c37d;
     }
 
-    /* ✅ NOTE UI (added) */
+    /* NOTE UI */
     .noteWrap{
       margin-top:12px;
       border:1px solid rgba(255,255,255,.10);
@@ -191,19 +215,25 @@
     </div>
 
     <div class="card" id="card">
+
+      <!-- ✅ HERO IMAGE -->
       <div class="hero">
-        <div>
-          <h1 class="title" id="pTitle">Loading...</h1>
-          <div class="sub" id="pCat"></div>
+        <img id="heroImg" class="heroImg" src="assets/products/default.png" alt="Product">
+        <div class="heroOverlay"></div>
+
+        <div class="heroContent">
+          <div>
+            <h1 class="heroTitle" id="pTitle">Loading...</h1>
+            <div class="heroSub" id="pCat"></div>
+          </div>
+          <div class="pricePill" id="pPrice">$0.00</div>
         </div>
-        <div class="pricePill" id="pPrice">$0.00</div>
       </div>
 
       <div class="body">
         <div class="pills" id="pills"></div>
         <div class="features" id="features"></div>
 
-        <!-- ✅ Note box (added) -->
         <div class="noteWrap">
           <div class="noteLbl">Customer note (optional)</div>
           <textarea id="customerNote" class="noteInput" placeholder="Write note for this order..."></textarea>
@@ -235,20 +265,20 @@
     const featsEl = document.getElementById("features");
     const buyBtn  = document.getElementById("buyBtn");
 
+    const heroImgEl = document.getElementById("heroImg");
+
     const ordersDD   = document.getElementById("ordersDD");
     const ordersBtn  = document.getElementById("myOrdersBtn");
     const ordersMenu = document.getElementById("ordersMenu");
 
-    /* ✅ NOTE refs (added) */
     const customerNoteEl = document.getElementById("customerNote");
     const NOTE_KEY = "last_order_customer_note";
 
-    /* ✅ بدل DURATION_LIST: هيدي بتيجي من DB حسب المنتج */
     let PLAN_LIST = [];
 
     let currentProductId = null;
     let currentProduct = null;
-    let selectedPlan = null; // ✅ رح تتحدد بعد ما نجيب الخطط
+    let selectedPlan = null;
 
     function esc(s){
       return String(s ?? "")
@@ -265,7 +295,17 @@
       return Number.isFinite(id) ? id : null;
     }
 
-    /* ✅ keep note always (added) */
+    function productImgUrl(id){
+      return `assets/products/${id}.jpg`;
+    }
+    function setHeroImage(id){
+      heroImgEl.src = productImgUrl(id);
+      heroImgEl.onerror = ()=>{
+        heroImgEl.onerror = null;
+        heroImgEl.src = "assets/products/default.png";
+      };
+    }
+
     function getCustomerNote(){
       return (customerNoteEl?.value || "").trim();
     }
@@ -284,7 +324,6 @@
       const priceTxt = Number.isFinite(p) ? p.toFixed(2) : "0.00";
       const userNote = getCustomerNote();
 
-      // note للطلب: plan + price + customer note
       return userNote
         ? `${title} | ${label} | $${priceTxt} | Note: ${userNote}`
         : `${title} | ${label} | $${priceTxt}`;
@@ -297,11 +336,8 @@
       const p = Number(plan.price || 0);
       priceEl.textContent = "$" + (Number.isFinite(p) ? p.toFixed(2) : "0.00");
 
-      // ✅ خزّن plan + price + note جاهز
       localStorage.setItem("last_order_plan", plan.key || "");
       localStorage.setItem("last_order_price", (Number.isFinite(p) ? p.toFixed(2) : "0.00"));
-
-      // ✅ خزّن note مبني (مع customer note إذا موجود)
       localStorage.setItem("last_order_note", buildOrderNote());
     }
 
@@ -330,7 +366,6 @@
       }
     }
 
-    // dropdown
     ordersBtn.addEventListener("click", (e)=>{
       e.preventDefault();
       e.stopPropagation();
@@ -359,7 +394,6 @@
       return { product: p, features: (f || []) };
     }
 
-    /* ✅ جيب الخطط من product_plan_prices */
     async function loadPlansFromDb(productId){
       const { data, error } = await sb
         .from("product_plan_prices")
@@ -371,8 +405,6 @@
       if(error) throw error;
 
       const rows = (data || []);
-
-      // ترتيب: الافتراضيين أولاً إذا موجودين، وبعدها الباقي
       const preferredOrder = ["1m","3m","6m","1y","2y"];
       const map = {};
       rows.forEach(r=>{ map[r.plan_key] = r; });
@@ -395,6 +427,9 @@
 
       titleEl.textContent = p?.title || "Product";
       catEl.textContent = p?.category ? ("Category: " + p.category) : "";
+
+      // ✅ hero image from id
+      setHeroImage(p?.id);
 
       pillsEl.innerHTML = "";
       if(p?.active === false){
@@ -460,10 +495,8 @@
           return;
         }
 
-        // ✅ السعر الحقيقي من DB (بدون ضرب)
         const finalPrice = Number(selectedPlan.price || 0);
 
-        // ✅ خلي note دايمًا آخر شي قبل الإرسال
         persistCustomerNote();
         const finalNote = buildOrderNote();
         localStorage.setItem("last_order_note", finalNote);
@@ -478,7 +511,6 @@
 
         const note = finalNote || "";
         const planKey = localStorage.getItem("last_order_plan") || selectedPlan.key;
-
         const planPrice = Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : "0.00";
 
         const go = () => {
@@ -522,24 +554,20 @@
         return;
       }
 
-      // ✅ restore note if exists (added)
-      try{
-        setCustomerNote(localStorage.getItem(NOTE_KEY) || "");
-      }catch(e){}
+      try{ setCustomerNote(localStorage.getItem(NOTE_KEY) || ""); }catch(e){}
+
+      // ✅ hero early (حتى قبل load)
+      setHeroImage(id);
 
       try{
-        // 1) حمل المنتج + الفيتشرز
         const { product, features } = await loadProduct(id);
         renderProduct(product, features);
 
-        // 2) حمل البلانات من DB
         PLAN_LIST = await loadPlansFromDb(id);
 
-        // 3) اختر أول بلان افتراضيًا إذا موجود
         if(PLAN_LIST.length){
           setSelectedPlan(PLAN_LIST[0]);
         }else{
-          // إذا ما في خطط، خلي السعر 0
           priceEl.textContent = "$0.00";
         }
 
@@ -550,6 +578,7 @@
       }
     })();
   </script>
+
   <script src="app-ui.js?v=4"></script>
 </body>
 </html>
