@@ -25,6 +25,8 @@ th{color:#93c5fd;text-align:left}
 .badge{font-weight:900}
 .done{color:#22c55e}
 .pending{color:#fbbf24}
+/* ✅ added */
+.rejected{color:#ef4444}
 
 textarea{
   width:100%;
@@ -187,7 +189,12 @@ async function load(){
     rowsEl.innerHTML = "";
     for(const o of data){
       const ds = String(o.delivery_status || "pending");
-      const dsClass = ds === "done" ? "done" : "pending";
+
+      /* ✅ added: badge class supports rejected */
+      const dsClass =
+        ds === "done" ? "done" :
+        ds === "rejected" ? "rejected" :
+        "pending";
 
       const replyVal = o.admin_reply || "";
       const title = o.products?.title || "Product";
@@ -230,6 +237,8 @@ async function load(){
             <select data-status-for="${esc(o.id)}">
               <option value="pending" ${ds==="pending" ? "selected" : ""}>pending</option>
               <option value="done" ${ds==="done" ? "selected" : ""}>done</option>
+              <!-- ✅ added -->
+              <option value="rejected" ${ds==="rejected" ? "selected" : ""}>rejected</option>
             </select>
             <div style="height:8px"></div>
             <button class="actionBtn" data-save="${esc(o.id)}">Save</button>
