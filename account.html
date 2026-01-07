@@ -419,7 +419,7 @@
         .select("plan_key, plan_label, price, active, updated_at")
         .eq("product_id", productId)
         .eq("active", true)
-        .order("updated_at", { ascending:false });
+        .order("plan_key", { ascending:true });
 
       if(error) throw error;
 
