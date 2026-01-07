@@ -25,7 +25,6 @@ th{color:#93c5fd;text-align:left}
 .badge{font-weight:900}
 .done{color:#22c55e}
 .pending{color:#fbbf24}
-/* ✅ added */
 .rejected{color:#ef4444}
 
 textarea{
@@ -126,22 +125,6 @@ function esc(s){
     .replaceAll("'","&#039;");
 }
 
-// ✅ parse status tag from reply (if exists)
-function getTaggedStatus(reply){
-  const raw = String(reply || "");
-  const m = raw.match(/^\s*\[STATUS:(pending|done|rejected)\]\s*/i);
-  return m && m[1] ? m[1].toLowerCase() : null;
-}
-function stripStatusTag(reply){
-  return String(reply || "").replace(/^\s*\[STATUS:(pending|done|rejected)\]\s*/i, "");
-}
-function upsertStatusTag(reply, status){
-  let r = String(reply || "");
-  // remove old tag(s)
-  r = r.replace(/\[STATUS:(pending|done|rejected)\]\s*/gi, "");
-  return `[STATUS:${status}]\n` + (r || "");
-}
-
 async function requireSession(){
   const { data: s, error } = await sb.auth.getSession();
   if(error) throw error;
@@ -203,18 +186,14 @@ async function load(){
 
     rowsEl.innerHTML = "";
     for(const o of data){
-      // ✅ show status from tag if present, else from delivery_status
-      const tagged = getTaggedStatus(o.admin_reply);
-      const ds = tagged || String(o.delivery_status || "pending");
+      const ds = String(o.delivery_status || "pending");
 
       const dsClass =
         ds === "done" ? "done" :
         ds === "rejected" ? "rejected" :
         "pending";
 
-      // ✅ do NOT show the tag inside textarea
-      const replyVal = stripStatusTag(o.admin_reply || "");
-
+      const replyVal = o.admin_reply || "";
       const title = o.products?.title || "Product";
 
       const planTxt = o.duration ? `Plan: ${esc(o.duration)}` : "";
@@ -280,14 +259,8 @@ rowsEl.addEventListener("click", async (ev)=>{
     const replyEl = rowsEl.querySelector(`textarea[data-reply-for="${orderId}"]`);
     const stEl = rowsEl.querySelector(`select[data-status-for="${orderId}"]`);
 
-    let reply = replyEl ? replyEl.value : "";
-    let uiStatus = stEl ? stEl.value : "pending";
-
-    // ✅ put tag in reply so we can show rejected later
-    reply = upsertStatusTag(reply, uiStatus);
-
-    // ✅ RPC only accepts pending/done, so map rejected => pending
-    let deliveryStatus = uiStatus;
+    const reply = replyEl ? replyEl.value : "";
+    const deliveryStatus = stEl ? stEl.value : "pending";
 
     const session = await requireSession();
     if(!session) return;
@@ -295,12 +268,22 @@ rowsEl.addEventListener("click", async (ev)=>{
     const okAdmin = await requireAdmin(session);
     if(!okAdmin) return;
 
+    // ✅ update order
     const { error } = await sb.rpc("admin_update_order", {
       p_order_id: orderId,
       p_reply: reply,
       p_delivery_status: deliveryStatus
     });
     if(error) throw error;
+
+    // ✅ optional: if you have a refund RPC, we try it (won't break if not exists)
+    if(deliveryStatus === "rejected"){
+      try{
+        await sb.rpc("refund_order_wallet", { p_order_id: orderId });
+      }catch(_e){
+        // ignore if not exists
+      }
+    }
 
     await load();
     alert("Saved ✅");
