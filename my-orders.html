@@ -1,3 +1,6 @@
+<!-- =========================
+       my-orders.html
+========================= -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -47,18 +50,12 @@ h2{margin:0;font-size:22px}
 .small{opacity:.65;font-size:12px}
 .price{font-weight:900;color:#38bdf8}
 
-/* Payment status */
 .status{font-weight:900}
 .paid{color:#22c55e}
 .pending{color:#fbbf24}
 .cancelled{color:#ef4444}
-.refunded{color:#ef4444}
-
-/* Delivery status badge inside replyBox */
-.replyStatus{font-weight:900}
-.replyStatus.pending{color:#fbbf24}
-.replyStatus.done{color:#22c55e}
-.replyStatus.rejected{color:#ef4444}
+/* ✅ refunded when rejected */
+.refunded{color:#38bdf8}
 
 /* ===== Reply ===== */
 .replyBox{
@@ -81,6 +78,10 @@ h2{margin:0;font-size:22px}
   opacity:.7;
   font-size:12px;
 }
+.replyStatus{font-weight:900}
+.replyStatus.pending{color:#fbbf24}
+.replyStatus.done{color:#22c55e}
+.replyStatus.rejected{color:#ef4444} /* ✅ added */
 
 /* ❌ ممنوع يبين الرد قبل الكبس */
 .replyText{ display:none !important; }
@@ -92,7 +93,7 @@ h2{margin:0;font-size:22px}
   margin-top:40px;
 }
 
-/* ===== Modal ===== */
+/* ===== Modal (Design like your glass UI) ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -312,25 +313,27 @@ replyShare.addEventListener("click", async ()=>{
   }
 
   for(const o of data){
-    const delivery = String(o.delivery_status || "pending");
-
-    // ✅ إذا الطلب rejected => خليه يبين refunded بدل paid (حتى لو DB بعده paid)
-    const payStatus = (delivery === "rejected") ? "refunded" : String(o.status || "pending");
-
-    const payClass =
-      payStatus === "paid" ? "paid" :
-      payStatus === "pending" ? "pending" :
-      payStatus === "refunded" ? "refunded" :
-      "cancelled";
-
+    const delivery = String(o.delivery_status || "pending").toLowerCase();
     const deliveryClass =
       delivery === "done" ? "done" :
       delivery === "rejected" ? "rejected" :
       "pending";
 
+    // ✅ paid status: if rejected => refunded
+    const paidLabel = (delivery === "rejected") ? "refunded" : String(o.status || "");
+    const stClass =
+      paidLabel === "paid" ? "paid" :
+      paidLabel === "pending" ? "pending" :
+      paidLabel === "refunded" ? "refunded" :
+      "cancelled";
+
     const replyRaw = String(o.admin_reply || "");
-    const hasReply = !!replyRaw.trim();
     const productTitle = String(o.products?.title || "order");
+
+    // ✅ ignore fake status-only replies
+    const replyTrim = replyRaw.trim();
+    const isOnlyStatusTag = /^(\[STATUS:\s*(pending|done|rejected)\s*\])$/i.test(replyTrim);
+    const hasReply = !!replyTrim && !isOnlyStatusTag;
 
     const el = document.createElement("div");
     el.className = "card";
@@ -347,17 +350,16 @@ replyShare.addEventListener("click", async ()=>{
 
       <div class="row" style="margin-top:8px">
         <div class="small">Order #${esc(o.id)}</div>
-        <!-- ✅ هون بس مرة وحدة: Payment status -->
-        <div class="status ${payClass}">${esc(payStatus)}</div>
+        <div class="status ${stClass}">${esc(paidLabel)}</div>
       </div>
 
       <div class="replyBox"
            data-full="${esc(replyRaw)}"
-           data-title="${esc(productTitle)}">
+           data-title="${esc(productTitle)}"
+           style="${hasReply ? "" : "cursor:default;"}">
         <div class="replyHeader">
-          <!-- ✅ هون status التنفيذ الحقيقي -->
           <div class="replyStatus ${deliveryClass}">
-            Status: ${esc(delivery)}
+            Status: ${delivery === "done" ? "Done" : delivery === "rejected" ? "Rejected" : "Pending"}
           </div>
           <div class="replyToggle">${hasReply ? 'Tap to view' : ''}</div>
         </div>
@@ -376,8 +378,14 @@ replyShare.addEventListener("click", async ()=>{
     const fullEsc = box.getAttribute("data-full") || "";
     const titleEsc = box.getAttribute("data-title") || "order";
 
-    const decodedReply = decodeEscaped(fullEsc);
+    let decodedReply = decodeEscaped(fullEsc);
     const decodedTitle = decodeEscaped(titleEsc);
+
+    // ✅ block status-only reply
+    const cleaned = decodedReply.trim();
+    if(/^(\[STATUS:\s*(pending|done|rejected)\s*\])$/i.test(cleaned)){
+      decodedReply = "";
+    }
 
     if(!decodedReply.trim()) return;
     openReplyModal(decodedReply, decodedTitle);
