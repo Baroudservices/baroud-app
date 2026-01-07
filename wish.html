@@ -27,7 +27,6 @@
       padding:18px;
     }
 
-    /* Debug banner (مخفي) */
     #dbg{
       max-width:460px;margin:0 auto 10px;
       padding:10px 12px;border-radius:14px;
@@ -99,6 +98,20 @@
       display:block;
     }
 
+    /* ✅ input رقم التحويل */
+    .tInput{
+      width:100%;
+      padding:16px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      outline:none;
+      margin-top:10px;
+      font-size:16px;
+      display:block;
+    }
+
     /* file input مخفي */
     #receipt{
       position:fixed;
@@ -133,6 +146,40 @@
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
+    }
+
+    /* ✅ OR line */
+    .orLine{
+      margin:14px 0 10px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      opacity:.9;
+      font-weight:950;
+    }
+    .orLine::before,
+    .orLine::after{
+      content:"";
+      flex:1;
+      height:1px;
+      background:rgba(255,255,255,.14);
+    }
+    .orLine span{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      font-size:12px;
+      letter-spacing:.4px;
+    }
+
+    /* ✅ label فوق input الرقم */
+    .lbl{
+      margin-top:8px;
+      color:var(--muted);
+      font-weight:800;
+      font-size:13px;
+      letter-spacing:.2px;
     }
 
     .btn{
@@ -213,12 +260,27 @@
 
       <input id="amount" type="number" placeholder="Enter amount $" inputmode="numeric" />
 
+      <!-- Upload -->
       <input id="receipt" type="file" accept="image/*" />
 
       <div class="fileBtn" id="fileBtn">
         <span>📎 Upload receipt</span>
         <span class="fileName" id="fileName">No file</span>
       </div>
+
+      <!-- OR -->
+      <div class="orLine"><span>OR</span></div>
+
+      <!-- Transfer number -->
+      <div class="lbl">The number from which the transfer was made</div>
+      <input
+        id="transferNumber"
+        class="tInput"
+        type="tel"
+        inputmode="numeric"
+        placeholder="Write the number..."
+        autocomplete="tel"
+      />
 
       <button id="btnReq" class="btn" type="button">REQUEST</button>
 
@@ -242,13 +304,13 @@
 
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const receipt = document.getElementById("receipt");
     const fileBtn = document.getElementById("fileBtn");
     const fileNameEl = document.getElementById("fileName");
     const btnReq = document.getElementById("btnReq");
+    const transferNumberEl = document.getElementById("transferNumber");
 
     function showOverlay(title, msg){
       document.getElementById("ovTitle").textContent = title;
@@ -268,6 +330,17 @@
     receipt.addEventListener("change", ()=>{
       const f = receipt.files?.[0];
       fileNameEl.textContent = f?.name || "No file";
+      // ✅ إذا اختار صورة، فضّي رقم التحويل (حتى ما يصير الاثنين سوا)
+      if(f) transferNumberEl.value = "";
+    });
+
+    // ✅ إذا كتب رقم تحويل، فضّي الصورة
+    transferNumberEl.addEventListener("input", ()=>{
+      const v = (transferNumberEl.value || "").trim();
+      if(v){
+        receipt.value = "";
+        fileNameEl.textContent = "No file";
+      }
     });
 
     // ✅ helper: get public url from storage path
@@ -284,14 +357,23 @@
 
       const amount = Number(document.getElementById("amount").value);
       const file = receipt.files?.[0];
+      const transferNumber = (transferNumberEl.value || "").trim();
 
       if(!amount || amount < 10){
         sending = false;
         return showOverlay("Error ❌","Minimum deposit is 10$");
       }
-      if(!file){
+
+      const hasImg = !!file;
+      const hasNum = !!transferNumber;
+
+      if(!hasImg && !hasNum){
         sending = false;
-        return showOverlay("Error ❌","Please upload receipt image");
+        return showOverlay("Error ❌","Upload receipt OR enter transfer number.");
+      }
+      if(hasImg && hasNum){
+        sending = false;
+        return showOverlay("Error ❌","Choose only one: receipt image OR transfer number.");
       }
 
       btnReq.disabled = true;
@@ -307,36 +389,43 @@
           return;
         }
 
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-        const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
-        const filePath = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
+        let receipt_path = null;
+        let receipt_url  = null;
 
-        // ✅ Upload
-        const { error: upErr } = await sb.storage
-          .from("receipts")
-          .upload(filePath, file, { upsert:false });
+        // ✅ إذا في صورة: ارفعها
+        if(hasImg){
+          const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+          const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
+          const filePath = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
 
-        if(upErr) throw upErr;
+          const { error: upErr } = await sb.storage
+            .from("receipts")
+            .upload(filePath, file, { upsert:false });
+          if(upErr) throw upErr;
 
-        // ✅ Build public url (bucket لازم يكون public)
-        const receiptUrl = publicReceiptUrl(filePath);
+          receipt_path = filePath;
+          receipt_url = publicReceiptUrl(filePath); // bucket لازم يكون public
+        }
 
-        // ✅ Insert: نخزن path + url
+        // ✅ Insert: نخزن يا صورة يا رقم
         const { error: insErr } = await sb.from("deposits").insert([{
           user_id: user.id,
           method: "Whish Money",
           amount,
-          receipt_path: filePath,
-          receipt_url: receiptUrl,   // ✅ الجديد
+          receipt_path,
+          receipt_url,
+          transfer_number: hasNum ? transferNumber : null,  // ✅ الجديد
           status: "pending"
         }]);
         if(insErr) throw insErr;
 
         showOverlay("Request sent ✅","Your deposit request is pending.");
 
+        // reset
         document.getElementById("amount").value = "";
         receipt.value = "";
         fileNameEl.textContent = "No file";
+        transferNumberEl.value = "";
 
       }catch(err){
         showOverlay("Failed ❌", err?.message || "Unknown error");
@@ -347,6 +436,7 @@
       }
     });
   </script>
-<script src="app-ui.js?v=3"></script>
+
+  <script src="app-ui.js?v=3"></script>
 </body>
 </html>
