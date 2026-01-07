@@ -507,13 +507,18 @@
         const finalNote = buildOrderNote();
         localStorage.setItem("last_order_note", finalNote);
 
-        const { data: orderId, error } = await sb.rpc("place_order", {
-          p_product_id: currentProductId,
-          p_price: finalPrice,
-          p_duration: selectedPlan.label,
-          p_note: finalNote || null
-        });
-        if(error) throw error;
+     const { data: orderId, error } = await sb.rpc("place_order", {
+  p_product_id: currentProductId,
+  p_price: finalPrice,
+  p_duration: selectedPlan.label,
+  p_note: finalNote || null
+});
+if(error) throw error;
+
+// ✅ clear customer note after successful order
+setCustomerNote("");
+try{ localStorage.removeItem(NOTE_KEY); }catch(e){}
+try{ localStorage.removeItem("last_order_customer_note"); }catch(e){}
 
         const note = finalNote || "";
         const planKey = localStorage.getItem("last_order_plan") || selectedPlan.key;
