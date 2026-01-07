@@ -16,13 +16,50 @@
       -webkit-tap-highlight-color:transparent;
       overflow-x:hidden;
     }
-    <body>
-  <div class="page">
-    <!-- كل محتوى موقعك هون -->
-  </div>
-</body>
+.wrap{
+  width: 100%;
+  margin: 0 auto;
+  padding: 14px 14px 40px;
+  max-width: 520px; /* موبايل */
+}
 
-    .wrap{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+@media (min-width: 992px){
+  .wrap{
+    max-width: 1200px;  /* وسّع على PC */
+    padding: 24px 24px 60px;
+  }
+
+  /* تكبير عام للواجهة */
+  html{ font-size: 18px; }
+  
+  /* تكبير البانر والكروت */
+  .banner img{ height: 260px; }
+  .tile img{ height: 170px; }
+  .grid{ gap: 20px; }
+  .label{ font-size: 16px; }
+}
+.wrap{
+  width: 100%;
+  margin: 0 auto;
+  padding: 14px 14px 40px;
+  max-width: 520px; /* موبايل */
+}
+
+@media (min-width: 992px){
+  .wrap{
+    max-width: 1200px;  /* وسّع على PC */
+    padding: 24px 24px 60px;
+  }
+
+  /* تكبير عام للواجهة */
+  html{ font-size: 18px; }
+  
+  /* تكبير البانر والكروت */
+  .banner img{ height: 260px; }
+  .tile img{ height: 170px; }
+  .grid{ gap: 20px; }
+  .label{ font-size: 16px; }
+}
 
     /* ===== TOPBAR (NO BALANCE) ===== */
     .topbar{
@@ -104,6 +141,12 @@
       touch-action:manipulation;
       transition:transform .12s ease;
     }
+    @media (min-width: 992px){
+  .grid{
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
     .tile:active{transform:scale(.98)}
     .tile img{width:100%;height:120px;object-fit:cover;display:block}
     .label{
