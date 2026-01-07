@@ -1,0 +1,21 @@
+/* ===== GLOBAL LAYOUT (ALL PAGES) ===== */
+*{ box-sizing: border-box; }
+
+.wrap{
+  width: 100%;
+  margin: 0 auto;
+  padding: 14px 14px 40px;
+  max-width: 520px; /* موبايل */
+}
+
+/* ===== DESKTOP / PC ===== */
+@media (min-width: 992px){
+  .wrap{
+    max-width: 1200px;
+    padding: 24px 24px 60px;
+  }
+
+  html{
+    font-size: 18px;
+  }
+}
