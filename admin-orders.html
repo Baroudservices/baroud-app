@@ -288,7 +288,6 @@ rowsEl.addEventListener("click", async (ev)=>{
 
     // ✅ RPC only accepts pending/done, so map rejected => pending
     let deliveryStatus = uiStatus;
-    if(uiStatus === "rejected") deliveryStatus = "pending";
 
     const session = await requireSession();
     if(!session) return;
