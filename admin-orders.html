@@ -126,6 +126,22 @@ function esc(s){
     .replaceAll("'","&#039;");
 }
 
+// ✅ parse status tag from reply (if exists)
+function getTaggedStatus(reply){
+  const raw = String(reply || "");
+  const m = raw.match(/^\s*\[STATUS:(pending|done|rejected)\]\s*/i);
+  return m && m[1] ? m[1].toLowerCase() : null;
+}
+function stripStatusTag(reply){
+  return String(reply || "").replace(/^\s*\[STATUS:(pending|done|rejected)\]\s*/i, "");
+}
+function upsertStatusTag(reply, status){
+  let r = String(reply || "");
+  // remove old tag(s)
+  r = r.replace(/\[STATUS:(pending|done|rejected)\]\s*/gi, "");
+  return `[STATUS:${status}]\n` + (r || "");
+}
+
 async function requireSession(){
   const { data: s, error } = await sb.auth.getSession();
   if(error) throw error;
@@ -161,7 +177,6 @@ async function load(){
     const okAdmin = await requireAdmin(session);
     if(!okAdmin){ rowsEl.innerHTML = ""; return; }
 
-    // ✅ add duration + note
     const { data, error } = await sb
       .from("orders")
       .select(`
@@ -188,15 +203,18 @@ async function load(){
 
     rowsEl.innerHTML = "";
     for(const o of data){
-      const ds = String(o.delivery_status || "pending");
+      // ✅ show status from tag if present, else from delivery_status
+      const tagged = getTaggedStatus(o.admin_reply);
+      const ds = tagged || String(o.delivery_status || "pending");
 
-      /* ✅ added: badge class supports rejected */
       const dsClass =
         ds === "done" ? "done" :
         ds === "rejected" ? "rejected" :
         "pending";
 
-      const replyVal = o.admin_reply || "";
+      // ✅ do NOT show the tag inside textarea
+      const replyVal = stripStatusTag(o.admin_reply || "");
+
       const title = o.products?.title || "Product";
 
       const planTxt = o.duration ? `Plan: ${esc(o.duration)}` : "";
@@ -236,9 +254,7 @@ async function load(){
           <td style="min-width:160px">
             <select data-status-for="${esc(o.id)}">
               <option value="pending" ${ds==="pending" ? "selected" : ""}>pending</option>
-<option value="done" ${ds==="done" ? "selected" : ""}>done</option>
-<option value="rejected" ${ds==="rejected" ? "selected" : ""}>rejected</option>
-              <!-- ✅ added -->
+              <option value="done" ${ds==="done" ? "selected" : ""}>done</option>
               <option value="rejected" ${ds==="rejected" ? "selected" : ""}>rejected</option>
             </select>
             <div style="height:8px"></div>
@@ -264,8 +280,15 @@ rowsEl.addEventListener("click", async (ev)=>{
     const replyEl = rowsEl.querySelector(`textarea[data-reply-for="${orderId}"]`);
     const stEl = rowsEl.querySelector(`select[data-status-for="${orderId}"]`);
 
-    const reply = replyEl ? replyEl.value : "";
-    const deliveryStatus = stEl ? stEl.value : "pending";
+    let reply = replyEl ? replyEl.value : "";
+    let uiStatus = stEl ? stEl.value : "pending";
+
+    // ✅ put tag in reply so we can show rejected later
+    reply = upsertStatusTag(reply, uiStatus);
+
+    // ✅ RPC only accepts pending/done, so map rejected => pending
+    let deliveryStatus = uiStatus;
+    if(uiStatus === "rejected") deliveryStatus = "pending";
 
     const session = await requireSession();
     if(!session) return;
