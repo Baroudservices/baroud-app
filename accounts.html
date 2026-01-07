@@ -90,14 +90,14 @@
       justify-content:center;
       font-size:46px;
       position:relative;
-      overflow:hidden; /* ✅ مهم */
+      overflow:hidden;
     }
 
-    /* ✅ FIX: خلي الصورة تعبي المربع */
+    /* ✅ خلي الصورة تعبي المربع */
     .pImg{
       width:100%;
       height:100%;
-      object-fit:cover; /* بدل contain */
+      object-fit:cover;
       display:block;
       user-select:none;
       -webkit-user-drag:none;
@@ -181,7 +181,6 @@
     .sk-line{ height:14px; border-radius:10px; }
     .sk-line.big{ height:18px; }
     .sk-row{ display:flex; gap:10px; align-items:center; }
-    .mt8{ margin-top:8px; }
     .mt10{ margin-top:10px; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -220,7 +219,7 @@
       .replaceAll("'","&#039;");
   }
 
-  // ✅ FIX: skeleton جوّا .img حتى يطابق المربع
+  // ✅ skeleton جوّا .img حتى يطابق المربع
   function showLoading(n=6){
     grid.innerHTML = "";
     for(let i=0;i<n;i++){
@@ -246,7 +245,6 @@
     }
   }
 
-  // ✅ فتح صفحة المنتج (id bigint safe)
   function openProduct(rawId){
     const s = String(rawId ?? "").trim();
     const n = Number(s);
@@ -257,7 +255,6 @@
     location.href = `account.html?id=${n}`;
   }
 
-  // ✅ image path from /assets/products/{id}.jpg (with fallback)
   function productImgUrl(id){
     return `assets/products/${id}.jpg`;
   }
@@ -299,13 +296,10 @@
         </div>
       `;
 
-      // ✅ الكرت كله يفتح
       el.addEventListener("click", ()=> openProduct(it.id));
-
       grid.appendChild(el);
     }
 
-    // ✅ الزر كمان يفتح (وبنوقف bubbling)
     grid.querySelectorAll("button.buy").forEach(b=>{
       b.addEventListener("click", (e)=>{
         e.stopPropagation();
@@ -360,6 +354,5 @@
 </script>
 
 <script src="app-ui.js?v=4"></script>
-
 </body>
 </html>
