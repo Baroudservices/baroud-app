@@ -94,11 +94,10 @@
       overflow:hidden; /* ✅ مهم */
     }
 
-    /* ✅ خلي الصورة تعبي المربع */
     .pImg{
       width:100%;
       height:100%;
-      object-fit:cover; /* hero look */
+      object-fit:cover;
       display:block;
       user-select:none;
       -webkit-user-drag:none;
@@ -221,7 +220,6 @@
       .replaceAll("'","&#039;");
   }
 
-  // ✅ skeleton جوّا .img حتى يطابق المربع
   function showLoading(n=6){
     grid.innerHTML = "";
     for(let i=0;i<n;i++){
@@ -247,18 +245,20 @@
     }
   }
 
-  function openProduct(rawId){
+  /* ✅ FIX: Games تفتح صفحة game.html مش account.html */
+  function openGame(rawId){
     const s = String(rawId ?? "").trim();
     const n = Number(s);
     if(!Number.isFinite(n) || n <= 0){
       alert("Invalid product id");
       return;
     }
-    location.href = `account.html?id=${n}`;
+    location.href = `game.html?id=${n}`;
   }
 
-  function productImgUrl(id){
-    return `assets/products/${id}.jpg`;
+  /* ✅ FIX: صور الألعاب بفولدر games */
+  function gameImgUrl(id){
+    return `assets/games/${id}.jpg`;
   }
 
   function render(list){
@@ -279,10 +279,10 @@
       el.innerHTML = `
         <div class="img">
           <img class="pImg"
-               src="${esc(productImgUrl(it.id))}"
+               src="${esc(gameImgUrl(it.id))}"
                alt="${esc(it.title)}"
                loading="lazy"
-               onerror="this.onerror=null; this.src='assets/products/default.png';">
+               onerror="this.onerror=null; this.src='assets/games/default.png';">
         </div>
 
         <div class="body">
@@ -298,14 +298,14 @@
         </div>
       `;
 
-      el.addEventListener("click", ()=> openProduct(it.id));
+      el.addEventListener("click", ()=> openGame(it.id));
       grid.appendChild(el);
     }
 
     grid.querySelectorAll("button.buy").forEach(b=>{
       b.addEventListener("click", (e)=>{
         e.stopPropagation();
-        openProduct(b.getAttribute("data-id"));
+        openGame(b.getAttribute("data-id"));
       });
     });
   }
@@ -315,7 +315,7 @@
       .from("products")
       .select("id,title,price,category")
       .eq("active", true)
-      .eq("category", "Games")          // ✅ Games فقط
+      .eq("category", "Games")
       .order("id", { ascending: true });
 
     if(error) throw new Error(error.message || "Products query failed");
