@@ -308,17 +308,33 @@
     });
   }
 
- async function loadProducts(){
+async function loadProducts(){
   const { data, error } = await sb
     .from("products")
-    .select("id,title,price,category,page")
-    .eq("active", true)
-    .eq("page", "accounts")
-    .order("id", { ascending: true });
+    .select(`
+      id,
+      title,
+      category,
+      product_plan_prices(price)
+    `)
+    .eq("active", true);
 
-  if(error) throw new Error(error.message || "Products query failed");
-  return data || [];
+  if(error) throw error;
+
+  return (data || []).map(p => {
+    const prices = (p.product_plan_prices || [])
+      .map(x => Number(x.price))
+      .filter(n => Number.isFinite(n));
+
+    return {
+      id: p.id,
+      title: p.title,
+      category: p.category,
+      price: prices.length ? Math.min(...prices) : 0
+    };
+  });
 }
+
 
   let all = [];
 
