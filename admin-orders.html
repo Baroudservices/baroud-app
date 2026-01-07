@@ -1,3 +1,6 @@
+<!-- =========================
+      admin-orders.html
+========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +28,7 @@ th{color:#93c5fd;text-align:left}
 .badge{font-weight:900}
 .done{color:#22c55e}
 .pending{color:#fbbf24}
-.rejected{color:#ef4444}
+.rejected{color:#ef4444} /* ✅ added */
 
 textarea{
   width:100%;
@@ -186,7 +189,7 @@ async function load(){
 
     rowsEl.innerHTML = "";
     for(const o of data){
-      const ds = String(o.delivery_status || "pending");
+      const ds = String(o.delivery_status || "pending").toLowerCase();
 
       const dsClass =
         ds === "done" ? "done" :
@@ -268,22 +271,12 @@ rowsEl.addEventListener("click", async (ev)=>{
     const okAdmin = await requireAdmin(session);
     if(!okAdmin) return;
 
-    // ✅ update order
     const { error } = await sb.rpc("admin_update_order", {
       p_order_id: orderId,
       p_reply: reply,
       p_delivery_status: deliveryStatus
     });
     if(error) throw error;
-
-    // ✅ optional: if you have a refund RPC, we try it (won't break if not exists)
-    if(deliveryStatus === "rejected"){
-      try{
-        await sb.rpc("refund_order_wallet", { p_order_id: orderId });
-      }catch(_e){
-        // ignore if not exists
-      }
-    }
 
     await load();
     alert("Saved ✅");
