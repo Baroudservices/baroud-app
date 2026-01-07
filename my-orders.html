@@ -47,11 +47,19 @@ h2{margin:0;font-size:22px}
 .small{opacity:.65;font-size:12px}
 .price{font-weight:900;color:#38bdf8}
 
+/* Payment status */
 .status{font-weight:900}
 .paid{color:#22c55e}
 .pending{color:#fbbf24}
 .cancelled{color:#ef4444}
-.refunded{ color:#38bdf8; font-weight:900; }
+.refunded{color:#ef4444}
+
+/* Delivery status badge inside replyBox */
+.replyStatus{font-weight:900}
+.replyStatus.pending{color:#fbbf24}
+.replyStatus.done{color:#22c55e}
+.replyStatus.rejected{color:#ef4444}
+
 /* ===== Reply ===== */
 .replyBox{
   margin-top:10px;
@@ -73,9 +81,6 @@ h2{margin:0;font-size:22px}
   opacity:.7;
   font-size:12px;
 }
-.replyStatus{font-weight:900}
-.replyStatus.pending{color:#fbbf24}
-.replyStatus.done{color:#22c55e}
 
 /* ❌ ممنوع يبين الرد قبل الكبس */
 .replyText{ display:none !important; }
@@ -87,7 +92,7 @@ h2{margin:0;font-size:22px}
   margin-top:40px;
 }
 
-/* ===== Modal (Design like your glass UI) ===== */
+/* ===== Modal ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -230,16 +235,9 @@ function decodeEscaped(htmlEsc){
   return t.value;
 }
 
-// ✅ remove [STATUS:...] tag from reply before showing user
-function stripStatusTag(reply){
-  return String(reply || "").replace(/^\s*\[STATUS:(pending|done|rejected)\]\s*/i, "");
-}
-
 function openReplyModal(replyText, productTitle){
   const safeTitle = String(productTitle || "order").trim() || "order";
-
-  // ✅ clean reply (no status tag)
-  const cleanReply = stripStatusTag(String(replyText || "")).trim();
+  const cleanReply = String(replyText || "").trim();
 
   replyModalTitle.textContent = "Reply";
 
@@ -293,6 +291,7 @@ replyShare.addEventListener("click", async ()=>{
       id,
       price,
       status,
+      delivery_status,
       duration,
       note,
       created_at,
@@ -313,15 +312,24 @@ replyShare.addEventListener("click", async ()=>{
   }
 
   for(const o of data){
-    const stClass =
-  o.status === "paid" ? "paid" :
-  o.status === "refunded" ? "cancelled" :   // أو اعمل class جديدة refunded
-  o.status === "pending" ? "pending" : "cancelled";
+    const delivery = String(o.delivery_status || "pending");
+
+    // ✅ إذا الطلب rejected => خليه يبين refunded بدل paid (حتى لو DB بعده paid)
+    const payStatus = (delivery === "rejected") ? "refunded" : String(o.status || "pending");
+
+    const payClass =
+      payStatus === "paid" ? "paid" :
+      payStatus === "pending" ? "pending" :
+      payStatus === "refunded" ? "refunded" :
+      "cancelled";
+
+    const deliveryClass =
+      delivery === "done" ? "done" :
+      delivery === "rejected" ? "rejected" :
+      "pending";
 
     const replyRaw = String(o.admin_reply || "");
-    const replyClean = stripStatusTag(replyRaw);
-    const hasReply = !!replyClean.trim();
-
+    const hasReply = !!replyRaw.trim();
     const productTitle = String(o.products?.title || "order");
 
     const el = document.createElement("div");
@@ -336,23 +344,25 @@ replyShare.addEventListener("click", async ()=>{
         </div>
         <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
       </div>
-<div class="status ${stClass}">${esc(o.status)}</div>
+
       <div class="row" style="margin-top:8px">
         <div class="small">Order #${esc(o.id)}</div>
-        <div class="status ${stClass}">${esc(o.status)}</div>
+        <!-- ✅ هون بس مرة وحدة: Payment status -->
+        <div class="status ${payClass}">${esc(payStatus)}</div>
       </div>
 
       <div class="replyBox"
            data-full="${esc(replyRaw)}"
            data-title="${esc(productTitle)}">
         <div class="replyHeader">
-          <div class="replyStatus ${hasReply ? 'done' : 'pending'}">
-            Status: ${hasReply ? 'Done' : 'Pending'}
+          <!-- ✅ هون status التنفيذ الحقيقي -->
+          <div class="replyStatus ${deliveryClass}">
+            Status: ${esc(delivery)}
           </div>
           <div class="replyToggle">${hasReply ? 'Tap to view' : ''}</div>
         </div>
 
-        <div class="replyText">${hasReply ? esc(replyClean) : "No details yet"}</div>
+        <div class="replyText">${hasReply ? esc(replyRaw) : "No details yet"}</div>
       </div>
     `;
 
@@ -369,10 +379,7 @@ replyShare.addEventListener("click", async ()=>{
     const decodedReply = decodeEscaped(fullEsc);
     const decodedTitle = decodeEscaped(titleEsc);
 
-    // ✅ don't open if empty after cleaning
-    const clean = stripStatusTag(decodedReply).trim();
-    if(!clean) return;
-
+    if(!decodedReply.trim()) return;
     openReplyModal(decodedReply, decodedTitle);
   });
 
