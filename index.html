@@ -7,6 +7,7 @@
 
   <style>
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
@@ -17,15 +18,15 @@
       overflow-x:hidden;
     }
 
-    /* ===== GLOBAL WRAP (KEEP) ===== */
+    /* ===== GLOBAL WRAP ===== */
     .wrap{
       width: 100%;
       margin: 0 auto;
       padding: 14px 14px 40px;
-      max-width: 520px; /* موبايل */
+      max-width: 520px; /* Mobile */
     }
 
-    /* ===== TOPBAR (NO BALANCE) ===== */
+    /* ===== TOPBAR ===== */
     .topbar{
       display:flex;align-items:center;justify-content:space-between;gap:12px;
       margin-top:6px;
@@ -192,43 +193,31 @@
       font-weight:900;
     }
 
-    /* ===== DESKTOP / PC (ONE PLACE) ===== */
+    /* ===== DESKTOP / PC ===== */
     @media (min-width: 992px){
       .wrap{
-        max-width: 1200px;
-        padding: 24px 24px 60px;
+        max-width: 1400px;     /* أكبر من 1200 */
+        padding: 28px 28px 70px;
       }
 
       html{ font-size: 18px; }
 
-      .banner img{ height: 260px; }
-      .tile img{ height: 170px; }
+      .iconBtn{ width:60px; height:60px; border-radius:20px; }
+      .logo{ width:48px; height:48px; border-radius:16px; }
+      .brandText{ font-size: 20px; }
+
+      .banner img{ height: 320px; }
+      .tile img{ height: 190px; }
+
       .grid{
-        gap: 20px;
+        gap: 22px;
         grid-template-columns: repeat(4, 1fr);
       }
       .label{ font-size: 16px; }
-    }
 
-    /* ===== OLD DUPLICATE WRAP (KEPT, NOT DELETED) =====
-    .wrap{
-      width: 100%;
-      margin: 0 auto;
-      padding: 14px 14px 40px;
-      max-width: 520px;
+      .support, .searchBox{ padding: 16px 18px; }
+      .searchBox input{ font-size: 17px; }
     }
-    @media (min-width: 992px){
-      .wrap{
-        max-width: 1200px;
-        padding: 24px 24px 60px;
-      }
-      html{ font-size: 18px; }
-      .banner img{ height: 260px; }
-      .tile img{ height: 170px; }
-      .grid{ gap: 20px; }
-      .label{ font-size: 16px; }
-    }
-    ================================================ */
   </style>
 </head>
 
@@ -354,6 +343,7 @@
       });
     });
   </script>
+
   <script src="app-ui.js?v=3"></script>
 </body>
 </html>
