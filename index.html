@@ -23,7 +23,7 @@
       width: 100%;
       margin: 0 auto;
       padding: 14px 14px 40px;
-      max-width: 520px; /* Mobile */
+      max-width: 520px;
     }
 
     /* ===== TOPBAR ===== */
@@ -107,7 +107,12 @@
       transition:transform .12s ease;
     }
     .tile:active{transform:scale(.98)}
-    .tile img{width:100%;height:120px;object-fit:cover;display:block}
+    .tile img{
+      width:100%;
+      height:140px; /* طول أنسب للصور الجديدة */
+      object-fit:cover;
+      display:block;
+    }
     .label{
       padding:12px 10px;text-align:center;
       font-weight:900;letter-spacing:.6px;opacity:.92;font-size:15px
@@ -195,28 +200,11 @@
 
     /* ===== DESKTOP / PC ===== */
     @media (min-width: 992px){
-  .wrap{
-    max-width: 1600px;   /* أكبر */
-    padding: 32px 32px 80px;
-  }
-
-  html{ font-size: 19px; }
-
-  .banner img{ height: 360px; }
-  .tile img{ height: 210px; }
-
-  .grid{
-    grid-template-columns: repeat(4, 1fr);
-    gap: 26px;
-  }
-
-  .iconBtn{ width:64px; height:64px; border-radius:22px; }
-  .logo{ width:52px; height:52px; border-radius:18px; }
-  .brandText{ font-size: 22px; }
-
-  .support, .searchBox{ padding: 18px 20px; }
-  .searchBox input{ font-size: 18px; }
-}
+      .wrap{ max-width: 1200px; padding: 32px; }
+      .grid{ grid-template-columns: repeat(4, 1fr); gap: 20px; }
+      .banner img{ height: 300px; }
+      .tile img{ height: 180px; }
+    }
 
   </style>
 </head>
@@ -272,27 +260,27 @@
 
     <section class="grid" id="grid">
       <div class="tile" data-name="accounts" onclick="goLogin()">
-        <img src="assets/tile-accounts.jpg" alt="Accounts" />
+        <img src="assets/accounts.png" alt="Accounts" />
         <div class="label">Accounts</div>
       </div>
 
       <div class="tile" data-name="games" onclick="goLogin()">
-        <img src="assets/tile-games.jpg" alt="Games" />
+        <img src="assets/games.png" alt="Games" />
         <div class="label">Games</div>
       </div>
 
       <div class="tile" data-name="gift cards" onclick="goLogin()">
-        <img src="assets/tile-giftcards.jpg" alt="Gift Cards" />
+        <img src="assets/giftcards.png" alt="Gift Cards" />
         <div class="label">Gift Cards</div>
       </div>
 
-      <div class="tile" data-name="social media" onclick="goLogin()">
-        <img src="assets/tile-social.jpg" alt="Social Media" />
-        <div class="label">Social Media</div>
+      <div class="tile" data-name="apps" onclick="goLogin()">
+        <img src="assets/apps.png" alt="Apps" />
+        <div class="label">Apps</div>
       </div>
     </section>
 
-    <div class="hint">pre-login landing</div>
+    <div class="hint">baroudlb.com</div>
   </main>
 
   <script>
@@ -325,10 +313,6 @@
       closeDrawer();
       alert("About Us");
     });
-    document.getElementById("ttBtn").addEventListener("click", (e)=>{
-      e.preventDefault();
-      alert("TikTok");
-    });
 
     function goLogin(){
       location.assign("login.html?v=" + Date.now());
@@ -343,7 +327,5 @@
       });
     });
   </script>
-
-  <script src="app-ui.js?v=3"></script>
 </body>
 </html>
