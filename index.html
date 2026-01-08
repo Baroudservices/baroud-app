@@ -66,16 +66,51 @@
       background:rgba(255,255,255,.04);
       box-shadow:0 22px 70px rgba(0,0,0,.35);
     }
-    .banner img{width:100%;height:170px;object-fit:cover;display:block}
 
+    /* Slider styles */
+    .slider{position:relative;overflow:hidden;border-radius:24px}
+    .slides{display:flex;transition:transform .55s ease;will-change:transform}
+    .slide{min-width:100%;height:170px}
+    .slide img{width:100%;height:170px;object-fit:cover;display:block}
+
+    .dots{
+      position:absolute;left:0;right:0;bottom:10px;
+      display:flex;justify-content:center;gap:7px;
+      z-index:5;
+    }
+    .dotBtn{
+      width:8px;height:8px;border-radius:99px;
+      background:rgba(255,255,255,.30);
+      border:1px solid rgba(255,255,255,.10);
+      cursor:pointer;
+      padding:0;
+      outline:none;
+    }
+    .dotBtn.active{width:18px;background:rgba(255,255,255,.85)}
+
+    /* ===== Support ticker ===== */
     .support{
       margin-top:12px;
       padding:12px 14px;border-radius:18px;
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.06);
       opacity:.9;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      overflow:hidden;
       font-weight:700;
+      box-shadow:0 18px 60px rgba(0,0,0,.18);
+    }
+    .support-slider{overflow:hidden;width:100%}
+    .support-track{
+      display:flex;
+      gap:40px;
+      width:max-content;
+      animation: scrollSupport 14s linear infinite;
+      will-change:transform;
+    }
+    .support-track span{white-space:nowrap;font-weight:800}
+    @keyframes scrollSupport{
+      from{ transform:translateX(0); }
+      to{ transform:translateX(-50%); }
     }
 
     /* ===== SEARCH ===== */
@@ -109,7 +144,7 @@
     .tile:active{transform:scale(.98)}
     .tile img{
       width:100%;
-      height:140px; /* طول أنسب للصور الجديدة */
+      height:140px;
       object-fit:cover;
       display:block;
     }
@@ -170,23 +205,6 @@
       color:#0b1a12;
       background:linear-gradient(90deg,#21f07a,#0fe067);
     }
-    
-.slider{position:relative;overflow:hidden;border-radius:var(--radius)}
-    .slides{display:flex;transition:transform .55s ease;will-change:transform}
-    .slide{min-width:100%;height:170px}
-    .slide img{width:100%;height:170px;object-fit:cover;display:block}
-
-    .dots{
-      position:absolute;left:0;right:0;bottom:10px;
-      display:flex;justify-content:center;gap:7px;
-    }
-    .dot{
-      width:8px;height:8px;border-radius:99px;
-      background:rgba(255,255,255,.30);
-      border:1px solid rgba(255,255,255,.10);
-      cursor:pointer;
-    }
-    .dot.active{width:18px;background:rgba(255,255,255,.85)}
 
     .menu{
       margin-top:14px;
@@ -219,10 +237,9 @@
     @media (min-width: 992px){
       .wrap{ max-width: 1200px; padding: 32px; }
       .grid{ grid-template-columns: repeat(4, 1fr); gap: 20px; }
-      .banner img{ height: 300px; }
+      .slide, .slide img{ height: 300px; }
       .tile img{ height: 180px; }
     }
-
   </style>
 </head>
 
@@ -265,8 +282,9 @@
       </div>
     </div>
 
+    <!-- Banner Slider -->
     <div class="banner slider" id="slider">
-      <div class="slides">
+      <div class="slides" id="slides">
         <div class="slide"><img src="assets/banner1.jpg" alt="banner 1"></div>
         <div class="slide"><img src="assets/banner2.jpg" alt="banner 2"></div>
         <div class="slide"><img src="assets/banner3.jpg" alt="banner 3"></div>
@@ -274,14 +292,20 @@
       <div class="dots" id="dots"></div>
     </div>
 
+    <!-- Support ticker -->
     <div class="support">
-  <div class="support-slider">
-    <div class="support-track">
-      <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
-      <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
+      <div class="support-slider">
+        <div class="support-track" id="supportTrack">
+          <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
+          <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+
+    <!-- Search (كان ناقص عندك فبيرجع وبيشتغل) -->
+    <div class="searchBox">
+      <input id="search" placeholder="Search" />
+    </div>
 
     <section class="grid" id="grid">
       <div class="tile" data-name="accounts" onclick="goLogin()">
@@ -309,33 +333,11 @@
   </main>
 
   <script>
-    const drawer = document.getElementById("drawer");
+    // ===== Drawer =====
+    const drawer  = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
     const closeBtn = document.getElementById("closeBtn");
-document.addEventListener("DOMContentLoaded", () => {
-      const slider = document.getElementById("slider");
-      const slidesEl = slider.querySelector(".slides");
-      const slides = [...slider.querySelectorAll(".slide")];
-      const dotsEl = document.getElementById("dots");
-
-      let i = 0;
-      let timer = null;
-
-      let startX = 0;
-      let dx = 0;
-      let dragging = false;
-
-      // dots
-      slides.forEach((_, idx) => {
-        const d = document.createElement("div");
-        d.className = "dot" + (idx === 0 ? " active" : "");
-        d.addEventListener("click", () => goTo(idx, true));
-        dotsEl.appendChild(d);
-      });
-  function setDots(){
-        [...dotsEl.children].forEach((d, idx) => d.classList.toggle("active", idx === i));
-      }
 
     function openDrawer(){
       drawer.classList.add("show");
@@ -366,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
       location.assign("login.html?v=" + Date.now());
     }
 
+    // ===== Search filter =====
     const search = document.getElementById("search");
     search.addEventListener("input", () => {
       const q = search.value.trim().toLowerCase();
@@ -373,6 +376,100 @@ document.addEventListener("DOMContentLoaded", () => {
         const name = (t.getAttribute("data-name") || t.innerText).toLowerCase();
         t.style.display = name.includes(q) ? "" : "none";
       });
+    });
+
+    // ===== Support ticker ensure enough length =====
+    (function(){
+      const track = document.getElementById("supportTrack");
+      if(!track) return;
+      // كرر المحتوى ليصير -50% دايمًا صحيح
+      track.innerHTML = track.innerHTML + track.innerHTML;
+    })();
+
+    // ===== Banner Slider (Auto + Swipe + dots) =====
+    document.addEventListener("DOMContentLoaded", () => {
+      const slider = document.getElementById("slider");
+      const slidesEl = document.getElementById("slides");
+      const slides = [...slider.querySelectorAll(".slide")];
+      const dotsEl = document.getElementById("dots");
+
+      let i = 0;
+      let timer = null;
+
+      let startX = 0;
+      let dx = 0;
+      let dragging = false;
+
+      // fallback images if missing
+      slidesEl.querySelectorAll("img").forEach(img=>{
+        img.addEventListener("error", ()=>{
+          img.onerror = null;
+          img.src = "assets/products/default.png"; // عندك هيدا موجود عادة
+        });
+      });
+
+      // dots
+      dotsEl.innerHTML = "";
+      slides.forEach((_, idx) => {
+        const d = document.createElement("button");
+        d.type = "button";
+        d.className = "dotBtn" + (idx === 0 ? " active" : "");
+        d.setAttribute("aria-label", "Go to slide " + (idx+1));
+        d.addEventListener("click", () => goTo(idx, true));
+        dotsEl.appendChild(d);
+      });
+
+      function setDots(){
+        [...dotsEl.children].forEach((d, idx) => d.classList.toggle("active", idx === i));
+      }
+
+      function goTo(n, user=false){
+        i = (n + slides.length) % slides.length;
+        slidesEl.style.transition = user ? "transform .45s ease" : "transform .55s ease";
+        slidesEl.style.transform = `translateX(${-i * 100}%)`;
+        setDots();
+      }
+
+      function next(){ goTo(i + 1); }
+
+      function play(){
+        stop();
+        timer = setInterval(next, 4500);
+      }
+      function stop(){
+        if(timer) clearInterval(timer);
+        timer = null;
+      }
+
+      // Swipe
+      slider.addEventListener("touchstart", (e) => {
+        dragging = true;
+        stop();
+        startX = e.touches[0].clientX;
+        dx = 0;
+        slidesEl.style.transition = "none";
+      }, {passive:true});
+
+      slider.addEventListener("touchmove", (e) => {
+        if(!dragging) return;
+        dx = e.touches[0].clientX - startX;
+        const percent = (dx / slider.clientWidth) * 100;
+        slidesEl.style.transform = `translateX(${(-i * 100) + percent}%)`;
+      }, {passive:true});
+
+      slider.addEventListener("touchend", () => {
+        if(!dragging) return;
+        dragging = false;
+
+        if (dx > 60) goTo(i - 1, true);
+        else if (dx < -60) goTo(i + 1, true);
+        else goTo(i, true);
+
+        play();
+      });
+
+      goTo(0);
+      play();
     });
   </script>
 </body>
