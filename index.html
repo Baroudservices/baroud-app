@@ -170,6 +170,23 @@
       color:#0b1a12;
       background:linear-gradient(90deg,#21f07a,#0fe067);
     }
+    
+.slider{position:relative;overflow:hidden;border-radius:var(--radius)}
+    .slides{display:flex;transition:transform .55s ease;will-change:transform}
+    .slide{min-width:100%;height:170px}
+    .slide img{width:100%;height:170px;object-fit:cover;display:block}
+
+    .dots{
+      position:absolute;left:0;right:0;bottom:10px;
+      display:flex;justify-content:center;gap:7px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:99px;
+      background:rgba(255,255,255,.30);
+      border:1px solid rgba(255,255,255,.10);
+      cursor:pointer;
+    }
+    .dot.active{width:18px;background:rgba(255,255,255,.85)}
 
     .menu{
       margin-top:14px;
@@ -257,11 +274,14 @@
       <div class="dots" id="dots"></div>
     </div>
 
-    <div class="support">Support Number: +961 81812024 | Fast & Secure Services</div>
-
-    <div class="searchBox">
-      <input id="search" placeholder="Search" />
+    <div class="support">
+  <div class="support-slider">
+    <div class="support-track">
+      <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
+      <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
     </div>
+  </div>
+</div>
 
     <section class="grid" id="grid">
       <div class="tile" data-name="accounts" onclick="goLogin()">
@@ -293,6 +313,29 @@
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
     const closeBtn = document.getElementById("closeBtn");
+document.addEventListener("DOMContentLoaded", () => {
+      const slider = document.getElementById("slider");
+      const slidesEl = slider.querySelector(".slides");
+      const slides = [...slider.querySelectorAll(".slide")];
+      const dotsEl = document.getElementById("dots");
+
+      let i = 0;
+      let timer = null;
+
+      let startX = 0;
+      let dx = 0;
+      let dragging = false;
+
+      // dots
+      slides.forEach((_, idx) => {
+        const d = document.createElement("div");
+        d.className = "dot" + (idx === 0 ? " active" : "");
+        d.addEventListener("click", () => goTo(idx, true));
+        dotsEl.appendChild(d);
+      });
+  function setDots(){
+        [...dotsEl.children].forEach((d, idx) => d.classList.toggle("active", idx === i));
+      }
 
     function openDrawer(){
       drawer.classList.add("show");
