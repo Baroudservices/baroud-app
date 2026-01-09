@@ -3,184 +3,56 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baroud Services</title>
-
+  <title>Baroud Services - Home</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    :root{
-      --bg1:#06162a;
-      --bg2:#020b14;
-      --text:#ffffff;
-      --glass:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.08);
-      --shadow:0 18px 60px rgba(0,0,0,.35);
-      --radius:22px;
-    }
-    *{box-sizing:border-box}
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: linear-gradient(180deg, #0b1424, #050a14);
-      color: #fff;
-      min-height: 100vh;
-    }
-    .card, .service, .banner, .searchBox, .support {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(14px);
-    }
-    a{color:inherit;text-decoration:none}
-    .wrap{
-      width:100%;
-      max-width:600px;
-      margin:0 auto;
-      padding:14px 14px 40px;
-      position:relative;
-      z-index:1;
-    }
-    .support-slider{ overflow:hidden; position:relative; width:100%; }
-    .support-track{ display:flex; gap:40px; width:max-content; animation: scrollSupport 14s linear infinite; }
-    .support-track span{ white-space:nowrap; font-weight:800; }
-    @keyframes scrollSupport{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
-
-    /* ===== Topbar ===== */
-    .topbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:6px; }
-    .iconBtn{
-      width:52px;height:52px; border-radius:18px; background:var(--glass); border:1px solid var(--stroke);
-      display:flex;align-items:center;justify-content:center; cursor:pointer; flex:0 0 auto;
-    }
-    .hamburger{width:20px}
-    .hamburger span{ display:block;height:2px;border-radius:2px; background:#fff;margin:4px 0;opacity:.9; }
-
-    .balancePill{
-      flex:1; min-width:0; height:48px; border-radius:20px; background:var(--glass); border:1px solid var(--stroke);
-      display:flex; align-items:center; justify-content:space-between; padding:7px 9px; gap:8px;
-    }
-    .coin{
-      width:28px;height:28px; border-radius:50%; background:#b68b2a;
-      display:flex;align-items:center;justify-content:center; font-weight:900; font-size:14px; flex:0 0 auto;
-    }
-    .balTop{ font-weight:950; font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
-    .addBtn{
-      width:34px;height:34px; border-radius:14px; border:none; cursor:pointer;
-      font-size:18px; font-weight:1000; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-    }
-    .logoTop{ height:44px; filter:drop-shadow(0 8px 14px rgba(0,0,0,.35)); }
-
-    /* ===== Tiles ===== */
-    .grid{ margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    .tile{
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.06);
-      border-radius:22px; overflow:hidden; box-shadow:0 18px 60px rgba(0,0,0,.25); cursor:pointer;
-      transition: transform 0.2s;
-    }
-    .tile:active { transform: scale(0.95); }
-    .tile img{width:100%;height:140px;object-fit:cover;display:block}
-    .label{padding:12px;text-align:center;font-weight:900;opacity:.95}
-
-    /* ===== Drawer ===== */
-    .overlay{ position:fixed;inset:0;background:rgba(0,0,0,.55); opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:9998; }
-    .overlay.show{opacity:1;pointer-events:auto}
-    .drawer{
-      position:fixed;top:0;bottom:0;left:0; width:min(86vw,340px);
-      background:linear-gradient(180deg,#071a31,#020b14); border-right:1px solid rgba(255,255,255,.08);
-      transform:translateX(-105%); transition:transform .28s ease; z-index:9999; padding:18px 16px;
-    }
-    .drawer.show{transform:translateX(0)}
-    .profile{ margin-top:6px;padding:14px;border-radius:22px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); }
-    .pBal{ margin-top:6px;font-size:22px;font-weight:950;color:#1bc7ff; display:flex;align-items:center;gap:8px; }
-    .menu{display:flex;flex-direction:column;gap:14px;padding:4px 6px}
-    .mItem{ display:flex;align-items:center;gap:12px; font-size:18px;padding:10px 8px;border-radius:16px;cursor:pointer; }
-    
-    @media (min-width: 992px){
-      .wrap{ max-width: 1200px; }
-      .grid{ grid-template-columns: repeat(4, 1fr); }
-    }
+    :root{ --bg:#0b1424; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.08); --blue:#1bc7ff; }
+    body{ margin:0; font-family:sans-serif; background:var(--bg); color:#fff; }
+    .wrap{ max-width:1200px; margin:0 auto; padding:20px; }
+    .topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+    .balancePill{ background:var(--glass); border:1px solid var(--stroke); padding:8px 15px; border-radius:15px; display:flex; gap:10px; align-items:center; }
+    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:15px; }
+    .tile{ background:var(--glass); border:1px solid var(--stroke); border-radius:20px; overflow:hidden; cursor:pointer; text-align:center; transition:0.3s; }
+    .tile:hover{ transform:translateY(-5px); border-color:var(--blue); }
+    .tile img{ width:100%; height:140px; object-fit:cover; }
+    .label{ padding:12px; font-weight:bold; }
+    .addBtn{ background:linear-gradient(90deg,#0aa0ff,#2a74ff); border:none; color:#fff; padding:5px 10px; border-radius:8px; cursor:pointer; }
   </style>
 </head>
-
 <body>
-  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-
-  <aside class="drawer" id="drawer">
-    <div class="drawerTop" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <button onclick="closeDrawer()" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">×</button>
-      <div style="font-weight:900;">MENU</div>
-    </div>
-    <div class="profile">
-      <div id="pName" style="font-size:20px; font-weight:900;">User</div>
-      <div id="pId" style="opacity:0.6; font-size:14px;">#000</div>
-      <div class="pBal"><span id="pBal">0.00</span> 🇺🇸</div>
-    </div>
-    <div class="menu" style="margin-top:20px;">
-      <div class="mItem" onclick="go('services.html')">🏠 Home</div>
-      <div class="mItem" onclick="go('add-credit.html')">💳 Add Credit</div>
-      <div class="mItem" onclick="go('my-orders.html')">🛒 My Orders</div>
-      <div class="mItem" onclick="doLogout()" style="color:#ff4b4b;">⎋ Logout</div>
-    </div>
-  </aside>
-
-  <main class="wrap">
+  <div class="wrap">
     <div class="topbar">
-      <div class="iconBtn" onclick="openDrawer()">
-        <div class="hamburger"><span></span><span></span><span></span></div>
-      </div>
       <div class="balancePill">
-        <div class="coin">★</div>
-        <div id="uBalTop" class="balTop">0.00</div>
-        <button class="addBtn" onclick="go('add-credit.html')">+</button>
+        <span>Balance: $<span id="uBalTop">0.00</span></span>
+        <button class="addBtn" onclick="location.href='add-credit.html'">+</button>
       </div>
-      <img src="assets/logo.png" class="logoTop">
+      <img src="assets/logo.png" style="height:40px;">
     </div>
 
-    <div class="support" style="margin-top:15px;">
-      <div class="support-slider">
-        <div class="support-track">
-          <span>📞 Support: +961 70385398 | Houssein Baroud</span>
-          <span>📞 Support: +961 70385398 | Houssein Baroud</span>
-        </div>
+    <div class="grid" id="products-grid">
       </div>
-    </div>
-
-    <div class="searchBox" style="margin-top:15px;">
-      <input id="search" placeholder="Search services...">
-    </div>
-
-    <section class="grid" id="products-grid">
-      <div style="grid-column: span 2; text-align: center; padding: 20px;">Loading Services...</div>
-    </section>
-
-    <div class="footer" style="text-align:center; padding:40px; opacity:0.5;">©2026 Baroud Services</div>
-  </main>
+  </div>
 
   <script>
-    // ✅ الـ Keys الصحيحة 100%
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ✅ دالة جلب الرصيد
-    async function loadBalance(){
-      const { data, error } = await sb.rpc("get_my_balance");
-      if(!error) {
-        const b = Number(data).toFixed(2);
-        document.getElementById("pBal").textContent = b;
-        document.getElementById("uBalTop").textContent = b;
-      }
-    }
+    async function init() {
+        // 1. جلب الرصيد
+        const { data: bal } = await sb.rpc("get_my_balance");
+        if(bal !== null) document.getElementById("uBalTop").textContent = Number(bal).toFixed(2);
 
-    // ✅ دالة جلب المنتجات (الـ List)
-    async function loadProducts() {
-        const { data: products, error } = await sb.from('products').select('*').eq('active', true);
+        // 2. جلب المنتجات
+        const { data: prods, error } = await sb.from('products').select('*').eq('active', true);
         const grid = document.getElementById('products-grid');
-        
-        if (error || !products || products.length === 0) {
-            grid.innerHTML = '<div style="grid-column: span 2; text-align: center;">No products found.</div>';
+
+        if (error || !prods || prods.length === 0) {
+            grid.innerHTML = "<p>No services found. Add some from Supabase dashboard.</p>";
             return;
         }
 
-        grid.innerHTML = products.map(p => `
+        grid.innerHTML = prods.map(p => `
             <div class="tile" onclick="location.href='order-details.html?id=${p.id}'">
                 <img src="assets/products/${p.id}.jpg" onerror="this.src='assets/products/default.png'">
                 <div class="label">${p.title}</div>
@@ -188,26 +60,7 @@
         `).join('');
     }
 
-    // ✅ التشغيل عند فتح الصفحة
-    (async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
-          location.replace("login.html");
-          return;
-      }
-
-      document.getElementById("pName").textContent = session.user.email.split('@')[0];
-      document.getElementById("pId").textContent = "#" + session.user.id.slice(0,4);
-
-      loadBalance();
-      loadProducts();
-    })();
-
-    // ✅ التنقل والـ Drawer
-    function openDrawer() { document.getElementById("drawer").classList.add("show"); document.getElementById("overlay").classList.add("show"); }
-    function closeDrawer() { document.getElementById("drawer").classList.remove("show"); document.getElementById("overlay").classList.remove("show"); }
-    function go(url) { location.href = url; }
-    async function doLogout() { await sb.auth.signOut(); location.replace("login.html"); }
+    init();
   </script>
 </body>
 </html>
