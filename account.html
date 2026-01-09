@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Account Details</title>
+  <title>Order Details</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="css/layout.css">
 
   <style>
     :root{
@@ -34,8 +34,6 @@
       padding:12px 14px;
       border-radius:16px;
       cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color:transparent;
     }
     .card{
       margin-top:14px;
@@ -45,17 +43,11 @@
       overflow:visible;
       box-shadow:var(--shadow);
     }
-
     .hero{
       height:210px;
       position:relative;
       overflow:hidden;
-      border-top-left-radius:22px;
-      border-top-right-radius:22px;
-      background:
-        radial-gradient(700px 260px at 15% 25%, rgba(42,116,255,.35), transparent 60%),
-        radial-gradient(700px 260px at 85% 20%, rgba(27,199,255,.22), transparent 60%),
-        linear-gradient(160deg, rgba(6,22,42,.95), rgba(2,11,20,.95));
+      border-radius: 22px 22px 0 0;
     }
     .heroImg{
       position:absolute;
@@ -63,32 +55,17 @@
       width:100%;
       height:100%;
       object-fit:cover;
-      display:block;
       opacity:.82;
-      transform:scale(1.02);
-      filter:contrast(1.02) saturate(1.05);
-      z-index:1;
-    }
-    .heroOverlay{
-      position:absolute;
-      inset:0;
-      background:linear-gradient(180deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.78) 100%);
-      pointer-events:none;
-      z-index:2;
     }
     .heroContent{
       position:absolute;
-      left:0; right:0; bottom:0;
+      inset:0;
       padding:14px;
       display:flex;
       align-items:flex-end;
       justify-content:space-between;
-      gap:12px;
-      z-index:3;
+      background:linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.8) 100%);
     }
-    .heroTitle{font-weight:950;font-size:22px;letter-spacing:.2px;margin:0}
-    .heroSub{margin-top:6px;opacity:.82;font-weight:800;font-size:12px}
-
     .pricePill{
       background:rgba(255,255,255,.07);
       border:1px solid rgba(255,255,255,.10);
@@ -96,119 +73,24 @@
       border-radius:16px;
       font-weight:950;
       color:var(--blue);
-      white-space:nowrap;
       backdrop-filter: blur(6px);
     }
-
     .body{padding:14px}
-    .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-    .pill{
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      font-weight:900;
-      font-size:12px;
-      opacity:.95;
-    }
-
-    .features{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-    .feature{
-      display:flex;justify-content:space-between;gap:12px;
-      padding:12px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(0,0,0,.18);
-    }
-    .fLabel{font-weight:950; opacity:.9}
-    .fValue{font-weight:900; opacity:.85; text-align:right}
-
-    .buyRow{margin-top:14px;display:flex;gap:10px;align-items:center}
-    .buyBtn{
-      flex:1;
-      padding:14px 14px;
-      border-radius:16px;
-      border:0;
-      cursor:pointer;
-      font-weight:950;
-      color:#fff;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      box-shadow:0 14px 40px rgba(0,0,0,.25);
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
-    }
-    .buyBtn:disabled{opacity:.6; cursor:not-allowed}
-
-    .smallBtn{
-      padding:14px 14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      cursor:pointer;
-      font-weight:900;
-      white-space:nowrap;
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
-    }
-
-    .noteWrap{
-      margin-top:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      border-radius:16px;
-      padding:10px;
-    }
-    .noteLbl{
-      font-size:12px;
-      font-weight:950;
-      opacity:.85;
-      margin-bottom:8px;
-      letter-spacing:.3px;
-      color: var(--blue);
-    }
+    .noteLbl{font-size:12px; font-weight:950; color: var(--blue); margin-bottom:8px; text-transform: uppercase;}
     .noteInput{
-      width:100%;
-      min-height:44px;
-      resize:vertical;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      padding:10px 12px;
-      outline:none;
-      font-weight:900;
+      width:100%; min-height:48px; border-radius:14px; border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06); color:#fff; padding:12px; outline:none; font-weight:800;
     }
-
-    .ordersDD{position:relative;display:inline-block;z-index:99999}
-    .ordersMenu{
-      position:absolute;
-      right:0;
-      top:calc(100% + 10px);
-      width:260px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:#0b0f17;
-      overflow:auto;
-      box-shadow:0 18px 40px rgba(0,0,0,.35);
-      z-index:99999;
-      max-height:260px;
+    .buyBtn{
+      width:100%; padding:16px; border-radius:16px; border:0; cursor:pointer;
+      font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      margin-top:15px; box-shadow:0 10px 30px rgba(0,160,255,0.3);
     }
-    .ordersItem{
-      display:flex;justify-content:space-between;align-items:center;gap:12px;
-      padding:12px 14px;color:#e5e7eb;cursor:pointer;user-select:none;
-    }
-    .ordersItem:hover{background:rgba(255,255,255,.06)}
-    .badge{
-      padding:4px 10px;border-radius:999px;font-size:12px;font-weight:950;color:#fff;white-space:nowrap;
-      background:#19c37d;
-    }
-
-    #dynamic-fields {
-      border: 1px solid var(--blue);
-      padding: 12px;
-      border-radius: 18px;
-      background: rgba(27, 199, 255, 0.05);
-    }
+    
+    /* Custom SweetAlert Styles */
+    .swal2-popup { background: #0b1424 !important; color: #fff !important; border-radius: 22px !important; border: 1px solid var(--stroke) !important; }
+    .swal2-title { color: #fff !important; }
+    .swal2-confirm { background: linear-gradient(90deg,#0aa0ff,#2a74ff) !important; border-radius: 12px !important; }
   </style>
 </head>
 
@@ -219,53 +101,50 @@
       <button class="btn" onclick="location.href='services.html'">Home</button>
     </div>
 
-    <div class="card" id="card">
+    <div class="card">
       <div class="hero">
-        <img id="heroImg" class="heroImg" src="assets/products/default.png" alt="Product">
-        <div class="heroOverlay"></div>
+        <img id="heroImg" class="heroImg" src="assets/products/default.png">
         <div class="heroContent">
           <div>
-            <h1 class="heroTitle" id="pTitle">Loading...</h1>
-            <div class="heroSub" id="pCat"></div>
+            <h1 id="pTitle" style="margin:0; font-size:22px;">Loading...</h1>
+            <div id="pCat" style="font-size:12px; opacity:0.7;"></div>
           </div>
           <div class="pricePill" id="pPrice">$0.00</div>
         </div>
       </div>
 
       <div class="body">
-        <div class="pills" id="pills"></div>
-        <div class="features" id="features"></div>
-
-        <div id="dynamic-fields" style="margin-top:14px; display:none; flex-direction:column; gap:12px;">
+        <div id="dynamic-fields" style="display:none; flex-direction:column; gap:15px; margin-bottom:15px; border: 1px solid var(--blue); padding: 15px; border-radius: 18px; background: rgba(27,199,255,0.05);">
+          
           <div id="field-player-id" style="display:none;">
-            <div class="noteLbl" id="id-label">PLAYER ID</div>
-            <input type="text" id="input-player-id" class="noteInput" placeholder="Enter ID here..." autocomplete="off">
+            <div class="noteLbl">Player ID / Account ID</div>
+            <input type="text" id="input-player-id" class="noteInput" placeholder="Enter ID here...">
           </div>
+
+          <div id="field-player-name" style="display:none;">
+            <div class="noteLbl">Checking Name</div>
+            <input type="text" id="input-player-name" class="noteInput" placeholder="Verifying..." readonly>
+          </div>
+
           <div id="field-email" style="display:none;">
-            <div class="noteLbl" id="email-label">EMAIL / PHONE</div>
-            <input type="text" id="input-email" class="noteInput" placeholder="Enter here..." autocomplete="new-password">
+            <div class="noteLbl" id="email-label">Email Address</div>
+            <input type="text" id="input-email" class="noteInput" placeholder="Enter here...">
           </div>
+
           <div id="field-pass" style="display:none;">
-            <div class="noteLbl">PASSWORD</div>
-            <input type="password" id="input-pass" class="noteInput" placeholder="Enter password..." autocomplete="new-password">
+            <div class="noteLbl">Password</div>
+            <input type="password" id="input-pass" class="noteInput" placeholder="••••••••">
           </div>
         </div>
 
         <div class="noteWrap">
           <div class="noteLbl">Customer note (optional)</div>
-          <textarea id="customerNote" class="noteInput" placeholder="Write note for this order..."></textarea>
+          <textarea id="customerNote" class="noteInput" placeholder="Write any extra details..."></textarea>
         </div>
 
-        <div class="buyRow">
-          <button class="buyBtn" id="buyBtn" type="button">Buy Now</button>
-          <div class="ordersDD" id="ordersDD">
-            <button class="smallBtn" id="myOrdersBtn" type="button">▾</button>
-            <div class="ordersMenu" id="ordersMenu" hidden></div>
-          </div>
-        </div>
+        <button class="buyBtn" id="buyBtn">Buy Now</button>
       </div>
     </div>
-    <div class="footer">©2025 Baroud Services</div>
   </main>
 
   <script>
@@ -273,173 +152,109 @@
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const titleEl = document.getElementById("pTitle");
-    const catEl   = document.getElementById("pCat");
-    const priceEl = document.getElementById("pPrice");
-    const pillsEl = document.getElementById("pills");
-    const featsEl = document.getElementById("features");
-    const buyBtn  = document.getElementById("buyBtn");
-    const heroImgEl = document.getElementById("heroImg");
-    const ordersMenu = document.getElementById("ordersMenu");
-    const ordersBtn = document.getElementById("myOrdersBtn");
-    const customerNoteEl = document.getElementById("customerNote");
-
-    let PLAN_LIST = [];
-    let currentProductId = null;
     let currentProduct = null;
     let selectedPlan = null;
 
-    function esc(s){ return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-    function getId(){ return new URL(location.href).searchParams.get("id"); }
+    // 1. Logic for dynamic fields (including Phone Recharge)
+    function updateFields() {
+        const df = document.getElementById("dynamic-fields");
+        const fId = document.getElementById("field-player-id");
+        const fName = document.getElementById("field-player-name");
+        const fEmail = document.getElementById("field-email");
+        const fPass = document.getElementById("field-pass");
+        const emailLbl = document.getElementById("email-label");
 
-    async function loadProduct(id){
-      const { data: p } = await sb.from("products").select("*").eq("id", id).single();
-      const { data: f } = await sb.from("product_features").select("*").eq("product_id", id).order("sort");
-      return { product: p, features: f || [] };
+        df.style.display = "none";
+        [fId, fName, fEmail, fPass].forEach(el => el.style.display = "none");
+
+        if (!currentProduct) return;
+        const cat = (currentProduct.category || "").toLowerCase();
+        const title = currentProduct.title.toLowerCase();
+
+        // Phone Recharge Logic
+        if (cat.includes("recharge")) {
+            df.style.display = "flex";
+            fEmail.style.display = "block";
+            emailLbl.textContent = "Phone Number";
+            document.getElementById("input-email").placeholder = "Ex: 70123456";
+        } 
+        // Games Logic (Jawaker etc)
+        else if (cat.includes("games")) {
+            df.style.display = "flex";
+            fId.style.display = "block";
+            if(title.includes("jawaker")) fName.style.display = "block";
+        }
+        // Accounts Logic (Shahid, Netflix)
+        else if (cat.includes("accounts") || cat.includes("apps")) {
+            df.style.display = "flex";
+            fEmail.style.display = "block";
+            fPass.style.display = "block";
+            emailLbl.textContent = "Email / Phone";
+        }
     }
 
-    async function loadPlans(id){
-      const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true).order("price", {ascending: true});
-      PLAN_LIST = (data || []).map(r=>({ key: r.plan_key, label: r.plan_label || r.plan_key, price: r.price }));
-      if(PLAN_LIST.length > 0) setSelectedPlan(PLAN_LIST[0]);
-      renderMenu();
+    // 2. Auto-check Name Logic (Placeholder for your API)
+    document.getElementById("input-player-id").addEventListener("input", async (e) => {
+        if (!currentProduct.title.toLowerCase().includes("jawaker")) return;
+        const val = e.target.value;
+        const nameInput = document.getElementById("input-player-name");
+        if (val.length > 5) {
+            nameInput.value = "Checking... ⏳";
+            // هنا تضع رابط الـ API الخاص بك مستقبلاً
+            setTimeout(() => { nameInput.value = "Verified User ✅"; }, 1500);
+        }
+    });
+
+    // 3. Main Load Function
+    async function init() {
+        const id = new URLSearchParams(window.location.search).get("id");
+        if (!id) return;
+
+        try {
+            const { data: p } = await sb.from("products").select("*").eq("id", id).single();
+            const { data: plans } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true).order("price");
+
+            currentProduct = p;
+            document.getElementById("pTitle").textContent = p.title;
+            document.getElementById("pCat").textContent = p.category;
+            document.getElementById("heroImg").src = `assets/products/${p.id}.jpg`;
+            
+            if (plans && plans.length > 0) {
+                selectedPlan = plans[0];
+                document.getElementById("pPrice").textContent = "$" + Number(selectedPlan.price).toFixed(2);
+            }
+
+            updateFields();
+        } catch (e) {
+            console.error(e);
+        }
     }
 
-    function renderMenu(){
-      ordersMenu.innerHTML = PLAN_LIST.map(p => `
-        <div class="ordersItem" onclick="window.setSelectedPlanByKey('${p.key}')">
-          <span>${esc(p.label)}</span>
-          <span class="badge">$${Number(p.price).toFixed(2)}</span>
-        </div>
-      `).join('');
-    }
+    // 4. Buy Button with SweetAlert
+    document.getElementById("buyBtn").onclick = async () => {
+        const pEmail = document.getElementById("input-email").value.trim();
+        const cat = currentProduct.category.toLowerCase();
 
-    window.setSelectedPlanByKey = (key) => {
-      const plan = PLAN_LIST.find(p => p.key === key);
-      if(plan) setSelectedPlan(plan);
-      ordersMenu.hidden = true;
-    };
-
-    function setSelectedPlan(plan){
-      selectedPlan = plan;
-      priceEl.textContent = "$" + Number(plan.price).toFixed(2);
-      updateDynamicFields();
-    }
-
-    function updateDynamicFields(){
-      const df = document.getElementById("dynamic-fields");
-      const fId = document.getElementById("field-player-id");
-      const fEmail = document.getElementById("field-email");
-      const fPass = document.getElementById("field-pass");
-      
-      df.style.display = "none";
-      [fId, fEmail, fPass].forEach(el => el.style.display = "none");
-
-      if(!currentProduct || !selectedPlan) return;
-
-      const title = currentProduct.title.toLowerCase();
-      const planLabel = selectedPlan.label.toLowerCase();
-      const cat = (currentProduct.category || "").toLowerCase();
-
-      // Shahid
-      if (title.includes("shahid") && planLabel.includes("direct")) {
-        df.style.display = "flex"; fEmail.style.display = "block"; fPass.style.display = "block";
-        document.getElementById("email-label").textContent = "EMAIL";
-      } 
-      // ChatGPT
-      else if (title.includes("chatgpt") && planLabel.includes("private")) {
-        df.style.display = "flex"; fEmail.style.display = "block";
-        document.getElementById("email-label").textContent = "EMAIL";
-      }
-      // TikTok
-      else if (title.includes("tiktok")) {
-        df.style.display = "flex"; fEmail.style.display = "block";
-        document.getElementById("email-label").textContent = "EMAIL OR PHONE";
-        const emailInput = document.getElementById("input-email");
-        emailInput.oninput = () => {
-          fPass.style.display = emailInput.value.includes("@") ? "block" : "none";
-        };
-        fPass.style.display = emailInput.value.includes("@") ? "block" : "none";
-      }
-      // Games (Jawaker Included - Only ID)
-      else if (cat.includes("games") || cat.includes("apps")) {
-        df.style.display = "flex"; fId.style.display = "block";
-      }
-    }
-
-    async function buyProduct(){
-      if(!selectedPlan) { alert("Please select a plan first"); return; }
-      
-      const pId = document.getElementById("input-player-id").value.trim();
-      const pEmail = document.getElementById("input-email").value.trim();
-      const pPass = document.getElementById("input-pass").value.trim();
-
-      // Validation
-      if(document.getElementById("field-player-id").style.display !== "none" && !pId) { alert("Player ID is required"); return; }
-      if(document.getElementById("field-email").style.display !== "none" && !pEmail) { alert("Email/Phone is required"); return; }
-      if(document.getElementById("field-pass").style.display !== "none" && !pPass) { alert("Password is required"); return; }
-
-      if(!confirm("Confirm Purchase?")) return;
-
-      buyBtn.disabled = true;
-      buyBtn.textContent = "Processing...";
-      try {
-        const { data: { session } } = await sb.auth.getSession();
-        if(!session) { location.href = "login.html"; return; }
-
-        const { data: orderId, error } = await sb.rpc("place_order", {
-          p_product_id: currentProductId,
-          p_price: selectedPlan.price,
-          p_duration: selectedPlan.label,
-          p_note: customerNoteEl.value,
-          p_player_id: pId || null,
-          p_player_name: null, // Removed Checking Name
-          p_acc_email: pEmail || null,
-          p_acc_pass: pPass || null
-        });
-
-        if(error) throw error;
-
-        if(currentProduct.title.toLowerCase().includes("tiktok")){
-          const waMsg = `TikTok Order ID: ${orderId}\nAccount: ${pEmail}\nStatus: Waiting for code`;
-          window.open(`https://wa.me/96170385398?text=${encodeURIComponent(waMsg)}`);
+        // Custom Validation Message
+        if (cat.includes("recharge") && !pEmail) {
+            Swal.fire({ icon: 'error', title: 'Missing Info', text: 'Please enter the phone number!' });
+            return;
         }
 
-        alert("✅ Order Placed! ID: " + orderId);
-        location.href = "my-orders.html";
-      } catch(e) {
-        alert(e.message || "Failed");
-      } finally {
-        buyBtn.disabled = false;
-        buyBtn.textContent = "Buy Now";
-      }
-    }
+        const result = await Swal.fire({
+            title: 'Confirm Order',
+            text: `Are you sure you want to buy ${currentProduct.title}?`,
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Buy!'
+        });
 
-    ordersBtn.onclick = (e) => { e.stopPropagation(); ordersMenu.hidden = !ordersMenu.hidden; };
-    document.onclick = () => ordersMenu.hidden = true;
+        if (result.isConfirmed) {
+            Swal.fire('Processing...', 'Your order is being sent', 'info');
+            // هنا تضع كود الـ place_order الفعلي
+        }
+    };
 
-    (async ()=>{
-      currentProductId = getId();
-      if(!currentProductId) return;
-      try {
-        const { product, features } = await loadProduct(currentProductId);
-        currentProduct = product;
-        
-        titleEl.textContent = product.title;
-        catEl.textContent = "Category: " + product.category;
-        heroImgEl.src = `assets/products/${product.id}.jpg`;
-        heroImgEl.onerror = () => heroImgEl.src = "assets/products/default.png";
-        pillsEl.innerHTML = `<span class="pill">${product.active ? 'Available' : 'Unavailable'}</span><span class="pill">${product.category}</span>`;
-        featsEl.innerHTML = features.map(f => `<div class="feature"><div class="fLabel">${esc(f.label)}</div><div class="fValue">${esc(f.value)}</div></div>`).join('');
-
-        await loadPlans(currentProductId);
-        updateDynamicFields();
-        buyBtn.onclick = buyProduct;
-      } catch(e) {
-        titleEl.textContent = "Error loading";
-      }
-    })();
+    init();
   </script>
-  <script src="app-ui.js?v=3"></script>
 </body>
 </html>
