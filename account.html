@@ -203,7 +203,6 @@
       background:#19c37d;
     }
 
-    /* Dynamic Container Styling */
     #dynamic-fields {
       border: 1px solid var(--blue);
       padding: 12px;
@@ -237,27 +236,24 @@
         <div class="pills" id="pills"></div>
         <div class="features" id="features"></div>
 
-       <div id="dynamic-fields" style="margin-top:14px; display:none; flex-direction:column; gap:12px;">
-  <div id="field-player-id" style="display:none;">
-    <div class="noteLbl" id="id-label">PLAYER ID</div>
-    <input type="text" id="input-player-id" class="noteInput" placeholder="Enter ID here..." autocomplete="off" autocapitalize="none">
-  </div>
-  
-  <div id="field-player-name" style="display:none;">
-    <div class="noteLbl">CHECKING NAME</div>
-    <input type="text" id="input-player-name" class="noteInput" placeholder="Ex: Baroud_Hero" autocomplete="off">
-  </div>
-
-  <div id="field-email" style="display:none;">
-    <div class="noteLbl" id="email-label">EMAIL / PHONE</div>
-    <input type="text" id="input-email" class="noteInput" placeholder="Enter here..." autocomplete="new-password">
-  </div>
-
-  <div id="field-pass" style="display:none;">
-    <div class="noteLbl">PASSWORD</div>
-    <input type="password" id="input-pass" class="noteInput" placeholder="Enter account password..." autocomplete="new-password">
-  </div>
-</div>
+        <div id="dynamic-fields" style="margin-top:14px; display:none; flex-direction:column; gap:12px;">
+          <div id="field-player-id" style="display:none;">
+            <div class="noteLbl" id="id-label">PLAYER ID</div>
+            <input type="text" id="input-player-id" class="noteInput" placeholder="Enter ID here..." autocomplete="off">
+          </div>
+          <div id="field-player-name" style="display:none;">
+            <div class="noteLbl">CHECKING NAME</div>
+            <input type="text" id="input-player-name" class="noteInput" placeholder="Ex: Baroud_Hero" autocomplete="off">
+          </div>
+          <div id="field-email" style="display:none;">
+            <div class="noteLbl" id="email-label">EMAIL / PHONE</div>
+            <input type="text" id="input-email" class="noteInput" placeholder="Enter here..." autocomplete="new-password">
+          </div>
+          <div id="field-pass" style="display:none;">
+            <div class="noteLbl">PASSWORD</div>
+            <input type="password" id="input-pass" class="noteInput" placeholder="Enter password..." autocomplete="new-password">
+          </div>
+        </div>
 
         <div class="noteWrap">
           <div class="noteLbl">Customer note (optional)</div>
@@ -289,6 +285,7 @@
     const buyBtn  = document.getElementById("buyBtn");
     const heroImgEl = document.getElementById("heroImg");
     const ordersMenu = document.getElementById("ordersMenu");
+    const ordersBtn = document.getElementById("myOrdersBtn");
     const customerNoteEl = document.getElementById("customerNote");
 
     let PLAN_LIST = [];
@@ -306,117 +303,95 @@
     }
 
     async function loadPlans(id){
-      const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true);
-      return (data || []).map(r=>({ key: r.plan_key, label: r.plan_label || r.plan_key, price: r.price }));
+      const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true).order("price", {ascending: true});
+      PLAN_LIST = (data || []).map(r=>({ key: r.plan_key, label: r.plan_label || r.plan_key, price: r.price }));
+      
+      if(PLAN_LIST.length > 0) setSelectedPlan(PLAN_LIST[0]);
+      renderMenu();
     }
 
-    function renderProduct(p, features){
-      currentProduct = p;
-      titleEl.textContent = p.title;
-      catEl.textContent = "Category: " + p.category;
-      heroImgEl.src = `assets/products/${p.id}.jpg`;
-      heroImgEl.onerror = () => heroImgEl.src = "assets/products/default.png";
-      
-      pillsEl.innerHTML = `<span class="pill">${p.active ? 'Available' : 'Unavailable'}</span><span class="pill">${p.category}</span>`;
-      featsEl.innerHTML = features.map(f => `<div class="feature"><div class="fLabel">${esc(f.label)}</div><div class="fValue">${esc(f.value)}</div></div>`).join('');
+    function renderMenu(){
+      ordersMenu.innerHTML = PLAN_LIST.map(p => `
+        <div class="ordersItem" onclick="window.setSelectedPlanByKey('${p.key}')">
+          <span>${esc(p.label)}</span>
+          <span class="badge">$${Number(p.price).toFixed(2)}</span>
+        </div>
+      `).join('');
+    }
 
-      // ✅ DYNAMIC LOGIC FOR INPUTS
+    window.setSelectedPlanByKey = (key) => {
+      const plan = PLAN_LIST.find(p => p.key === key);
+      if(plan) setSelectedPlan(plan);
+      ordersMenu.hidden = true;
+    };
+
+    function setSelectedPlan(plan){
+      selectedPlan = plan;
+      priceEl.textContent = "$" + Number(plan.price).toFixed(2);
+      updateDynamicFields();
+    }
+
+    function updateDynamicFields(){
       const df = document.getElementById("dynamic-fields");
       const fId = document.getElementById("field-player-id");
       const fName = document.getElementById("field-player-name");
       const fEmail = document.getElementById("field-email");
       const fPass = document.getElementById("field-pass");
-
+      
       df.style.display = "none";
       [fId, fName, fEmail, fPass].forEach(el => el.style.display = "none");
 
-      const title = p.title.toLowerCase();
-      const cat = (p.category || "").toLowerCase();
+      if(!currentProduct || !selectedPlan) return;
 
-      if(cat.includes("games") || cat.includes("apps")){
+      const title = currentProduct.title.toLowerCase();
+      const planLabel = selectedPlan.label.toLowerCase();
+      const cat = (currentProduct.category || "").toLowerCase();
+
+      // Shahid Direct
+      if (title.includes("shahid") && planLabel.includes("direct")) {
+        df.style.display = "flex"; fEmail.style.display = "block"; fPass.style.display = "block";
+        document.getElementById("email-label").textContent = "SHAHID EMAIL";
+      } 
+      // ChatGPT Private
+      else if (title.includes("chatgpt") && planLabel.includes("private")) {
+        df.style.display = "flex"; fEmail.style.display = "block";
+        document.getElementById("email-label").textContent = "CHATGPT EMAIL";
+      }
+      // Games & Apps Logic
+      else if (cat.includes("games") || cat.includes("apps")) {
         df.style.display = "flex";
-        if(title.includes("jawaker")){
+        if (title.includes("jawaker")) {
           fId.style.display = "block"; fName.style.display = "block";
-        } else if(title.includes("tiktok")){
+        } else if (title.includes("tiktok")) {
           fEmail.style.display = "block";
           document.getElementById("email-label").textContent = "PHONE OR EMAIL";
           document.getElementById("input-email").oninput = (e) => {
             fPass.style.display = e.target.value.includes("@") ? "block" : "none";
           };
         } else {
-          fId.style.display = "block"; // Default for all other games/apps
+          fId.style.display = "block";
         }
-      } else if(title.includes("chatgpt")){
-        df.style.display = "flex"; fEmail.style.display = "block";
-        document.getElementById("email-label").textContent = "EMAIL";
-      } else if(title.includes("shahid direct")){
-        df.style.display = "flex"; fEmail.style.display = "block"; fPass.style.display = "block";
-        document.getElementById("email-label").textContent = "EMAIL";
       }
     }
 
- function setSelectedPlan(plan) {
-  if (!plan) return;
-  selectedPlan = plan;
-
-  const p = Number(plan.price || 0);
-  priceEl.textContent = "$" + (Number.isFinite(p) ? p.toFixed(2) : "0.00");
-
-  const planLabel = (plan.label || "").toLowerCase();
-  const productTitle = (currentProduct?.title || "").toLowerCase();
-  
-  const df = document.getElementById("dynamic-fields");
-  const fId = document.getElementById("field-player-id");
-  const fName = document.getElementById("field-player-name");
-  const fEmail = document.getElementById("field-email");
-  const fPass = document.getElementById("field-pass");
-
-  // 1. تنظيف الخانات أولاً
-  [fId, fName, fEmail, fPass].forEach(el => el.style.display = "none");
-  df.style.display = "none";
-
-  // 2. فحص حالة Shahid Direct
-  if (productTitle.includes("shahid") && planLabel.includes("direct")) {
-    df.style.display = "flex";
-    fEmail.style.display = "block";
-    fPass.style.display = "block";
-    document.getElementById("email-label").textContent = "SHAHID EMAIL";
-  } 
-  // 3. فحص حالة ChatGPT Private
-  else if (productTitle.includes("chatgpt") && planLabel.includes("private")) {
-    df.style.display = "flex";
-    fEmail.style.display = "block";
-    document.getElementById("email-label").textContent = "CHATGPT EMAIL";
-  }
-  // 4. الحالات العامة (Games/Apps/Jawaker/TikTok)
-  else {
-    renderProductFields(currentProduct);
-  }
-
-  localStorage.setItem("last_order_plan", plan.key || "");
-  localStorage.setItem("last_order_price", (Number.isFinite(p) ? p.toFixed(2) : "0.00"));
-}
-
     async function buyProduct(){
-      if(!selectedPlan) { alert("Select a plan first"); return; }
-
+      if(!selectedPlan) { alert("Please select a plan first"); return; }
+      
       const pId = document.getElementById("input-player-id").value.trim();
       const pName = document.getElementById("input-player-name").value.trim();
       const pEmail = document.getElementById("input-email").value.trim();
       const pPass = document.getElementById("input-pass").value.trim();
-      const title = currentProduct.title.toLowerCase();
 
-      // VALIDATION
-      if(document.getElementById("field-player-id").style.display === "block" && !pId) { alert("Player ID is required!"); return; }
-      if(document.getElementById("field-player-name").style.display === "block" && !pName) { alert("Checking Name is required!"); return; }
-      if(document.getElementById("field-email").style.display === "block" && !pEmail) { alert("Email/Phone is required!"); return; }
-      if(document.getElementById("field-pass").style.display === "block" && !pPass) { alert("Password is required!"); return; }
+      // Validation for visible fields only
+      if(document.getElementById("field-player-id").style.display !== "none" && !pId) { alert("Player ID is required"); return; }
+      if(document.getElementById("field-player-name").style.display !== "none" && !pName) { alert("Checking Name is required"); return; }
+      if(document.getElementById("field-email").style.display !== "none" && !pEmail) { alert("Email/Phone is required"); return; }
+      if(document.getElementById("field-pass").style.display !== "none" && !pPass) { alert("Password is required"); return; }
 
-      if(!confirm("Are you sure? This will deduct balance.")) return;
+      if(!confirm("Confirm Purchase?")) return;
 
       buyBtn.disabled = true;
       buyBtn.textContent = "Processing...";
-
       try {
         const { data: { session } } = await sb.auth.getSession();
         if(!session) { location.href = "login.html"; return; }
@@ -434,52 +409,36 @@
 
         if(error) throw error;
 
-        // TIKTOK REDIRECT
-        if(title.includes("tiktok")){
-          const waMsg = `Hello Baroud Services, I just bought TikTok Coins. Order ID: ${orderId}. My Details: ${pEmail}. Waiting for code.`;
-          window.open(`https://wa.me/96170385398?text=${encodeURIComponent(waMsg)}`);
+        if(currentProduct.title.toLowerCase().includes("tiktok")){
+          window.open(`https://wa.me/96170385398?text=${encodeURIComponent("TikTok Order ID: "+orderId+". Account: "+pEmail)}`);
         }
 
         alert("✅ Order Placed! ID: " + orderId);
         location.href = "my-orders.html";
       } catch(e) {
-        alert(e.message || "Purchase failed");
+        alert(e.message || "Failed");
       } finally {
         buyBtn.disabled = false;
         buyBtn.textContent = "Buy Now";
       }
     }
 
-    // Initialize
+    ordersBtn.onclick = (e) => { e.stopPropagation(); ordersMenu.hidden = !ordersMenu.hidden; };
+    document.onclick = () => ordersMenu.hidden = true;
+
     (async ()=>{
       currentProductId = getId();
       if(!currentProductId) return;
-      
-      const { product, features } = await loadProduct(currentProductId);
-      renderProduct(product, features);
-      
-      PLAN_LIST = await loadPlans(currentProductId);
-      if(PLAN_LIST.length) setSelectedPlan(PLAN_LIST[0]);
-
-      buyBtn.onclick = buyProduct;
-      document.getElementById("myOrdersBtn").onclick = (e) => {
-        e.stopPropagation();
-        ordersMenu.hidden = !ordersMenu.hidden;
-        ordersMenu.innerHTML = PLAN_LIST.map(p => `
-          <div class="ordersItem" onclick="setSelectedPlanByPrice('${p.key}')">
-            <span>${p.label}</span>
-            <span class="badge">$${p.price}</span>
-          </div>
-        `).join('');
-      };
+      try {
+        const { product, features } = await loadProduct(currentProductId);
+        currentProduct = product;
+        renderProduct(product, features);
+        await loadPlans(currentProductId);
+        buyBtn.onclick = buyProduct;
+      } catch(e) {
+        titleEl.textContent = "Error loading";
+      }
     })();
-
-    window.setSelectedPlanByPrice = (key) => {
-      const plan = PLAN_LIST.find(p => p.key === key);
-      if(plan) setSelectedPlan(plan);
-      ordersMenu.hidden = true;
-    };
-    document.onclick = () => ordersMenu.hidden = true;
   </script>
 </body>
 </html>
