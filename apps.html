@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apps - Baroud Services</title>
+
+  <style>
+    :root{
+      --bg1:#06162a;
+      --bg2:#020b14;
+      --text:#ffffff;
+      --glass:rgba(255,255,255,.07);
+      --stroke:rgba(255,255,255,.10);
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --r:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#0b1424,#050a14);
+      color:var(--text);
+      min-height:100vh;
+      padding:14px;
+    }
+    .wrap{max-width:520px;margin:0 auto;padding-bottom:28px}
+
+    .top{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin-top:6px;
+    }
+    .btn{
+      border:1px solid var(--stroke);
+      background:var(--glass);
+      color:#fff;
+      padding:12px 14px;
+      border-radius:16px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .title{ font-weight:950; font-size:20px; letter-spacing:.2px; }
+
+    .searchBox{
+      margin-top:12px;
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      border-radius:26px;
+      padding:14px 16px;
+      box-shadow:0 18px 60px rgba(0,0,0,.18);
+    }
+    .searchBox input{
+      width:100%; background:transparent; border:none; outline:none;
+      color:#fff; font-size:16px; opacity:.9;
+    }
+
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+    .card{
+      background:var(--glass);
+      border:1px solid var(--stroke);
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .img{
+      height:120px;
+      background:rgba(0,0,0,.25);
+      display:flex; align-items:center; justify-content:center;
+      position:relative; overflow:hidden;
+    }
+    .pImg{
+      width:100%; height:100%; object-fit:cover;
+      display:block; user-select:none;
+    }
+
+    .body{ padding:12px 12px 14px; display:flex; flex-direction:column; gap:8px; }
+    .name{ font-weight:950; font-size:16px; line-height:1.1; min-height:35px; }
+    .meta{ display:flex; gap:8px; flex-wrap:wrap; opacity:.9; font-weight:800; font-size:12px; }
+    .pill{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.06); }
+    .priceRow{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+    .price{ font-weight:950; font-size:16px; color:#1bc7ff; }
+    .buy{ padding:10px 12px; border-radius:14px; border:none; cursor:pointer; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); }
+
+    .footer{ margin-top:18px; text-align:center; opacity:.55; font-weight:800; }
+
+    /* Skeleton */
+    .skeleton{ position:relative; overflow:hidden; background:rgba(255,255,255,.05); }
+    .skeleton::after{ content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent); animation:shimmer 1.2s infinite; }
+    @keyframes shimmer{ to{ transform:translateX(100%); } }
+    .sk-line{ height:14px; border-radius:10px; margin-bottom:10px; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="top">
+      <button class="btn" onclick="history.back()">← Back</button>
+      <div class="title">Apps</div>
+      <button class="btn" onclick="location.href='services.html'">Home</button>
+    </div>
+
+    <div class="searchBox">
+      <input id="q" placeholder="Search apps (Netflix, Shahid...)">
+    </div>
+
+    <section class="grid" id="grid"></section>
+
+    <div class="footer">©2025 Baroud Services</div>
+  </main>
+
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const grid = document.getElementById("grid");
+  const q = document.getElementById("q");
+
+  function esc(s){ return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+
+  function showLoading(n=6){
+    grid.innerHTML = "";
+    for(let i=0;i<n;i++){
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `<div class="img"><div class="skeleton" style="width:100%;height:100%"></div></div>
+        <div class="body"><div class="skeleton sk-line" style="width:70%"></div><div class="skeleton sk-line" style="width:40%"></div></div>`;
+      grid.appendChild(el);
+    }
+  }
+
+  function openItem(id){
+    location.href = `game.html?id=${id}`;
+  }
+
+  /* ✅ المسار اللي اتفقنا عليه */
+  function getImg(id){
+    return `assets/products/${id}.jpg`;
+  }
+
+  function render(list){
+    grid.innerHTML = "";
+    if(!list.length) { grid.innerHTML = "<p>No apps found.</p>"; return; }
+
+    list.forEach(it => {
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `
+        <div class="img">
+          <img class="pImg" src="${getImg(it.id)}" onerror="this.src='assets/products/default.png'">
+        </div>
+        <div class="body">
+          <div class="name">${esc(it.title)}</div>
+          <div class="meta"><span class="pill">${esc(it.category || 'App')}</span></div>
+          <div class="priceRow">
+            <div class="price">$${Number(it.price).toFixed(2)}</div>
+            <button class="buy">Open</button>
+          </div>
+        </div>
+      `;
+      el.onclick = () => openItem(it.id);
+      grid.appendChild(el);
+    });
+  }
+
+  async function load(){
+    showLoading();
+    try {
+      const { data, error } = await sb.from("products")
+        .select("*")
+        .eq("active", true)
+        .eq("page", "apps") // الفلتر المخصص للتطبيقات
+        .order("id", { ascending: true });
+
+      if(error) throw error;
+      const all = data || [];
+      render(all);
+
+      q.oninput = () => {
+        const v = q.value.toLowerCase();
+        render(all.filter(x => x.title.toLowerCase().includes(v)));
+      };
+    } catch(e) {
+      grid.innerHTML = `<p>Error: ${e.message}</p>`;
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>
