@@ -4,7 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Apps - Baroud Services</title>
-
   <style>
     :root{
       --bg1:#06162a;
@@ -13,6 +12,7 @@
       --glass:rgba(255,255,255,.07);
       --stroke:rgba(255,255,255,.10);
       --shadow:0 18px 60px rgba(0,0,0,.35);
+      --r:22px;
     }
     *{box-sizing:border-box}
     body{
@@ -47,6 +47,7 @@
       border:1px solid var(--stroke);
       border-radius:26px;
       padding:14px 16px;
+      box-shadow:0 18px 60px rgba(0,0,0,.18);
     }
     .searchBox input{
       width:100%; background:transparent; border:none; outline:none;
@@ -71,31 +72,32 @@
       flex-direction:column;
     }
 
-    /* ضبط الصور لتكون متناسقة */
-    .img {
-      height: 140px;
-      background: rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+    .img{
+      height:120px;
+      background:rgba(0,0,0,.25);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow:hidden;
     }
 
-    .pImg {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
+    .pImg{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      user-select:none;
+      -webkit-user-drag:none;
     }
 
     .body{ padding:12px 12px 14px; display:flex; flex-direction:column; gap:8px; }
-    .name{ font-weight:950; font-size:16px; line-height:1.1; min-height:35px; }
+    .name{ font-weight:950; font-size:16px; line-height:1.1; }
     .meta{ display:flex; gap:8px; flex-wrap:wrap; opacity:.9; font-weight:800; font-size:12px; }
     .pill{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.06); }
     .priceRow{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
     .price{ font-weight:950; font-size:16px; color:#1bc7ff; }
-    .buy{ padding:10px 12px; border-radius:14px; border:none; cursor:pointer; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); }
+    .buy{ padding:10px 12px; border-radius:14px; border:none; cursor:pointer; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); box-shadow:0 14px 40px rgba(0,0,0,.25); }
 
     .footer{ margin-top:18px; text-align:center; opacity:.55; font-weight:800; }
 
@@ -103,12 +105,11 @@
     .skeleton{ position:relative; overflow:hidden; background:rgba(255,255,255,.05); }
     .skeleton::after{ content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent); animation:shimmer 1.2s infinite; }
     @keyframes shimmer{ to{ transform:translateX(100%); } }
-    .sk-line{ height:14px; border-radius:10px; margin-bottom:10px; }
+    .sk-img{ height:120px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .sk-line{ height:14px; border-radius:10px; }
   </style>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body>
   <main class="wrap">
     <div class="top">
@@ -116,13 +117,10 @@
       <div class="title">Apps</div>
       <button class="btn" onclick="location.href='services.html'">Home</button>
     </div>
-
     <div class="searchBox">
-      <input id="q" placeholder="Search apps (Tiktok, Soulchill...)">
+      <input id="q" placeholder="Search apps (TikTok, Soulchill...)">
     </div>
-
     <section class="grid" id="grid"></section>
-
     <div class="footer">©2025 Baroud Services</div>
   </main>
 
@@ -141,73 +139,80 @@
     for(let i=0;i<n;i++){
       const el = document.createElement("div");
       el.className = "card";
-      el.innerHTML = `<div class="img"><div class="skeleton" style="width:100%;height:100%"></div></div>
+      el.innerHTML = `<div class="img"><div class="skeleton sk-img" style="width:100%;height:100%"></div></div>
         <div class="body"><div class="skeleton sk-line" style="width:70%"></div><div class="skeleton sk-line" style="width:40%"></div></div>`;
       grid.appendChild(el);
     }
   }
 
-  /* ✅ الربط مع صفحة account.html */
-  function openItem(id){
+  function openProduct(id){
     location.href = `account.html?id=${id}`;
-  }
-
-  function getImg(id){
-    return `assets/products/${id}.jpg`;
   }
 
   function render(list){
     grid.innerHTML = "";
-    if(!list.length) { grid.innerHTML = "<p style='padding:20px; opacity:0.5;'>No apps found.</p>"; return; }
+    if(!list.length) { grid.innerHTML = "<div style='opacity:.8;padding:14px'>No apps found.</div>"; return; }
 
     list.forEach(it => {
       const el = document.createElement("div");
       el.className = "card";
-      // أخذنا أقل سعر من الخُطط إذا وجد، وإلا السعر الأساسي
-      const displayPrice = it.price ? `$${Number(it.price).toFixed(2)}` : "View";
+      const priceTxt = Number(it.price).toFixed(2);
 
       el.innerHTML = `
         <div class="img">
-          <img class="pImg" src="${getImg(it.id)}" onerror="this.src='assets/products/default.png'">
+          <img class="pImg" src="assets/products/${it.id}.jpg" onerror="this.src='assets/products/default.png'">
         </div>
         <div class="body">
           <div class="name">${esc(it.title)}</div>
-          <div class="meta"><span class="pill">${esc(it.category || 'App')}</span></div>
+          <div class="meta">
+            <span class="pill">${esc(it.category || 'App')}</span>
+            <span class="pill">Available</span>
+          </div>
           <div class="priceRow">
-            <div class="price">${displayPrice}</div>
+            <div class="price">$${priceTxt}</div>
             <button class="buy">Open</button>
           </div>
         </div>
       `;
-      el.onclick = () => openItem(it.id);
+      el.onclick = () => openProduct(it.id);
       grid.appendChild(el);
     });
   }
 
-  async function load(){
-    showLoading();
-    try {
-      // جلب البيانات مع التأكد من فلتر الصفحة
-      const { data, error } = await sb.from("products")
-        .select("*")
-        .eq("active", true)
-        .eq("page", "apps") 
-        .order("id", { ascending: true });
+  async function loadApps(){
+    const { data, error } = await sb
+      .from("products")
+      .select(`id, title, category, product_plan_prices(price)`)
+      .eq("active", true)
+      .eq("page", "apps"); 
 
-      if(error) throw error;
-      const all = data || [];
-      render(all);
+    if(error) throw error;
 
-      q.oninput = () => {
-        const v = q.value.toLowerCase();
-        render(all.filter(x => x.title.toLowerCase().includes(v)));
+    return (data || []).map(p => {
+      const plans = (p.product_plan_prices || []).map(x => Number(x.price)).filter(n => Number.isFinite(n));
+      return {
+        id: p.id,
+        title: p.title,
+        category: p.category,
+        price: plans.length ? Math.min(...plans) : 0
       };
-    } catch(e) {
-      grid.innerHTML = `<p style='padding:20px;'>Error: ${e.message}</p>`;
-    }
+    });
   }
 
-  load();
+  let all = [];
+  (async ()=>{
+    showLoading(6);
+    try{
+      all = await loadApps();
+      render(all);
+      q.addEventListener("input", ()=>{
+        const v = q.value.toLowerCase().trim();
+        render(all.filter(x => x.title.toLowerCase().includes(v)));
+      });
+    }catch(e){
+      grid.innerHTML = `<div style="padding:14px">Error: ${esc(e.message)}</div>`;
+    }
+  })();
 </script>
 </body>
 </html>
