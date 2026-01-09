@@ -1,63 +1,131 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baroud Store - Services</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="css/style.css"> </head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baroud Store - Our Services</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* نفس الستاييل اللي بصفحة الـ Index لضمان التناسق */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#06162a,#020b14);
+      color:#fff;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    .wrap{ width: 100%; margin: 0 auto; padding: 14px 14px 40px; max-width: 520px; }
+
+    /* TOPBAR */
+    .topbar{ display:flex;align-items:center;justify-content:space-between;gap:12px; margin-top:6px; margin-bottom: 20px;}
+    .backBtn{
+      width:54px;height:54px;border-radius:18px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer; text-decoration: none; color: white; font-size: 24px;
+    }
+    .brandText{ font-weight:900;letter-spacing:2px;font-size:18px; text-transform: uppercase;}
+
+    /* SEARCH */
+    .searchBox{
+      margin-top:12px; background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06); border-radius:26px;
+      padding:14px 16px; box-shadow:0 18px 60px rgba(0,0,0,.18);
+    }
+    .searchBox input{ width:100%;background:transparent;border:none;outline:none; color:#fff;font-size:16px; }
+
+    /* GRID */
+    .grid{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .tile{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:22px; overflow:hidden;
+      cursor:pointer; box-shadow:0 18px 60px rgba(0,0,0,.25);
+      transition:transform .12s ease;
+    }
+    .tile:active{transform:scale(.98)}
+    .tile img{ width:100%; height:130px; object-fit:cover; display:block; background: #111;}
+    .label{ padding:12px 10px;text-align:center; font-weight:900; font-size:14px; opacity:.9}
+    .price-tag { color: #21f07a; font-size: 13px; margin-top: 4px; display: block; }
+
+    .hint{margin-top:30px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
+
+    @media (min-width: 992px){
+      .wrap{ max-width: 1200px; padding: 32px; }
+      .grid{ grid-template-columns: repeat(4, 1fr); gap: 20px; }
+      .tile img{ height: 180px; }
+    }
+  </style>
+</head>
 <body>
-    <div class="main-container">
-        <aside class="sidebar">
-            <div class="logo">BAROUD</div>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="service.html" class="active">Services</a>
-                <a href="orders.html">My Orders</a>
-            </nav>
-        </aside>
 
-        <main class="content">
-            <header>
-                <h1>Explore Services</h1>
-                <div id="balance" class="balance-tag">Balance: $0.00</div>
-            </header>
+  <main class="wrap">
+    <div class="topbar">
+      <a href="index.html" class="backBtn">‹</a>
+      <div class="brandText">All Services</div>
+      <div style="width:54px"></div> </div>
 
-            <div class="services-grid" id="servicesGrid">
-                </div>
-        </main>
+    <div class="searchBox">
+      <input id="search" placeholder="Search services..." />
     </div>
 
-    <script>
-        const SB_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-        const SB_KEY = "YOUR_SUPABASE_KEY"; 
-        const sb = supabase.createClient(SB_URL, SB_KEY);
+    <section class="grid" id="servicesGrid">
+        <p style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Loading products...</p>
+    </section>
 
-        async function init() {
-            // جلب الرصيد
-            const { data: { user } } = await sb.auth.getUser();
-            if (user) {
-                const { data: prof } = await sb.from('profiles').select('balance').eq('id', user.id).single();
-                document.getElementById('balance').innerText = `Balance: $${prof.balance}`;
-            }
+    <div class="hint">baroudlb.com</div>
+  </main>
 
-            // جلب المنتجات
-            const { data: products } = await sb.from('products').select('*').eq('active', true);
-            const grid = document.getElementById('servicesGrid');
-            
-            grid.innerHTML = products.map(p => `
-                <div class="service-card" onclick="location.href='product.html?id=${p.id}'">
-                    <div class="img-wrapper">
-                        <img src="${p.image_url}" alt="">
-                    </div>
-                    <div class="card-info">
-                        <h3>${p.title}</h3>
-                        <span class="price">$${p.price}</span>
-                    </div>
-                </div>
-            `).join('');
+  <script>
+    // إعدادات سوبابيس (استخدم بياناتك الحقيقية هنا)
+    const SB_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SB_KEY = "YOUR_SUPABASE_KEY"; 
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+
+    async function loadServices() {
+        const { data: products, error } = await sb
+            .from('products')
+            .select('*')
+            .eq('active', true);
+
+        if (error) {
+            console.error("Error loading products:", error);
+            document.getElementById('servicesGrid').innerHTML = "<p>Error connecting to database.</p>";
+            return;
         }
-        init();
-    </script>
+
+        const grid = document.getElementById('servicesGrid');
+        if (products.length === 0) {
+            grid.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>No products available.</p>";
+            return;
+        }
+
+        grid.innerHTML = products.map(p => `
+            <div class="tile" data-name="${p.title.toLowerCase()}" onclick="location.href='product.html?id=${p.id}'">
+                <img src="${p.image_url || 'assets/products/default.png'}" alt="${p.title}">
+                <div class="label">
+                    ${p.title}
+                    <span class="price-tag">$${p.price}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // فلتر البحث
+    document.getElementById("search").addEventListener("input", (e) => {
+        const q = e.target.value.toLowerCase();
+        document.querySelectorAll(".tile").forEach(t => {
+            const name = t.getAttribute("data-name");
+            t.style.display = name.includes(q) ? "" : "none";
+        });
+    });
+
+    loadServices();
+  </script>
 </body>
 </html>
