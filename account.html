@@ -86,11 +86,8 @@
       font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff);
       margin-top:15px; box-shadow:0 10px 30px rgba(0,160,255,0.3);
     }
-    
-    /* Custom SweetAlert Styles */
     .swal2-popup { background: #0b1424 !important; color: #fff !important; border-radius: 22px !important; border: 1px solid var(--stroke) !important; }
     .swal2-title { color: #fff !important; }
-    .swal2-confirm { background: linear-gradient(90deg,#0aa0ff,#2a74ff) !important; border-radius: 12px !important; }
   </style>
 </head>
 
@@ -115,22 +112,18 @@
 
       <div class="body">
         <div id="dynamic-fields" style="display:none; flex-direction:column; gap:15px; margin-bottom:15px; border: 1px solid var(--blue); padding: 15px; border-radius: 18px; background: rgba(27,199,255,0.05);">
-          
           <div id="field-player-id" style="display:none;">
             <div class="noteLbl">Player ID / Account ID</div>
             <input type="text" id="input-player-id" class="noteInput" placeholder="Enter ID here...">
           </div>
-
           <div id="field-player-name" style="display:none;">
             <div class="noteLbl">Checking Name</div>
             <input type="text" id="input-player-name" class="noteInput" placeholder="Verifying..." readonly>
           </div>
-
           <div id="field-email" style="display:none;">
             <div class="noteLbl" id="email-label">Email Address</div>
             <input type="text" id="input-email" class="noteInput" placeholder="Enter here...">
           </div>
-
           <div id="field-pass" style="display:none;">
             <div class="noteLbl">Password</div>
             <input type="password" id="input-pass" class="noteInput" placeholder="••••••••">
@@ -149,13 +142,12 @@
 
   <script>
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentProduct = null;
     let selectedPlan = null;
 
-    // 1. Logic for dynamic fields (including Phone Recharge)
     function updateFields() {
         const df = document.getElementById("dynamic-fields");
         const fId = document.getElementById("field-player-id");
@@ -169,88 +161,74 @@
 
         if (!currentProduct) return;
         const cat = (currentProduct.category || "").toLowerCase();
-        const title = currentProduct.title.toLowerCase();
 
-        // Phone Recharge Logic
         if (cat.includes("recharge")) {
             df.style.display = "flex";
             fEmail.style.display = "block";
             emailLbl.textContent = "Phone Number";
-            document.getElementById("input-email").placeholder = "Ex: 70123456";
-        } 
-        // Games Logic (Jawaker etc)
-        else if (cat.includes("games")) {
+        } else if (cat.includes("games")) {
             df.style.display = "flex";
             fId.style.display = "block";
-            if(title.includes("jawaker")) fName.style.display = "block";
-        }
-        // Accounts Logic (Shahid, Netflix)
-        else if (cat.includes("accounts") || cat.includes("apps")) {
+            if(currentProduct.title.toLowerCase().includes("jawaker")) fName.style.display = "block";
+        } else if (cat.includes("accounts") || cat.includes("apps")) {
             df.style.display = "flex";
             fEmail.style.display = "block";
             fPass.style.display = "block";
-            emailLbl.textContent = "Email / Phone";
+            emailLbl.textContent = "Account Email";
         }
     }
 
-    // 2. Auto-check Name Logic (Placeholder for your API)
-    document.getElementById("input-player-id").addEventListener("input", async (e) => {
-        if (!currentProduct.title.toLowerCase().includes("jawaker")) return;
-        const val = e.target.value;
-        const nameInput = document.getElementById("input-player-name");
-        if (val.length > 5) {
-            nameInput.value = "Checking... ⏳";
-            // هنا تضع رابط الـ API الخاص بك مستقبلاً
-            setTimeout(() => { nameInput.value = "Verified User ✅"; }, 1500);
-        }
-    });
-
-    // 3. Main Load Function
     async function init() {
         const id = new URLSearchParams(window.location.search).get("id");
         if (!id) return;
-
-        try {
-            const { data: p } = await sb.from("products").select("*").eq("id", id).single();
-            const { data: plans } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true).order("price");
-
+        const { data: p } = await sb.from("products").select("*").eq("id", id).single();
+        const { data: plans } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true).order("price");
+        if(p) {
             currentProduct = p;
             document.getElementById("pTitle").textContent = p.title;
             document.getElementById("pCat").textContent = p.category;
             document.getElementById("heroImg").src = `assets/products/${p.id}.jpg`;
-            
             if (plans && plans.length > 0) {
                 selectedPlan = plans[0];
                 document.getElementById("pPrice").textContent = "$" + Number(selectedPlan.price).toFixed(2);
             }
-
             updateFields();
-        } catch (e) {
-            console.error(e);
         }
     }
 
-    // 4. Buy Button with SweetAlert
     document.getElementById("buyBtn").onclick = async () => {
-        const pEmail = document.getElementById("input-email").value.trim();
-        const cat = currentProduct.category.toLowerCase();
+        if(!currentProduct || !selectedPlan) return;
 
-        // Custom Validation Message
-        if (cat.includes("recharge") && !pEmail) {
-            Swal.fire({ icon: 'error', title: 'Missing Info', text: 'Please enter the phone number!' });
-            return;
-        }
+        const pId = document.getElementById("input-player-id").value;
+        const pEmail = document.getElementById("input-email").value;
+        const pPass = document.getElementById("input-pass").value;
+        const cNote = document.getElementById("customerNote").value;
 
-        const result = await Swal.fire({
-            title: 'Confirm Order',
-            text: `Are you sure you want to buy ${currentProduct.title}?`,
+        const finalNote = `ID: ${pId} | Email: ${pEmail} | Pass: ${pPass} | Note: ${cNote}`;
+
+        const { isConfirmed } = await Swal.fire({
+            title: 'Confirm Purchase',
+            text: `Buy ${currentProduct.title} for $${selectedPlan.price}?`,
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, Buy!'
+            confirmButtonText: 'Confirm'
         });
 
-        if (result.isConfirmed) {
-            Swal.fire('Processing...', 'Your order is being sent', 'info');
-            // هنا تضع كود الـ place_order الفعلي
+        if (isConfirmed) {
+            Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
+            const { data, error } = await sb.rpc('place_order', {
+                p_product_id: currentProduct.id,
+                p_price: selectedPlan.price,
+                p_duration: selectedPlan.plan_name || 'N/A',
+                p_note: finalNote
+            });
+
+            if (error) {
+                Swal.fire('Error', error.message, 'error');
+            } else {
+                Swal.fire('Success!', 'Order placed. Admin notified!', 'success')
+                .then(() => location.href = 'my-orders.html');
+            }
         }
     };
 
