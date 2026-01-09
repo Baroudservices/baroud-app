@@ -291,27 +291,50 @@
     }
   }
 
-  async function loadProducts(){
-    const { data, error } = await sb
-      .from("products")
-      .select("id,title,price,category,page")
-      .eq("active", true)
-      .eq("page", "games")
-      .order("id", { ascending: true });
-    if(error) throw error;
-    return data || [];
-  }
+ async function loadProducts(){
+  // التعديل هنا: أضفنا فلتر category لضمان جلب الحسابات فقط
+  const { data, error } = await sb
+    .from("products")
+    .select(`
+      id,
+      title,
+      category,
+      product_plan_prices(price)
+    `)
+    .eq("active", true)
+    .eq("category", "Accounts"); // تأكد أن الكلمة مطابقة تماماً لما في Supabase
+
+  if(error) throw error;
+
+  return (data || []).map(p => {
+    const prices = (p.product_plan_prices || [])
+      .map(x => Number(x.price))
+      .filter(n => Number.isFinite(n));
+    return {
+      id: p.id,
+      title: p.title,
+      category: p.category,
+      price: prices.length ? Math.min(...prices) : 0
+    };
+  });
+}
 
   let all = [];
+
   (async ()=>{
-    showLoading();
+    showLoading(6);
     try{
       all = await loadProducts();
       render(all);
-      q.oninput = () => {
-        const v = q.value.toLowerCase();
-        render(all.filter(x => x.title.toLowerCase().includes(v) || (x.category||"").toLowerCase().includes(v)));
-      };
+
+      q.addEventListener("input", ()=>{
+        const v = q.value.trim().toLowerCase();
+        if(!v) return render(all);
+        render(all.filter(x =>
+          (x.title||"").toLowerCase().includes(v) ||
+          (x.category||"").toLowerCase().includes(v)
+        ));
+      });
     }catch(e){
       grid.innerHTML = `<div style="color:red;padding:14px">Error: ${esc(e.message)}</div>`;
     }
