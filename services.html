@@ -1,66 +1,228 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baroud Services - Home</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root{ --bg:#0b1424; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.08); --blue:#1bc7ff; }
-    body{ margin:0; font-family:sans-serif; background:var(--bg); color:#fff; }
-    .wrap{ max-width:1200px; margin:0 auto; padding:20px; }
-    .topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-    .balancePill{ background:var(--glass); border:1px solid var(--stroke); padding:8px 15px; border-radius:15px; display:flex; gap:10px; align-items:center; }
-    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:15px; }
-    .tile{ background:var(--glass); border:1px solid var(--stroke); border-radius:20px; overflow:hidden; cursor:pointer; text-align:center; transition:0.3s; }
-    .tile:hover{ transform:translateY(-5px); border-color:var(--blue); }
-    .tile img{ width:100%; height:140px; object-fit:cover; }
-    .label{ padding:12px; font-weight:bold; }
-    .addBtn{ background:linear-gradient(90deg,#0aa0ff,#2a74ff); border:none; color:#fff; padding:5px 10px; border-radius:8px; cursor:pointer; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="balancePill">
-        <span>Balance: $<span id="uBalTop">0.00</span></span>
-        <button class="addBtn" onclick="location.href='add-credit.html'">+</button>
-      </div>
-      <img src="assets/logo.png" style="height:40px;">
-    </div>
-
-    <div class="grid" id="products-grid">
-      </div>
-  </div>
-
-  <script>
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    async function init() {
-        // 1. جلب الرصيد
-        const { data: bal } = await sb.rpc("get_my_balance");
-        if(bal !== null) document.getElementById("uBalTop").textContent = Number(bal).toFixed(2);
-
-        // 2. جلب المنتجات
-        const { data: prods, error } = await sb.from('products').select('*').eq('active', true);
-        const grid = document.getElementById('products-grid');
-
-        if (error || !prods || prods.length === 0) {
-            grid.innerHTML = "<p>No services found. Add some from Supabase dashboard.</p>";
-            return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services | Baroud Store</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <style>
+        :root {
+            --primary: #1bc7ff;
+            --bg: #050a14;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-dim: #8892b0;
         }
 
-        grid.innerHTML = prods.map(p => `
-            <div class="tile" onclick="location.href='order-details.html?id=${p.id}'">
-                <img src="assets/products/${p.id}.jpg" onerror="this.src='assets/products/default.png'">
-                <div class="label">${p.title}</div>
-            </div>
-        `).join('');
-    }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); overflow-x: hidden; }
 
-    init();
-  </script>
+        /* Header & Nav */
+        nav {
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(5, 10, 20, 0.8);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { font-size: 22px; font-weight: 800; color: var(--primary); text-decoration: none; letter-spacing: 1px; }
+
+        /* Hero Section */
+        .hero {
+            padding: 150px 8% 60px;
+            text-align: center;
+            background: radial-gradient(circle at top, rgba(27, 199, 255, 0.05), transparent);
+        }
+        .hero h1 { font-size: 48px; margin-bottom: 15px; }
+        .hero p { color: var(--text-dim); max-width: 600px; margin: 0 auto 30px; }
+
+        /* Search & Filter */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 12px 25px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            margin-left: 10px;
+            outline: none;
+            width: 100%;
+        }
+
+        /* Services Grid */
+        .container { padding: 0 8% 100px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* Professional Card Design */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 30px;
+            position: relative;
+            transition: all 0.4s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(27, 199, 255, 0.03));
+            opacity: 0; transition: 0.4s;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .card:hover::before { opacity: 1; }
+
+        .card-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(27, 199, 255, 0.1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        .card-icon img { width: 40px; height: 40px; object-fit: contain; }
+
+        .card h3 { font-size: 22px; margin-bottom: 12px; }
+        .card p { color: var(--text-dim); font-size: 14px; line-height: 1.6; margin-bottom: 25px; }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        .price { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .buy-btn {
+            background: var(--primary);
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* Balance Badge */
+        .balance-card {
+            background: rgba(25, 195, 125, 0.1);
+            color: #19c37d;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1px solid rgba(25, 195, 125, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">BAROUD STORE</a>
+        <div id="navRight">
+            <div id="balanceDisplay" class="balance-card">Loading...</div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Premium Services</h1>
+        <p>Explore our exclusive collection of gaming services and digital subscriptions with instant manual delivery.</p>
+        
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search" style="color: #444;"></i>
+                <input type="text" id="searchInput" placeholder="Search services..." onkeyup="filterServices()">
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="grid" id="servicesGrid">
+            </div>
+    </div>
+
+    <script>
+        const SB_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+        const SB_KEY = "YOUR_SUPABASE_KEY"; 
+        const sb = supabase.createClient(SB_URL, SB_KEY);
+
+        let allProducts = [];
+
+        async function loadData() {
+            // Load Balance
+            const { data: { user } } = await sb.auth.getUser();
+            if (user) {
+                const { data: profile } = await sb.from('profiles').select('balance').eq('id', user.id).single();
+                document.getElementById('balanceDisplay').innerText = `$${profile?.balance || 0} USD`;
+            } else {
+                document.getElementById('balanceDisplay').innerHTML = '<a href="login.html" style="color:#19c37d; text-decoration:none;">Login</a>';
+            }
+
+            // Load Products
+            const { data, error } = await sb.from('products').select('*').eq('active', true);
+            if (!error) {
+                allProducts = data;
+                displayProducts(allProducts);
+            }
+        }
+
+        function displayProducts(list) {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = list.map(p => `
+                <div class="card" onclick="location.href='details.html?id=${p.id}'">
+                    <div class="card-icon">
+                        <img src="${p.image_url}" alt="">
+                    </div>
+                    <h3>${p.title}</h3>
+                    <p>${p.description || 'Secure delivery for your favorite gaming and digital services.'}</p>
+                    <div class="card-footer">
+                        <div class="price">$${p.price}</div>
+                        <div class="buy-btn">ORDER NOW</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterServices() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.title.toLowerCase().includes(term));
+            displayProducts(filtered);
+        }
+
+        loadData();
+    </script>
 </body>
 </html>
