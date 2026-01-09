@@ -355,10 +355,34 @@
       }
     }
 
-    function setSelectedPlan(plan){
-      selectedPlan = plan;
-      priceEl.textContent = "$" + Number(plan.price).toFixed(2);
-    }
+   function setSelectedPlan(plan) {
+  if (!plan) return;
+  selectedPlan = plan;
+
+  const p = Number(plan.price || 0);
+  priceEl.textContent = "$" + (Number.isFinite(p) ? p.toFixed(2) : "0.00");
+
+  const planLabel = (plan.label || "").toLowerCase();
+  const productTitle = (currentProduct?.title || "").toLowerCase();
+  
+  const df = document.getElementById("dynamic-fields");
+  const fEmail = document.getElementById("field-email");
+  const fPass = document.getElementById("field-pass");
+
+  // الشرط الذكي: فقط إذا كان المنتج Shahid والـ Plan فيه كلمة Direct
+  if (productTitle.includes("shahid") && planLabel.includes("direct")) {
+    df.style.display = "flex";
+    fEmail.style.display = "block";
+    fPass.style.display = "block";
+    document.getElementById("email-label").textContent = "SHAHID EMAIL";
+  } else {
+    // إذا مش شاهد دايبركت، منرجع للقواعد الأساسية اللي عرفناها بالـ renderProduct
+    renderProductFields(currentProduct);
+  }
+
+  localStorage.setItem("last_order_plan", plan.key || "");
+  localStorage.setItem("last_order_price", (Number.isFinite(p) ? p.toFixed(2) : "0.00"));
+}
 
     async function buyProduct(){
       if(!selectedPlan) { alert("Select a plan first"); return; }
