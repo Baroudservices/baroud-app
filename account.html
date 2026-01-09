@@ -46,7 +46,6 @@
       box-shadow:var(--shadow);
     }
 
-    /* ===== HERO (background ثابت + صورة المنتج فوقه) ===== */
     .hero{
       height:210px;
       position:relative;
@@ -73,12 +72,7 @@
     .heroOverlay{
       position:absolute;
       inset:0;
-      background:linear-gradient(
-        180deg,
-        rgba(0,0,0,.10) 0%,
-        rgba(0,0,0,.35) 55%,
-        rgba(0,0,0,.78) 100%
-      );
+      background:linear-gradient(180deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.78) 100%);
       pointer-events:none;
       z-index:2;
     }
@@ -157,15 +151,33 @@
       touch-action:manipulation;
     }
 
-    #myOrdersBtn{
-      font-size:18px;
-      font-weight:950;
-      padding:14px 18px;
-      line-height:1;
+    .noteWrap{
+      margin-top:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      border-radius:16px;
+      padding:10px;
     }
-
-    .footer{margin-top:18px;text-align:center;opacity:.55;font-weight:800;letter-spacing:1px}
-    .muted{opacity:.7;font-weight:800}
+    .noteLbl{
+      font-size:12px;
+      font-weight:950;
+      opacity:.85;
+      margin-bottom:8px;
+      letter-spacing:.3px;
+      color: var(--blue);
+    }
+    .noteInput{
+      width:100%;
+      min-height:44px;
+      resize:vertical;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      padding:10px 12px;
+      outline:none;
+      font-weight:900;
+    }
 
     .ordersDD{position:relative;display:inline-block;z-index:99999}
     .ordersMenu{
@@ -191,44 +203,12 @@
       background:#19c37d;
     }
 
-    /* ✅ HIGH PRICE (RED PULSE) */
-    .priceHigh{
-      background: linear-gradient(90deg, #ff3b3b, #ff0000) !important;
-      color: #fff !important;
-      box-shadow: 0 0 12px rgba(255,0,0,.85);
-      animation: pulseRed 1.2s infinite;
-    }
-    @keyframes pulseRed{
-      0%   { box-shadow: 0 0 6px rgba(255,0,0,.6); }
-      50%  { box-shadow: 0 0 16px rgba(255,0,0,1); }
-      100% { box-shadow: 0 0 6px rgba(255,0,0,.6); }
-    }
-
-    .noteWrap{
-      margin-top:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      border-radius:16px;
-      padding:10px;
-    }
-    .noteLbl{
-      font-size:12px;
-      font-weight:950;
-      opacity:.85;
-      margin-bottom:8px;
-      letter-spacing:.3px;
-    }
-    .noteInput{
-      width:100%;
-      min-height:44px;
-      resize:vertical;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      padding:10px 12px;
-      outline:none;
-      font-weight:900;
+    /* Dynamic Container Styling */
+    #dynamic-fields {
+      border: 1px solid var(--blue);
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(27, 199, 255, 0.05);
     }
   </style>
 </head>
@@ -244,7 +224,6 @@
       <div class="hero">
         <img id="heroImg" class="heroImg" src="assets/products/default.png" alt="Product">
         <div class="heroOverlay"></div>
-
         <div class="heroContent">
           <div>
             <h1 class="heroTitle" id="pTitle">Loading...</h1>
@@ -258,22 +237,42 @@
         <div class="pills" id="pills"></div>
         <div class="features" id="features"></div>
 
+        <div id="dynamic-fields" style="margin-top:14px; display:none; flex-direction:column; gap:12px;">
+          <div id="field-player-id" style="display:none;">
+            <div class="noteLbl" id="id-label">PLAYER ID</div>
+            <input type="text" id="input-player-id" class="noteInput" placeholder="Enter ID here...">
+          </div>
+          
+          <div id="field-player-name" style="display:none;">
+            <div class="noteLbl">CHECKING NAME</div>
+            <input type="text" id="input-player-name" class="noteInput" placeholder="Ex: Baroud_Hero">
+          </div>
+
+          <div id="field-email" style="display:none;">
+            <div class="noteLbl" id="email-label">EMAIL / PHONE</div>
+            <input type="text" id="input-email" class="noteInput" placeholder="Enter here...">
+          </div>
+
+          <div id="field-pass" style="display:none;">
+            <div class="noteLbl">PASSWORD</div>
+            <input type="password" id="input-pass" class="noteInput" placeholder="Enter account password...">
+          </div>
+        </div>
+
         <div class="noteWrap">
           <div class="noteLbl">Customer note (optional)</div>
           <textarea id="customerNote" class="noteInput" placeholder="Write note for this order..."></textarea>
         </div>
 
         <div class="buyRow">
-          <button class="buyBtn" id="buyBtn" type="button">Buy</button>
-
+          <button class="buyBtn" id="buyBtn" type="button">Buy Now</button>
           <div class="ordersDD" id="ordersDD">
-            <button class="smallBtn" id="myOrdersBtn" type="button" aria-label="plans menu">▾</button>
+            <button class="smallBtn" id="myOrdersBtn" type="button">▾</button>
             <div class="ordersMenu" id="ordersMenu" hidden></div>
           </div>
         </div>
       </div>
     </div>
-
     <div class="footer">©2025 Baroud Services</div>
   </main>
 
@@ -289,307 +288,161 @@
     const featsEl = document.getElementById("features");
     const buyBtn  = document.getElementById("buyBtn");
     const heroImgEl = document.getElementById("heroImg");
-
-    const ordersDD   = document.getElementById("ordersDD");
-    const ordersBtn  = document.getElementById("myOrdersBtn");
     const ordersMenu = document.getElementById("ordersMenu");
-
     const customerNoteEl = document.getElementById("customerNote");
-    const NOTE_KEY = "last_order_customer_note";
 
     let PLAN_LIST = [];
     let currentProductId = null;
     let currentProduct = null;
     let selectedPlan = null;
 
-    function esc(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    function esc(s){ return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    function getId(){ return new URL(location.href).searchParams.get("id"); }
+
+    async function loadProduct(id){
+      const { data: p } = await sb.from("products").select("*").eq("id", id).single();
+      const { data: f } = await sb.from("product_features").select("*").eq("product_id", id).order("sort");
+      return { product: p, features: f || [] };
     }
 
-    function getId(){
-      const u = new URL(location.href);
-      const id = Number(u.searchParams.get("id"));
-      return Number.isFinite(id) ? id : null;
-    }
-
-    function productImgUrl(id){
-      return `assets/products/${id}.jpg`;
-    }
-
-    function setHeroImage(id){
-      heroImgEl.src = productImgUrl(id);
-      heroImgEl.onerror = ()=>{
-        heroImgEl.onerror = null;
-        heroImgEl.src = "assets/products/default.png";
-      };
-    }
-
-    function getCustomerNote(){
-      return (customerNoteEl?.value || "").trim();
-    }
-    function setCustomerNote(v){
-      if(customerNoteEl) customerNoteEl.value = String(v || "");
-    }
-    function persistCustomerNote(){
-      try{ localStorage.setItem(NOTE_KEY, getCustomerNote()); }catch(e){}
-    }
-    customerNoteEl.addEventListener("input", persistCustomerNote);
-
-    function buildOrderNote(){
-      const title = currentProduct?.title || "Product";
-      const label = selectedPlan?.label || selectedPlan?.key || "";
-      const p = Number(selectedPlan?.price || 0);
-      const priceTxt = Number.isFinite(p) ? p.toFixed(2) : "0.00";
-      const userNote = getCustomerNote();
-
-      return userNote
-        ? `${title} | ${label} | $${priceTxt} | Note: ${userNote}`
-        : `${title} | ${label} | $${priceTxt}`;
-    }
-
-    function setSelectedPlan(plan){
-      if(!plan) return;
-      selectedPlan = plan;
-
-      const p = Number(plan.price || 0);
-      priceEl.textContent = "$" + (Number.isFinite(p) ? p.toFixed(2) : "0.00");
-
-      localStorage.setItem("last_order_plan", plan.key || "");
-      localStorage.setItem("last_order_price", (Number.isFinite(p) ? p.toFixed(2) : "0.00"));
-      localStorage.setItem("last_order_note", buildOrderNote());
-    }
-
-    function renderMenu(){
-      ordersMenu.innerHTML = "";
-
-      if(!PLAN_LIST.length){
-        const item = document.createElement("div");
-        item.className = "ordersItem";
-        item.innerHTML = `<span>No plans</span><span class="badge">$0.00</span>`;
-        ordersMenu.appendChild(item);
-        return;
-      }
-
-      for(const d of PLAN_LIST){
-        const priceNum = Number(d.price || 0);
-        const priceTxt = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "0.00";
-        const highClass = priceNum > 10000 ? "priceHigh" : "";
-
-        const item = document.createElement("div");
-        item.className = "ordersItem";
-        item.innerHTML = `
-          <span>${esc(d.label || d.key)}</span>
-          <span class="badge ${highClass}">$${priceTxt}</span>
-        `;
-
-        item.addEventListener("click", (e)=>{
-          e.stopPropagation();
-          setSelectedPlan(d);
-          ordersMenu.hidden = true;
-        });
-        ordersMenu.appendChild(item);
-      }
-    }
-
-    ordersBtn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-      renderMenu();
-      ordersMenu.hidden = !ordersMenu.hidden;
-    });
-    document.addEventListener("click", ()=>{ ordersMenu.hidden = true; });
-    ordersDD.addEventListener("click", (e)=> e.stopPropagation());
-    ordersMenu.addEventListener("click", (e)=> e.stopPropagation());
-
-    async function loadProduct(productId){
-      const { data: p, error: pErr } = await sb
-        .from("products")
-        .select("id,title,price,category,active")
-        .eq("id", productId)
-        .single();
-      if(pErr) throw pErr;
-
-      const { data: f, error: fErr } = await sb
-        .from("product_features")
-        .select("label,value,sort")
-        .eq("product_id", productId)
-        .order("sort", { ascending:true });
-      if(fErr) throw fErr;
-
-      return { product: p, features: (f || []) };
-    }
-
-    async function loadPlansFromDb(productId){
-      const { data, error } = await sb
-        .from("product_plan_prices")
-        .select("plan_key, plan_label, price, active, updated_at")
-        .eq("product_id", productId)
-        .eq("active", true)
-        .order("plan_key", { ascending:true });
-
-      if(error) throw error;
-
-      const rows = (data || []);
-      return rows.map(r=>({
-        key: r.plan_key,
-        label: r.plan_label || r.plan_key,
-        price: Number(r.price || 0)
-      }));
+    async function loadPlans(id){
+      const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true);
+      return (data || []).map(r=>({ key: r.plan_key, label: r.plan_label || r.plan_key, price: r.price }));
     }
 
     function renderProduct(p, features){
       currentProduct = p;
+      titleEl.textContent = p.title;
+      catEl.textContent = "Category: " + p.category;
+      heroImgEl.src = `assets/products/${p.id}.jpg`;
+      heroImgEl.onerror = () => heroImgEl.src = "assets/products/default.png";
+      
+      pillsEl.innerHTML = `<span class="pill">${p.active ? 'Available' : 'Unavailable'}</span><span class="pill">${p.category}</span>`;
+      featsEl.innerHTML = features.map(f => `<div class="feature"><div class="fLabel">${esc(f.label)}</div><div class="fValue">${esc(f.value)}</div></div>`).join('');
 
-      titleEl.textContent = p?.title || "Product";
-      catEl.textContent = p?.category ? ("Category: " + p.category) : "";
+      // ✅ DYNAMIC LOGIC FOR INPUTS
+      const df = document.getElementById("dynamic-fields");
+      const fId = document.getElementById("field-player-id");
+      const fName = document.getElementById("field-player-name");
+      const fEmail = document.getElementById("field-email");
+      const fPass = document.getElementById("field-pass");
 
-      setHeroImage(p?.id);
+      df.style.display = "none";
+      [fId, fName, fEmail, fPass].forEach(el => el.style.display = "none");
 
-      pillsEl.innerHTML = "";
-      if(p?.active === false){
-        pillsEl.innerHTML += `<span class="pill">Unavailable</span>`;
-        buyBtn.disabled = true;
-      }else{
-        pillsEl.innerHTML += `<span class="pill">Available</span>`;
-        buyBtn.disabled = false;
-      }
-      if(p?.category){
-        pillsEl.innerHTML += `<span class="pill">${esc(p.category)}</span>`;
-      }
+      const title = p.title.toLowerCase();
+      const cat = (p.category || "").toLowerCase();
 
-      featsEl.innerHTML = "";
-      if(!features.length){
-        featsEl.innerHTML = `<div class="muted">No details yet</div>`;
-        return;
+      if(cat.includes("games") || cat.includes("apps")){
+        df.style.display = "flex";
+        if(title.includes("jawaker")){
+          fId.style.display = "block"; fName.style.display = "block";
+        } else if(title.includes("tiktok")){
+          fEmail.style.display = "block";
+          document.getElementById("email-label").textContent = "PHONE OR EMAIL";
+          document.getElementById("input-email").oninput = (e) => {
+            fPass.style.display = e.target.value.includes("@") ? "block" : "none";
+          };
+        } else {
+          fId.style.display = "block"; // Default for all other games/apps
+        }
+      } else if(title.includes("chatgpt")){
+        df.style.display = "flex"; fEmail.style.display = "block";
+        document.getElementById("email-label").textContent = "EMAIL";
+      } else if(title.includes("shahid direct")){
+        df.style.display = "flex"; fEmail.style.display = "block"; fPass.style.display = "block";
+        document.getElementById("email-label").textContent = "EMAIL";
       }
-      for(const x of features){
-        featsEl.innerHTML += `
-          <div class="feature">
-            <div class="fLabel">${esc(x.label)}</div>
-            <div class="fValue">${esc(x.value)}</div>
-          </div>
-        `;
-      }
+    }
+
+    function setSelectedPlan(plan){
+      selectedPlan = plan;
+      priceEl.textContent = "$" + Number(plan.price).toFixed(2);
     }
 
     async function buyProduct(){
-      if(!currentProductId){ alert("Invalid product"); return; }
-      if(!currentProduct){ alert("Still loading... try again"); return; }
-      if(currentProduct?.active === false){ alert("Unavailable"); return; }
-      if(!selectedPlan){ alert("Select a plan"); return; }
+      if(!selectedPlan) { alert("Select a plan first"); return; }
 
-      let ok = true;
-      if (typeof window.confirmMsg === "function") {
-        ok = await window.confirmMsg("Confirm Purchase", "Are you sure you want to buy this product?");
-      } else {
-        ok = confirm("Are you sure you want to buy this product?");
-      }
-      if(!ok) return;
+      const pId = document.getElementById("input-player-id").value.trim();
+      const pName = document.getElementById("input-player-name").value.trim();
+      const pEmail = document.getElementById("input-email").value.trim();
+      const pPass = document.getElementById("input-pass").value.trim();
+      const title = currentProduct.title.toLowerCase();
+
+      // VALIDATION
+      if(document.getElementById("field-player-id").style.display === "block" && !pId) { alert("Player ID is required!"); return; }
+      if(document.getElementById("field-player-name").style.display === "block" && !pName) { alert("Checking Name is required!"); return; }
+      if(document.getElementById("field-email").style.display === "block" && !pEmail) { alert("Email/Phone is required!"); return; }
+      if(document.getElementById("field-pass").style.display === "block" && !pPass) { alert("Password is required!"); return; }
+
+      if(!confirm("Are you sure? This will deduct balance.")) return;
 
       buyBtn.disabled = true;
-      const old = buyBtn.textContent;
-      buyBtn.textContent = "Buying...";
+      buyBtn.textContent = "Processing...";
 
-      try{
-        const { data: s } = await sb.auth.getSession();
-        if(!s?.session?.user){
-          location.href = "login.html?v=" + Date.now();
-          return;
-        }
-
-        const finalPrice = Number(selectedPlan.price || 0);
-
-        persistCustomerNote();
-        const finalNote = buildOrderNote();
-        localStorage.setItem("last_order_note", finalNote);
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if(!session) { location.href = "login.html"; return; }
 
         const { data: orderId, error } = await sb.rpc("place_order", {
           p_product_id: currentProductId,
-          p_price: finalPrice,
+          p_price: selectedPlan.price,
           p_duration: selectedPlan.label,
-          p_note: finalNote || null
+          p_note: customerNoteEl.value,
+          p_player_id: pId || null,
+          p_player_name: pName || null,
+          p_acc_email: pEmail || null,
+          p_acc_pass: pPass || null
         });
+
         if(error) throw error;
 
-        /* ✅ clear customer note after successful order */
-        setCustomerNote("");
-        try{ localStorage.removeItem(NOTE_KEY); }catch(e){}
-
-        const note = finalNote || "";
-        const planKey = localStorage.getItem("last_order_plan") || selectedPlan.key;
-        const planPrice = Number.isFinite(finalPrice) ? finalPrice.toFixed(2) : "0.00";
-
-        const go = () => {
-          location.href =
-            "my-orders.html?v=" + Date.now() +
-            "&product_id=" + encodeURIComponent(currentProductId) +
-            "&duration=" + encodeURIComponent(planKey) +
-            "&price=" + encodeURIComponent(planPrice) +
-            "&note=" + encodeURIComponent(note) +
-            "&order_id=" + encodeURIComponent(orderId);
-        };
-
-        if (typeof window.showMsg === "function") {
-          window.showMsg("Success", `✅ Order placed!\nOrder ID: ${orderId}`, () => setTimeout(go, 300));
-        } else {
-          alert("✅ Order placed! Order ID: " + orderId);
-          setTimeout(go, 300);
+        // TIKTOK REDIRECT
+        if(title.includes("tiktok")){
+          const waMsg = `Hello Baroud Services, I just bought TikTok Coins. Order ID: ${orderId}. My Details: ${pEmail}. Waiting for code.`;
+          window.open(`https://wa.me/96170385398?text=${encodeURIComponent(waMsg)}`);
         }
 
-      }catch(err){
-        alert(err?.message || "Failed");
-      }finally{
+        alert("✅ Order Placed! ID: " + orderId);
+        location.href = "my-orders.html";
+      } catch(e) {
+        alert(e.message || "Purchase failed");
+      } finally {
         buyBtn.disabled = false;
-        buyBtn.textContent = old;
+        buyBtn.textContent = "Buy Now";
       }
     }
 
-    buyBtn.addEventListener("click", (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-      buyProduct();
-    });
-
+    // Initialize
     (async ()=>{
-      const id = getId();
-      currentProductId = id;
+      currentProductId = getId();
+      if(!currentProductId) return;
+      
+      const { product, features } = await loadProduct(currentProductId);
+      renderProduct(product, features);
+      
+      PLAN_LIST = await loadPlans(currentProductId);
+      if(PLAN_LIST.length) setSelectedPlan(PLAN_LIST[0]);
 
-      if(!id){
-        titleEl.textContent = "Invalid product";
-        buyBtn.disabled = true;
-        return;
-      }
-
-      /* ✅ restore note (if still exists) */
-      try{ setCustomerNote(localStorage.getItem(NOTE_KEY) || ""); }catch(e){}
-
-      setHeroImage(id);
-
-      try{
-        const { product, features } = await loadProduct(id);
-        renderProduct(product, features);
-
-        PLAN_LIST = await loadPlansFromDb(id);
-
-        if(PLAN_LIST.length){
-          setSelectedPlan(PLAN_LIST[0]);
-        }else{
-          priceEl.textContent = "$0.00";
-        }
-
-      }catch(e){
-        titleEl.textContent = "Error loading product";
-        featsEl.innerHTML = `<div class="muted">Error: ${esc(e?.message || e)}</div>`;
-        buyBtn.disabled = true;
-      }
+      buyBtn.onclick = buyProduct;
+      document.getElementById("myOrdersBtn").onclick = (e) => {
+        e.stopPropagation();
+        ordersMenu.hidden = !ordersMenu.hidden;
+        ordersMenu.innerHTML = PLAN_LIST.map(p => `
+          <div class="ordersItem" onclick="setSelectedPlanByPrice('${p.key}')">
+            <span>${p.label}</span>
+            <span class="badge">$${p.price}</span>
+          </div>
+        `).join('');
+      };
     })();
-  </script>
 
-  <script src="app-ui.js?v=4"></script>
+    window.setSelectedPlanByPrice = (key) => {
+      const plan = PLAN_LIST.find(p => p.key === key);
+      if(plan) setSelectedPlan(plan);
+      ordersMenu.hidden = true;
+    };
+    document.onclick = () => ordersMenu.hidden = true;
+  </script>
 </body>
 </html>
