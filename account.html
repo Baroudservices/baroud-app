@@ -355,7 +355,7 @@
       }
     }
 
-   function setSelectedPlan(plan) {
+ function setSelectedPlan(plan) {
   if (!plan) return;
   selectedPlan = plan;
 
@@ -366,17 +366,30 @@
   const productTitle = (currentProduct?.title || "").toLowerCase();
   
   const df = document.getElementById("dynamic-fields");
+  const fId = document.getElementById("field-player-id");
+  const fName = document.getElementById("field-player-name");
   const fEmail = document.getElementById("field-email");
   const fPass = document.getElementById("field-pass");
 
-  // الشرط الذكي: فقط إذا كان المنتج Shahid والـ Plan فيه كلمة Direct
+  // 1. تنظيف الخانات أولاً
+  [fId, fName, fEmail, fPass].forEach(el => el.style.display = "none");
+  df.style.display = "none";
+
+  // 2. فحص حالة Shahid Direct
   if (productTitle.includes("shahid") && planLabel.includes("direct")) {
     df.style.display = "flex";
     fEmail.style.display = "block";
     fPass.style.display = "block";
     document.getElementById("email-label").textContent = "SHAHID EMAIL";
-  } else {
-    // إذا مش شاهد دايبركت، منرجع للقواعد الأساسية اللي عرفناها بالـ renderProduct
+  } 
+  // 3. فحص حالة ChatGPT Private
+  else if (productTitle.includes("chatgpt") && planLabel.includes("private")) {
+    df.style.display = "flex";
+    fEmail.style.display = "block";
+    document.getElementById("email-label").textContent = "CHATGPT EMAIL";
+  }
+  // 4. الحالات العامة (Games/Apps/Jawaker/TikTok)
+  else {
     renderProductFields(currentProduct);
   }
 
