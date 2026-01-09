@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventory Management</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body { background: #050a14; color: #fff; font-family: system-ui; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+    input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; }
+    button { background: #1bc7ff; color: #000; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .stock-list { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .stock-list th, .stock-list td { padding: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: left; }
+    .status-sold { color: #ff4d4d; }
+    .status-available { color: #19c37d; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 Account Inventory</h1>
+    
+    <div class="card">
+      <h3>Add New Stock</h3>
+      <select id="productSelect"><option value="">Select Product...</option></select>
+      <p style="font-size: 12px; opacity: 0.6;">Enter accounts (One per line):</p>
+      <textarea id="accountsInput" rows="5" placeholder="user1:pass1&#10;user2:pass2"></textarea>
+      <button onclick="addStock()">Add to Stock</button>
+    </div>
+
+    <div class="card">
+      <h3>Current Stock</h3>
+      <table class="stock-list" id="stockTable">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Account Data</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="stockBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const SB_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SB_KEY = "YOUR_SUPABASE_KEY"; // حط مفتاحك هون
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+
+    async function loadInitialData() {
+        // تحميل المنتجات للقائمة
+        const { data: products } = await sb.from('products').select('id, title');
+        const select = document.getElementById('productSelect');
+        products.forEach(p => {
+            select.innerHTML += `<option value="${p.id}">${p.title}</option>`;
+        });
+        loadStock();
+    }
+
+    async function loadStock() {
+        const { data: stock } = await sb.from('product_stock').select('*, products(title)').order('created_at', {ascending: false});
+        const body = document.getElementById('stockBody');
+        body.innerHTML = stock.map(s => `
+            <tr>
+                <td>${s.products.title}</td>
+                <td><code>${s.account_data}</code></td>
+                <td class="${s.is_sold ? 'status-sold' : 'status-available'}">${s.is_sold ? 'SOLD' : 'AVAILABLE'}</td>
+                <td><button onclick="deleteStock(${s.id})" style="background:#ff4d4d; padding:5px 10px;">Delete</button></td>
+            </tr>
+        `).join('');
+    }
+
+    async function addStock() {
+        const productId = document.getElementById('productSelect').value;
+        const rawAccounts = document.getElementById('accountsInput').value.split('\n');
+        const accounts = rawAccounts.filter(a => a.trim() !== "");
+
+        if (!productId || accounts.length === 0) return Swal.fire('Error', 'Please fill all fields', 'error');
+
+        const insertData = accounts.map(acc => ({ product_id: productId, account_data: acc }));
+        const { error } = await sb.from('product_stock').insert(insertData);
+
+        if (!error) {
+            Swal.fire('Success', `Added ${accounts.length} accounts`, 'success');
+            document.getElementById('accountsInput').value = "";
+            loadStock();
+        }
+    }
+
+    async function deleteStock(id) {
+        if (!confirm('Are you sure?')) return;
+        await sb.from('product_stock').delete().eq('id', id);
+        loadStock();
+    }
+
+    loadInitialData();
+  </script>
+</body>
+</html>
