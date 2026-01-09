@@ -331,6 +331,7 @@
       updateDynamicFields();
     }
 
+    // ✅ THE SMART LOGIC FOR DYNAMIC FIELDS
     function updateDynamicFields(){
       const df = document.getElementById("dynamic-fields");
       const fId = document.getElementById("field-player-id");
@@ -347,30 +348,34 @@
       const planLabel = selectedPlan.label.toLowerCase();
       const cat = (currentProduct.category || "").toLowerCase();
 
-      // Shahid Direct
+      // 1. Shahid Direct 1 Year
       if (title.includes("shahid") && planLabel.includes("direct")) {
         df.style.display = "flex"; fEmail.style.display = "block"; fPass.style.display = "block";
-        document.getElementById("email-label").textContent = "SHAHID EMAIL";
+        document.getElementById("email-label").textContent = "EMAIL";
       } 
-      // ChatGPT Private
+      // 2. ChatGPT Private
       else if (title.includes("chatgpt") && planLabel.includes("private")) {
         df.style.display = "flex"; fEmail.style.display = "block";
-        document.getElementById("email-label").textContent = "CHATGPT EMAIL";
+        document.getElementById("email-label").textContent = "EMAIL";
       }
-      // Games & Apps Logic
+      // 3. TikTok Logic
+      else if (title.includes("tiktok")) {
+        df.style.display = "flex"; fEmail.style.display = "block";
+        document.getElementById("email-label").textContent = "EMAIL OR PHONE";
+        // Show pass ONLY if it's an email (contains @)
+        const emailInput = document.getElementById("input-email");
+        emailInput.oninput = () => {
+          fPass.style.display = emailInput.value.includes("@") ? "block" : "none";
+        };
+        fPass.style.display = emailInput.value.includes("@") ? "block" : "none";
+      }
+      // 4. Jawaker Logic
+      else if (title.includes("jawaker")) {
+        df.style.display = "flex"; fId.style.display = "block"; fName.style.display = "block";
+      }
+      // 5. General Games & Apps
       else if (cat.includes("games") || cat.includes("apps")) {
-        df.style.display = "flex";
-        if (title.includes("jawaker")) {
-          fId.style.display = "block"; fName.style.display = "block";
-        } else if (title.includes("tiktok")) {
-          fEmail.style.display = "block";
-          document.getElementById("email-label").textContent = "PHONE OR EMAIL";
-          document.getElementById("input-email").oninput = (e) => {
-            fPass.style.display = e.target.value.includes("@") ? "block" : "none";
-          };
-        } else {
-          fId.style.display = "block";
-        }
+        df.style.display = "flex"; fId.style.display = "block";
       }
     }
 
@@ -382,7 +387,7 @@
       const pEmail = document.getElementById("input-email").value.trim();
       const pPass = document.getElementById("input-pass").value.trim();
 
-      // Validation for visible fields only
+      // ✅ STRICT VALIDATION (Only for what's visible)
       if(document.getElementById("field-player-id").style.display !== "none" && !pId) { alert("Player ID is required"); return; }
       if(document.getElementById("field-player-name").style.display !== "none" && !pName) { alert("Checking Name is required"); return; }
       if(document.getElementById("field-email").style.display !== "none" && !pEmail) { alert("Email/Phone is required"); return; }
@@ -409,8 +414,10 @@
 
         if(error) throw error;
 
+        // TIKTOK WHATSAPP REDIRECT
         if(currentProduct.title.toLowerCase().includes("tiktok")){
-          window.open(`https://wa.me/96170385398?text=${encodeURIComponent("TikTok Order ID: "+orderId+". Account: "+pEmail)}`);
+          const waMsg = `TikTok Order ID: ${orderId}\nAccount: ${pEmail}\nStatus: Waiting for code`;
+          window.open(`https://wa.me/96170385398?text=${encodeURIComponent(waMsg)}`);
         }
 
         alert("✅ Order Placed! ID: " + orderId);
@@ -432,7 +439,15 @@
       try {
         const { product, features } = await loadProduct(currentProductId);
         currentProduct = product;
-        renderProduct(product, features);
+        
+        // Render basic UI
+        titleEl.textContent = product.title;
+        catEl.textContent = "Category: " + product.category;
+        heroImgEl.src = `assets/products/${product.id}.jpg`;
+        heroImgEl.onerror = () => heroImgEl.src = "assets/products/default.png";
+        pillsEl.innerHTML = `<span class="pill">${product.active ? 'Available' : 'Unavailable'}</span><span class="pill">${product.category}</span>`;
+        featsEl.innerHTML = features.map(f => `<div class="feature"><div class="fLabel">${esc(f.label)}</div><div class="fValue">${esc(f.value)}</div></div>`).join('');
+
         await loadPlans(currentProductId);
         buyBtn.onclick = buyProduct;
       } catch(e) {
