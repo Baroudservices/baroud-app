@@ -241,10 +241,6 @@
             <div class="noteLbl" id="id-label">PLAYER ID</div>
             <input type="text" id="input-player-id" class="noteInput" placeholder="Enter ID here..." autocomplete="off">
           </div>
-          <div id="field-player-name" style="display:none;">
-            <div class="noteLbl">CHECKING NAME</div>
-            <input type="text" id="input-player-name" class="noteInput" placeholder="Ex: Baroud_Hero" autocomplete="off">
-          </div>
           <div id="field-email" style="display:none;">
             <div class="noteLbl" id="email-label">EMAIL / PHONE</div>
             <input type="text" id="input-email" class="noteInput" placeholder="Enter here..." autocomplete="new-password">
@@ -305,7 +301,6 @@
     async function loadPlans(id){
       const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true).order("price", {ascending: true});
       PLAN_LIST = (data || []).map(r=>({ key: r.plan_key, label: r.plan_label || r.plan_key, price: r.price }));
-      
       if(PLAN_LIST.length > 0) setSelectedPlan(PLAN_LIST[0]);
       renderMenu();
     }
@@ -331,16 +326,14 @@
       updateDynamicFields();
     }
 
-    // ✅ THE SMART LOGIC FOR DYNAMIC FIELDS
     function updateDynamicFields(){
       const df = document.getElementById("dynamic-fields");
       const fId = document.getElementById("field-player-id");
-      const fName = document.getElementById("field-player-name");
       const fEmail = document.getElementById("field-email");
       const fPass = document.getElementById("field-pass");
       
       df.style.display = "none";
-      [fId, fName, fEmail, fPass].forEach(el => el.style.display = "none");
+      [fId, fEmail, fPass].forEach(el => el.style.display = "none");
 
       if(!currentProduct || !selectedPlan) return;
 
@@ -348,32 +341,27 @@
       const planLabel = selectedPlan.label.toLowerCase();
       const cat = (currentProduct.category || "").toLowerCase();
 
-      // 1. Shahid Direct 1 Year
+      // Shahid
       if (title.includes("shahid") && planLabel.includes("direct")) {
         df.style.display = "flex"; fEmail.style.display = "block"; fPass.style.display = "block";
         document.getElementById("email-label").textContent = "EMAIL";
       } 
-      // 2. ChatGPT Private
+      // ChatGPT
       else if (title.includes("chatgpt") && planLabel.includes("private")) {
         df.style.display = "flex"; fEmail.style.display = "block";
         document.getElementById("email-label").textContent = "EMAIL";
       }
-      // 3. TikTok Logic
+      // TikTok
       else if (title.includes("tiktok")) {
         df.style.display = "flex"; fEmail.style.display = "block";
         document.getElementById("email-label").textContent = "EMAIL OR PHONE";
-        // Show pass ONLY if it's an email (contains @)
         const emailInput = document.getElementById("input-email");
         emailInput.oninput = () => {
           fPass.style.display = emailInput.value.includes("@") ? "block" : "none";
         };
         fPass.style.display = emailInput.value.includes("@") ? "block" : "none";
       }
-      // 4. Jawaker Logic
-      else if (title.includes("jawaker")) {
-        df.style.display = "flex"; fId.style.display = "block"; fName.style.display = "block";
-      }
-      // 5. General Games & Apps
+      // Games (Jawaker Included - Only ID)
       else if (cat.includes("games") || cat.includes("apps")) {
         df.style.display = "flex"; fId.style.display = "block";
       }
@@ -383,13 +371,11 @@
       if(!selectedPlan) { alert("Please select a plan first"); return; }
       
       const pId = document.getElementById("input-player-id").value.trim();
-      const pName = document.getElementById("input-player-name").value.trim();
       const pEmail = document.getElementById("input-email").value.trim();
       const pPass = document.getElementById("input-pass").value.trim();
 
-      // ✅ STRICT VALIDATION (Only for what's visible)
+      // Validation
       if(document.getElementById("field-player-id").style.display !== "none" && !pId) { alert("Player ID is required"); return; }
-      if(document.getElementById("field-player-name").style.display !== "none" && !pName) { alert("Checking Name is required"); return; }
       if(document.getElementById("field-email").style.display !== "none" && !pEmail) { alert("Email/Phone is required"); return; }
       if(document.getElementById("field-pass").style.display !== "none" && !pPass) { alert("Password is required"); return; }
 
@@ -407,14 +393,13 @@
           p_duration: selectedPlan.label,
           p_note: customerNoteEl.value,
           p_player_id: pId || null,
-          p_player_name: pName || null,
+          p_player_name: null, // Removed Checking Name
           p_acc_email: pEmail || null,
           p_acc_pass: pPass || null
         });
 
         if(error) throw error;
 
-        // TIKTOK WHATSAPP REDIRECT
         if(currentProduct.title.toLowerCase().includes("tiktok")){
           const waMsg = `TikTok Order ID: ${orderId}\nAccount: ${pEmail}\nStatus: Waiting for code`;
           window.open(`https://wa.me/96170385398?text=${encodeURIComponent(waMsg)}`);
@@ -440,7 +425,6 @@
         const { product, features } = await loadProduct(currentProductId);
         currentProduct = product;
         
-        // Render basic UI
         titleEl.textContent = product.title;
         catEl.textContent = "Category: " + product.category;
         heroImgEl.src = `assets/products/${product.id}.jpg`;
@@ -449,6 +433,7 @@
         featsEl.innerHTML = features.map(f => `<div class="feature"><div class="fLabel">${esc(f.label)}</div><div class="fValue">${esc(f.value)}</div></div>`).join('');
 
         await loadPlans(currentProductId);
+        updateDynamicFields();
         buyBtn.onclick = buyProduct;
       } catch(e) {
         titleEl.textContent = "Error loading";
