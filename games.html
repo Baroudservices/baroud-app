@@ -291,8 +291,8 @@
     }
   }
 
- async function loadProducts(){
-  // التعديل هنا: أضفنا فلتر category لضمان جلب الحسابات فقط
+async function loadProducts(){
+  // التعديل: جلب فئة Games فقط وحساب أقل سعر من جدول الخطط
   const { data, error } = await sb
     .from("products")
     .select(`
@@ -302,18 +302,21 @@
       product_plan_prices(price)
     `)
     .eq("active", true)
-    .eq("category", "Accounts"); // تأكد أن الكلمة مطابقة تماماً لما في Supabase
+    .eq("category", "Games"); // جلب الألعاب فقط
 
   if(error) throw error;
 
   return (data || []).map(p => {
+    // استخراج جميع الأسعار المتاحة لهذا المنتج
     const prices = (p.product_plan_prices || [])
       .map(x => Number(x.price))
-      .filter(n => Number.isFinite(n));
+      .filter(n => Number.isFinite(n) && n > 0);
+
     return {
       id: p.id,
       title: p.title,
       category: p.category,
+      // إذا وجد أسعار نأخذ الأقل، وإذا لم يجد نضع 0.00
       price: prices.length ? Math.min(...prices) : 0
     };
   });
