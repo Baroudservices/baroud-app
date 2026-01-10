@@ -1,169 +1,294 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Baroud Services - Neon Pro</title>
 
+  <!-- ✅ Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; padding:0;}
     body{
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:#020b14; 
+      margin:0;
+      font-family: system-ui,Arial;
+      background:#020b14;
       color:#fff;
-      min-height:100vh;
-      overflow-x:hidden;
-      padding-bottom: 90px;
     }
 
-    .wrap{ width: 100%; margin: 0 auto; padding: 14px; max-width: 520px; }
+    .overlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.65);
+      opacity:0; pointer-events:none;
+      transition:.2s;
+      z-index:9998;
+    }
+    .overlay.show{ opacity:1; pointer-events:auto; }
 
-    /* ===== TOPBAR ===== */
-    .topbar{
+    aside{
+      position:fixed; top:0; left:0;
+      width:280px; height:100%;
+      background:rgba(10,14,22,.98);
+      border-right:1px solid rgba(255,255,255,.08);
+      transform:translateX(-100%);
+      transition:.22s ease;
+      z-index:9999;
+      padding:16px;
+      box-sizing:border-box;
+    }
+    aside.show{ transform:translateX(0); }
+
+    .m-head{
       display:flex; align-items:center; justify-content:space-between;
-      padding: 10px 0; margin-bottom: 15px;
+      padding:8px 6px 14px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      margin-bottom:12px;
     }
-    .topbar-left{ display: flex; align-items: center; gap: 12px; }
-    
+    .m-title{ font-weight:900; letter-spacing:.5px; }
+    .m-close{
+      width:40px; height:40px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.06);
+      color:#fff; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px;
+    }
+
+    .m-item{
+      display:flex; align-items:center; gap:10px;
+      padding:12px 10px;
+      border-radius:14px;
+      color:#fff;
+      text-decoration:none;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.03);
+      margin-bottom:10px;
+    }
+    .m-item:hover{ background:rgba(255,255,255,.06); }
+    .m-dot{ width:10px; height:10px; border-radius:999px; background:#38bdf8; }
+    .logout-dot{ background:#ef4444; }
+
+    .page{
+      max-width:980px;
+      margin:0 auto;
+      padding:16px;
+      padding-bottom:90px;
+      box-sizing:border-box;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .topbar-left{
+      display:flex; align-items:center; gap:10px;
+    }
     .menu-trigger{
-      width: 45px; height: 45px; background: rgba(255,255,255,0.06);
-      border-radius: 12px; display: flex; align-items: center;
-      justify-content: center; font-size: 22px; cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.1);
+      width:44px; height:44px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      font-size:20px;
+    }
+    .brand-title{
+      font-weight:950;
+      letter-spacing:1px;
+      opacity:.9;
     }
 
     .wallet-pill{
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.05);
-      padding: 6px 14px; border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.1);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
     }
-    .star-icon{ color: #ffd700; font-size: 18px; }
-    .balance-text{ font-weight: 800; font-size: 15px; }
-
-    .add-fund-btn{ 
-      width: 28px; height: 28px; background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 18px; font-weight: bold; cursor: pointer;
-      box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); border: none; margin-left: 5px;
+    .star-icon{
+      width:26px; height:26px;
+      border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      background:rgba(56,189,248,.18);
+      border:1px solid rgba(56,189,248,.35);
+      color:#38bdf8;
+      font-weight:900;
+      font-size:14px;
     }
-
-    .brand-title{ font-weight: 900; letter-spacing: 1.5px; font-size: 20px; text-transform: uppercase; }
-
-    /* ===== BANNER SLIDER ===== */
-    .slider-box {
-      width: 100%; border-radius: 20px; overflow: hidden;
-      margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
-      position: relative; height: 160px;
+    .balance-text{
+      font-weight:950;
+      letter-spacing:.3px;
+      white-space:nowrap;
     }
-    .slides { display: flex; width: 300%; height: 100%; transition: 0.5s; }
-    .slides img { width: 33.333%; object-fit: cover; }
-
-    /* ===== SUPPORT SLIDER ===== */
-    .support-slider {
-      background: rgba(255,255,255,0.05);
-      border-radius: 30px; height: 50px;
-      overflow: hidden; margin-bottom: 20px;
-      border: 1px solid rgba(255,255,255,0.05);
-      position: relative;
-    }
-    .support-track {
-      display: flex; flex-direction: column;
-      animation: supportSlide 8s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    }
-    .support-item {
-      height: 50px; display: flex; align-items: center; justify-content: center;
-      gap: 10px; font-weight: 700; font-size: 14px;
-    }
-    @keyframes supportSlide {
-      0%, 20% { transform: translateY(0); }
-      25%, 45% { transform: translateY(-50px); }
-      50%, 70% { transform: translateY(-100px); }
-      75%, 95% { transform: translateY(-150px); }
-      100% { transform: translateY(0); }
+    .add-fund-btn{
+      width:28px; height:28px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+      line-height:1;
     }
 
-    /* ===== SEARCH ===== */
-    .search-box{
-      background: rgba(255,255,255,0.05);
-      border-radius: 25px; padding: 14px 20px;
-      margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.08);
+    .slider-box{
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      margin-bottom:12px;
     }
-    .search-box input{ width: 100%; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; }
-
-    /* ===== GRID ===== */
-    .grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .neon-tile{
-      background: #0b141d; border-radius: 25px;
-      overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
-      transition: 0.3s; cursor: pointer;
+    .slides{
+      display:flex;
+      transition: transform .5s ease;
     }
-    .neon-tile img{ width: 100%; display: block; }
-    .tile-label{ padding: 12px; text-align: center; font-weight: 800; font-size: 14px; }
+    .slides img{
+      width:100%;
+      height:180px;
+      object-fit:cover;
+      flex:0 0 100%;
+      display:block;
+    }
 
-    /* ===== BOTTOM NAV ===== */
+    .support-slider{
+      overflow:hidden;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      margin-bottom:16px;
+    }
+    .support-track{
+      display:flex;
+      gap:26px;
+      padding:10px 14px;
+      animation: marquee 14s linear infinite;
+      white-space:nowrap;
+      align-items:center;
+    }
+    .support-item{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800;
+      opacity:.9;
+    }
+    @keyframes marquee{
+      0%{ transform:translateX(0); }
+      100%{ transform:translateX(-33.333%); }
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    @media (min-width: 720px){
+      .grid{ grid-template-columns:repeat(4, minmax(0,1fr)); }
+      .slides img{ height:240px; }
+    }
+    .tile{
+      position:relative;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      cursor:pointer;
+      text-decoration:none;
+      color:#fff;
+      min-height:120px;
+      display:flex;
+      align-items:flex-end;
+    }
+    .tile img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      opacity:.88;
+      transform:scale(1.05);
+    }
+    .tile::after{
+      content:"";
+      position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.75));
+    }
+    .tile .label{
+      position:relative;
+      z-index:2;
+      padding:12px;
+      font-weight:950;
+      letter-spacing:.3px;
+    }
+
     .bottom-nav{
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: #020b14; border-top: 1px solid rgba(255,255,255,0.05);
-      display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000;
+      position:fixed;
+      left:0; right:0; bottom:0;
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      gap:10px;
+      padding:10px 10px 14px;
+      background:rgba(6,10,18,.94);
+      border-top:1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+      z-index:9997;
     }
-    .nav-btn{ font-size: 24px; opacity: 0.5; }
-
-    /* ===== DRAWER (SIDEBAR) ===== */
-    .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.8); opacity:0; pointer-events:none; transition:0.3s; z-index:2000; }
-    .overlay.show{ opacity:1; pointer-events:auto; }
-    .drawer{
-      position:fixed; top:0; left:0; width:290px; height:100vh;
-      background:#06162a; border-right:1px solid rgba(255,255,255,.1);
-      transform:translateX(-100%); transition:0.3s; z-index:2100; padding:25px;
-      display: flex; flex-direction: column;
+    .nav-btn{
+      width:62px;
+      height:44px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      cursor:pointer;
+      text-decoration:none;
+      font-weight:900;
     }
-    .drawer.show{ transform:translateX(0); }
-    .m-item{ display:flex; align-items:center; gap:15px; padding:14px; border-radius:12px; cursor:pointer; text-decoration: none; color: inherit; }
-    .m-item:hover{ background: rgba(255,255,255,0.05); }
-    .m-dot{ width:8px; height:8px; border-radius:50%; background:#00d2ff; box-shadow: 0 0 8px #00d2ff; }
-    
-    .logout-item {
-      margin-top: auto; 
-      border-top: 1px solid rgba(255,255,255,0.05);
-      padding-top: 15px;
-      color: #ff4d4d;
+    .nav-btn.active{
+      background:rgba(56,189,248,.16);
+      border-color:rgba(56,189,248,.35);
     }
-    .logout-dot { background: #ff4d4d; box-shadow: 0 0 8px #ff4d4d; }
   </style>
 </head>
 
 <body>
   <div class="overlay" id="overlay"></div>
 
-  <aside class="drawer" id="drawer">
-    <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
-      <div style="width:60px; height:60px; background:rgba(255,255,255,0.05); border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; border:2px solid #00d2ff; font-size:25px;">👤</div>
-      <div style="font-weight: 900;">Houssein Baroud</div>
+  <aside id="drawer">
+    <div class="m-head">
+      <div class="m-title">Menu</div>
+      <button class="m-close" id="closeBtn">✕</button>
     </div>
-    
-    <div class="m-item" id="homeExit"><div class="m-dot"></div><span>Home</span></div>
-    
-    <a href="add-credit.html" class="m-item"><div class="m-dot"></div><span>Add Credit</span></a>
-    <a href="my-payments.html" class="m-item"><div class="m-dot"></div><span>My Payments</span></a>
-    <a href="my-orders.html" class="m-item"><div class="m-dot"></div><span>My Orders</span></a>
-    <a href="security.html" class="m-item"><div class="m-dot"></div><span>Security</span></a>
-    <a href="help.html" class="m-item"><div class="m-dot"></div><span>Help</span></a>
 
-    <a href="login.html" class="m-item logout-item"><div class="m-dot logout-dot"></div><span>Logout</span></a>
+    <a href="services.html" class="m-item"><div class="m-dot"></div><span>Home</span></a>
+    <a href="account.html" class="m-item"><div class="m-dot"></div><span>Account</span></a>
+    <a href="my-orders.html" class="m-item"><div class="m-dot"></div><span>My Orders</span></a>
+    <a href="add-credit.html" class="m-item"><div class="m-dot"></div><span>Add Credit</span></a>
+    <a href="login.html" class="m-item"><div class="m-dot logout-dot"></div><span>Logout</span></a>
   </aside>
 
-  <main class="wrap">
+  <div class="page">
     <div class="topbar">
       <div class="topbar-left">
         <div class="menu-trigger" id="menuBtn">☰</div>
+
+        <!-- ✅ Wallet (رصيد المستخدم) -->
         <div class="wallet-pill">
           <span class="star-icon">★</span>
-          <span class="balance-text">0.00 🇱🇧</span>
+          <span class="balance-text">0 🇱🇧</span>
           <button class="add-fund-btn" onclick="location.href='add-credit.html'">+</button>
         </div>
       </div>
+
       <div class="brand-title">BAROUD</div>
     </div>
 
@@ -178,66 +303,130 @@
     <div class="support-slider">
       <div class="support-track">
         <div class="support-item"><span>📞</span> Support Number</div>
-        <div class="support-item"><span>📱</span> +961 70385398</div>
-        <div class="support-item"><span>👤</span> Houssein Baroud</div>
-        <div class="support-item"><span>🛡️</span> 24/7 Available</div>
+        <div class="support-item"><span>✅</span> Fast Delivery</div>
+        <div class="support-item"><span>🔒</span> Secure Payments</div>
+
+        <div class="support-item"><span>📞</span> Support Number</div>
+        <div class="support-item"><span>✅</span> Fast Delivery</div>
+        <div class="support-item"><span>🔒</span> Secure Payments</div>
+
+        <div class="support-item"><span>📞</span> Support Number</div>
+        <div class="support-item"><span>✅</span> Fast Delivery</div>
+        <div class="support-item"><span>🔒</span> Secure Payments</div>
       </div>
     </div>
 
-    <div class="search-box">
-      <input type="text" placeholder="Search for services...">
+    <div class="grid">
+      <a class="tile" href="accounts.html">
+        <img src="assets/accounts.png" alt="Accounts">
+        <div class="label">Accounts</div>
+      </a>
+
+      <a class="tile" href="games.html">
+        <img src="assets/games.png" alt="Games">
+        <div class="label">Games</div>
+      </a>
+
+      <a class="tile" href="giftcards.html">
+        <img src="assets/giftcards.png" alt="Gift Cards">
+        <div class="label">Gift Cards</div>
+      </a>
+
+      <a class="tile" href="apps.html">
+        <img src="assets/apps.png" alt="Apps">
+        <div class="label">Apps</div>
+      </a>
     </div>
-
-   <section class="grid">
-      <a href="accounts.html" class="neon-tile" style="text-decoration: none; color: inherit;">
-        <img src="assets/accounts.png">
-        <div class="tile-label">Accounts</div>
-      </a>
-
-      <a href="games.html" class="neon-tile" style="text-decoration: none; color: inherit;">
-        <img src="assets/games.png">
-        <div class="tile-label">Games</div>
-      </a>
-
-      <a href="giftcards.html" class="neon-tile" style="text-decoration: none; color: inherit;">
-        <img src="assets/giftcards.png">
-        <div class="tile-label">Gift Cards</div>
-      </a>
-
-      <a href="apps.html" class="neon-tile" style="text-decoration: none; color: inherit;">
-        <img src="assets/apps.png">
-        <div class="tile-label">Apps</div>
-      </a>
-    </section>
-  </main>
+  </div>
 
   <nav class="bottom-nav">
-    <div class="nav-btn" style="opacity:1; color:#00d2ff;">🏠</div>
-    <div class="nav-btn">🛒</div>
-    <div class="nav-btn">🔔</div>
-    <div class="nav-btn">💳</div>
-    <div class="nav-btn">👤</div>
+    <a class="nav-btn active" href="services.html">Home</a>
+    <a class="nav-btn" href="account.html">Account</a>
+    <a class="nav-btn" href="my-orders.html">Orders</a>
+    <a class="nav-btn" href="add-credit.html">+</a>
   </nav>
 
   <script>
     const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
-    const homeExit = document.getElementById("homeExit");
+    const closeBtn = document.getElementById("closeBtn");
 
-    menuBtn.onclick = () => { drawer.classList.add("show"); overlay.classList.add("show"); }
-    const closeSidebar = () => { drawer.classList.remove("show"); overlay.classList.remove("show"); }
-    
+    const openSidebar = () => {
+      drawer.classList.add("show");
+      overlay.classList.add("show");
+    };
+    const closeSidebar = () => {
+      drawer.classList.remove("show");
+      overlay.classList.remove("show");
+    };
+
+    menuBtn.onclick = openSidebar;
+    closeBtn.onclick = closeSidebar;
     overlay.onclick = closeSidebar;
-    homeExit.onclick = closeSidebar;
 
-    // Banner Logic
-    let currentSlide = 0;
+    // Slider
     const slider = document.getElementById("mainSlider");
+    let idx = 0;
     setInterval(() => {
-      currentSlide = (currentSlide + 1) % 3;
-      slider.style.transform = `translateX(-${currentSlide * 33.333}%)`;
+      idx = (idx + 1) % 3;
+      slider.style.transform = `translateX(-${idx * 100}%)`;
     }, 4000);
+  </script>
+
+  <!-- ✅ ربط الرصيد من Supabase -->
+  <script>
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    function fmtLBP(n){
+      const x = Number(n || 0);
+      try{
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(x);
+      }catch(e){
+        return String(Math.round(x));
+      }
+    }
+
+    async function loadBalance(){
+      const el = document.querySelector(".balance-text");
+      if(!el) return;
+
+      const { data: { session } } = await sb.auth.getSession();
+      if(!session){
+        el.textContent = "0 🇱🇧";
+        return;
+      }
+
+      const { data, error } = await sb
+        .from("profiles")
+        .select("balance")
+        .eq("id", session.user.id)
+        .single();
+
+      if(error){
+        console.warn("Balance error:", error.message);
+        el.textContent = "0 🇱🇧";
+        return;
+      }
+
+      el.textContent = `${fmtLBP(data?.balance)} 🇱🇧`;
+    }
+
+    loadBalance();
+
+    // Realtime update لو الرصيد تغيّر
+    sb.channel('balance-watch')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, (payload) => {
+        sb.auth.getSession().then(({ data: { session } }) => {
+          if(session && payload.new && payload.new.id === session.user.id){
+            const el = document.querySelector(".balance-text");
+            if(el) el.textContent = `${fmtLBP(payload.new.balance)} 🇱🇧`;
+          }
+        });
+      })
+      .subscribe();
   </script>
 </body>
 </html>
