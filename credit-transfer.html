@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Credit Transfer - Baroud</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; padding:0;}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:#020b14;
+      color:#fff;
+      min-height:100vh;
+      overflow-x:hidden;
+      padding-bottom: 20px;
+    }
+    .wrap{ width: 100%; margin: 0 auto; padding: 14px; max-width: 520px; }
+
+    .topbar{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; margin-bottom:12px; }
+    .topbar-left{ display:flex; align-items:center; gap:12px; }
+
+    .back-btn{
+      width:45px; height:45px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      display:flex; align-items:center; justify-content:center;
+      font-size: 22px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      user-select:none;
+    }
+
+    .wallet-pill{
+      display:flex; align-items:center; gap:8px;
+      background: rgba(255,255,255,0.05);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .star-icon{ color:#ffd700; font-size:18px; }
+    .balance-text{ font-weight: 900; font-size: 15px; }
+
+    .brand-title{
+      font-weight: 900; letter-spacing: 1.2px;
+      font-size: 18px; text-transform: uppercase; opacity: .95;
+    }
+
+    .card{
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .filters{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      padding-bottom: 2px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .filters::-webkit-scrollbar{ display:none; }
+    .fbtn{
+      flex:0 0 auto;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-weight: 900;
+      font-size: 13px;
+      cursor:pointer;
+      user-select:none;
+      opacity:.9;
+      transition:.2s;
+      white-space:nowrap;
+    }
+    .fbtn.active{
+      background: linear-gradient(135deg, rgba(0,210,255,.25), rgba(58,123,213,.18));
+      border-color: rgba(0,210,255,.45);
+      box-shadow: 0 0 18px rgba(0,210,255,.12);
+      opacity:1;
+    }
+
+    label{ display:block; font-weight:900; margin-bottom:8px; opacity:.9; }
+    .input{
+      width:100%;
+      padding: 14px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.25);
+      color:#fff;
+      outline:none;
+      font-size: 15px;
+    }
+
+    .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:12px; }
+    .small{ opacity:.7; font-size: 12px; font-weight: 800; }
+    .price{ font-weight: 950; color:#38bdf8; font-size: 16px; }
+
+    .btn{
+      width:100%;
+      margin-top: 14px;
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 950;
+      color:#fff;
+      background: linear-gradient(90deg,#0aa0ff,#2a74ff);
+      box-shadow: 0 12px 30px rgba(0,0,0,.30);
+    }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; }
+
+    .msg{
+      margin-top: 10px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      font-weight: 900;
+      opacity:.95;
+      display:none;
+    }
+    .msg.err{ border-color: rgba(239,68,68,.35); color:#fecaca; }
+    .msg.ok{ border-color: rgba(34,197,94,.35); color:#bbf7d0; }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="back-btn" id="backBtn">←</div>
+        <div class="wallet-pill">
+          <span class="star-icon">★</span>
+          <span class="balance-text" id="balanceText">0.00 🇱🇧</span>
+        </div>
+      </div>
+      <div class="brand-title">BAROUD</div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:950; font-size:18px; margin-bottom:6px;">💸 Credit Transfer</div>
+      <div class="small">Choose provider, enter amount, system will calculate price automatically.</div>
+    </div>
+
+    <div class="filters" id="providerTabs">
+      <div class="fbtn active" data-provider="ALFA">ALFA (× 1.30)</div>
+      <div class="fbtn" data-provider="MTC">MTC (× 1.25)</div>
+    </div>
+
+    <div class="card">
+      <label for="amount">Amount (USD)</label>
+      <input id="amount" class="input" type="number" inputmode="decimal" min="1" step="0.01" placeholder="مثال: 10" />
+
+      <div class="row">
+        <div class="small">Rate</div>
+        <div class="small" id="rateText">1.30</div>
+      </div>
+
+      <div class="row">
+        <div class="small">Total Price</div>
+        <div class="price" id="totalText">$0.00</div>
+      </div>
+
+      <button class="btn" id="payBtn" disabled>Confirm & Pay</button>
+
+      <div class="msg" id="msgBox"></div>
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const balanceText = document.getElementById("balanceText");
+    const providerTabs = document.getElementById("providerTabs");
+    const amountEl = document.getElementById("amount");
+    const rateText = document.getElementById("rateText");
+    const totalText = document.getElementById("totalText");
+    const payBtn = document.getElementById("payBtn");
+    const msgBox = document.getElementById("msgBox");
+
+    let provider = "ALFA";
+    let rate = 1.30;
+    let sessionUser = null;
+    let cachedBalance = 0;
+
+    function showMsg(text, type){
+      msgBox.style.display = "block";
+      msgBox.className = "msg " + (type || "");
+      msgBox.textContent = text;
+    }
+    function hideMsg(){
+      msgBox.style.display = "none";
+      msgBox.textContent = "";
+      msgBox.className = "msg";
+    }
+
+    document.getElementById("backBtn").onclick = () => {
+      if(history.length > 1) history.back();
+      else location.href = "services.html";
+    };
+
+    function calcTotal(){
+      const amount = Number(amountEl.value || 0);
+      const total = amount > 0 ? amount * rate : 0;
+      totalText.textContent = "$" + total.toFixed(2);
+
+      payBtn.disabled = !(amount > 0 && sessionUser);
+      return { amount, total };
+    }
+
+    providerTabs.addEventListener("click", (e)=>{
+      const btn = e.target.closest(".fbtn");
+      if(!btn) return;
+
+      const p = btn.getAttribute("data-provider");
+      if(!p) return;
+
+      provider = p;
+      rate = (provider === "ALFA") ? 1.30 : 1.25;
+
+      Array.from(providerTabs.querySelectorAll(".fbtn")).forEach(b=> b.classList.remove("active"));
+      btn.classList.add("active");
+
+      rateText.textContent = rate.toFixed(2);
+      hideMsg();
+      calcTotal();
+    });
+
+    amountEl.addEventListener("input", ()=>{
+      hideMsg();
+      calcTotal();
+    });
+
+    async function loadSessionAndBalance(){
+      const { data: { session } } = await sb.auth.getSession();
+      if(!session){
+        location.href = "login.html";
+        return;
+      }
+      sessionUser = session.user;
+
+      const { data, error } = await sb
+        .from("profiles")
+        .select("balance")
+        .eq("id", sessionUser.id)
+        .single();
+
+      if(error){
+        cachedBalance = 0;
+        balanceText.textContent = "0.00 🇱🇧";
+        return;
+      }
+
+      cachedBalance = Number(data?.balance || 0);
+      balanceText.textContent = cachedBalance.toFixed(2) + " 🇱🇧";
+      calcTotal();
+    }
+
+    // ===== PAY / CREATE ORDER =====
+    payBtn.addEventListener("click", async ()=>{
+      hideMsg();
+
+      const { amount, total } = calcTotal();
+      if(!(amount > 0)){
+        showMsg("Please enter a valid amount.", "err");
+        return;
+      }
+
+      // read latest balance
+      const { data: prof, error: profErr } = await sb
+        .from("profiles")
+        .select("balance")
+        .eq("id", sessionUser.id)
+        .single();
+
+      if(profErr){
+        showMsg("Failed to load balance.", "err");
+        return;
+      }
+
+      const bal = Number(prof?.balance || 0);
+      if(bal < total){
+        showMsg("Not enough balance.", "err");
+        return;
+      }
+
+      payBtn.disabled = true;
+
+      // 1) deduct balance
+      const newBal = bal - total;
+      const { error: updErr } = await sb
+        .from("profiles")
+        .update({ balance: newBal })
+        .eq("id", sessionUser.id);
+
+      if(updErr){
+        payBtn.disabled = false;
+        showMsg("Failed to deduct balance: " + updErr.message, "err");
+        return;
+      }
+
+      // 2) create order (paid)
+      const orderPayload = {
+        user_id: sessionUser.id,
+        category: "Phone recharge",
+        product_name: `Credit Transfer - ${provider}`,
+        amount: amount,
+        price: total,
+        status: "paid",
+        delivery_status: "pending"
+      };
+
+      const { error: orderErr } = await sb
+        .from("orders")
+        .insert(orderPayload);
+
+      if(orderErr){
+        // rollback balance (best effort)
+        await sb.from("profiles").update({ balance: bal }).eq("id", sessionUser.id);
+        payBtn.disabled = false;
+        showMsg("Failed to create order: " + orderErr.message, "err");
+        return;
+      }
+
+      cachedBalance = newBal;
+      balanceText.textContent = cachedBalance.toFixed(2) + " 🇱🇧";
+      showMsg("Order created successfully ✅", "ok");
+      amountEl.value = "";
+      calcTotal();
+      payBtn.disabled = false;
+    });
+
+    loadSessionAndBalance();
+    calcTotal();
+  </script>
+</body>
+</html>
