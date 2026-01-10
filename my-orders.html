@@ -17,25 +17,22 @@
   .small{opacity:.65;font-size:12px}
   .price{font-weight:900;color:#38bdf8}
   .status{font-weight:900}
-  .paid{color:#22c55e}
-  .pending{color:#fbbf24}
+  .paid{color:#22c55e} .pending{color:#fbbf24} .cancelled{color:#ef4444}
   .replyBox{ margin-top:10px; padding:12px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); cursor:pointer; }
   .replyHeader{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .replyStatus{font-weight:900}
-  .replyStatus.done{color:#22c55e}
-  .replyStatus.pending{color:#fbbf24}
-  .replyStatus.rejected{color:#ef4444}
+  .replyStatus.done{color:#22c55e} .replyStatus.pending{color:#fbbf24} .replyStatus.rejected{color:#ef4444}
   .reportBtn { margin-top: 10px; width: 100%; padding: 10px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; font-weight: 900; cursor: pointer; font-size: 13px; }
   .modal{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; padding:16px; z-index:99999; }
   .modalCard{ width:min(520px,100%); background:rgba(12, 16, 24, 0.98); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:16px; }
-  .modalBtn{ border:0; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); width: 100%; }
+  .modalBtn{ border:0; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); width:100%; }
   .empty{ opacity:.6; text-align:center; margin-top:40px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <a href="index.html" class="back">←</a>
+    <a href="service.html" class="back">←</a>
     <h2>My Orders</h2>
   </div>
   <div id="list"></div>
@@ -55,14 +52,16 @@ const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+function esc(s){ return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
 async function loadOrders() {
     const { data: { session } } = await sb.auth.getSession();
     if(!session) { location.replace("login.html"); return; }
 
-    // جلب البيانات بدون تحديد العلاقة لتجنب التعليق
+    // جلب البيانات مع ربط المنتجات (استخدام !product_id ضروري جداً عندك)
     const { data, error } = await sb
         .from("orders")
-        .select(`*, products(title)`)
+        .select(`*, products!product_id(title)`)
         .eq("user_id", session.user.id)
         .order("created_at", {ascending:false});
 
@@ -78,23 +77,24 @@ async function loadOrders() {
 
     document.getElementById("list").innerHTML = data.map(o => {
         const delivery = (o.delivery_status || "pending").toLowerCase();
+        const hasReply = !!o.admin_reply;
         return `
             <div class="card">
                 <div class="row">
                     <div>
-                        <div class="name">${o.products?.title || 'Order Item'}</div>
+                        <div class="name">${esc(o.products?.title || 'Product')}</div>
                         <div class="small">${new Date(o.created_at).toLocaleString()}</div>
                     </div>
                     <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
                 </div>
                 <div class="row" style="margin-top:8px">
                     <div class="small">Order #${o.id}</div>
-                    <div class="status ${o.status}">${o.status}</div>
+                    <div class="status ${o.status}">${esc(o.status)}</div>
                 </div>
-                <div class="replyBox" onclick="showReply('${o.admin_reply || ''}')">
+                <div class="replyBox" onclick="showReply('${esc(o.admin_reply)}')" style="${hasReply ? '' : 'opacity:0.6'}">
                     <div class="replyHeader">
                         <div class="replyStatus ${delivery}">Status: ${delivery.toUpperCase()}</div>
-                        <div class="small">View Details</div>
+                        <div class="small">${hasReply ? 'Tap to view reply' : 'No details yet'}</div>
                     </div>
                 </div>
             </div>
@@ -103,7 +103,7 @@ async function loadOrders() {
 }
 
 function showReply(text) {
-    if(!text) text = "No extra details from admin yet.";
+    if(!text || text === 'null') return;
     document.getElementById("replyModalText").textContent = text;
     document.getElementById("replyModal").style.display = "flex";
 }
