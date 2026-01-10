@@ -1,440 +1,399 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Account Details</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="css/layout.css">
-
   <style>
     :root{
-      --text:#ffffff;
-      --glass:rgba(255,255,255,.07);
+      --bg:#070b12;
+      --card:rgba(255,255,255,.06);
       --stroke:rgba(255,255,255,.10);
-      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --muted:rgba(255,255,255,.65);
+      --shadow:0 16px 60px rgba(0,0,0,.35);
       --blue:#1bc7ff;
     }
     *{box-sizing:border-box}
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      margin:0; font-family:system-ui, Arial;
       background:linear-gradient(180deg,#0b1424,#050a14);
-      color:var(--text);
-      min-height:100vh;
-      padding:14px;
+      color:#fff; min-height:100vh;
+      padding:16px;
     }
-    .wrap{max-width:520px;margin:0 auto;padding-bottom:28px}
-    .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
-    .btn{
-      border:1px solid var(--stroke);
-      background:var(--glass);
-      color:#fff;
-      padding:12px 14px;
-      border-radius:16px;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color:transparent;
+    .wrap{max-width:860px;margin:auto}
+    .top{
+      display:flex; align-items:center; gap:10px; margin-bottom:14px;
     }
-    .card{
-      margin-top:14px;
-      background:var(--glass);
-      border:1px solid var(--stroke);
-      border-radius:22px;
-      overflow:visible;
-      box-shadow:var(--shadow);
+    .back{
+      padding:10px 14px; border-radius:14px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      cursor:pointer; text-decoration:none; color:#fff;
     }
-
+    h2{margin:0;font-size:22px}
     .hero{
-      height:210px;
-      position:relative;
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:18px;
       overflow:hidden;
-      border-top-left-radius:22px;
-      border-top-right-radius:22px;
-      background:
-        radial-gradient(700px 260px at 15% 25%, rgba(42,116,255,.35), transparent 60%),
-        radial-gradient(700px 260px at 85% 20%, rgba(27,199,255,.22), transparent 60%),
-        linear-gradient(160deg, rgba(6,22,42,.95), rgba(2,11,20,.95));
+      box-shadow:var(--shadow);
+      margin-bottom:12px;
     }
     .heroImg{
-      position:absolute;
-      inset:0;
       width:100%;
-      height:100%;
+      height:200px;
       object-fit:cover;
       display:block;
-      opacity:.82;
-      transform:scale(1.02);
-      filter:contrast(1.02) saturate(1.05);
-      z-index:1;
+      background:rgba(255,255,255,.04);
     }
-    .heroOverlay{
-      position:absolute;
-      inset:0;
-      background:linear-gradient(180deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.78) 100%);
-      pointer-events:none;
-      z-index:2;
+    .heroBody{padding:14px}
+    .row{
+      display:flex; justify-content:space-between; align-items:center;
+      gap:10px; flex-wrap:wrap;
     }
-    .heroContent{
-      position:absolute;
-      left:0; right:0; bottom:0;
-      padding:14px;
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:12px;
-      z-index:3;
-    }
-    .heroTitle{font-weight:950;font-size:22px;letter-spacing:.2px;margin:0}
-    .heroSub{margin-top:6px;opacity:.82;font-weight:800;font-size:12px}
-
-    .pricePill{
-      background:rgba(255,255,255,.07);
-      border:1px solid rgba(255,255,255,.10);
-      padding:10px 12px;
-      border-radius:16px;
-      font-weight:950;
-      color:var(--blue);
-      white-space:nowrap;
-      backdrop-filter: blur(6px);
-    }
-
-    .body{padding:14px}
-    .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .title{font-weight:950; font-size:20px}
+    .muted{opacity:.7}
+    .pills{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
     .pill{
-      padding:8px 10px;
+      padding:6px 10px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      font-weight:900;
+      background:rgba(255,255,255,.04);
+      font-weight:800;
       font-size:12px;
-      opacity:.95;
+      opacity:.9;
     }
-
-    .features{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .section{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:14px;
+      margin-bottom:12px;
+    }
+    .section h3{margin:0 0 10px; font-size:16px}
+    .features{display:grid; gap:8px}
     .feature{
-      display:flex;justify-content:space-between;gap:12px;
-      padding:12px;border-radius:16px;
+      display:flex; justify-content:space-between; gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
       border:1px solid rgba(255,255,255,.08);
-      background:rgba(0,0,0,.18);
+      background:rgba(255,255,255,.03);
     }
-    .fLabel{font-weight:950; opacity:.9}
-    .fValue{font-weight:900; opacity:.85; text-align:right}
-
-    .buyRow{margin-top:14px;display:flex;gap:10px;align-items:center}
-    .buyBtn{
-      flex:1;
-      padding:14px 14px;
-      border-radius:16px;
+    .fKey{font-weight:900}
+    .fValue{opacity:.8}
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    @media (max-width:700px){ .grid2{grid-template-columns:1fr} }
+    label{display:block; font-size:12px; opacity:.7; margin-bottom:6px}
+    input, select, textarea{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      outline:none;
+      font-size:14px;
+    }
+    textarea{min-height:90px; resize:vertical}
+    .btn{
+      width:100%;
+      padding:12px 14px;
+      border-radius:14px;
       border:0;
       cursor:pointer;
-      font-weight:950;
       color:#fff;
+      font-weight:950;
       background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      box-shadow:0 14px 40px rgba(0,0,0,.25);
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
     }
-    .buyBtn:disabled{opacity:.6; cursor:not-allowed}
-
-    .smallBtn{
-      padding:14px 14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      cursor:pointer;
-      font-weight:900;
-      white-space:nowrap;
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
-    }
-
-    .noteWrap{
-      margin-top:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      border-radius:16px;
-      padding:10px;
-    }
-    .noteLbl{
-      font-size:12px;
-      font-weight:950;
-      opacity:.85;
-      margin-bottom:8px;
-      letter-spacing:.3px;
-      color: var(--blue);
-    }
-    .noteInput{
-      width:100%;
-      min-height:44px;
-      resize:vertical;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      padding:10px 12px;
-      outline:none;
-      font-weight:900;
-    }
-
-    .ordersDD{position:relative;display:inline-block;z-index:99999}
-    .ordersMenu{
-      position:absolute;
-      right:0;
-      top:calc(100% + 10px);
-      width:260px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:#0b0f17;
-      overflow:auto;
-      box-shadow:0 18px 40px rgba(0,0,0,.35);
-      z-index:99999;
-      max-height:260px;
-    }
-    .ordersItem{
-      display:flex;justify-content:space-between;align-items:center;gap:12px;
-      padding:12px 14px;color:#e5e7eb;cursor:pointer;user-select:none;
-    }
-    .ordersItem:hover{background:rgba(255,255,255,.06)}
-    .badge{
-      padding:4px 10px;border-radius:999px;font-size:12px;font-weight:950;color:#fff;white-space:nowrap;
-      background:#19c37d;
-    }
-
-    #dynamic-fields {
-      border: 1px solid var(--blue);
-      padding: 12px;
-      border-radius: 18px;
-      background: rgba(27, 199, 255, 0.05);
-    }
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+    .priceRow{display:flex; justify-content:space-between; align-items:center; gap:10px}
+    .price{font-weight:950; color:#38bdf8; font-size:18px}
+    .msg{margin-top:10px; opacity:.8; font-size:13px}
+    .danger{color:#ef4444}
+    .ok{color:#22c55e}
+    .small{font-size:12px; opacity:.65}
+    .hidden{display:none}
   </style>
 </head>
 
 <body>
-  <main class="wrap">
+  <div class="wrap">
     <div class="top">
-      <button class="btn" onclick="history.back()">← Back</button>
-      <button class="btn" onclick="location.href='services.html'">Home</button>
+      <a href="services.html" class="back">←</a>
+      <h2>Account</h2>
     </div>
 
-    <div class="card" id="card">
-      <div class="hero">
-        <img id="heroImg" class="heroImg" src="assets/products/default.png" alt="Product">
-        <div class="heroOverlay"></div>
-        <div class="heroContent">
+    <div class="hero">
+      <img id="heroImg" class="heroImg" src="assets/products/default.png" alt="product">
+      <div class="heroBody">
+        <div class="row">
           <div>
-            <h1 class="heroTitle" id="pTitle">Loading...</h1>
-            <div class="heroSub" id="pCat"></div>
+            <div id="title" class="title">Loading...</div>
+            <div id="cat" class="muted">Category:</div>
           </div>
-          <div class="pricePill" id="pPrice">$0.00</div>
-        </div>
-      </div>
-
-      <div class="body">
-        <div class="pills" id="pills"></div>
-        <div class="features" id="features"></div>
-
-       <div id="dynamic-fields" style="margin-top:14px; display:none; flex-direction:column; gap:12px;">
-          <div id="field-player-id" style="display:none;">
-            <div class="noteLbl" id="id-label">PLAYER ID</div>
-            <input type="text" id="input-player-id" class="noteInput" value="" placeholder="Enter your ID or Account here...">
-          </div>
-          
-          <div id="field-player-name" style="display:none;">
-            <div class="noteLbl">CHECKING NAME</div>
-            <input type="text" id="input-player-name" class="noteInput" value="" placeholder="Ex: Player_Name">
-          </div>
-          <div id="field-email" style="display:none;">
-            <div class="noteLbl" id="email-label">EMAIL / PHONE</div>
-            <input type="text" id="input-email" class="noteInput" value="" placeholder="Enter email or phone...">
-          </div>
-
-          <div id="field-pass" style="display:none;">
-            <div class="noteLbl">PASSWORD</div>
-            <input type="password" id="input-pass" class="noteInput" value="" placeholder="Enter account password...">
+          <div class="priceRow">
+            <div class="small">Price</div>
+            <div id="price" class="price">$0.00</div>
           </div>
         </div>
-
-        <div class="noteWrap">
-          <div class="noteLbl">Customer note (optional)</div>
-          <textarea id="customerNote" class="noteInput" placeholder="Write any extra details for Baroud Services..."></textarea>
-        </div>
-
-        <div class="buyRow">
-          <button class="buyBtn" id="buyBtn" type="button">Buy Now</button>
-          <div class="ordersDD" id="ordersDD">
-            <button class="smallBtn" id="myOrdersBtn" type="button">▾</button>
-            <div class="ordersMenu" id="ordersMenu" hidden></div>
-          </div>
-        </div>
+        <div id="pills" class="pills"></div>
       </div>
     </div>
-    <div class="footer" style="text-align: center; margin-top: 15px; opacity: 0.5; font-size: 12px;">©2025 Baroud Services</div>
-  </main>
 
-  <script>
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <div class="section">
+      <h3>Features</h3>
+      <div id="features" class="features"></div>
+    </div>
 
-    const titleEl = document.getElementById("pTitle");
-    const catEl   = document.getElementById("pCat");
-    const priceEl = document.getElementById("pPrice");
-    const pillsEl = document.getElementById("pills");
-    const featsEl = document.getElementById("features");
-    const buyBtn  = document.getElementById("buyBtn");
-    const heroImgEl = document.getElementById("heroImg");
-    const ordersMenu = document.getElementById("ordersMenu");
-    const customerNoteEl = document.getElementById("customerNote");
+    <div class="section">
+      <h3>Order Details</h3>
 
-    let PLAN_LIST = [];
-    let currentProductId = null;
-    let currentProduct = null;
-    let selectedPlan = null;
+      <div class="grid2" style="margin-bottom:10px">
+        <div>
+          <label>Plan</label>
+          <select id="planSelect"></select>
+        </div>
+        <div>
+          <label>Notes (optional)</label>
+          <input id="notes" placeholder="Any notes..." />
+        </div>
+      </div>
 
-    function esc(s){ return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-    function getId(){ return new URL(location.href).searchParams.get("id"); }
+      <!-- ✅ Dynamic Fields -->
+      <div id="dynamic-fields" class="grid2" style="display:none; margin-top:8px">
+        <div id="field-player-id" style="display:none">
+          <label id="id-label">PLAYER ID</label>
+          <input id="input-player-id" placeholder="Enter player id" />
+        </div>
 
-    async function loadProduct(id){
-      const { data: p } = await sb.from("products").select("*").eq("id", id).single();
-      const { data: f } = await sb.from("product_features").select("*").eq("product_id", id).order("sort");
-      return { product: p, features: f || [] };
+        <div id="field-player-name" style="display:none">
+          <label>PLAYER NAME</label>
+          <input id="input-player-name" placeholder="Enter player name" />
+        </div>
+
+        <div id="field-email" style="display:none">
+          <label id="email-label">EMAIL / PHONE</label>
+          <input id="input-email" placeholder="Enter email or phone" />
+        </div>
+
+        <div id="field-pass" style="display:none">
+          <label>PASSWORD</label>
+          <input id="input-pass" placeholder="Enter password" />
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <button id="buyBtn" class="btn">Place Order</button>
+        <div id="msg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const titleEl = document.getElementById("title");
+  const catEl = document.getElementById("cat");
+  const heroImgEl = document.getElementById("heroImg");
+  const pillsEl = document.getElementById("pills");
+  const featsEl = document.getElementById("features");
+  const planSelect = document.getElementById("planSelect");
+  const priceEl = document.getElementById("price");
+  const buyBtn = document.getElementById("buyBtn");
+  const msgEl = document.getElementById("msg");
+
+  let currentProduct = null;
+  let selectedPlan = null;
+
+  function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function getId(){ return new URL(location.href).searchParams.get("id"); }
+
+  async function loadProduct(id){
+    const { data: p, error: e1 } = await sb.from("products").select("*").eq("id", id).single();
+    if(e1) throw new Error(e1.message);
+
+    const { data: f, error: e2 } = await sb.from("product_features").select("*").eq("product_id", id).order("sort");
+    if(e2) console.warn(e2.message);
+
+    return { product: p, features: f || [] };
+  }
+
+  async function loadPlans(id){
+    const { data, error } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true);
+    if(error) console.warn(error.message);
+    return (data || []).map(r=>({ key: r.plan_key, label: r.plan_label || r.plan_key, price: r.price }));
+  }
+
+  function renderProduct(p, features){
+    currentProduct = p;
+    titleEl.textContent = p.title;
+    catEl.textContent = "Category: " + p.category;
+
+    heroImgEl.src = `assets/products/${p.id}.jpg`;
+    heroImgEl.onerror = () => heroImgEl.src = "assets/products/default.png";
+
+    pillsEl.innerHTML = `
+      <span class="pill">${p.active ? 'Available' : 'Unavailable'}</span>
+      <span class="pill">${esc(p.category)}</span>
+    `;
+
+    featsEl.innerHTML = (features || [])
+      .map(f => `<div class="feature"><div class="fKey">${esc(f.label || f.key)}</div><div class="fValue">${esc(f.value)}</div></div>`)
+      .join("");
+
+    const df = document.getElementById("dynamic-fields");
+    const fId = document.getElementById("field-player-id");
+    const fName = document.getElementById("field-player-name");
+    const fEmail = document.getElementById("field-email");
+    const fPass = document.getElementById("field-pass");
+
+    df.style.display = "none";
+    [fId, fName, fEmail, fPass].forEach(el => el.style.display = "none");
+
+    // ✅ dynamic fields driven by product settings (no guessing by title/category)
+    const emailInput = document.getElementById("input-email");
+    if(emailInput) emailInput.oninput = null;
+
+    // labels (optional per product)
+    const idLabelEl = document.getElementById("id-label");
+    const emailLabelEl = document.getElementById("email-label");
+    if(idLabelEl) idLabelEl.textContent = p.player_id_label || "PLAYER ID";
+    if(emailLabelEl) emailLabelEl.textContent = p.email_label || "EMAIL / PHONE";
+
+    const needId   = !!p.require_player_id;
+    const needName = !!p.require_player_name;
+    const needMail = !!p.require_email;
+    const needPass = !!p.require_password;
+
+    if(needId || needName || needMail || needPass){
+      df.style.display = "flex";
+      if(needId)   fId.style.display = "block";
+      if(needName) fName.style.display = "block";
+      if(needMail) fEmail.style.display = "block";
+      if(needPass) fPass.style.display = "block";
     }
+  }
 
-    async function loadPlans(id){
-      const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", id).eq("active", true);
-      return (data || []).map(r=>({ key: r.plan_key, label: r.plan_label || r.plan_key, price: r.price }));
+  function setSelectedPlan(plan){
+    selectedPlan = plan;
+    priceEl.textContent = "$" + Number(plan.price).toFixed(2);
+  }
+
+  function renderPlans(plans){
+    planSelect.innerHTML = "";
+    if(!plans || plans.length === 0){
+      planSelect.innerHTML = `<option value="">No plans</option>`;
+      setSelectedPlan({ key:"default", label:"Default", price: Number(currentProduct?.price || 0) });
+      return;
     }
+    plans.forEach((p, i) => {
+      const opt = document.createElement("option");
+      opt.value = p.key;
+      opt.textContent = `${p.label} - $${Number(p.price).toFixed(2)}`;
+      planSelect.appendChild(opt);
+      if(i === 0) setSelectedPlan(p);
+    });
 
-    function renderProduct(p, features){
-      currentProduct = p;
-      titleEl.textContent = p.title;
-      catEl.textContent = "Category: " + p.category;
-      heroImgEl.src = `assets/products/${p.id}.jpg`;
-      heroImgEl.onerror = () => heroImgEl.src = "assets/products/default.png";
-      
-      pillsEl.innerHTML = `<span class="pill">${p.active ? 'Available' : 'Unavailable'}</span><span class="pill">${p.category}</span>`;
-      featsEl.innerHTML = features.map(f => `<div class="feature"><div class="fLabel">${esc(f.label)}</div><div class="fValue">${esc(f.value)}</div></div>`).join('');
-
-      const df = document.getElementById("dynamic-fields");
-      const fId = document.getElementById("field-player-id");
-      const fName = document.getElementById("field-player-name");
-      const fEmail = document.getElementById("field-email");
-      const fPass = document.getElementById("field-pass");
-
-      df.style.display = "none";
-      [fId, fName, fEmail, fPass].forEach(el => el.style.display = "none");
-
-      const title = p.title.toLowerCase();
-      const cat = (p.category || "").toLowerCase();
-
-      if(cat.includes("games") || cat.includes("apps")){
-        df.style.display = "flex";
-        if(title.includes("jawaker")){
-          fId.style.display = "block"; fName.style.display = "block";
-        } else if(title.includes("tiktok")){
-          fEmail.style.display = "block";
-          document.getElementById("email-label").textContent = "PHONE OR EMAIL";
-          document.getElementById("input-email").oninput = (e) => {
-            fPass.style.display = e.target.value.includes("@") ? "block" : "none";
-          };
-        } else {
-          fId.style.display = "block";
-        }
-      } else if(title.includes("chatgpt") || title.includes("netflix") || title.includes("shahid")){
-        df.style.display = "flex"; fEmail.style.display = "block";
-        if(title.includes("direct") || title.includes("shahid")){ fPass.style.display = "block"; }
-      }
-    }
-
-    function setSelectedPlan(plan){
-      selectedPlan = plan;
-      priceEl.textContent = "$" + Number(plan.price).toFixed(2);
-    }
-
-    async function buyProduct(){
-      if(!selectedPlan) { alert("Select a plan first"); return; }
-
-      const pId = document.getElementById("input-player-id").value.trim();
-      const pName = document.getElementById("input-player-name").value.trim();
-      const pEmail = document.getElementById("input-email").value.trim();
-      const pPass = document.getElementById("input-pass").value.trim();
-      const title = currentProduct.title.toLowerCase();
-
-      if(document.getElementById("field-player-id").style.display === "block" && !pId) { alert("Player ID is required!"); return; }
-      if(document.getElementById("field-player-name").style.display === "block" && !pName) { alert("Checking Name is required!"); return; }
-      if(document.getElementById("field-email").style.display === "block" && !pEmail) { alert("Email/Phone is required!"); return; }
-      if(document.getElementById("field-pass").style.display === "block" && !pPass) { alert("Password is required!"); return; }
-
-      if(!confirm("Proceed with purchase? Balance will be deducted.")) return;
-
-      buyBtn.disabled = true;
-      buyBtn.textContent = "Processing...";
-
-      try {
-        const { data: { session } } = await sb.auth.getSession();
-        if(!session) { location.href = "login.html"; return; }
-
-        const { data: orderId, error } = await sb.rpc("place_order", {
-          p_product_id: currentProductId,
-          p_price: selectedPlan.price,
-          p_duration: selectedPlan.label,
-          p_note: customerNoteEl.value,
-          p_player_id: pId || null,
-          p_player_name: pName || null,
-          p_acc_email: pEmail || null,
-          p_acc_pass: pPass || null
-        });
-
-        if(error) throw error;
-
-        if(title.includes("tiktok")){
-          const waMsg = `Hello Baroud Services, I just bought TikTok Coins. Order ID: ${orderId}. Email/Phone: ${pEmail}.`;
-          window.open(`https://wa.me/96170385398?text=${encodeURIComponent(waMsg)}`);
-        }
-
-        alert("✅ Order Placed Successfully! ID: " + orderId);
-        location.href = "my-orders.html";
-      } catch(e) {
-        alert(e.message || "Purchase failed");
-      } finally {
-        buyBtn.disabled = false;
-        buyBtn.textContent = "Buy Now";
-      }
-    }
-
-    (async ()=>{
-      currentProductId = getId();
-      if(!currentProductId) return;
-      
-      const { product, features } = await loadProduct(currentProductId);
-      renderProduct(product, features);
-      
-      PLAN_LIST = await loadPlans(currentProductId);
-      if(PLAN_LIST.length) setSelectedPlan(PLAN_LIST[0]);
-
-      buyBtn.onclick = buyProduct;
-      document.getElementById("myOrdersBtn").onclick = (e) => {
-        e.stopPropagation();
-        ordersMenu.hidden = !ordersMenu.hidden;
-        ordersMenu.innerHTML = PLAN_LIST.map(p => `
-          <div class="ordersItem" onclick="setSelectedPlanByPrice('${p.key}')">
-            <span>${p.label}</span>
-            <span class="badge">$${p.price}</span>
-          </div>
-        `).join('');
-      };
-    })();
-
-    window.setSelectedPlanByPrice = (key) => {
-      const plan = PLAN_LIST.find(p => p.key === key);
+    planSelect.onchange = () => {
+      const k = planSelect.value;
+      const plan = plans.find(x => x.key === k);
       if(plan) setSelectedPlan(plan);
-      ordersMenu.hidden = true;
     };
-    document.onclick = () => ordersMenu.hidden = true;
-  </script>
-  <script src="app-ui.js?v=4"></script>
+  }
+
+  async function placeOrder(){
+    msgEl.className = "msg";
+    msgEl.textContent = "";
+
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){ location.replace("login.html"); return; }
+
+    if(!currentProduct || !selectedPlan){
+      msgEl.className = "msg danger";
+      msgEl.textContent = "Missing product/plan";
+      return;
+    }
+
+    const notes = document.getElementById("notes").value || "";
+    const playerId = document.getElementById("input-player-id").value || "";
+    const playerName = document.getElementById("input-player-name").value || "";
+    const email = document.getElementById("input-email").value || "";
+    const pass = document.getElementById("input-pass").value || "";
+
+    // Simple front validation حسب flags
+    if(currentProduct.require_player_id && !playerId.trim()){
+      msgEl.className = "msg danger"; msgEl.textContent = "Please enter Player ID"; return;
+    }
+    if(currentProduct.require_player_name && !playerName.trim()){
+      msgEl.className = "msg danger"; msgEl.textContent = "Please enter Player Name"; return;
+    }
+    if(currentProduct.require_email && !email.trim()){
+      msgEl.className = "msg danger"; msgEl.textContent = "Please enter Email/Phone"; return;
+    }
+    if(currentProduct.require_password && !pass.trim()){
+      msgEl.className = "msg danger"; msgEl.textContent = "Please enter Password"; return;
+    }
+
+    buyBtn.disabled = true;
+    buyBtn.textContent = "Placing...";
+
+    // ⚠️ حاليا: نفس منطقك القديم (insert order)
+    // لما نركّب نظام wallet (خصم رصيد + paid)، منبدّلها لـ RPC create_order_and_pay.
+    const orderPayload = {
+      user_id: session.user.id,
+      product_id: currentProduct.id,
+      price: Number(selectedPlan.price || currentProduct.price || 0),
+      status: "pending",
+      delivery_status: "pending",
+      plan_key: selectedPlan.key,
+      notes: notes,
+      player_id: playerId,
+      player_name: playerName,
+      email: email,
+      password: pass
+    };
+
+    const { error } = await sb.from("orders").insert(orderPayload);
+
+    buyBtn.disabled = false;
+    buyBtn.textContent = "Place Order";
+
+    if(error){
+      msgEl.className = "msg danger";
+      msgEl.textContent = "Error: " + error.message;
+      return;
+    }
+
+    msgEl.className = "msg ok";
+    msgEl.textContent = "Order placed ✅";
+    setTimeout(()=> location.href="my-orders.html", 600);
+  }
+
+  buyBtn.onclick = placeOrder;
+
+  (async function init(){
+    const id = getId();
+    if(!id){
+      titleEl.textContent = "Missing id";
+      return;
+    }
+
+    try{
+      const { product, features } = await loadProduct(id);
+      renderProduct(product, features);
+
+      const plans = await loadPlans(id);
+      renderPlans(plans);
+    }catch(err){
+      titleEl.textContent = "Error";
+      msgEl.className = "msg danger";
+      msgEl.textContent = String(err.message || err);
+    }
+  })();
+</script>
 </body>
 </html>
