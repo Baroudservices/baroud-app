@@ -42,7 +42,6 @@
     .star-icon{ color: #ffd700; font-size: 18px; }
     .balance-text{ font-weight: 800; font-size: 15px; }
 
-    /* شكل الـ + الجديد (Neon Style) */
     .add-fund-btn{ 
       width: 28px; height: 28px; background: linear-gradient(135deg, #00d2ff, #3a7bd5);
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -61,7 +60,7 @@
     .slides { display: flex; width: 300%; height: 100%; transition: 0.5s; }
     .slides img { width: 33.333%; object-fit: cover; }
 
-    /* ===== SUPPORT SLIDER (Support Number + Name) ===== */
+    /* ===== SUPPORT SLIDER ===== */
     .support-slider {
       background: rgba(255,255,255,0.05);
       border-radius: 30px; height: 50px;
@@ -111,17 +110,27 @@
     }
     .nav-btn{ font-size: 24px; opacity: 0.5; }
 
-    /* ===== DRAWER ===== */
+    /* ===== DRAWER (SLIDEBAR) ===== */
     .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.8); opacity:0; pointer-events:none; transition:0.3s; z-index:2000; }
     .overlay.show{ opacity:1; pointer-events:auto; }
     .drawer{
       position:fixed; top:0; left:0; width:290px; height:100vh;
       background:#06162a; border-right:1px solid rgba(255,255,255,.1);
       transform:translateX(-100%); transition:0.3s; z-index:2100; padding:25px;
+      display: flex; flex-direction: column;
     }
     .drawer.show{ transform:translateX(0); }
     .m-item{ display:flex; align-items:center; gap:15px; padding:14px; border-radius:12px; cursor:pointer; }
+    .m-item:hover{ background: rgba(255,255,255,0.05); }
     .m-dot{ width:8px; height:8px; border-radius:50%; background:#00d2ff; box-shadow: 0 0 8px #00d2ff; }
+    
+    .logout-item {
+      margin-top: auto; /* يدفع الزر لآخر القائمة */
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 15px;
+      color: #ff4d4d;
+    }
+    .logout-dot { background: #ff4d4d; box-shadow: 0 0 8px #ff4d4d; }
   </style>
 </head>
 
@@ -133,12 +142,16 @@
       <div style="width:60px; height:60px; background:rgba(255,255,255,0.05); border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; border:2px solid #00d2ff; font-size:25px;">👤</div>
       <div style="font-weight: 900;">Houssein Baroud</div>
     </div>
-    <div class="m-item" onclick="location.href='index.html'"><div class="m-dot"></div><span>Home</span></div>
+    
+    <div class="m-item" id="homeExit"><div class="m-dot"></div><span>Home</span></div>
+    
     <div class="m-item"><div class="m-dot"></div><span>Add Credit</span></div>
     <div class="m-item"><div class="m-dot"></div><span>My Payments</span></div>
     <div class="m-item"><div class="m-dot"></div><span>My Orders</span></div>
     <div class="m-item"><div class="m-dot"></div><span>Security</span></div>
     <div class="m-item"><div class="m-dot"></div><span>About Us</span></div>
+
+    <div class="m-item logout-item" onclick="location.href='login.html'"><div class="m-dot logout-dot"></div><span>Logout</span></div>
   </aside>
 
   <main class="wrap">
@@ -192,12 +205,19 @@
   </nav>
 
   <script>
-    // Sidebar Logic
     const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
+    const homeExit = document.getElementById("homeExit");
+
+    // فتح السلايدبار
     menuBtn.onclick = () => { drawer.classList.add("show"); overlay.classList.add("show"); }
-    overlay.onclick = () => { drawer.classList.remove("show"); overlay.classList.remove("show"); }
+    
+    // إغلاق السلايدبار (Exit) عند الضغط على الأوفرلاي أو زر Home
+    const closeSidebar = () => { drawer.classList.remove("show"); overlay.classList.remove("show"); }
+    
+    overlay.onclick = closeSidebar;
+    homeExit.onclick = closeSidebar;
 
     // Banner Logic
     let currentSlide = 0;
