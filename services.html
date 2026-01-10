@@ -3,190 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Our Services - Baroud</title>
+  <title>Baroud Services</title>
 
   <style>
     *{box-sizing:border-box}
-    html,body{height:100%}
+    html,body{height:100%; margin:0; padding:0;}
     body{
-      margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#06162a,#020b14);
+      background:#020b14; /* لون غامق متل الصورة */
       color:#fff;
       min-height:100vh;
-      -webkit-tap-highlight-color:transparent;
       overflow-x:hidden;
+      padding-bottom: 80px; /* مساحة للـ Bottom Nav */
     }
 
-    .wrap{
-      width: 100%;
-      margin: 0 auto;
-      padding: 14px 14px 40px;
-      max-width: 520px;
-    }
+    .wrap{ width: 100%; margin: 0 auto; padding: 14px; max-width: 520px; }
 
-    /* TOPBAR */
+    /* ===== TOPBAR (مثل الصورة) ===== */
     .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      margin-top:6px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 10px 0; margin-bottom: 10px;
     }
-    .iconBtn{
-      width:54px;height:54px;border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
+    .topbar-left{ display: flex; align-items: center; gap: 15px; }
+    
+    .wallet-box{
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.06);
+      padding: 6px 12px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
-    .hamburger{width:22px}
-    .hamburger span{display:block;height:2px;background:#fff;margin:5px 0;border-radius:9px;opacity:.95}
+    .wallet-icon{ width: 22px; height: 22px; background: #eab308; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 14px; }
+    .balance{ font-weight: 800; font-size: 16px; }
+    .plus-icon{ color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; }
 
-    .brandRow{display:flex;align-items:center;gap:10px;justify-content:flex-end;flex:1;}
-    .logo{
-      width:42px;height:42px;border-radius:14px;
-      object-fit:cover;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-    }
-    .brandText{font-weight:900;letter-spacing:2px;opacity:.95;font-size:18px;}
+    .brand-logo-top{ width: 100px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
 
-    /* PAGE HEADER */
-    .pageHeader{
-      margin-top: 25px;
-      text-align: center;
-    }
-    .pageHeader h1{
-      font-size: 24px;
-      font-weight: 900;
-      margin-bottom: 5px;
-      letter-spacing: 1px;
-    }
-    .pageHeader p{
-      color: rgba(255,255,255,0.5);
-      font-size: 14px;
-      margin-top: 0;
-    }
+    /* ===== BANNER ===== */
+    .banner{ width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+    .banner img{ width: 100%; display: block; }
 
-    /* SERVICES LIST */
-    .services-list{
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+    /* ===== SEARCH ===== */
+    .searchBox{
+      background: #101a26;
+      border-radius: 25px;
+      padding: 15px 20px;
+      margin-bottom: 25px;
+      border: 1px solid rgba(255,255,255,0.05);
     }
+    .searchBox input{ width: 100%; background: transparent; border: none; outline: none; color: #fff; font-size: 16px; }
 
-    .service-card{
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 24px;
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      transition: transform 0.2s;
-    }
-    .service-card:active{ transform: scale(0.98); }
+    /* ===== GRID (مثل الصورة) ===== */
+    .grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .tile{ text-align: center; cursor: pointer; }
+    .tile img{ width: 100%; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+    .tile:active img{ transform: scale(0.95); }
+    .tile .label{ margin-top: 8px; font-weight: 600; font-size: 14px; color: #ccc; }
 
-    .service-img{
-      width: 80px;
-      height: 80px;
-      border-radius: 18px;
-      object-fit: cover;
-      background: rgba(255,255,255,0.05);
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav{
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #020b14; border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 15px 0; z-index: 100;
     }
+    .nav-item{ color: #fff; font-size: 22px; opacity: 0.6; cursor: pointer; }
+    .nav-item.active{ opacity: 1; }
 
-    .service-info{
-      flex: 1;
-    }
-    .service-name{
-      font-weight: 800;
-      font-size: 16px;
-      margin-bottom: 4px;
-      display: block;
-    }
-    .service-price{
-      color: #21f07a;
-      font-weight: 900;
-      font-size: 15px;
-    }
-
-    .order-btn{
-      background: linear-gradient(90deg,#21f07a,#0fe067);
-      border: none;
-      color: #0b1a12;
-      padding: 8px 18px;
-      border-radius: 14px;
-      font-size: 13px;
-      font-weight: 900;
-      text-decoration: none;
-    }
-
-    /* DRAWER & OVERLAY */
-    .overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,.55);
-      opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:50;
-    }
-    .overlay.show{opacity:1;pointer-events:auto}
+    /* ===== DRAWER (السلايدبار اللي عملناه) ===== */
+    .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.7); opacity:0; pointer-events:none; transition:opacity .3s; z-index:200; }
+    .overlay.show{ opacity:1; pointer-events:auto; }
     .drawer{
-      position:fixed;top:0;left:0;width:min(320px,86vw);height:100vh;
-      background:linear-gradient(180deg,#071a30,#020b14);
-      border-right:1px solid rgba(255,255,255,.06);
-      transform:translateX(-105%);transition:transform .22s ease;z-index:60;
-      padding:14px;overflow:auto;
+      position:fixed; top:0; left:0; width:280px; height:100vh;
+      background:#06162a; border-right:1px solid rgba(255,255,255,.05);
+      transform:translateX(-100%); transition:0.3s; z-index:210; padding:20px;
     }
-    .drawer.show{transform:translateX(0)}
-    .closeBtn{
-      width:44px;height:44px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);color:#fff;font-size:22px;cursor:pointer;
-    }
-
-    /* USER PROFILE */
-    .userProfile{
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.06);
-      border-radius: 22px;
-      padding: 20px 16px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .userAvatar{
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      margin: 0 auto 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      border: 1px solid #21f07a;
-    }
-    .userName{ font-weight: 900; font-size: 18px; display: block; }
-
-    /* MENU ITEMS */
-    .mItem{display:flex;align-items:center;gap:12px;padding:14px 10px;border-radius:16px;cursor:pointer; transition: 0.2s;}
-    .mItem:active{ background: rgba(255,255,255,0.08); }
-    .dot{width:8px;height:8px;border-radius:50%;background:#21f07a;box-shadow: 0 0 8px #21f07a;}
-    .mItem span:last-child{font-weight:800;color:rgba(255,255,255,.85); font-size: 15px;}
-
-    .logoutBtn{
-        margin-top: 25px;
-        color: #ff4d4d;
-        font-weight: 800;
-        text-align: center;
-        padding: 10px;
-        display: block;
-        text-decoration: none;
-        font-size: 14px;
-        border-top: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .hint{margin-top:30px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
-
-    @media (min-width: 992px){
-      .wrap{ max-width: 800px; }
-      .services-list{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    }
+    .drawer.show{ transform:translateX(0); }
+    .user-profile{ text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
+    .user-avatar{ width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 25px; border: 1px solid #21f07a; }
+    .mItem{ display:flex; align-items:center; gap:12px; padding:15px 10px; border-radius:12px; cursor:pointer; }
+    .dot{ width:8px; height:8px; border-radius:50%; background:#21f07a; box-shadow: 0 0 5px #21f07a; }
+    .mItem span{ font-weight:600; color:#ddd; }
   </style>
 </head>
 
@@ -194,92 +90,74 @@
   <div class="overlay" id="overlay"></div>
 
   <aside class="drawer" id="drawer">
-    <div style="display:flex;justify-content:flex-end;padding-bottom:10px">
-      <button class="closeBtn" id="closeBtn">×</button>
+    <div class="user-profile">
+      <div class="user-avatar">👤</div>
+      <div style="font-weight: 800;">Houssein Baroud</div>
     </div>
-    
-    <div class="userProfile">
-      <div class="userAvatar">👤</div>
-      <span class="userName">Houssein Baroud</span>
-    </div>
-
-    <div style="margin-top:10px;">
-      <div class="mItem" onclick="location.href='index.html'"><span class="dot"></span><span>Home</span></div>
-      <div class="mItem"><span class="dot"></span><span>Add Credit</span></div>
-      <div class="mItem"><span class="dot"></span><span>My Payments</span></div>
-      <div class="mItem"><span class="dot"></span><span>My Orders</span></div>
-      <div class="mItem"><span class="dot"></span><span>Security</span></div>
-      <div class="mItem"><span class="dot"></span><span>About Us</span></div>
-      
-      <a href="index.html" class="logoutBtn">Logout</a>
-    </div>
+    <div class="mItem" onclick="location.href='index.html'"><span class="dot"></span><span>Home</span></div>
+    <div class="mItem"><span class="dot"></span><span>Add Credit</span></div>
+    <div class="mItem"><span class="dot"></span><span>My Payments</span></div>
+    <div class="mItem"><span class="dot"></span><span>My Orders</span></div>
+    <div class="mItem"><span class="dot"></span><span>Security</span></div>
+    <div class="mItem"><span class="dot"></span><span>About Us</span></div>
+    <div class="mItem" style="margin-top: 20px; opacity: 0.5;"><span class="dot" style="background:red; box-shadow:none;"></span><span>Logout</span></div>
   </aside>
 
   <main class="wrap">
     <div class="topbar">
-      <div class="iconBtn" id="menuBtn">
-        <div class="hamburger"><span></span><span></span><span></span></div>
+      <div class="topbar-left">
+        <div id="menuBtn" style="cursor:pointer; font-size: 24px;">☰</div>
+        <div class="wallet-box">
+          <div class="wallet-icon">★</div>
+          <div class="balance">0.00 🇱🇧</div>
+          <div class="plus-icon">⊕</div>
+        </div>
       </div>
-      <div class="brandRow">
-        <img class="logo" src="assets/logo.png" alt="Logo" />
-        <div class="brandText">BAROUD</div>
-      </div>
+      <img src="assets/logo-text.png" class="brand-logo-top" alt="OVOXZ">
     </div>
 
-    <div class="pageHeader">
-      <h1>OUR SERVICES</h1>
-      <p>Choose your favorite service</p>
+    <div class="banner">
+      <img src="assets/banner1.jpg" alt="Unlock Ultimate Power">
     </div>
 
-    <section class="services-list">
-      <div class="service-card">
-        <img src="assets/accounts.png" class="service-img" alt="Service">
-        <div class="service-info">
-          <span class="service-name">Netflix Premium</span>
-          <span class="service-price">5.00$</span>
-        </div>
-        <a href="#" class="order-btn">Order</a>
-      </div>
+    <div class="searchBox">
+      <input type="text" placeholder="Search">
+    </div>
 
-      <div class="service-card">
-        <img src="assets/games.png" class="service-img" alt="Service">
-        <div class="service-info">
-          <span class="service-name">PUBG Mobile UC</span>
-          <span class="service-price">10.00$</span>
-        </div>
-        <a href="#" class="order-btn">Order</a>
+    <section class="grid">
+      <div class="tile">
+        <img src="assets/games-card.png" alt="Games">
+        <div class="label">Games</div>
       </div>
-
-      <div class="service-card">
-        <img src="assets/apps.png" class="service-img" alt="Service">
-        <div class="service-info">
-          <span class="service-name">IPTV Subscription</span>
-          <span class="service-price">12.00$</span>
-        </div>
-        <a href="#" class="order-btn">Order</a>
+      <div class="tile">
+        <img src="assets/apps-card.png" alt="Applications">
+        <div class="label">Applications</div>
       </div>
-
-      <div class="service-card">
-        <img src="assets/giftcards.png" class="service-img" alt="Service">
-        <div class="service-info">
-          <span class="service-name">Google Play Card</span>
-          <span class="service-price">15.00$</span>
-        </div>
-        <a href="#" class="order-btn">Order</a>
+      <div class="tile">
+        <img src="assets/accounts-card.png" alt="Accounts">
+        <div class="label">Accounts</div>
+      </div>
+      <div class="tile">
+        <img src="assets/cards-card.png" alt="Digital Cards">
+        <div class="label">Digital Cards</div>
       </div>
     </section>
-
-    <div class="hint">baroudlb.com</div>
   </main>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active">🏠</div>
+    <div class="nav-item">🛒</div>
+    <div class="nav-item">🔔</div>
+    <div class="nav-item">💳</div>
+    <div class="nav-item">👤</div>
+  </nav>
 
   <script>
     const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
-    const closeBtn = document.getElementById("closeBtn");
 
     menuBtn.onclick = () => { drawer.classList.add("show"); overlay.classList.add("show"); }
-    closeBtn.onclick = () => { drawer.classList.remove("show"); overlay.classList.remove("show"); }
     overlay.onclick = () => { drawer.classList.remove("show"); overlay.classList.remove("show"); }
   </script>
 </body>
