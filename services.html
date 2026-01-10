@@ -51,7 +51,7 @@
 
     .brand-title{ font-weight: 900; letter-spacing: 1.5px; font-size: 20px; text-transform: uppercase; }
 
-    /* ===== BANNER SLIDER (3 Images) ===== */
+    /* ===== BANNER SLIDER ===== */
     .slider-box {
       width: 100%; border-radius: 20px; overflow: hidden;
       margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
@@ -110,7 +110,7 @@
     }
     .nav-btn{ font-size: 24px; opacity: 0.5; }
 
-    /* ===== DRAWER (SLIDEBAR) ===== */
+    /* ===== DRAWER (SIDEBAR) ===== */
     .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.8); opacity:0; pointer-events:none; transition:0.3s; z-index:2000; }
     .overlay.show{ opacity:1; pointer-events:auto; }
     .drawer{
@@ -120,12 +120,12 @@
       display: flex; flex-direction: column;
     }
     .drawer.show{ transform:translateX(0); }
-    .m-item{ display:flex; align-items:center; gap:15px; padding:14px; border-radius:12px; cursor:pointer; }
+    .m-item{ display:flex; align-items:center; gap:15px; padding:14px; border-radius:12px; cursor:pointer; text-decoration: none; color: inherit; }
     .m-item:hover{ background: rgba(255,255,255,0.05); }
     .m-dot{ width:8px; height:8px; border-radius:50%; background:#00d2ff; box-shadow: 0 0 8px #00d2ff; }
     
     .logout-item {
-      margin-top: auto; /* يدفع الزر لآخر القائمة */
+      margin-top: auto; 
       border-top: 1px solid rgba(255,255,255,0.05);
       padding-top: 15px;
       color: #ff4d4d;
@@ -145,13 +145,13 @@
     
     <div class="m-item" id="homeExit"><div class="m-dot"></div><span>Home</span></div>
     
-    <div class="m-item"><div class="m-dot"></div><span>Add Credit</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>My Payments</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>My Orders</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>Security</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>About Us</span></div>
+    <a href="add-credit.html" class="m-item"><div class="m-dot"></div><span>Add Credit</span></a>
+    <a href="my-payments.html" class="m-item"><div class="m-dot"></div><span>My Payments</span></a>
+    <a href="my-orders.html" class="m-item"><div class="m-dot"></div><span>My Orders</span></a>
+    <a href="security.html" class="m-item"><div class="m-dot"></div><span>Security</span></a>
+    <a href="help.html" class="m-item"><div class="m-dot"></div><span>About Us</span></a>
 
-    <div class="m-item logout-item" onclick="location.href='login.html'"><div class="m-dot logout-dot"></div><span>Logout</span></div>
+    <a href="login.html" class="m-item logout-item"><div class="m-dot logout-dot"></div><span>Logout</span></a>
   </aside>
 
   <main class="wrap">
@@ -161,7 +161,7 @@
         <div class="wallet-pill">
           <span class="star-icon">★</span>
           <span class="balance-text">0.00 🇱🇧</span>
-          <button class="add-fund-btn">+</button>
+          <button class="add-fund-btn" onclick="location.href='add-credit.html'">+</button>
         </div>
       </div>
       <div class="brand-title">BAROUD</div>
@@ -210,10 +210,7 @@
     const menuBtn = document.getElementById("menuBtn");
     const homeExit = document.getElementById("homeExit");
 
-    // فتح السلايدبار
     menuBtn.onclick = () => { drawer.classList.add("show"); overlay.classList.add("show"); }
-    
-    // إغلاق السلايدبار (Exit) عند الضغط على الأوفرلاي أو زر Home
     const closeSidebar = () => { drawer.classList.remove("show"); overlay.classList.remove("show"); }
     
     overlay.onclick = closeSidebar;
