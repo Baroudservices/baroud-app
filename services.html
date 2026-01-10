@@ -6,7 +6,6 @@
   <title>Our Services - Baroud</title>
 
   <style>
-    /* نعتمد نفس الـ Base Styles اللي عندك */
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -50,7 +49,7 @@
     }
     .brandText{font-weight:900;letter-spacing:2px;opacity:.95;font-size:18px;}
 
-    /* PAGE TITLE */
+    /* PAGE HEADER */
     .pageHeader{
       margin-top: 25px;
       text-align: center;
@@ -67,7 +66,7 @@
       margin-top: 0;
     }
 
-    /* SERVICES GRID (Modified for detailed list) */
+    /* SERVICES LIST */
     .services-list{
       margin-top: 20px;
       display: flex;
@@ -111,17 +110,17 @@
     }
 
     .order-btn{
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #fff;
-      padding: 8px 15px;
+      background: linear-gradient(90deg,#21f07a,#0fe067);
+      border: none;
+      color: #0b1a12;
+      padding: 8px 18px;
       border-radius: 14px;
-      font-size: 12px;
-      font-weight: 800;
+      font-size: 13px;
+      font-weight: 900;
       text-decoration: none;
     }
 
-    /* DRAWER & OVERLAY (Same as Home) */
+    /* DRAWER & OVERLAY */
     .overlay{
       position:fixed;inset:0;background:rgba(0,0,0,.55);
       opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:50;
@@ -140,18 +139,47 @@
       border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.06);color:#fff;font-size:22px;cursor:pointer;
     }
-    .loginCard{
-      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);
-      border-radius:22px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.25);
+
+    /* USER PROFILE */
+    .userProfile{
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 22px;
+      padding: 20px 16px;
+      text-align: center;
+      margin-bottom: 20px;
     }
-    .loginBtn{
-      display:block;text-align:center;padding:14px;border-radius:22px;
-      font-weight:900;text-decoration:none;color:#0b1a12;
-      background:linear-gradient(90deg,#21f07a,#0fe067);
+    .userAvatar{
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      border: 1px solid #21f07a;
     }
-    .mItem{display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:16px;cursor:pointer;}
-    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35)}
-    .mItem span:last-child{font-weight:800;color:rgba(255,255,255,.85)}
+    .userName{ font-weight: 900; font-size: 18px; display: block; }
+
+    /* MENU ITEMS */
+    .mItem{display:flex;align-items:center;gap:12px;padding:14px 10px;border-radius:16px;cursor:pointer; transition: 0.2s;}
+    .mItem:active{ background: rgba(255,255,255,0.08); }
+    .dot{width:8px;height:8px;border-radius:50%;background:#21f07a;box-shadow: 0 0 8px #21f07a;}
+    .mItem span:last-child{font-weight:800;color:rgba(255,255,255,.85); font-size: 15px;}
+
+    .logoutBtn{
+        margin-top: 25px;
+        color: #ff4d4d;
+        font-weight: 800;
+        text-align: center;
+        padding: 10px;
+        display: block;
+        text-decoration: none;
+        font-size: 14px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
 
     .hint{margin-top:30px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
 
@@ -169,14 +197,21 @@
     <div style="display:flex;justify-content:flex-end;padding-bottom:10px">
       <button class="closeBtn" id="closeBtn">×</button>
     </div>
-    <div class="loginCard">
-      <h2 style="margin:0">Login</h2>
-      <p style="color:rgba(255,255,255,.7)">Access your account</p>
-      <a class="loginBtn" href="login.html">Login</a>
+    
+    <div class="userProfile">
+      <div class="userAvatar">👤</div>
+      <span class="userName">Houssein Baroud</span>
     </div>
-    <div style="margin-top:14px; border-top:1px solid rgba(255,255,255,.06); padding-top:10px;">
+
+    <div style="margin-top:10px;">
       <div class="mItem" onclick="location.href='index.html'"><span class="dot"></span><span>Home</span></div>
-      <div class="mItem"><span class="dot"></span><span>Support</span></div>
+      <div class="mItem"><span class="dot"></span><span>Add Credit</span></div>
+      <div class="mItem"><span class="dot"></span><span>My Payments</span></div>
+      <div class="mItem"><span class="dot"></span><span>My Orders</span></div>
+      <div class="mItem"><span class="dot"></span><span>Security</span></div>
+      <div class="mItem"><span class="dot"></span><span>About Us</span></div>
+      
+      <a href="index.html" class="logoutBtn">Logout</a>
     </div>
   </aside>
 
@@ -193,11 +228,10 @@
 
     <div class="pageHeader">
       <h1>OUR SERVICES</h1>
-      <p>Select a service to proceed</p>
+      <p>Choose your favorite service</p>
     </div>
 
     <section class="services-list">
-      
       <div class="service-card">
         <img src="assets/accounts.png" class="service-img" alt="Service">
         <div class="service-info">
@@ -233,14 +267,12 @@
         </div>
         <a href="#" class="order-btn">Order</a>
       </div>
-
     </section>
 
     <div class="hint">baroudlb.com</div>
   </main>
 
   <script>
-    // Drawer Logic (نفس اللي بالصفحة الرئيسية)
     const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
