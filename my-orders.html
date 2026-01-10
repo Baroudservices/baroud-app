@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Orders</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -16,26 +16,31 @@
   .name{font-weight:900}
   .small{opacity:.65;font-size:12px}
   .price{font-weight:900;color:#38bdf8}
-  .status{font-weight:900}
-  .paid{color:#22c55e} .pending{color:#fbbf24} .cancelled{color:#ef4444}
+  .status{font-weight:900; text-transform:lowercase}
+  .paid{color:#22c55e}
+  .pending{color:#fbbf24}
+  .cancelled{color:#ef4444}
+  .rejected{color:#ef4444}
+
   .replyBox{ margin-top:10px; padding:12px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); cursor:pointer; }
   .replyHeader{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .replyStatus{font-weight:900}
-  .replyStatus.done{color:#22c55e} .replyStatus.pending{color:#fbbf24} .replyStatus.rejected{color:#ef4444}
+  .replyStatus.done{color:#22c55e}
+  .replyStatus.pending{color:#fbbf24}
+  .replyStatus.rejected{color:#ef4444}
+
   .modal{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; padding:16px; z-index:99999; }
   .modalCard{ width:min(520px,100%); background:rgba(12, 16, 24, 0.98); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:16px; }
   .modalBtn{ border:0; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); width:100%; }
-  .empty{ opacity:.7; text-align:center; margin-top:40px; }
+  .empty{ opacity:.6; text-align:center; margin-top:40px; }
 </style>
 </head>
-
 <body>
 <div class="wrap">
   <div class="top">
-    <a href="service.html" class="back">←</a>
+    <a href="services.html" class="back">←</a>
     <h2>My Orders</h2>
   </div>
-
   <div id="list"></div>
   <div id="empty" class="empty" style="display:none">No orders yet</div>
 </div>
@@ -53,7 +58,7 @@ const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc(s){ return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 function toArr(x){ return Array.isArray(x) ? x : []; }
 
 async function loadOrders() {
@@ -63,12 +68,12 @@ async function loadOrders() {
   const { data: { session } } = await sb.auth.getSession();
   if(!session) { location.replace("login.html"); return; }
 
-  // 1) fetch orders (بدون embed)
+  // ✅ fetch orders بدون embed
   const { data: orders, error: e1 } = await sb
     .from("orders")
     .select("id,user_id,product_id,price,status,delivery_status,admin_reply,created_at")
     .eq("user_id", session.user.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", {ascending:false});
 
   if(e1) {
     listEl.innerHTML = `<div class="empty">Error: ${esc(e1.message)}</div>`;
@@ -80,35 +85,41 @@ async function loadOrders() {
     return;
   }
 
-  // 2) fetch product titles in one go
+  // ✅ fetch product titles
   const ids = [...new Set(toArr(orders).map(o => o.product_id).filter(Boolean))];
-  let titleById = {};
-
-  if(ids.length) {
+  const titleById = {};
+  if(ids.length){
     const { data: prods, error: e2 } = await sb
       .from("products")
       .select("id,title")
       .in("id", ids);
 
-    if(e2) {
-      // لو صار error هون، منكمّل بس بدون titles
-      console.warn("Products fetch error:", e2.message);
-    } else {
-      toArr(prods).forEach(p => { titleById[p.id] = p.title; });
+    if(!e2){
+      toArr(prods).forEach(p => titleById[p.id] = p.title);
     }
   }
 
-  // 3) render
   listEl.innerHTML = orders.map(o => {
     const delivery = (o.delivery_status || "pending").toLowerCase();
     const hasReply = !!o.admin_reply;
-    const title = titleById[o.product_id] || "Product";
+
+    // ✅ المطلوب: إذا rejected يبين rejected بدل pending
+    const finalStatus =
+      delivery === "rejected"
+        ? "rejected"
+        : ((o.status || "pending").toLowerCase());
+
+    const statusLabel =
+      finalStatus === "rejected" ? "rejected" :
+      finalStatus === "paid" ? "paid" :
+      finalStatus === "cancelled" ? "cancelled" :
+      "pending";
 
     return `
       <div class="card">
         <div class="row">
           <div>
-            <div class="name">${esc(title)}</div>
+            <div class="name">${esc(titleById[o.product_id] || "Product")}</div>
             <div class="small">${new Date(o.created_at).toLocaleString()}</div>
           </div>
           <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
@@ -116,22 +127,22 @@ async function loadOrders() {
 
         <div class="row" style="margin-top:8px">
           <div class="small">Order #${esc(o.id)}</div>
-          <div class="status ${esc(o.status)}">${esc(o.status || "")}</div>
+          <div class="status ${esc(finalStatus)}">${esc(statusLabel)}</div>
         </div>
 
-        <div class="replyBox" onclick="showReply('${esc(o.admin_reply)}')" style="${hasReply ? "" : "opacity:0.6"}">
+        <div class="replyBox" onclick="showReply('${esc(o.admin_reply)}')" style="${hasReply ? '' : 'opacity:0.6'}">
           <div class="replyHeader">
             <div class="replyStatus ${esc(delivery)}">Status: ${esc(delivery.toUpperCase())}</div>
-            <div class="small">${hasReply ? "Tap to view reply" : "No details yet"}</div>
+            <div class="small">${hasReply ? 'Tap to view reply' : 'No details yet'}</div>
           </div>
         </div>
       </div>
     `;
-  }).join("");
+  }).join('');
 }
 
 function showReply(text) {
-  if(!text || text === "null") return;
+  if(!text || text === 'null') return;
   document.getElementById("replyModalText").textContent = text;
   document.getElementById("replyModal").style.display = "flex";
 }
