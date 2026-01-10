@@ -4,158 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Orders</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-  body{
-    margin:0;
-    font-family:system-ui,Arial;
-    background:linear-gradient(180deg,#0b1424,#050a14);
-    color:#fff;
-    min-height:100vh;
-    padding:16px;
-  }
+  body{ margin:0; font-family:system-ui,Arial; background:linear-gradient(180deg,#0b1424,#050a14); color:#fff; min-height:100vh; padding:16px; }
   .wrap{max-width:520px;margin:auto}
-  .top{
-    display:flex;align-items:center;gap:10px;
-    margin-bottom:14px;
-  }
-  .back{
-    padding:10px 14px;
-    border-radius:14px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.08);
-    cursor:pointer;
-    text-decoration: none;
-    color: white;
-  }
+  .top{ display:flex;align-items:center;gap:10px; margin-bottom:14px; }
+  .back{ padding:10px 14px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); cursor:pointer; text-decoration: none; color: white; }
   h2{margin:0;font-size:22px}
-
-  .card{
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:18px;
-    padding:14px;
-    margin-bottom:12px;
-  }
-  .row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-  }
+  .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
+  .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .name{font-weight:900}
   .small{opacity:.65;font-size:12px}
   .price{font-weight:900;color:#38bdf8}
-
   .status{font-weight:900}
   .paid{color:#22c55e}
   .pending{color:#fbbf24}
-  .cancelled{color:#ef4444}
-  .refunded{color:#38bdf8}
-
-  .replyBox{
-    margin-top:10px;
-    padding:12px;
-    border-radius:14px;
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.08);
-    cursor:pointer;
-  }
-  .replyHeader{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-  }
+  .replyBox{ margin-top:10px; padding:12px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); cursor:pointer; }
+  .replyHeader{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .replyStatus{font-weight:900}
-  .replyStatus.pending{color:#fbbf24}
   .replyStatus.done{color:#22c55e}
+  .replyStatus.pending{color:#fbbf24}
   .replyStatus.rejected{color:#ef4444}
-
-  .reportBtn {
-    margin-top: 10px;
-    width: 100%;
-    padding: 10px;
-    border-radius: 12px;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-    font-weight: 900;
-    cursor: pointer;
-    font-size: 13px;
-  }
-  
-  #reportText {
-    width: 100%;
-    height: 120px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    color: #fff;
-    padding: 12px;
-    margin-top: 10px;
-    outline: none;
-  }
-
-  .modal{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.7);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-    z-index:99999;
-  }
-  .modalCard{
-    width:min(520px,100%);
-    background:rgba(12, 16, 24, 0.98);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:18px;
-    padding:16px;
-  }
-  .modalBtn{
-    border:0;
-    cursor:pointer;
-    padding:12px 14px;
-    border-radius:14px;
-    font-weight:950;
-    color:#fff;
-    background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-  }
+  .reportBtn { margin-top: 10px; width: 100%; padding: 10px; border-radius: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; font-weight: 900; cursor: pointer; font-size: 13px; }
+  .modal{ position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; padding:16px; z-index:99999; }
+  .modalCard{ width:min(520px,100%); background:rgba(12, 16, 24, 0.98); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:16px; }
+  .modalBtn{ border:0; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); width: 100%; }
   .empty{ opacity:.6; text-align:center; margin-top:40px; }
 </style>
 </head>
-
 <body>
 <div class="wrap">
   <div class="top">
-    <a href="service.html" class="back">←</a>
+    <a href="index.html" class="back">←</a>
     <h2>My Orders</h2>
   </div>
-
   <div id="list"></div>
   <div id="empty" class="empty" style="display:none">No orders yet</div>
 </div>
 
 <div id="replyModal" class="modal">
   <div class="modalCard">
-    <div id="replyModalTitle" style="font-weight:950; margin-bottom:10px">Order Details</div>
+    <div style="font-weight:950; margin-bottom:10px">Order Details</div>
     <div id="replyModalText" style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; margin-bottom:15px; white-space:pre-wrap;"></div>
-    <button class="modalBtn" style="width:100%" onclick="document.getElementById('replyModal').style.display='none'">Close</button>
-  </div>
-</div>
-
-<div id="reportModal" class="modal">
-  <div class="modalCard">
-    <div style="font-weight:950">Report Issue - Order #<span id="targetOrder"></span></div>
-    <textarea id="reportText" placeholder="Describe the problem..."></textarea>
-    <div style="display:flex; gap:10px; margin-top:15px">
-      <button class="modalBtn" style="background:grey; flex:1" onclick="closeReport()">Cancel</button>
-      <button class="modalBtn" style="background:#ef4444; flex:1" id="submitReport">Submit</button>
-    </div>
+    <button class="modalBtn" onclick="document.getElementById('replyModal').style.display='none'">Close</button>
   </div>
 </div>
 
@@ -164,86 +55,58 @@ const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const listEl = document.getElementById("list");
-const emptyEl = document.getElementById("empty");
-let currentOrderId = null;
-
-function esc(s){
-  return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function openReport(id) {
-    currentOrderId = id;
-    document.getElementById("targetOrder").textContent = id;
-    document.getElementById("reportModal").style.display = "flex";
-}
-function closeReport() { document.getElementById("reportModal").style.display = "none"; }
-
 async function loadOrders() {
     const { data: { session } } = await sb.auth.getSession();
     if(!session) { location.replace("login.html"); return; }
 
-    // ✅ التعديل الجوهري: إضافة !product_id لحل مشكلة الـ Multiple Relationships
+    // جلب البيانات بدون تحديد العلاقة لتجنب التعليق
     const { data, error } = await sb
         .from("orders")
-        .select(`id, price, status, delivery_status, duration, note, created_at, admin_reply, products!product_id(title)`)
+        .select(`*, products(title)`)
         .eq("user_id", session.user.id)
         .order("created_at", {ascending:false});
 
-    if(error) { 
-        console.error(error);
-        listEl.innerHTML = `<div class="empty">Error: ${error.message}</div>`; 
-        return; 
+    if(error) {
+        document.getElementById("list").innerHTML = `<div class="empty">Error: ${error.message}</div>`;
+        return;
     }
     
-    if(!data || !data.length) { emptyEl.style.display = "block"; return; }
+    if(!data || data.length === 0) {
+        document.getElementById("empty").style.display = "block";
+        return;
+    }
 
-    listEl.innerHTML = data.map(o => {
+    document.getElementById("list").innerHTML = data.map(o => {
         const delivery = (o.delivery_status || "pending").toLowerCase();
-        const productTitle = o.products?.title || "Product";
-        const hasReply = !!o.admin_reply;
-
         return `
             <div class="card">
                 <div class="row">
                     <div>
-                        <div class="name">${esc(productTitle)}</div>
+                        <div class="name">${o.products?.title || 'Order Item'}</div>
                         <div class="small">${new Date(o.created_at).toLocaleString()}</div>
                     </div>
                     <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
                 </div>
                 <div class="row" style="margin-top:8px">
                     <div class="small">Order #${o.id}</div>
-                    <div class="status ${o.status}">${esc(o.status)}</div>
+                    <div class="status ${o.status}">${o.status}</div>
                 </div>
-                <div class="replyBox" onclick="showReply('${esc(o.admin_reply)}')" style="${hasReply ? '' : 'opacity:0.6'}">
+                <div class="replyBox" onclick="showReply('${o.admin_reply || ''}')">
                     <div class="replyHeader">
                         <div class="replyStatus ${delivery}">Status: ${delivery.toUpperCase()}</div>
-                        <div class="small">${hasReply ? 'Tap to view reply' : 'No reply yet'}</div>
+                        <div class="small">View Details</div>
                     </div>
                 </div>
-                <button class="reportBtn" onclick="openReport('${o.id}')">⚠️ Report a Problem</button>
             </div>
         `;
     }).join('');
 }
 
 function showReply(text) {
-    if(!text || text === 'undefined') return;
+    if(!text) text = "No extra details from admin yet.";
     document.getElementById("replyModalText").textContent = text;
     document.getElementById("replyModal").style.display = "flex";
 }
-
-document.getElementById("submitReport").onclick = async () => {
-    const msg = document.getElementById("reportText").value.trim();
-    if(!msg) return alert("Please describe the issue");
-    
-    const { data: { user } } = await sb.auth.getUser();
-    const { error } = await sb.from("reports").insert([{ order_id: currentOrderId, message: msg, user_id: user.id }]);
-    
-    if(error) alert("Error: " + error.message);
-    else { alert("Report sent! ✅"); closeReport(); }
-};
 
 loadOrders();
 </script>
