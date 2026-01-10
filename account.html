@@ -8,12 +8,9 @@
 
   <style>
     :root{
-      --bg:#070b12;
       --card:rgba(255,255,255,.06);
       --stroke:rgba(255,255,255,.10);
-      --muted:rgba(255,255,255,.65);
       --shadow:0 16px 60px rgba(0,0,0,.35);
-      --blue:#1bc7ff;
     }
     *{box-sizing:border-box}
     body{
@@ -203,17 +200,12 @@
     <div class="section">
       <h3>Order Details</h3>
 
-      <div class="grid2" style="margin-bottom:10px">
-        <div>
-          <label>Plan</label>
-          <select id="planSelect"></select>
-        </div>
-        <div>
-          <label>Notes (optional)</label>
-          <input id="notes" placeholder="Any notes..." />
-        </div>
+      <div style="margin-bottom:10px">
+        <label>Plan</label>
+        <select id="planSelect"></select>
       </div>
 
+      <!-- ✅ Note واحدة فقط -->
       <div style="margin-bottom:10px">
         <label>Customer Note (optional)</label>
         <textarea id="customerNote" placeholder="Write any extra details..."></textarea>
@@ -223,7 +215,7 @@
       <div id="dynamic-fields" class="grid2" style="display:none; margin-top:8px">
         <div id="field-player-id" style="display:none">
           <label id="id-label">PLAYER ID</label>
-          <input id="input-player-id" placeholder="Enter player id" />
+          <input id="input-player-id" placeholder="Enter id" />
         </div>
 
         <div id="field-zone-id" style="display:none">
@@ -233,7 +225,7 @@
 
         <div id="field-player-name" style="display:none">
           <label id="name-label">PLAYER NAME</label>
-          <input id="input-player-name" placeholder="Enter player name" />
+          <input id="input-player-name" placeholder="Enter name" />
         </div>
 
         <div id="field-email" style="display:none">
@@ -305,14 +297,9 @@
   function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function getId(){ return new URL(location.href).searchParams.get("id"); }
 
-  function setMsg(text, ok=false){
-    msgEl.className = "msg " + (ok ? "ok" : "danger");
-    msgEl.textContent = text || "";
-  }
-
   function clearAllInputs(){
     const ids = [
-      "notes","customerNote",
+      "customerNote",
       "input-player-id","input-zone-id","input-player-name",
       "input-email","input-phone","input-whatsapp","input-username",
       "input-pass","input-backup","input-account-details"
@@ -367,11 +354,9 @@
     const fBackup = document.getElementById("field-backup");
     const fAcc = document.getElementById("field-account-details");
 
-    // reset
     df.style.display = "none";
     [fId,fZone,fName,fEmail,fPhone,fWhats,fUser,fPass,fBackup,fAcc].forEach(el=>el.style.display="none");
 
-    // labels
     document.getElementById("id-label").textContent = currentProduct.player_id_label || "PLAYER ID";
     document.getElementById("zone-label").textContent = currentProduct.zone_id_label || "ZONE ID";
     document.getElementById("name-label").textContent = currentProduct.player_name_label || "PLAYER NAME";
@@ -383,7 +368,6 @@
     document.getElementById("backup-label").textContent = currentProduct.backup_codes_label || "BACKUP CODES";
     document.getElementById("account-details-label").textContent = currentProduct.account_details_label || "ACCOUNT DETAILS";
 
-    // base flags from DB
     let needId   = !!currentProduct.require_player_id;
     let needZone = !!currentProduct.require_zone_id;
     let needName = !!currentProduct.require_player_name;
@@ -395,29 +379,17 @@
     let needBackup = !!currentProduct.require_backup_codes;
     let needAcc = !!currentProduct.require_account_details;
 
-    // ✅ Plan keyword rules
     const planText = ((selectedPlan?.label || selectedPlan?.key || "") + "").toLowerCase();
     const titleText = (currentProduct.title || "").toLowerCase();
 
-    // Shahid VIP: if direct -> Email + Pass
     if(titleText.includes("shahid") && planText.includes("direct")){
-      needEmail = true;
-      needPass = true;
+      needEmail = true; needPass = true;
     }
 
-    // ChatGPT Plus: if private -> Email only
     if(titleText.includes("chatgpt") && planText.includes("private")){
-      needEmail = true;
-      needPass = false;
+      needEmail = true; needPass = false;
     }
 
-    // TikTok coins: pass + (phone OR email)
-    // في DB عندك require_phone=true AND require_email=true AND require_password=true
-    // UI: نعرض الاتنين، بس بالتحقق نقبل واحد منهم.
-    // ما بدنا تغيير هون، بس منخليهم يبينوا.
-    // (التحقق تحت)
-
-    // show if any needed
     if(needId || needZone || needName || needEmail || needPhone || needWhats || needUser || needPass || needBackup || needAcc){
       df.style.display = "grid";
       if(needId) fId.style.display = "block";
@@ -537,7 +509,6 @@
   });
 
   function buildExtraNote(extra){
-    // نحط الإضافات داخل note حتى ما نغيّر RPC
     const lines = [];
     for(const [k,v] of Object.entries(extra)){
       const val = (v || "").toString().trim();
@@ -548,14 +519,8 @@
   }
 
   async function buyProduct(){
-    setMsg("");
+    if(!selectedPlan){ alert("Select a plan first"); return; }
 
-    if(!selectedPlan){
-      setMsg("Select a plan first");
-      return;
-    }
-
-    // read inputs
     const pId = document.getElementById("input-player-id").value.trim();
     const zId = document.getElementById("input-zone-id").value.trim();
     const pName = document.getElementById("input-player-name").value.trim();
@@ -567,36 +532,32 @@
     const pBackup = document.getElementById("input-backup").value.trim();
     const pAcc = document.getElementById("input-account-details").value.trim();
 
-    // what is visible/required (based on dynamic flags)
     const isVisible = (id)=> document.getElementById(id)?.style.display === "block";
 
-    // ✅ validation per visible fields
-    if(isVisible("field-player-id") && !pId){ setMsg("ID is required"); return; }
-    if(isVisible("field-zone-id") && !zId){ setMsg("Zone ID is required"); return; }
-    if(isVisible("field-player-name") && !pName){ setMsg("Name is required"); return; }
-    if(isVisible("field-username") && !pUser){ setMsg("Username is required"); return; }
-    if(isVisible("field-whatsapp") && !pWhats){ setMsg("WhatsApp number is required"); return; }
-    if(isVisible("field-pass") && !pPass){ setMsg("Password is required"); return; }
-    if(isVisible("field-backup") && !pBackup){ setMsg("Backup codes are required"); return; }
-    if(isVisible("field-account-details") && !pAcc){ setMsg("Account details are required"); return; }
+    if(isVisible("field-player-id") && !pId){ alert("ID is required"); return; }
+    if(isVisible("field-zone-id") && !zId){ alert("Zone ID is required"); return; }
+    if(isVisible("field-player-name") && !pName){ alert("Name is required"); return; }
+    if(isVisible("field-username") && !pUser){ alert("Username is required"); return; }
+    if(isVisible("field-whatsapp") && !pWhats){ alert("WhatsApp number is required"); return; }
+    if(isVisible("field-pass") && !pPass){ alert("Password is required"); return; }
+    if(isVisible("field-backup") && !pBackup){ alert("Backup codes are required"); return; }
+    if(isVisible("field-account-details") && !pAcc){ alert("Account details are required"); return; }
 
-    // ✅ TikTok rule: phone OR email required (when both fields shown)
     const titleText = (currentProduct.title || "").toLowerCase();
     if(titleText.includes("tiktok")){
-      // إذا واحد من الاتنين ظاهر، لازم يدخل واحد على الأقل
       const emailShown = isVisible("field-email");
       const phoneShown = isVisible("field-phone");
       if((emailShown || phoneShown) && (!pEmail && !pPhone)){
-        setMsg("Enter Email or Phone number");
+        alert("Enter Email or Phone number");
         return;
       }
       if(isVisible("field-pass") && !pPass){
-        setMsg("Password is required");
+        alert("Password is required");
         return;
       }
     } else {
-      if(isVisible("field-email") && !pEmail){ setMsg("Email is required"); return; }
-      if(isVisible("field-phone") && !pPhone){ setMsg("Phone number is required"); return; }
+      if(isVisible("field-email") && !pEmail){ alert("Email is required"); return; }
+      if(isVisible("field-phone") && !pPhone){ alert("Phone number is required"); return; }
     }
 
     if(!confirm("Proceed with purchase? Balance will be deducted.")) return;
@@ -608,11 +569,9 @@
       const { data: { session } } = await sb.auth.getSession();
       if(!session){ location.href="login.html"; return; }
 
-      const notes = document.getElementById("notes").value || "";
       const baseNote = (customerNoteEl.value || "").trim();
       const extraNote = buildExtraNote({
         "Plan": selectedPlan.label || selectedPlan.key,
-        "Notes": notes,
         "ID": pId,
         "Zone ID": zId,
         "Name": pName,
@@ -623,10 +582,8 @@
         "Backup Codes": pBackup,
         "Account Details": pAcc
       });
-
       const finalNote = (baseNote + extraNote).trim();
 
-      // ✅ keep your original RPC signature (no new params)
       const { data: orderId, error } = await sb.rpc("place_order", {
         p_product_id: currentProductId,
         p_price: selectedPlan.price,
@@ -634,21 +591,13 @@
         p_note: finalNote || null,
         p_player_id: pId || null,
         p_player_name: pName || null,
-        p_acc_email: (pEmail || pPhone) || null,   // ✅ for tiktok we can store phone or email here
+        p_acc_email: (pEmail || pPhone) || null,
         p_acc_pass: pPass || null
       });
 
       if(error) throw error;
 
-      // ✅ clear inputs after success (طلبك)
       clearAllInputs();
-
-      // Optional WA message (keep if you want)
-      if(titleText.includes("tiktok")){
-        const waMsg = `Hello Baroud Services, I just bought TikTok Coins. Order ID: ${orderId}. Contact: ${(pEmail || pPhone)}.`;
-        window.open(`https://wa.me/96170385398?text=${encodeURIComponent(waMsg)}`);
-      }
-
       alert("✅ Order Placed Successfully! ID: " + orderId);
       location.href = "my-orders.html";
     }catch(e){
@@ -663,10 +612,7 @@
 
   (async function init(){
     const id = getId();
-    if(!id){
-      titleEl.textContent = "Missing id";
-      return;
-    }
+    if(!id){ titleEl.textContent = "Missing id"; return; }
     try{
       const { product, features } = await loadProduct(id);
       renderProduct(product, features);
@@ -675,7 +621,7 @@
       renderPlans(plans);
     }catch(err){
       titleEl.textContent = "Error";
-      setMsg(err?.message || String(err));
+      alert(err?.message || String(err));
     }
   })();
 </script>
