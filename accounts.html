@@ -295,33 +295,23 @@
     }
   }
 
-async function loadProducts(){
-  // التعديل هنا: أضفنا فلتر category لضمان جلب الحسابات فقط
-  const { data, error } = await sb
-    .from("products")
-    .select(`
-      id,
-      title,
-      category,
-      product_plan_prices(price)
-    `)
-    .eq("active", true)
-    .eq("category", "Accounts"); // تأكد أن الكلمة مطابقة تماماً لما في Supabase
+  async function loadProducts(){
+    // ✅ جلب الحسابات فقط + عرض أرخص سعر (min_price) مباشرة
+    const { data, error } = await sb
+      .from("products_with_min_price")
+      .select("id,title,category,min_price")
+      .eq("active", true)
+      .eq("category", "Accounts");
 
-  if(error) throw error;
+    if(error) throw error;
 
-  return (data || []).map(p => {
-    const prices = (p.product_plan_prices || [])
-      .map(x => Number(x.price))
-      .filter(n => Number.isFinite(n));
-    return {
+    return (data || []).map(p => ({
       id: p.id,
       title: p.title,
       category: p.category,
-      price: prices.length ? Math.min(...prices) : 0
-    };
-  });
-}
+      price: Number(p.min_price || 0)
+    }));
+  }
 
   let all = [];
 
