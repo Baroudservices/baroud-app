@@ -203,7 +203,6 @@
       background:#19c37d;
     }
 
-    /* Dynamic Container Styling */
     #dynamic-fields {
       border: 1px solid var(--blue);
       padding: 12px;
@@ -240,28 +239,28 @@
         <div id="dynamic-fields" style="margin-top:14px; display:none; flex-direction:column; gap:12px;">
           <div id="field-player-id" style="display:none;">
             <div class="noteLbl" id="id-label">PLAYER ID</div>
-            <input type="text" id="input-player-id" class="noteInput" placeholder="Enter ID here...">
+            <input type="text" id="input-player-id" class="noteInput" value="" placeholder="Enter Player ID here...">
           </div>
           
           <div id="field-player-name" style="display:none;">
             <div class="noteLbl">CHECKING NAME</div>
-            <input type="text" id="input-player-name" class="noteInput" placeholder="Ex: Baroud_Hero">
+            <input type="text" id="input-player-name" class="noteInput" value="" placeholder="Ex: Player_Name">
           </div>
 
           <div id="field-email" style="display:none;">
             <div class="noteLbl" id="email-label">EMAIL / PHONE</div>
-            <input type="text" id="input-email" class="noteInput" placeholder="Enter here...">
+            <input type="text" id="input-email" class="noteInput" value="" placeholder="Enter email or phone...">
           </div>
 
           <div id="field-pass" style="display:none;">
             <div class="noteLbl">PASSWORD</div>
-            <input type="password" id="input-pass" class="noteInput" placeholder="Enter account password...">
+            <input type="password" id="input-pass" class="noteInput" value="" placeholder="Enter account password...">
           </div>
         </div>
 
         <div class="noteWrap">
           <div class="noteLbl">Customer note (optional)</div>
-          <textarea id="customerNote" class="noteInput" placeholder="Write note for this order..."></textarea>
+          <textarea id="customerNote" class="noteInput" placeholder="Write any extra details for Baroud Services..."></textarea>
         </div>
 
         <div class="buyRow">
@@ -273,7 +272,7 @@
         </div>
       </div>
     </div>
-    <div class="footer">©2025 Baroud Services</div>
+    <div class="footer" style="text-align: center; margin-top: 15px; opacity: 0.5; font-size: 12px;">©2025 Baroud Services</div>
   </main>
 
   <script>
@@ -320,7 +319,6 @@
       pillsEl.innerHTML = `<span class="pill">${p.active ? 'Available' : 'Unavailable'}</span><span class="pill">${p.category}</span>`;
       featsEl.innerHTML = features.map(f => `<div class="feature"><div class="fLabel">${esc(f.label)}</div><div class="fValue">${esc(f.value)}</div></div>`).join('');
 
-      // ✅ DYNAMIC LOGIC FOR INPUTS
       const df = document.getElementById("dynamic-fields");
       const fId = document.getElementById("field-player-id");
       const fName = document.getElementById("field-player-name");
@@ -344,14 +342,11 @@
             fPass.style.display = e.target.value.includes("@") ? "block" : "none";
           };
         } else {
-          fId.style.display = "block"; // Default for all other games/apps
+          fId.style.display = "block";
         }
-      } else if(title.includes("chatgpt")){
+      } else if(title.includes("chatgpt") || title.includes("netflix") || title.includes("shahid")){
         df.style.display = "flex"; fEmail.style.display = "block";
-        document.getElementById("email-label").textContent = "EMAIL";
-      } else if(title.includes("shahid direct")){
-        df.style.display = "flex"; fEmail.style.display = "block"; fPass.style.display = "block";
-        document.getElementById("email-label").textContent = "EMAIL";
+        if(title.includes("direct") || title.includes("shahid")){ fPass.style.display = "block"; }
       }
     }
 
@@ -369,13 +364,12 @@
       const pPass = document.getElementById("input-pass").value.trim();
       const title = currentProduct.title.toLowerCase();
 
-      // VALIDATION
       if(document.getElementById("field-player-id").style.display === "block" && !pId) { alert("Player ID is required!"); return; }
       if(document.getElementById("field-player-name").style.display === "block" && !pName) { alert("Checking Name is required!"); return; }
       if(document.getElementById("field-email").style.display === "block" && !pEmail) { alert("Email/Phone is required!"); return; }
       if(document.getElementById("field-pass").style.display === "block" && !pPass) { alert("Password is required!"); return; }
 
-      if(!confirm("Are you sure? This will deduct balance.")) return;
+      if(!confirm("Proceed with purchase? Balance will be deducted.")) return;
 
       buyBtn.disabled = true;
       buyBtn.textContent = "Processing...";
@@ -397,13 +391,12 @@
 
         if(error) throw error;
 
-        // TIKTOK REDIRECT
         if(title.includes("tiktok")){
-          const waMsg = `Hello Baroud Services, I just bought TikTok Coins. Order ID: ${orderId}. My Details: ${pEmail}. Waiting for code.`;
+          const waMsg = `Hello Baroud Services, I just bought TikTok Coins. Order ID: ${orderId}. Email/Phone: ${pEmail}.`;
           window.open(`https://wa.me/96170385398?text=${encodeURIComponent(waMsg)}`);
         }
 
-        alert("✅ Order Placed! ID: " + orderId);
+        alert("✅ Order Placed Successfully! ID: " + orderId);
         location.href = "my-orders.html";
       } catch(e) {
         alert(e.message || "Purchase failed");
@@ -413,7 +406,6 @@
       }
     }
 
-    // Initialize
     (async ()=>{
       currentProductId = getId();
       if(!currentProductId) return;
