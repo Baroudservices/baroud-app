@@ -1,108 +1,56 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin – Orders</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Orders</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:linear-gradient(160deg,#060b16,#0a1330);
-  color:#fff;
-  padding:16px;
-}
-.wrap{max-width:1000px;margin:auto}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
-.btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;background:#1e293b;color:#fff}
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid #334155;font-size:14px;vertical-align:top}
-th{color:#93c5fd;text-align:left}
-.small{opacity:.75;font-size:12px}
-.badge{font-weight:900}
-.done{color:#22c55e}
-.pending{color:#fbbf24}
-.rejected{color:#ef4444}
-
-textarea{
-  width:100%;
-  min-height:70px;
-  resize:vertical;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.25);
-  color:#fff;
-  padding:10px;
-  outline:none;
-  font-family:inherit;
-}
-select{
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.25);
-  color:#fff;
-  padding:10px;
-  outline:none;
-}
-.actionBtn{
-  padding:10px 12px;border-radius:12px;border:0;cursor:pointer;
-  background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-  color:#fff;font-weight:900;
-}
-.actionBtn:disabled{opacity:.6;cursor:not-allowed}
-
-.noteBox{
-  margin-top:6px;
-  padding:8px 10px;
-  border-radius:12px;
-  border:1px solid rgba(56,189,248,.25);
-  background:rgba(56,189,248,.08);
-}
-.noteTitle{
-  font-weight:950;
-  font-size:12px;
-  opacity:.85;
-}
-.noteText{
-  margin-top:4px;
-  font-weight:900;
-  font-size:12px;
-  opacity:.95;
-  line-height:1.35;
-  word-break:break-word;
-}
+  body{ margin:0; font-family:system-ui,Arial; background:linear-gradient(180deg,#0b1424,#050a14); color:#fff; min-height:100vh; padding:16px; }
+  .wrap{max-width:880px;margin:auto}
+  .top{ display:flex;align-items:center;gap:10px; margin-bottom:14px; }
+  .back{ padding:10px 14px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); cursor:pointer; text-decoration: none; color: white; }
+  h2{margin:0;font-size:22px}
+  .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
+  .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .name{font-weight:900}
+  .small{opacity:.65;font-size:12px}
+  .price{font-weight:900;color:#38bdf8}
+  select, textarea, input{
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.12);
+    color:#fff;
+    border-radius:12px;
+    padding:10px;
+    outline:none;
+  }
+  textarea{ width:100%; min-height:90px; resize:vertical; }
+  .btn{
+    border:0; cursor:pointer; padding:12px 14px; border-radius:14px;
+    font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+  }
+  .btn2{
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.06);
+  }
+  .empty{ opacity:.7; text-align:center; margin-top:40px; }
 </style>
 </head>
 
 <body>
 <div class="wrap">
   <div class="top">
-    <h2 style="margin:0">Admin – Orders</h2>
-    <div>
-      <button class="btn" id="btnRefresh">Refresh</button>
-      <button class="btn" id="btnLogout">Logout</button>
-    </div>
+    <a href="admin.html" class="back">←</a>
+    <h2>Admin Orders</h2>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Order</th>
-        <th>User</th>
-        <th>Product</th>
-        <th>Price</th>
-        <th>Status</th>
-        <th>Reply</th>
-        <th>Save</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
+  <div class="row" style="margin-bottom:12px">
+    <input id="q" placeholder="Search by order id / user id" style="flex:1; min-width:220px" />
+    <button class="btn btn2" onclick="loadOrders()">Refresh</button>
+  </div>
 
-  <p id="empty" style="display:none;opacity:.6;text-align:center;margin-top:20px;">No orders found</p>
+  <div id="list"></div>
+  <div id="empty" class="empty" style="display:none">No orders</div>
 </div>
 
 <script>
@@ -110,132 +58,126 @@ const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const rowsEl = document.getElementById("rows");
-const emptyEl = document.getElementById("empty");
-const btnRefresh = document.getElementById("btnRefresh");
-const btnLogout = document.getElementById("btnLogout");
+function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function toArr(x){ return Array.isArray(x) ? x : []; }
 
-function esc(s){
-  return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
-async function requireSession(){
-  const { data: s } = await sb.auth.getSession();
-  if(!s?.session){ location.href="login.html"; return null; }
-  return s.session;
-}
-
-async function requireAdmin(session){
-  const { data: profile } = await sb.from("profiles").select("is_admin").eq("id", session.user.id).single();
-  if(!profile?.is_admin){ alert("Access Denied: Admins Only"); return false; }
-  return true;
-}
-
-function setBusy(isBusy){
-  btnRefresh.disabled = isBusy;
-  rowsEl.querySelectorAll("button.actionBtn").forEach(b => b.disabled = isBusy);
-}
-
-async function load(){
-  rowsEl.innerHTML = `<tr><td colspan="7">Loading...</td></tr>`;
+async function loadOrders(){
+  const listEl = document.getElementById("list");
+  const emptyEl = document.getElementById("empty");
+  listEl.innerHTML = "";
   emptyEl.style.display = "none";
 
-  try{
-    const session = await requireSession();
-    if(!session) return;
-    if(!(await requireAdmin(session))) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session) { location.replace("login.html"); return; }
 
-    // ✅ التعديل هنا: إضافة !product_id لحل مشكلة التضارب
-    const { data, error } = await sb
-      .from("orders")
-      .select(`
-        id, user_id, price, status, duration, note, delivery_status, admin_reply, created_at,
-        products!product_id(title)
-      `)
-      .order("created_at", { ascending:false });
+  // 1) fetch orders
+  const { data: orders, error: e1 } = await sb
+    .from("orders")
+    .select("id,user_id,product_id,price,status,delivery_status,admin_reply,created_at")
+    .order("created_at", { ascending:false });
 
-    if(error) throw error;
+  if(e1){
+    listEl.innerHTML = `<div class="empty">Error: ${esc(e1.message)}</div>`;
+    return;
+  }
 
-    if(!data || !data.length){
-      rowsEl.innerHTML = "";
-      emptyEl.style.display = "block";
-      return;
-    }
+  if(!orders || orders.length === 0){
+    emptyEl.style.display = "block";
+    return;
+  }
 
-    rowsEl.innerHTML = data.map(o => {
-      const ds = String(o.delivery_status || "pending").toLowerCase();
-      const dsClass = ds === "done" ? "done" : ds === "rejected" ? "rejected" : "pending";
-      const title = o.products?.title || "Product";
-      
-      return `
-        <tr>
-          <td>
-            <b>#${o.id}</b>
-            <div class="small">${new Date(o.created_at).toLocaleString()}</div>
-          </td>
-          <td class="small">${o.user_id.slice(0,8)}...</td>
-          <td>
-            <div>${esc(title)}</div>
-            <div class="noteBox">
-              <div class="noteTitle">${o.duration ? 'Plan: '+esc(o.duration) : 'No Plan'}</div>
-              <div class="noteText">${esc(o.note)}</div>
-            </div>
-          </td>
-          <td><b>$${Number(o.price || 0).toFixed(2)}</b></td>
-          <td>
-            <div class="badge ${dsClass}">${ds.toUpperCase()}</div>
-            <div class="small">Payment: ${esc(o.status)}</div>
-          </td>
-          <td>
-            <textarea id="reply-${o.id}">${o.admin_reply || ""}</textarea>
-          </td>
-          <td>
-            <select id="status-${o.id}">
-              <option value="pending" ${ds==="pending" ? "selected" : ""}>Pending</option>
-              <option value="done" ${ds==="done" ? "selected" : ""}>Done</option>
-              <option value="rejected" ${ds==="rejected" ? "selected" : ""}>Rejected</option>
+  // 2) map product titles
+  const ids = [...new Set(toArr(orders).map(o => o.product_id).filter(Boolean))];
+  let titleById = {};
+  if(ids.length){
+    const { data: prods } = await sb.from("products").select("id,title").in("id", ids);
+    toArr(prods).forEach(p => titleById[p.id] = p.title);
+  }
+
+  // 3) simple search filter
+  const term = (document.getElementById("q").value || "").trim().toLowerCase();
+  const filtered = term
+    ? orders.filter(o => String(o.id).toLowerCase().includes(term) || String(o.user_id).toLowerCase().includes(term))
+    : orders;
+
+  if(!filtered.length){
+    emptyEl.style.display = "block";
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(o => {
+    const title = titleById[o.product_id] || "Product";
+    const status = (o.status || "pending").toLowerCase();
+    const delivery = (o.delivery_status || "pending").toLowerCase();
+    const reply = o.admin_reply || "";
+
+    return `
+      <div class="card" id="card_${esc(o.id)}">
+        <div class="row">
+          <div>
+            <div class="name">${esc(title)}</div>
+            <div class="small">Order #${esc(o.id)} • ${new Date(o.created_at).toLocaleString()}</div>
+            <div class="small">User: ${esc(o.user_id)}</div>
+          </div>
+          <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <div class="small">Payment Status</div>
+            <select id="status_${esc(o.id)}">
+              <option value="pending" ${status==="pending"?"selected":""}>pending</option>
+              <option value="paid" ${status==="paid"?"selected":""}>paid</option>
+              <option value="cancelled" ${status==="cancelled"?"selected":""}>cancelled</option>
             </select>
-            <div style="height:8px"></div>
-            <button class="actionBtn" onclick="saveOrder('${o.id}')">Save</button>
-          </td>
-        </tr>
-      `;
-    }).join('');
+          </div>
 
-  }catch(e){
-    rowsEl.innerHTML = `<tr><td colspan="7" style="color:#ef4444">Error: ${e.message}</td></tr>`;
-  }
+          <div>
+            <div class="small">Delivery Status</div>
+            <select id="delivery_${esc(o.id)}">
+              <option value="pending" ${delivery==="pending"?"selected":""}>pending</option>
+              <option value="done" ${delivery==="done"?"selected":""}>done</option>
+              <option value="rejected" ${delivery==="rejected"?"selected":""}>rejected</option>
+            </select>
+          </div>
+
+          <div style="flex:1; min-width:240px">
+            <div class="small">Admin Reply</div>
+            <textarea id="reply_${esc(o.id)}" placeholder="Write details / delivery info...">${esc(reply)}</textarea>
+          </div>
+
+          <div style="min-width:180px">
+            <button class="btn" onclick="saveOrder(${esc(o.id)})">Save</button>
+            <div id="msg_${esc(o.id)}" class="small" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
-// ✅ تم تعديل دالة الحفظ لتستخدم update مباشرة بدل rpc
-async function saveOrder(orderId) {
-  try {
-    setBusy(true);
-    const reply = document.getElementById(`reply-${orderId}`).value;
-    const status = document.getElementById(`status-${orderId}`).value;
+async function saveOrder(orderId){
+  const msg = document.getElementById(`msg_${orderId}`);
+  msg.textContent = "Saving...";
 
-    const { error } = await sb
-      .from("orders")
-      .update({ 
-        admin_reply: reply, 
-        delivery_status: status 
-      })
-      .eq("id", orderId);
+  const status = document.getElementById(`status_${orderId}`).value;
+  const delivery_status = document.getElementById(`delivery_${orderId}`).value;
+  const admin_reply = document.getElementById(`reply_${orderId}`).value;
 
-    if(error) throw error;
-    alert("Order #${orderId} Saved! ✅");
-    load();
-  } catch(e) {
-    alert("Error: " + e.message);
-  } finally {
-    setBusy(false);
+  const { error } = await sb
+    .from("orders")
+    .update({ status, delivery_status, admin_reply })
+    .eq("id", orderId);
+
+  if(error){
+    msg.textContent = `Error: ${error.message}`;
+    return;
   }
+
+  msg.textContent = "Saved ✅";
 }
 
-btnRefresh.onclick = load;
-btnLogout.onclick = async () => { await sb.auth.signOut(); location.href="login.html"; };
-
-load();
+loadOrders();
 </script>
 </body>
 </html>
