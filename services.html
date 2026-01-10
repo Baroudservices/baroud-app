@@ -35,14 +35,16 @@
       justify-content: center; font-size: 22px; cursor: pointer;
       border: 1px solid rgba(255,255,255,0.1);
     }
-    /* خلي phone recharge ياخد عرض صف كامل */
-.neon-tile.wide{
-  grid-column: 1 / -1;   /* يعني من أول عمود لآخر عمود */
-}
+
+    /* ===== GRID wide tile ===== */
+    .neon-tile.wide{
+      grid-column: 1 / -1;
+    }
     .neon-tile.wide img{
-    height: 150px;
-    object-fit: cover;
-  }
+      height: 150px;
+      object-fit: cover;
+    }
+
     .wallet-pill{
       display: flex; align-items: center; gap: 8px;
       background: rgba(255,255,255,0.05);
@@ -224,7 +226,7 @@
         <div class="menu-trigger" id="menuBtn">☰</div>
         <div class="wallet-pill">
           <span class="star-icon">★</span>
-          <span class="balance-text" id="balanceText">0.00 $</span>
+          <span class="balance-text" id="balanceText">0.00 🇱🇧</span>
           <button class="add-fund-btn" onclick="location.href='add-credit.html'">+</button>
         </div>
       </div>
@@ -255,7 +257,6 @@
     <div id="searchResults"></div>
 
     <section class="grid" id="serviceGrid">
-      <!-- All go to account.html -->
       <a href="accounts.html?category=Accounts" class="neon-tile">
         <img src="assets/accounts.png" alt="Accounts">
         <div class="tile-label">Accounts</div>
@@ -266,8 +267,8 @@
         <div class="tile-label">Games</div>
       </a>
 
-      <!-- NEW: Phone recharge -->
-s      <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile wide">
+      <!-- Phone recharge (fixed: NO extra 's' line) -->
+      <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile wide">
         <img src="assets/phone-recharge.png" alt="Phone recharge">
         <div class="tile-label">Phone recharge</div>
       </a>
@@ -344,7 +345,6 @@ s      <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile 
     let tmr = null;
 
     function openProduct(p){
-      // all products go to account.html
       location.href = `account.html?id=${encodeURIComponent(p.id)}`;
     }
 
@@ -404,7 +404,6 @@ s      <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile 
         tmr = setTimeout(()=> searchProducts(searchInput.value), 250);
       });
 
-      // hide results when user clears
       searchInput.addEventListener("blur", ()=>{
         setTimeout(()=>{
           if(!searchInput.value.trim()){
@@ -415,6 +414,7 @@ s      <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile 
       });
     }
   </script>
+
   <script src="app-ui.js?v=3"></script>
 </body>
 </html>
