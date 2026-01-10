@@ -3,86 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baroud Services</title>
+  <title>Baroud Services - Neon</title>
 
   <style>
     *{box-sizing:border-box}
     html,body{height:100%; margin:0; padding:0;}
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:#020b14; /* لون غامق متل الصورة */
+      background:#020b14; /* الخلفية الداكنة مثل الصور */
       color:#fff;
       min-height:100vh;
       overflow-x:hidden;
-      padding-bottom: 80px; /* مساحة للـ Bottom Nav */
+      padding-bottom: 90px;
     }
 
     .wrap{ width: 100%; margin: 0 auto; padding: 14px; max-width: 520px; }
 
-    /* ===== TOPBAR (مثل الصورة) ===== */
+    /* ===== TOPBAR (الرصيد + المنيو) ===== */
     .topbar{
       display:flex; align-items:center; justify-content:space-between;
-      padding: 10px 0; margin-bottom: 10px;
+      padding: 10px 0; margin-bottom: 15px;
     }
-    .topbar-left{ display: flex; align-items: center; gap: 15px; }
+    .topbar-left{ display: flex; align-items: center; gap: 12px; }
     
-    .wallet-box{
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.06);
-      padding: 6px 12px; border-radius: 20px;
+    .menu-trigger{
+      width: 45px; height: 45px; background: rgba(255,255,255,0.06);
+      border-radius: 12px; display: flex; align-items: center;
+      justify-content: center; font-size: 22px; cursor: pointer;
       border: 1px solid rgba(255,255,255,0.1);
     }
-    .wallet-icon{ width: 22px; height: 22px; background: #eab308; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 14px; }
-    .balance{ font-weight: 800; font-size: 16px; }
-    .plus-icon{ color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; }
 
-    .brand-logo-top{ width: 100px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+    .wallet-pill{
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05);
+      padding: 5px 12px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .star-icon{ color: #ffd700; font-size: 18px; }
+    .balance-text{ font-weight: 800; font-size: 15px; letter-spacing: 0.5px; }
+    .add-fund{ color: #fff; font-size: 20px; font-weight: bold; cursor: pointer; margin-left: 5px; }
 
-    /* ===== BANNER ===== */
-    .banner{ width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-    .banner img{ width: 100%; display: block; }
+    .brand-title{ font-weight: 900; letter-spacing: 1.5px; font-size: 18px; color: #fff; }
+
+    /* ===== BANNER SLIDER (Neon Style) ===== */
+    .banner-container{
+      width: 100%; border-radius: 20px; overflow: hidden;
+      margin-bottom: 20px; border: 1px solid rgba(0, 150, 255, 0.3);
+      box-shadow: 0 0 15px rgba(0, 150, 255, 0.2);
+    }
+    .banner-container img{ width: 100%; display: block; }
+
+    /* ===== SUPPORT INFO BAR ===== */
+    .support-bar{
+      background: rgba(255,255,255,0.05);
+      border-radius: 30px; padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);
+    }
+    .support-text{ font-weight: 700; font-size: 14px; color: #eee; }
 
     /* ===== SEARCH ===== */
-    .searchBox{
-      background: #101a26;
-      border-radius: 25px;
-      padding: 15px 20px;
-      margin-bottom: 25px;
-      border: 1px solid rgba(255,255,255,0.05);
+    .search-box{
+      background: rgba(255,255,255,0.05);
+      border-radius: 25px; padding: 14px 20px;
+      margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.08);
     }
-    .searchBox input{ width: 100%; background: transparent; border: none; outline: none; color: #fff; font-size: 16px; }
+    .search-box input{ width: 100%; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; }
 
-    /* ===== GRID (مثل الصورة) ===== */
+    /* ===== GRID (مثل الصور اللي بعتها) ===== */
     .grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .tile{ text-align: center; cursor: pointer; }
-    .tile img{ width: 100%; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
-    .tile:active img{ transform: scale(0.95); }
-    .tile .label{ margin-top: 8px; font-weight: 600; font-size: 14px; color: #ccc; }
+    .neon-tile{
+      background: #0b141d; border-radius: 25px;
+      overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
+      transition: 0.3s; cursor: pointer; position: relative;
+    }
+    .neon-tile:active{ transform: scale(0.96); }
+    .neon-tile img{ width: 100%; display: block; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .tile-label{
+      padding: 12px; text-align: center; font-weight: 800;
+      background: rgba(255,255,255,0.02); font-size: 14px;
+    }
 
-    /* ===== BOTTOM NAV ===== */
+    /* ===== BOTTOM NAVIGATION ===== */
     .bottom-nav{
       position: fixed; bottom: 0; left: 0; right: 0;
       background: #020b14; border-top: 1px solid rgba(255,255,255,0.05);
-      display: flex; justify-content: space-around; align-items: center;
-      padding: 15px 0; z-index: 100;
+      display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000;
     }
-    .nav-item{ color: #fff; font-size: 22px; opacity: 0.6; cursor: pointer; }
-    .nav-item.active{ opacity: 1; }
+    .nav-btn{ font-size: 24px; opacity: 0.5; cursor: pointer; transition: 0.3s; }
+    .nav-btn.active{ opacity: 1; color: #0096ff; }
 
-    /* ===== DRAWER (السلايدبار اللي عملناه) ===== */
-    .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.7); opacity:0; pointer-events:none; transition:opacity .3s; z-index:200; }
+    /* ===== DRAWER (السلايدبار) ===== */
+    .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.8); opacity:0; pointer-events:none; transition:0.3s; z-index:2000; }
     .overlay.show{ opacity:1; pointer-events:auto; }
     .drawer{
-      position:fixed; top:0; left:0; width:280px; height:100vh;
-      background:#06162a; border-right:1px solid rgba(255,255,255,.05);
-      transform:translateX(-100%); transition:0.3s; z-index:210; padding:20px;
+      position:fixed; top:0; left:0; width:290px; height:100vh;
+      background:#06162a; border-right:1px solid rgba(255,255,255,.1);
+      transform:translateX(-100%); transition:0.3s; z-index:2100; padding:25px;
     }
     .drawer.show{ transform:translateX(0); }
-    .user-profile{ text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
-    .user-avatar{ width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 25px; border: 1px solid #21f07a; }
-    .mItem{ display:flex; align-items:center; gap:12px; padding:15px 10px; border-radius:12px; cursor:pointer; }
-    .dot{ width:8px; height:8px; border-radius:50%; background:#21f07a; box-shadow: 0 0 5px #21f07a; }
-    .mItem span{ font-weight:600; color:#ddd; }
+    .user-sec{ text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .avatar{ width: 65px; height: 65px; background: rgba(255,255,255,0.05); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 2px solid #00d2ff; }
+    .m-item{ display:flex; align-items:center; gap:15px; padding:14px; border-radius:12px; cursor:pointer; margin-bottom: 5px; }
+    .m-item:active{ background: rgba(255,255,255,0.05); }
+    .m-dot{ width:8px; height:8px; border-radius:50%; background:#00d2ff; box-shadow: 0 0 8px #00d2ff; }
+    .m-item span{ font-weight:700; color:#ccc; font-size: 15px; }
   </style>
 </head>
 
@@ -90,66 +115,71 @@
   <div class="overlay" id="overlay"></div>
 
   <aside class="drawer" id="drawer">
-    <div class="user-profile">
-      <div class="user-avatar">👤</div>
-      <div style="font-weight: 800;">Houssein Baroud</div>
+    <div class="user-sec">
+      <div class="avatar">👤</div>
+      <div style="font-weight: 900; font-size: 18px;">Houssein Baroud</div>
     </div>
-    <div class="mItem" onclick="location.href='index.html'"><span class="dot"></span><span>Home</span></div>
-    <div class="mItem"><span class="dot"></span><span>Add Credit</span></div>
-    <div class="mItem"><span class="dot"></span><span>My Payments</span></div>
-    <div class="mItem"><span class="dot"></span><span>My Orders</span></div>
-    <div class="mItem"><span class="dot"></span><span>Security</span></div>
-    <div class="mItem"><span class="dot"></span><span>About Us</span></div>
-    <div class="mItem" style="margin-top: 20px; opacity: 0.5;"><span class="dot" style="background:red; box-shadow:none;"></span><span>Logout</span></div>
+    <div class="m-item" onclick="location.href='index.html'"><div class="m-dot"></div><span>Home</span></div>
+    <div class="m-item"><div class="m-dot"></div><span>Add Credit</span></div>
+    <div class="m-item"><div class="m-dot"></div><span>My Payments</span></div>
+    <div class="m-item"><div class="m-dot"></div><span>My Orders</span></div>
+    <div class="m-item"><div class="m-dot"></div><span>Security</span></div>
+    <div class="m-item"><div class="m-dot"></div><span>About Us</span></div>
+    <div class="m-item" style="margin-top: 30px; opacity: 0.6;"><div class="m-dot" style="background:#ff4d4d; box-shadow:none;"></div><span style="color:#ff4d4d;">Logout</span></div>
   </aside>
 
   <main class="wrap">
     <div class="topbar">
       <div class="topbar-left">
-        <div id="menuBtn" style="cursor:pointer; font-size: 24px;">☰</div>
-        <div class="wallet-box">
-          <div class="wallet-icon">★</div>
-          <div class="balance">0.00 🇱🇧</div>
-          <div class="plus-icon">⊕</div>
+        <div class="menu-trigger" id="menuBtn">☰</div>
+        <div class="wallet-pill">
+          <span class="star-icon">★</span>
+          <span class="balance-text">0.00 🇱🇧</span>
+          <span class="add-fund">⊕</span>
         </div>
       </div>
-      <img src="assets/logo-text.png" class="brand-logo-top" alt="OVOXZ">
+      <div class="brand-title">BAROUD</div>
     </div>
 
-    <div class="banner">
-      <img src="assets/banner1.jpg" alt="Unlock Ultimate Power">
+    <div class="banner-container">
+      <img src="assets/banner-neon.jpg" alt="Unlock Ultimate Power">
     </div>
 
-    <div class="searchBox">
-      <input type="text" placeholder="Search">
+    <div class="support-bar">
+      <span class="support-text">📞 +961 70385398 | Houssein Baroud</span>
+      <span style="font-size: 18px;">📞</span>
+    </div>
+
+    <div class="search-box">
+      <input type="text" placeholder="Search for services...">
     </div>
 
     <section class="grid">
-      <div class="tile">
-        <img src="assets/games-card.png" alt="Games">
-        <div class="label">Games</div>
+      <div class="neon-tile">
+        <img src="assets/accounts-neon.png" alt="Accounts">
+        <div class="tile-label">Accounts</div>
       </div>
-      <div class="tile">
-        <img src="assets/apps-card.png" alt="Applications">
-        <div class="label">Applications</div>
+      <div class="neon-tile">
+        <img src="assets/games-neon.png" alt="Games">
+        <div class="tile-label">Games</div>
       </div>
-      <div class="tile">
-        <img src="assets/accounts-card.png" alt="Accounts">
-        <div class="label">Accounts</div>
+      <div class="neon-tile">
+        <img src="assets/giftcards-neon.png" alt="Gift Cards">
+        <div class="tile-label">Gift Cards</div>
       </div>
-      <div class="tile">
-        <img src="assets/cards-card.png" alt="Digital Cards">
-        <div class="label">Digital Cards</div>
+      <div class="neon-tile">
+        <img src="assets/apps-neon.png" alt="Apps">
+        <div class="tile-label">Apps</div>
       </div>
     </section>
   </main>
 
   <nav class="bottom-nav">
-    <div class="nav-item active">🏠</div>
-    <div class="nav-item">🛒</div>
-    <div class="nav-item">🔔</div>
-    <div class="nav-item">💳</div>
-    <div class="nav-item">👤</div>
+    <div class="nav-btn active">🏠</div>
+    <div class="nav-btn">🛒</div>
+    <div class="nav-btn">🔔</div>
+    <div class="nav-btn">💳</div>
+    <div class="nav-btn">👤</div>
   </nav>
 
   <script>
