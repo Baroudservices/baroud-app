@@ -91,19 +91,43 @@
     .search-box{
       background: rgba(255,255,255,0.05);
       border-radius: 25px; padding: 14px 20px;
-      margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08);
     }
     .search-box input{ width: 100%; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; }
 
-    /* ===== GRID ===== */
-    .grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    /* Search results */
+    #searchResults{
+      display:none;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .sr-item{
+      padding: 12px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sr-item:last-child{ border-bottom:0; }
+    .sr-title{ font-weight:900; }
+    .sr-cat{ opacity:.65; font-size:12px; }
+    .sr-price{ font-weight:900; color:#38bdf8; font-size:13px; }
+
+    /* ===== GRID (smaller tiles) ===== */
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .neon-tile{
-      background: #0b141d; border-radius: 25px;
+      background: #0b141d; border-radius: 18px;
       overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
       transition: 0.3s; cursor: pointer;
+      text-decoration:none; color:inherit;
     }
-    .neon-tile img{ width: 100%; display: block; }
-    .tile-label{ padding: 12px; text-align: center; font-weight: 800; font-size: 14px; }
+    .neon-tile img{ width: 100%; display:block; height: 120px; object-fit: cover; }
+    .tile-label{ padding: 10px; text-align: center; font-weight: 800; font-size: 13px; }
 
     /* ===== DRAWER (SIDEBAR) ===== */
     .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.8); opacity:0; pointer-events:none; transition:0.3s; z-index:2000; }
@@ -112,20 +136,20 @@
       position:fixed; top:0; left:0; width:290px; height:100vh;
       background:#06162a; border-right:1px solid rgba(255,255,255,.1);
       transform:translateX(-100%); transition:0.3s; z-index:2100; padding:25px;
-      display: flex; flex-direction: column;
+      display:flex; flex-direction:column;
     }
     .drawer.show{ transform:translateX(0); }
-    .m-item{ display:flex; align-items:center; gap:15px; padding:14px; border-radius:12px; cursor:pointer; text-decoration: none; color: inherit; }
+    .m-item{ display:flex; align-items:center; gap:15px; padding:14px; border-radius:12px; cursor:pointer; text-decoration:none; color:inherit; }
     .m-item:hover{ background: rgba(255,255,255,0.05); }
     .m-dot{ width:8px; height:8px; border-radius:50%; background:#00d2ff; box-shadow: 0 0 8px #00d2ff; }
 
-    .logout-item {
-      margin-top: auto;
+    .logout-item{
       border-top: 1px solid rgba(255,255,255,0.05);
       padding-top: 15px;
       color: #ff4d4d;
+      margin-top: 10px;
     }
-    .logout-dot { background: #ff4d4d; box-shadow: 0 0 8px #ff4d4d; }
+    .logout-dot{ background:#ff4d4d; box-shadow:0 0 8px #ff4d4d; }
 
     .drawerTop{
       display:flex;
@@ -147,26 +171,10 @@
       justify-content:center;
     }
 
-    /* ===== WHATSAPP FAB ===== */
-    .wa-fab{
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      width: 56px;
-      height: 56px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      color: #fff;
-      font-weight: 950;
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.12);
-      z-index: 3000;
+    .waDot{
+      background:#25D366 !important;
+      box-shadow:0 0 8px #25D366 !important;
     }
-    .wa-fab span{ filter: drop-shadow(0 0 6px rgba(0,0,0,.25)); }
   </style>
 </head>
 
@@ -193,6 +201,13 @@
     <a href="security.html" class="m-item"><div class="m-dot"></div><span>Security</span></a>
     <a href="help.html" class="m-item"><div class="m-dot"></div><span>Help</span></a>
 
+    <!-- WhatsApp in sidebar footer -->
+    <a class="m-item" style="margin-top:auto;"
+       href="https://wa.me/96170385398?text=Hello%20Houssein%20I%20need%20Help"
+       target="_blank" rel="noopener noreferrer">
+      <div class="m-dot waDot"></div><span>WhatsApp Support</span>
+    </a>
+
     <a href="login.html" class="m-item logout-item"><div class="m-dot logout-dot"></div><span>Logout</span></a>
   </aside>
 
@@ -202,8 +217,7 @@
         <div class="menu-trigger" id="menuBtn">☰</div>
         <div class="wallet-pill">
           <span class="star-icon">★</span>
-          <!-- balance id -->
-          <span class="balance-text" id="balanceText">0.00 🇱🇧</span>
+          <span class="balance-text" id="balanceText">0.00 $</span>
           <button class="add-fund-btn" onclick="location.href='add-credit.html'">+</button>
         </div>
       </div>
@@ -228,39 +242,40 @@
     </div>
 
     <div class="search-box">
-      <!-- search id -->
-      <input id="serviceSearch" type="text" placeholder="Search for services...">
+      <input id="serviceSearch" type="text" placeholder="Search products...">
     </div>
 
+    <div id="searchResults"></div>
+
     <section class="grid" id="serviceGrid">
-      <a href="accounts.html" class="neon-tile" data-name="accounts" style="text-decoration: none; color: inherit;">
-        <img src="assets/accounts.png">
+      <!-- All go to account.html -->
+      <a href="account.html?category=Accounts" class="neon-tile">
+        <img src="assets/accounts.png" alt="Accounts">
         <div class="tile-label">Accounts</div>
       </a>
 
-      <a href="games.html" class="neon-tile" data-name="games" style="text-decoration: none; color: inherit;">
-        <img src="assets/games.png">
+      <a href="account.html?category=Games" class="neon-tile">
+        <img src="assets/games.png" alt="Games">
         <div class="tile-label">Games</div>
       </a>
 
-      <a href="giftcards.html" class="neon-tile" data-name="gift cards" style="text-decoration: none; color: inherit;">
-        <img src="assets/giftcards.png">
+      <!-- NEW: Phone recharge -->
+      <a href="account.html?category=Phone%20recharge" class="neon-tile">
+        <img src="assets/phone-recharge.png" alt="Phone recharge">
+        <div class="tile-label">Phone recharge</div>
+      </a>
+
+      <a href="account.html?category=Gift%20Cards" class="neon-tile">
+        <img src="assets/giftcards.png" alt="Gift Cards">
         <div class="tile-label">Gift Cards</div>
       </a>
 
-      <a href="apps.html" class="neon-tile" data-name="apps" style="text-decoration: none; color: inherit;">
-        <img src="assets/apps.png">
+      <a href="account.html?category=Apps" class="neon-tile">
+        <img src="assets/apps.png" alt="Apps">
         <div class="tile-label">Apps</div>
       </a>
     </section>
   </main>
-
-  <!-- WhatsApp button (bottom right) with message -->
-  <a class="wa-fab"
-     href="https://wa.me/96170385398?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%20%D8%A8%D8%AF%D9%8A%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9"
-     target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-    <span>WA</span>
-  </a>
 
   <script>
     // ===== Drawer =====
@@ -284,24 +299,14 @@
       slider.style.transform = `translateX(-${currentSlide * 33.333}%)`;
     }, 4000);
 
-    // ===== Search Logic (filters tiles) =====
-    const sInput = document.getElementById("serviceSearch");
-    const tiles = Array.from(document.querySelectorAll(".neon-tile"));
-    if (sInput) {
-      sInput.addEventListener("input", () => {
-        const q = sInput.value.trim().toLowerCase();
-        tiles.forEach(t => {
-          const name = (t.getAttribute("data-name") || t.textContent || "").toLowerCase();
-          t.style.display = name.includes(q) ? "" : "none";
-        });
-      });
-    }
-
-    // ===== Supabase Balance =====
+    // ===== Supabase =====
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+    // ===== Balance =====
     async function loadBalance() {
       const el = document.getElementById("balanceText");
       if (!el) return;
@@ -324,8 +329,84 @@
         el.textContent = "0.00 🇱🇧";
       }
     }
-
     loadBalance();
+
+    // ===== Product Search (Supabase) =====
+    const searchInput = document.getElementById("serviceSearch");
+    const searchResults = document.getElementById("searchResults");
+    let tmr = null;
+
+    function openProduct(p){
+      // all products go to account.html
+      location.href = `account.html?id=${encodeURIComponent(p.id)}`;
+    }
+
+    async function searchProducts(q){
+      const query = (q || "").trim();
+      if(query.length < 2){
+        searchResults.style.display = "none";
+        searchResults.innerHTML = "";
+        return;
+      }
+
+      const { data, error } = await sb
+        .from("products_with_min_price")
+        .select("id,title,category,min_price")
+        .eq("active", true)
+        .ilike("title", `%${query}%`)
+        .limit(10);
+
+      if(error){
+        searchResults.style.display = "block";
+        searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">Error</div><div class="sr-cat">${esc(error.message)}</div></div></div>`;
+        return;
+      }
+
+      if(!data || data.length === 0){
+        searchResults.style.display = "block";
+        searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">No results</div><div class="sr-cat">Try another word</div></div></div>`;
+        return;
+      }
+
+      searchResults.style.display = "block";
+      searchResults.innerHTML = data.map(p=>{
+        const pr = Number(p.min_price || 0);
+        return `
+          <div class="sr-item" data-id="${esc(p.id)}">
+            <div>
+              <div class="sr-title">${esc(p.title)}</div>
+              <div class="sr-cat">${esc(p.category || "")}</div>
+            </div>
+            <div class="sr-price">${pr ? "$"+pr.toFixed(2) : ""}</div>
+          </div>
+        `;
+      }).join("");
+
+      Array.from(searchResults.querySelectorAll(".sr-item")).forEach(el=>{
+        el.onclick = ()=>{
+          const id = el.getAttribute("data-id");
+          const p = data.find(x=>String(x.id)===String(id));
+          if(p) openProduct(p);
+        };
+      });
+    }
+
+    if(searchInput){
+      searchInput.addEventListener("input", ()=>{
+        clearTimeout(tmr);
+        tmr = setTimeout(()=> searchProducts(searchInput.value), 250);
+      });
+
+      // hide results when user clears
+      searchInput.addEventListener("blur", ()=>{
+        setTimeout(()=>{
+          if(!searchInput.value.trim()){
+            searchResults.style.display = "none";
+            searchResults.innerHTML = "";
+          }
+        }, 200);
+      });
+    }
   </script>
 </body>
 </html>
