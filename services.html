@@ -114,29 +114,34 @@
 <body>
   <div class="overlay" id="overlay"></div>
 
-  <aside class="drawer" id="drawer">
+ <aside class="drawer" id="drawer">
     <div class="user-sec">
       <div class="avatar">👤</div>
       <div style="font-weight: 900; font-size: 18px;">Houssein Baroud</div>
     </div>
+    
     <div class="m-item" onclick="location.href='index.html'"><div class="m-dot"></div><span>Home</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>Add Credit</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>My Payments</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>My Orders</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>Security</span></div>
-    <div class="m-item"><div class="m-dot"></div><span>About Us</span></div>
-    <div class="m-item" style="margin-top: 30px; opacity: 0.6;"><div class="m-dot" style="background:#ff4d4d; box-shadow:none;"></div><span style="color:#ff4d4d;">Logout</span></div>
+    <div class="m-item" onclick="location.href='add-credit.html'"><div class="m-dot"></div><span>Add Credit</span></div>
+    <div class="m-item" onclick="location.href='payments.html'"><div class="m-dot"></div><span>My Payments</span></div>
+    <div class="m-item" onclick="location.href='orders.html'"><div class="m-dot"></div><span>My Orders</span></div>
+    <div class="m-item" onclick="location.href='security.html'"><div class="m-dot"></div><span>Security</span></div>
+    <div class="m-item" onclick="location.href='about.html'"><div class="m-dot"></div><span>About Us</span></div>
+    
+    <div class="m-item" style="margin-top: 30px; opacity: 0.6;" onclick="location.href='logout.html'">
+      <div class="m-dot" style="background:#ff4d4d; box-shadow:none;"></div>
+      <span style="color:#ff4d4d;">Logout</span>
+    </div>
   </aside>
 
   <main class="wrap">
     <div class="topbar">
       <div class="topbar-left">
         <div class="menu-trigger" id="menuBtn">☰</div>
-        <div class="wallet-pill">
-          <span class="star-icon">★</span>
-          <span class="balance-text">0.00 🇱🇧</span>
-          <span class="add-fund">⊕</span>
-        </div>
+       <div class="wallet-pill">
+  <span class="star-icon">★</span>
+  <span class="balance-text">0.00 🇱🇧</span>
+  <span class="add-fund" onclick="location.href='add-credit.html'" style="cursor:pointer;">⊕</span>
+</div>
       </div>
       <div class="brand-title">BAROUD</div>
     </div>
