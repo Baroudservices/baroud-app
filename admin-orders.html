@@ -25,7 +25,7 @@
     padding:10px;
     outline:none;
   }
-  textarea{ width:100%; min-height:90px; resize:vertical; }
+  textarea{ width:100%; min-height:120px; resize:vertical; }
 
   .btn{
     border:0; cursor:pointer; padding:12px 14px; border-radius:14px;
@@ -34,6 +34,9 @@
   .btn2{
     border:1px solid rgba(255,255,255,.12);
     background:rgba(255,255,255,.06);
+  }
+  .btnDanger{
+    background:linear-gradient(90deg,#ef4444,#b91c1c);
   }
   .empty{ opacity:.7; text-align:center; margin-top:40px; }
 
@@ -48,6 +51,55 @@
   .kv:last-child{ border-bottom:0; }
   .k{ opacity:.7; font-size:12px; font-weight:800; }
   .v{ font-size:12px; font-weight:900; text-align:right; max-width:65%; word-break:break-word; }
+
+  .chipRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+    font-weight:900;
+    font-size:12px;
+    cursor:pointer;
+    user-select:none;
+  }
+
+  /* Modal */
+  .modal{
+    position:fixed; inset:0;
+    background: rgba(0,0,0,.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:99999;
+  }
+  .modalCard{
+    width:min(720px,100%);
+    background: rgba(12, 16, 24, 0.98);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;
+    padding:16px;
+  }
+  .mTitle{ font-weight:950; font-size:16px; margin-bottom:10px; }
+  .mSmall{ opacity:.7; font-weight:800; font-size:12px; margin-top:6px; }
+  .mErr{ color:#fca5a5; font-weight:900; font-size:12px; margin-top:8px; min-height:16px; }
+  .mBtns{ display:flex; gap:10px; margin-top: 12px; }
+  .mBtn{
+    flex:1;
+    border:0;
+    cursor:pointer;
+    padding:12px 14px;
+    border-radius:14px;
+    font-weight:950;
+    color:#fff;
+    background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+  }
+  .mBtn.secondary{
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.10);
+  }
 </style>
 </head>
 
@@ -65,6 +117,25 @@
 
   <div id="list"></div>
   <div id="empty" class="empty" style="display:none">No orders</div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal" id="replyModal">
+  <div class="modalCard">
+    <div class="mTitle" id="rmTitle">Admin Reply</div>
+    <div class="mSmall" id="rmMeta"></div>
+
+    <div style="margin-top:12px;">
+      <textarea id="rmText" placeholder="Write details / delivery info..."></textarea>
+    </div>
+
+    <div class="mErr" id="rmErr"></div>
+
+    <div class="mBtns">
+      <button class="mBtn secondary" id="rmCancel">Cancel</button>
+      <button class="mBtn" id="rmSave">Save Reply</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -87,10 +158,8 @@ function pickDetails(o){
     ["duration","Duration"],
     ["note","Note"],
     ["plan_label","Plan"],
-    ["title","Title"],
     ["product_title","Product"],
-    ["alfa_amount","Amount"],
-    ["mtc_amount","Amount"],
+    ["title","Title"],
   ];
 
   const out = [];
@@ -102,7 +171,11 @@ function pickDetails(o){
 
   // fallback: أي حقول إضافية (غير الأساسية)
   if(out.length === 0 && o){
-    const skip = new Set(["id","user_id","product_id","price","status","delivery_status","admin_reply","created_at","admin_reply_at","refunded_at","refunded_amount","refunded_txn"]);
+    const skip = new Set([
+      "id","user_id","product_id","price","status","delivery_status",
+      "admin_reply","created_at","admin_reply_at","refunded_at",
+      "refunded_amount","refunded_txn"
+    ]);
     Object.keys(o).forEach(k=>{
       if(skip.has(k)) return;
       const val = o[k];
@@ -116,6 +189,10 @@ function pickDetails(o){
   return out;
 }
 
+let ordersCache = [];
+let titleById = {};
+let currentReplyOrderId = null;
+
 async function loadOrders(){
   const listEl = document.getElementById("list");
   const emptyEl = document.getElementById("empty");
@@ -125,7 +202,6 @@ async function loadOrders(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session) { location.replace("login.html"); return; }
 
-  // 1) fetch orders (كل الأعمدة)
   const { data: orders, error: e1 } = await sb
     .from("orders")
     .select("*")
@@ -136,32 +212,43 @@ async function loadOrders(){
     return;
   }
 
-  if(!orders || orders.length === 0){
+  ordersCache = toArr(orders);
+
+  if(!ordersCache.length){
     emptyEl.style.display = "block";
     return;
   }
 
-  // 2) map product titles
-  const ids = [...new Set(toArr(orders).map(o => o.product_id).filter(Boolean))];
-  let titleById = {};
+  // map product titles
+  const ids = [...new Set(ordersCache.map(o => o.product_id).filter(Boolean))];
+  titleById = {};
   if(ids.length){
     const { data: prods } = await sb.from("products").select("id,title").in("id", ids);
     toArr(prods).forEach(p => titleById[p.id] = p.title);
   }
 
-  // 3) search filter
+  renderOrders();
+}
+
+function renderOrders(){
+  const listEl = document.getElementById("list");
+  const emptyEl = document.getElementById("empty");
+
   const term = (document.getElementById("q").value || "").trim().toLowerCase();
   const filtered = term
-    ? orders.filter(o => String(o.id).toLowerCase().includes(term) || String(o.user_id).toLowerCase().includes(term))
-    : orders;
+    ? ordersCache.filter(o => String(o.id).toLowerCase().includes(term) || String(o.user_id).toLowerCase().includes(term))
+    : ordersCache;
 
   if(!filtered.length){
+    listEl.innerHTML = "";
     emptyEl.style.display = "block";
     return;
   }
 
+  emptyEl.style.display = "none";
+
   listEl.innerHTML = filtered.map(o => {
-    const title = titleById[o.product_id] || o.title || "Product";
+    const title = titleById[o.product_id] || o.product_title || o.title || "Product";
     const status = (o.status || "pending").toLowerCase();
     const delivery = (o.delivery_status || "pending").toLowerCase();
     const reply = o.admin_reply || "";
@@ -169,7 +256,7 @@ async function loadOrders(){
     const details = pickDetails(o);
 
     const detailsHtml = details.length ? `
-      <div class="details">
+      <div class="details" id="details_${esc(o.id)}" style="display:none;">
         ${details.map(([k,v])=>`
           <div class="kv">
             <div class="k">${esc(k)}</div>
@@ -178,6 +265,8 @@ async function loadOrders(){
         `).join("")}
       </div>
     ` : "";
+
+    const replyPreview = reply ? reply.slice(0, 60) + (reply.length > 60 ? "..." : "") : "No reply yet";
 
     return `
       <div class="card" id="card_${esc(o.id)}">
@@ -188,6 +277,12 @@ async function loadOrders(){
             <div class="small">User: ${esc(o.user_id)}</div>
           </div>
           <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
+        </div>
+
+        <div class="chipRow">
+          <div class="chip" onclick="toggleDetails(${esc(o.id)})">📦 Details</div>
+          <div class="chip" onclick="openReplyModal(${esc(o.id)})">💬 Admin Reply</div>
+          <div class="chip" style="opacity:.75;cursor:default;">${esc(replyPreview)}</div>
         </div>
 
         ${detailsHtml}
@@ -211,20 +306,75 @@ async function loadOrders(){
             </select>
           </div>
 
-          <div style="flex:1; min-width:240px">
-            <div class="small">Admin Reply</div>
-            <textarea id="reply_${esc(o.id)}" placeholder="Write details / delivery info...">${esc(reply)}</textarea>
-          </div>
-
-          <div style="min-width:180px">
+          <div style="min-width:220px">
             <button class="btn" onclick="saveOrder(${esc(o.id)})">Save</button>
             <div id="msg_${esc(o.id)}" class="small" style="margin-top:8px"></div>
           </div>
         </div>
+
+        <input type="hidden" id="reply_${esc(o.id)}" value="${esc(reply)}" />
       </div>
     `;
   }).join("");
 }
+
+function toggleDetails(orderId){
+  const el = document.getElementById(`details_${orderId}`);
+  if(!el) return;
+  el.style.display = (el.style.display === "none" || !el.style.display) ? "block" : "none";
+}
+
+/* Reply Modal Logic */
+const replyModal = document.getElementById("replyModal");
+const rmTitle = document.getElementById("rmTitle");
+const rmMeta = document.getElementById("rmMeta");
+const rmText = document.getElementById("rmText");
+const rmErr  = document.getElementById("rmErr");
+const rmCancel = document.getElementById("rmCancel");
+const rmSave = document.getElementById("rmSave");
+
+function closeReplyModal(){
+  replyModal.style.display = "none";
+  currentReplyOrderId = null;
+  rmErr.textContent = "";
+}
+
+replyModal.addEventListener("click", (e)=>{ if(e.target === replyModal) closeReplyModal(); });
+rmCancel.onclick = closeReplyModal;
+
+function openReplyModal(orderId){
+  currentReplyOrderId = orderId;
+
+  const titleEl = document.querySelector(`#card_${orderId} .name`);
+  const userLine = document.querySelector(`#card_${orderId} .small:nth-child(3)`);
+  const replyHidden = document.getElementById(`reply_${orderId}`);
+
+  rmTitle.textContent = "Admin Reply";
+  rmMeta.textContent = `Order #${orderId}` + (userLine ? ` • ${userLine.textContent}` : "");
+  rmText.value = replyHidden ? (replyHidden.value || "") : "";
+  rmErr.textContent = "";
+
+  replyModal.style.display = "flex";
+}
+
+rmSave.onclick = ()=>{
+  if(!currentReplyOrderId) return;
+  const hidden = document.getElementById(`reply_${currentReplyOrderId}`);
+  if(hidden) hidden.value = rmText.value || "";
+  closeReplyModal();
+
+  // update preview without reload
+  const card = document.getElementById(`card_${currentReplyOrderId}`);
+  if(card){
+    // reload all for simplicity (keeps UI consistent)
+    // lightweight: just re-render
+    const idx = ordersCache.findIndex(o => String(o.id) === String(currentReplyOrderId));
+    if(idx >= 0){
+      ordersCache[idx].admin_reply = rmText.value || "";
+    }
+    renderOrders();
+  }
+};
 
 async function saveOrder(orderId){
   const msg = document.getElementById(`msg_${orderId}`);
@@ -232,11 +382,28 @@ async function saveOrder(orderId){
 
   const status = document.getElementById(`status_${orderId}`).value;
   const delivery_status = document.getElementById(`delivery_${orderId}`).value;
-  const admin_reply = document.getElementById(`reply_${orderId}`).value;
+  const admin_reply = (document.getElementById(`reply_${orderId}`)?.value || "").trim();
+
+  // Confirm when rejecting
+  if(delivery_status === "rejected"){
+    const ok = confirm(
+      "Delivery is REJECTED.\n\n✅ If DB trigger/refund function is enabled, user balance will be refunded automatically.\n\nContinue?"
+    );
+    if(!ok){
+      msg.textContent = "Cancelled.";
+      return;
+    }
+  }
+
+  // admin_reply_at if reply exists (optional)
+  const payload = { status, delivery_status, admin_reply };
+  if(admin_reply){
+    payload.admin_reply_at = new Date().toISOString();
+  }
 
   const { error } = await sb
     .from("orders")
-    .update({ status, delivery_status, admin_reply })
+    .update(payload)
     .eq("id", orderId);
 
   if(error){
@@ -244,8 +411,20 @@ async function saveOrder(orderId){
     return;
   }
 
-  msg.textContent = "Saved ✅";
+  msg.textContent = delivery_status === "rejected"
+    ? "Saved ✅ (Rejected) — refund should be auto-processed by DB."
+    : "Saved ✅";
+
+  // update cache
+  const idx = ordersCache.findIndex(o => String(o.id) === String(orderId));
+  if(idx >= 0){
+    ordersCache[idx].status = status;
+    ordersCache[idx].delivery_status = delivery_status;
+    ordersCache[idx].admin_reply = admin_reply;
+  }
 }
+
+document.getElementById("q").addEventListener("input", ()=> renderOrders());
 
 loadOrders();
 </script>
