@@ -1,1 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binance Deposit - Baroud</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; padding:0;}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:#020b14;
+      color:#fff;
+      min-height:100vh;
+      overflow-x:hidden;
+      padding-bottom: 24px;
+    }
+    .wrap{ width: 100%; margin: 0 auto; padding: 14px; max-width: 520px; }
+
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 10px 0; margin-bottom: 12px;
+    }
+    .topbar-left{ display:flex; align-items:center; gap:12px; }
+
+    .back-btn{
+      width:45px; height:45px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      display:flex; align-items:center; justify-content:center;
+      font-size: 22px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      user-select:none;
+    }
+
+    .wallet-pill{
+      display:flex; align-items:center; gap:8px;
+      background: rgba(255,255,255,0.05);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .star-icon{ color:#ffd700; font-size:18px; }
+    .balance-text{ font-weight: 900; font-size: 15px; }
+
+    .brand-title{
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      font-size: 18px;
+      text-transform: uppercase;
+      opacity: .95;
+    }
+
+    .hero{
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .hero h1{ margin:0; font-size: 18px; letter-spacing: .4px; }
+    .hero small{ opacity:.65; font-weight:700; }
+
+    .card{
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    .label{ font-weight:950; font-size:13px; opacity:.9; margin-bottom:8px; }
+    .valueBox{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px;
+      font-weight:950;
+    }
+    .copyBtn{
+      border:0;
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:950;
+      color:#fff;
+      background: rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      white-space:nowrap;
+    }
+
+    .input{
+      width:100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 12px;
+      color:#fff;
+      outline:none;
+      font-weight:900;
+      font-size:14px;
+    }
+
+    .help{ opacity:.7; font-weight:800; font-size:12px; margin-top:8px; }
+
+    .uploadRow{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .fileBtn{
+      flex:1;
+      border:0;
+      cursor:pointer;
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:950;
+      color:#fff;
+      background: rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.10);
+      text-align:center;
+      min-width: 160px;
+    }
+    input[type="file"]{ display:none; }
+
+    .preview{
+      margin-top:10px;
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      overflow:hidden;
+      display:none;
+    }
+    .preview img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
+    .requestBtn{
+      width:100%;
+      margin-top:12px;
+      border:0;
+      cursor:pointer;
+      padding:14px 14px;
+      border-radius:14px;
+      font-weight:950;
+      color:#fff;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      font-size:14px;
+    }
+    .requestBtn:disabled{ opacity:.6; cursor:not-allowed; }
+
+    .msg{
+      margin-top:12px;
+      font-weight:900;
+      font-size:13px;
+      min-height:18px;
+      opacity:.9;
+    }
+    .msg.ok{ color:#86efac; }
+    .msg.err{ color:#fca5a5; }
+
+    .smallNote{
+      margin-top:10px;
+      opacity:.65;
+      font-weight:800;
+      font-size:12px;
+      line-height:1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="back-btn" id="backBtn">←</div>
+        <div class="wallet-pill">
+          <span class="star-icon">★</span>
+          <span class="balance-text" id="balanceText">0.00 🇱🇧</span>
+        </div>
+      </div>
+      <div class="brand-title">BAROUD</div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <h1>Binance Deposit</h1>
+        <small>Send money then upload receipt</small>
+      </div>
+      <div style="opacity:.9; font-weight:950;">🟡</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Transfer number</div>
+      <div class="valueBox">
+        <div id="transferNo">300169104</div>
+        <button class="copyBtn" id="copyBtn">Copy</button>
+      </div>
+      <div class="smallNote">
+        حوّل على هالرقم (Binance) وبعدين ارفع صورة الوصل واضغط Request.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Amount ($)</div>
+      <input id="amountInput" class="input" inputmode="decimal" placeholder="مثال: 10" />
+
+      <div style="height:12px;"></div>
+
+      <div class="label">Receipt image</div>
+      <div class="uploadRow">
+        <label class="fileBtn" for="receiptFile" id="pickBtn">Choose image</label>
+        <div style="opacity:.75; font-weight:900; font-size:12px;" id="fileName">No file</div>
+      </div>
+      <input id="receiptFile" type="file" accept="image/*" />
+
+      <div class="preview" id="previewBox">
+        <img id="previewImg" alt="receipt preview" />
+      </div>
+
+      <button class="requestBtn" id="requestBtn">Request</button>
+      <div class="msg" id="msg"></div>
+
+      <div class="smallNote">
+        * الطلب بيتسجل Pending بالإدارة لحتى ينقبل ويزيد الرصيد.<br/>
+        * لازم تكون عامل Login.
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ===== Supabase =====
+    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ✅ غيّر اسم الباكيت إذا عندك مختلف
+    const RECEIPTS_BUCKET = "receipts";
+
+    // ثابت
+    const TRANSFER_NUMBER = "300169104";
+    const METHOD = "binance";
+
+    // UI
+    const balanceText = document.getElementById("balanceText");
+    const backBtn = document.getElementById("backBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const msg = document.getElementById("msg");
+
+    const amountInput = document.getElementById("amountInput");
+    const receiptFile = document.getElementById("receiptFile");
+    const fileName = document.getElementById("fileName");
+    const previewBox = document.getElementById("previewBox");
+    const previewImg = document.getElementById("previewImg");
+    const requestBtn = document.getElementById("requestBtn");
+
+    backBtn.onclick = () => {
+      if (history.length > 1) history.back();
+      else location.href = "services.html";
+    };
+
+    function setMsg(text, type){
+      msg.textContent = text || "";
+      msg.className = "msg" + (type ? (" " + type) : "");
+    }
+
+    function parseAmount(v){
+      const x = Number(String(v || "").replace(/,/g,".").replace(/[^\d.]/g,""));
+      return isFinite(x) ? x : 0;
+    }
+
+    async function loadBalance() {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { balanceText.textContent = "0.00 🇱🇧"; return; }
+
+        const { data, error } = await sb
+          .from("profiles")
+          .select("balance")
+          .eq("id", session.user.id)
+          .single();
+
+        if (error) { balanceText.textContent = "0.00 🇱🇧"; return; }
+        balanceText.textContent = `${Number(data?.balance || 0).toFixed(2)} 🇱🇧`;
+      } catch {
+        balanceText.textContent = "0.00 🇱🇧";
+      }
+    }
+    loadBalance();
+
+    // Copy transfer number
+    copyBtn.onclick = async () => {
+      try{
+        await navigator.clipboard.writeText(TRANSFER_NUMBER);
+        setMsg("Copied ✅", "ok");
+        setTimeout(()=> setMsg(""), 1200);
+      }catch{
+        setMsg("Copy failed", "err");
+      }
+    };
+
+    // Preview selected image
+    receiptFile.addEventListener("change", () => {
+      const f = receiptFile.files?.[0];
+      if(!f){
+        fileName.textContent = "No file";
+        previewBox.style.display = "none";
+        previewImg.src = "";
+        return;
+      }
+      fileName.textContent = f.name;
+      previewImg.src = URL.createObjectURL(f);
+      previewBox.style.display = "block";
+    });
+
+    async function uploadReceiptImage(userId, file){
+      // اسم ملف مرتب + فريد
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${userId}/${Date.now()}_${Math.random().toString(16).slice(2)}.${ext}`;
+
+      const { data, error } = await sb
+        .storage
+        .from(RECEIPTS_BUCKET)
+        .upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type || "image/jpeg"
+        });
+
+      if(error) throw new Error("Upload failed: " + error.message);
+
+      // رابط عام (إذا الباكيت Public)
+      const pub = sb.storage.from(RECEIPTS_BUCKET).getPublicUrl(data.path);
+      const publicUrl = pub?.data?.publicUrl || null;
+
+      return { path: data.path, publicUrl };
+    }
+
+    async function createDepositRow({ userId, amount, receiptPath, receiptUrl }){
+      // inserts into deposits
+      const payload = {
+        user_id: userId,
+        method: METHOD,
+        amount: amount,
+        receipt_path: receiptPath || null,
+        receipt_url: receiptUrl || null,
+        transfer_number: TRANSFER_NUMBER,
+        status: "pending"
+      };
+
+      const { data, error } = await sb
+        .from("deposits")
+        .insert(payload)
+        .select("id")
+        .single();
+
+      if(error) throw new Error("DB insert failed: " + error.message);
+
+      return data?.id;
+    }
+
+    requestBtn.onclick = async () => {
+      setMsg("");
+
+      const amt = parseAmount(amountInput.value);
+      const f = receiptFile.files?.[0];
+
+      if(amt <= 0){
+        setMsg("Please enter a valid amount.", "err");
+        return;
+      }
+      if(!f){
+        setMsg("Please upload receipt image.", "err");
+        return;
+      }
+
+      requestBtn.disabled = true;
+      requestBtn.textContent = "Sending...";
+
+      try{
+        const { data: { session } } = await sb.auth.getSession();
+        if(!session){
+          location.replace("login.html");
+          return;
+        }
+
+        // Upload image
+        const up = await uploadReceiptImage(session.user.id, f);
+
+        // Create deposit row
+        const depId = await createDepositRow({
+          userId: session.user.id,
+          amount: amt,
+          receiptPath: up.path,
+          receiptUrl: up.publicUrl
+        });
+
+        setMsg(`Request sent ✅ (Deposit #${depId})`, "ok");
+
+        // reset
+        amountInput.value = "";
+        receiptFile.value = "";
+        fileName.textContent = "No file";
+        previewBox.style.display = "none";
+        previewImg.src = "";
+
+        await loadBalance();
+      }catch(err){
+        setMsg(String(err?.message || err), "err");
+      }finally{
+        requestBtn.disabled = false;
+        requestBtn.textContent = "Request";
+      }
+    };
+  </script>
+</body>
+</html>
