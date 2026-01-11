@@ -12,10 +12,11 @@
   .back{ padding:10px 14px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); cursor:pointer; text-decoration: none; color: white; }
   h2{margin:0;font-size:22px}
   .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
-  .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
   .name{font-weight:900}
-  .small{opacity:.65;font-size:12px}
-  .price{font-weight:900;color:#38bdf8}
+  .small{opacity:.65;font-size:12px; line-height:1.35}
+  .price{font-weight:900;color:#38bdf8; font-size:18px}
+
   select, textarea, input{
     background:rgba(0,0,0,.25);
     border:1px solid rgba(255,255,255,.12);
@@ -25,6 +26,7 @@
     outline:none;
   }
   textarea{ width:100%; min-height:90px; resize:vertical; }
+
   .btn{
     border:0; cursor:pointer; padding:12px 14px; border-radius:14px;
     font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff);
@@ -34,6 +36,18 @@
     background:rgba(255,255,255,.06);
   }
   .empty{ opacity:.7; text-align:center; margin-top:40px; }
+
+  .details{
+    margin-top:12px;
+    background:rgba(0,0,0,.18);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    padding:12px;
+  }
+  .kv{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+  .kv:last-child{ border-bottom:0; }
+  .k{ opacity:.7; font-size:12px; font-weight:800; }
+  .v{ font-size:12px; font-weight:900; text-align:right; max-width:65%; word-break:break-word; }
 </style>
 </head>
 
@@ -61,6 +75,47 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function toArr(x){ return Array.isArray(x) ? x : []; }
 
+function pickDetails(o){
+  const candidates = [
+    ["phone_number","Phone"],
+    ["transfer_number","Phone"],
+    ["number","Phone"],
+    ["player_id","Player ID"],
+    ["player_name","Player Name"],
+    ["account_email","Email"],
+    ["account_password","Password"],
+    ["duration","Duration"],
+    ["note","Note"],
+    ["plan_label","Plan"],
+    ["title","Title"],
+    ["product_title","Product"],
+    ["alfa_amount","Amount"],
+    ["mtc_amount","Amount"],
+  ];
+
+  const out = [];
+  candidates.forEach(([key,label])=>{
+    if(o && o[key] !== null && o[key] !== undefined && String(o[key]).trim() !== ""){
+      out.push([label, String(o[key])]);
+    }
+  });
+
+  // fallback: أي حقول إضافية (غير الأساسية)
+  if(out.length === 0 && o){
+    const skip = new Set(["id","user_id","product_id","price","status","delivery_status","admin_reply","created_at","admin_reply_at","refunded_at","refunded_amount","refunded_txn"]);
+    Object.keys(o).forEach(k=>{
+      if(skip.has(k)) return;
+      const val = o[k];
+      if(val === null || val === undefined) return;
+      const s = String(val).trim();
+      if(!s) return;
+      out.push([k, s]);
+    });
+  }
+
+  return out;
+}
+
 async function loadOrders(){
   const listEl = document.getElementById("list");
   const emptyEl = document.getElementById("empty");
@@ -70,10 +125,10 @@ async function loadOrders(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session) { location.replace("login.html"); return; }
 
-  // 1) fetch orders
+  // 1) fetch orders (كل الأعمدة)
   const { data: orders, error: e1 } = await sb
     .from("orders")
-    .select("id,user_id,product_id,price,status,delivery_status,admin_reply,created_at")
+    .select("*")
     .order("created_at", { ascending:false });
 
   if(e1){
@@ -94,7 +149,7 @@ async function loadOrders(){
     toArr(prods).forEach(p => titleById[p.id] = p.title);
   }
 
-  // 3) simple search filter
+  // 3) search filter
   const term = (document.getElementById("q").value || "").trim().toLowerCase();
   const filtered = term
     ? orders.filter(o => String(o.id).toLowerCase().includes(term) || String(o.user_id).toLowerCase().includes(term))
@@ -106,21 +161,36 @@ async function loadOrders(){
   }
 
   listEl.innerHTML = filtered.map(o => {
-    const title = titleById[o.product_id] || "Product";
+    const title = titleById[o.product_id] || o.title || "Product";
     const status = (o.status || "pending").toLowerCase();
     const delivery = (o.delivery_status || "pending").toLowerCase();
     const reply = o.admin_reply || "";
+    const dt = o.created_at ? new Date(o.created_at).toLocaleString() : "";
+    const details = pickDetails(o);
+
+    const detailsHtml = details.length ? `
+      <div class="details">
+        ${details.map(([k,v])=>`
+          <div class="kv">
+            <div class="k">${esc(k)}</div>
+            <div class="v">${esc(v)}</div>
+          </div>
+        `).join("")}
+      </div>
+    ` : "";
 
     return `
       <div class="card" id="card_${esc(o.id)}">
         <div class="row">
           <div>
             <div class="name">${esc(title)}</div>
-            <div class="small">Order #${esc(o.id)} • ${new Date(o.created_at).toLocaleString()}</div>
+            <div class="small">Order #${esc(o.id)} • ${esc(dt)}</div>
             <div class="small">User: ${esc(o.user_id)}</div>
           </div>
           <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
         </div>
+
+        ${detailsHtml}
 
         <div class="row" style="margin-top:12px">
           <div>
