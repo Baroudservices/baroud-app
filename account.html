@@ -165,7 +165,7 @@
   <div class="wrap">
     <div class="top">
       <div class="leftTop">
-        <a href="javascript:history.back()"" class="back">←</a>
+        <a href="javascript:history.back()" class="back">←</a>
         <h2>Account</h2>
       </div>
 
@@ -205,13 +205,11 @@
         <select id="planSelect"></select>
       </div>
 
-      <!-- ✅ Note واحدة فقط -->
       <div style="margin-bottom:10px">
         <label>Customer Note (optional)</label>
         <textarea id="customerNote" placeholder="Write any extra details..."></textarea>
       </div>
 
-      <!-- ✅ Dynamic Fields -->
       <div id="dynamic-fields" class="grid2" style="display:none; margin-top:8px">
         <div id="field-player-id" style="display:none">
           <label id="id-label">PLAYER ID</label>
@@ -294,6 +292,9 @@
   let currentProduct = null;
   let selectedPlan = null;
 
+  // ✅ realtime channel للـ plans
+  let plansChannel = null;
+
   function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function getId(){ return new URL(location.href).searchParams.get("id"); }
 
@@ -318,18 +319,25 @@
     return { product: p, features: f || [] };
   }
 
+  // ✅ Plans from admin-prices (product_plan_prices)
   async function loadPlans(productId){
+    // مهم: جدولك ما فيه sort، فرتبنا على price وبعدين id
     const { data, error } = await sb
       .from("product_plan_prices")
-      .select("*")
+      .select("id, product_id, plan_key, plan_label, plan_name, price, active")
       .eq("product_id", productId)
       .eq("active", true)
-      .order("sort", { ascending: true });
+      .order("price", { ascending: true })
+      .order("id", { ascending: true });
 
-    if(error) return [];
+    if(error){
+      console.log("loadPlans error:", error);
+      return [];
+    }
+
     return (data || []).map(r => ({
-      key: r.plan_key,
-      label: r.plan_label || r.plan_key,
+      key: r.plan_key || String(r.id),
+      label: r.plan_label || r.plan_name || r.plan_key || ("Plan " + r.id),
       price: Number(r.price || 0)
     }));
   }
@@ -457,6 +465,42 @@
       priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
       applyDynamicFields();
     };
+  }
+
+  // ✅ Realtime subscribe: أي تعديل بالـ admin-prices ينعكس فوراً
+  function subscribePlansRealtime(productId){
+    try{
+      if(plansChannel) sb.removeChannel(plansChannel);
+    }catch(e){}
+
+    plansChannel = sb
+      .channel("plans_" + productId)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "product_plan_prices",
+          filter: `product_id=eq.${productId}`
+        },
+        async () => {
+          // reload plans + keep selected if still exists
+          const prevKey = selectedPlan?.key;
+          const plans = await loadPlans(productId);
+          renderPlans(plans);
+
+          if(prevKey){
+            const still = PLAN_LIST.find(x => x.key === prevKey);
+            if(still){
+              selectedPlan = still;
+              planSelect.value = prevKey;
+              priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
+              applyDynamicFields();
+            }
+          }
+        }
+      )
+      .subscribe();
   }
 
   async function loadMyOrdersMenu(){
@@ -619,12 +663,17 @@
 
       const plans = await loadPlans(product.id);
       renderPlans(plans);
+
+      // ✅ subscribe realtime بعد ما نعرف productId
+      subscribePlansRealtime(product.id);
+
     }catch(err){
       titleEl.textContent = "Error";
       alert(err?.message || String(err));
     }
   })();
 </script>
+
   <script src="app-ui.js?v=3"></script>
 </body>
 </html>
