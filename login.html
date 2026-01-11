@@ -41,7 +41,7 @@
 
     @media (min-width: 992px){
       .wrap{ max-width:1200px; }
-      .card{ max-width:900px; } 
+      .card{ max-width:900px; }
       h1{ font-size:52px; }
     }
 
@@ -116,7 +116,6 @@
 
 <body>
 
-  <!-- ✅ هون الإضافة الوحيدة -->
   <main class="wrap">
 
     <div class="card">
@@ -181,6 +180,7 @@
       loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
     }
 
+    // ✅ إذا المستخدم عامل Login مسبقاً
     (async ()=>{
       try{
         const { data } = await sb.auth.getSession();
@@ -227,43 +227,10 @@
       }
     }
 
-    async function doRegister(){
-      hideMsg();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("pass").value;
-
-      if(!email || !password){
-        showMsg("Fill email and password.");
-        return;
-      }
-      if(password.length < 6){
-        showMsg("Password must be at least 6 characters.");
-        return;
-      }
-
-      setLoading(true, "Creating...");
-
-      try{
-        const { error } = await sb.auth.signUp({
-          email,
-          password,
-          options:{
-            emailRedirectTo:"https://baroudservices.github.io/baroud-app/confirmed.html"
-          }
-        });
-
-        if(error){
-          showMsg(error.message || "Register failed.");
-          return;
-        }
-
-        showMsg("Register successful ✅ Check your email 📧", true);
-
-      }catch(e){
-        showMsg("Network error. Try again.");
-      }finally{
-        setLoading(false);
-      }
+    // ✅ Register صار يحوّل على صفحة التسجيل الجديدة (Create Account)
+    function goRegister(){
+      // غيّر الاسم إذا صفحتك اسمها مختلف
+      location.href = "register.html";
     }
 
     async function doReset(){
@@ -296,7 +263,7 @@
     }
 
     loginBtn.addEventListener("click", doLogin);
-    registerBtn.addEventListener("click", doRegister);
+    registerBtn.addEventListener("click", goRegister);
     resetBtn.addEventListener("click", doReset);
 
     document.getElementById("pass").addEventListener("keydown", e=>{
