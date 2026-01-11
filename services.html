@@ -148,17 +148,15 @@
       display:flex; flex-direction:column;
     }
     .drawer.show{ transform:translateX(0); }
-    .m-item{ display:flex; align-items:center; gap:15px; padding:14px; border-radius:12px; cursor:pointer; text-decoration:none; color:inherit; }
+    .m-item{
+      display:flex; align-items:center; gap:15px;
+      padding:14px; border-radius:12px; cursor:pointer;
+      text-decoration:none; color:inherit;
+      border:0; background:transparent; width:100%;
+      font: inherit;
+    }
     .m-item:hover{ background: rgba(255,255,255,0.05); }
     .m-dot{ width:8px; height:8px; border-radius:50%; background:#00d2ff; box-shadow: 0 0 8px #00d2ff; }
-
-    .logout-item{
-      border-top: 1px solid rgba(255,255,255,0.05);
-      padding-top: 15px;
-      color: #ff4d4d;
-      margin-top: 10px;
-    }
-    .logout-dot{ background:#ff4d4d; box-shadow:0 0 8px #ff4d4d; }
 
     .drawerTop{
       display:flex;
@@ -184,6 +182,15 @@
       background:#25D366 !important;
       box-shadow:0 0 8px #25D366 !important;
     }
+
+    /* Logout style */
+    .logout-item{
+      color:#ff4d4d;
+      margin-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 15px;
+    }
+    .logout-dot{ background:#ff4d4d; box-shadow:0 0 8px #ff4d4d; }
   </style>
 </head>
 
@@ -210,14 +217,17 @@
     <a href="security.html" class="m-item"><div class="m-dot"></div><span>Security</span></a>
     <a href="help.html" class="m-item"><div class="m-dot"></div><span>Help</span></a>
 
-    <!-- WhatsApp in sidebar footer -->
+    <!-- ✅ Logout مباشرة تحت Help -->
+    <button class="m-item logout-item" id="logoutBtn" type="button">
+      <div class="m-dot logout-dot"></div><span>Logout</span>
+    </button>
+
+    <!-- WhatsApp يبقى بالآخر -->
     <a class="m-item" style="margin-top:auto;"
        href="https://wa.me/96170385398?text=Hello%20Houssein%20I%20need%20Help"
        target="_blank" rel="noopener noreferrer">
       <div class="m-dot waDot"></div><span>WhatsApp Support</span>
     </a>
-
-    <a href="login.html" class="m-item logout-item"><div class="m-dot logout-dot"></div><span>Logout</span></a>
   </aside>
 
   <main class="wrap">
@@ -267,7 +277,7 @@
         <div class="tile-label">Games</div>
       </a>
 
-      <!-- Phone recharge (fixed: NO extra 's' line) -->
+      <!-- Phone recharge -->
       <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile wide">
         <img src="assets/phone-recharge.png" alt="Phone recharge">
         <div class="tile-label">Phone recharge</div>
@@ -338,6 +348,45 @@
       }
     }
     loadBalance();
+
+    // ✅ Logout (final fix)
+    async function doLogout(){
+      try{
+        await sb.auth.signOut({ scope: "global" });
+      }catch(e){}
+
+      try{
+        const prefix = "sb-" + "pqrwitolonhfbfwtsnde";
+        const keys = [];
+        for(let i=0;i<localStorage.length;i++){
+          const k = localStorage.key(i);
+          if(!k) continue;
+          if(k.startsWith(prefix) || k.includes("supabase") || k.includes("sb-")){
+            keys.push(k);
+          }
+        }
+        keys.forEach(k=> localStorage.removeItem(k));
+      }catch(e){}
+
+      try{
+        const keys2 = [];
+        for(let i=0;i<sessionStorage.length;i++){
+          const k = sessionStorage.key(i);
+          if(!k) continue;
+          if(k.includes("sb-") || k.includes("supabase")) keys2.push(k);
+        }
+        keys2.forEach(k=> sessionStorage.removeItem(k));
+      }catch(e){}
+
+      location.replace("login.html?logout=1&v=" + Date.now());
+    }
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if(logoutBtn){
+      logoutBtn.addEventListener("click", ()=>{
+        if(confirm("Logout now?")) doLogout();
+      });
+    }
 
     // ===== Product Search (Supabase) =====
     const searchInput = document.getElementById("serviceSearch");
