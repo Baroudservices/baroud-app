@@ -154,6 +154,7 @@
       text-decoration:none; color:inherit;
       border:0; background:transparent; width:100%;
       font: inherit;
+      text-align:left;
     }
     .m-item:hover{ background: rgba(255,255,255,0.05); }
     .m-dot{ width:8px; height:8px; border-radius:50%; background:#00d2ff; box-shadow: 0 0 8px #00d2ff; }
@@ -219,10 +220,9 @@
 
     <!-- ✅ Logout مباشرة تحت Help -->
     <button class="m-item logout-item" id="logoutBtn" type="button">
-  <div class="m-dot logout-dot"></div>
-  <span>Logout</span>
-</button>
-
+      <div class="m-dot logout-dot"></div>
+      <span>Logout</span>
+    </button>
 
     <!-- WhatsApp يبقى بالآخر -->
     <a class="m-item" style="margin-top:auto;"
@@ -279,7 +279,6 @@
         <div class="tile-label">Games</div>
       </a>
 
-      <!-- Phone recharge -->
       <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile wide">
         <img src="assets/phone-recharge.png" alt="Phone recharge">
         <div class="tile-label">Phone recharge</div>
@@ -305,19 +304,29 @@
     const homeExit = document.getElementById("homeExit");
     const drawerClose = document.getElementById("drawerClose");
 
-    menuBtn.onclick = () => { drawer.classList.add("show"); overlay.classList.add("show"); }
-    const closeSidebar = () => { drawer.classList.remove("show"); overlay.classList.remove("show"); }
-    overlay.onclick = closeSidebar;
-    homeExit.onclick = closeSidebar;
-    drawerClose.onclick = closeSidebar;
+    function openSidebar(){
+      drawer.classList.add("show");
+      overlay.classList.add("show");
+    }
+    function closeSidebar(){
+      drawer.classList.remove("show");
+      overlay.classList.remove("show");
+    }
+
+    if(menuBtn) menuBtn.onclick = openSidebar;
+    if(overlay) overlay.onclick = closeSidebar;
+    if(homeExit) homeExit.onclick = closeSidebar;
+    if(drawerClose) drawerClose.onclick = closeSidebar;
 
     // ===== Banner Logic =====
     let currentSlide = 0;
     const slider = document.getElementById("mainSlider");
-    setInterval(() => {
-      currentSlide = (currentSlide + 1) % 3;
-      slider.style.transform = `translateX(-${currentSlide * 33.333}%)`;
-    }, 4000);
+    if(slider){
+      setInterval(() => {
+        currentSlide = (currentSlide + 1) % 3;
+        slider.style.transform = `translateX(-${currentSlide * 33.333}%)`;
+      }, 4000);
+    }
 
     // ===== Supabase =====
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
@@ -351,65 +360,12 @@
     }
     loadBalance();
 
-    // ✅ Logout (final fix)
-    async function doLogout(){
-      try{
-        await sb.auth.signOut({ scope: "global" });
-      }catch(e){}
-
-      try{
-        const prefix = "sb-" + "pqrwitolonhfbfwtsnde";
-        const keys = [];
-        for(let i=0;i<localStorage.length;i++){
-          const k = localStorage.key(i);
-          if(!k) continue;
-          if(k.startsWith(prefix) || k.includes("supabase") || k.includes("sb-")){
-            keys.push(k);
-          }
-        }
-        keys.forEach(k=> localStorage.removeItem(k));
-      }catch(e){}
-
-      try{
-        const keys2 = [];
-        for(let i=0;i<sessionStorage.length;i++){
-          const k = sessionStorage.key(i);
-          if(!k) continue;
-          if(k.includes("sb-") || k.includes("supabase")) keys2.push(k);
-        }
-        keys2.forEach(k=> sessionStorage.removeItem(k));
-      }catch(e){}
-
-      location.replace("login.html?logout=1&v=" + Date.now());
-    }
-
+    // ✅ Logout: signOut + redirect to index.html (بدون أي كود يكسر الصفحة)
     const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      await sb.auth.signOut(); // logout من Supabase
-    } catch (e) {
-      console.error(e);
-    }
-    location.href = "index.html"; // تحويل
-  });
-}
-        const logoutModal = document.getElementById("logoutModal");
-const logoutCancel = document.getElementById("logoutCancel");
-const logoutConfirm = document.getElementById("logoutConfirm");
-
-logoutBtn.addEventListener("click", ()=>{
-  logoutModal.style.display = "block";
-});
-
-logoutCancel.onclick = ()=>{
-  logoutModal.style.display = "none";
-};
-
-logoutConfirm.onclick = ()=>{
-  logoutModal.style.display = "none";
-  doLogout();
-};
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        try { await sb.auth.signOut(); } catch(e) {}
+        location.href = "index.html";
       });
     }
 
@@ -439,13 +395,15 @@ logoutConfirm.onclick = ()=>{
 
       if(error){
         searchResults.style.display = "block";
-        searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">Error</div><div class="sr-cat">${esc(error.message)}</div></div></div>`;
+        searchResults.innerHTML =
+          `<div class="sr-item"><div><div class="sr-title">Error</div><div class="sr-cat">${esc(error.message)}</div></div></div>`;
         return;
       }
 
       if(!data || data.length === 0){
         searchResults.style.display = "block";
-        searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">No results</div><div class="sr-cat">Try another word</div></div></div>`;
+        searchResults.innerHTML =
+          `<div class="sr-item"><div><div class="sr-title">No results</div><div class="sr-cat">Try another word</div></div></div>`;
         return;
       }
 
