@@ -284,44 +284,35 @@
       }
     }
 
-    // Base provider keyword
     function baseKeyword(){
       if(mode === "ALFA") return "alfa";
       if(mode === "MTC") return "mtc";
-      // credit transfer
       return (ctMode === "CREDIT_ALFA") ? "alfa" : "mtc";
     }
 
-    // Extra filter per section
     function extraFilters(){
-      // returns array of {type:'ilike', col:'title', val:'%...%'} or {type:'not_ilike', ...}
       const f = [];
 
       if(mode === "ALFA"){
         if(alfaMode === "CARDS"){
-          // alfa cards: title contains alfa AND contains $
           f.push({type:"ilike", col:"title", val:"%$%"});
           f.push({type:"not_ilike", col:"title", val:"%kl 1$%"});
           f.push({type:"not_ilike", col:"title", val:"%gb%"});
         }else if(alfaMode === "USHARE"){
-          // ushare: title contains gb
           f.push({type:"ilike", col:"title", val:"%gb%"});
           f.push({type:"not_ilike", col:"title", val:"%kl 1$%"});
         }else{
-          // internet: if later you add titles with 'internet' or 'data'
           f.push({type:"ilike", col:"title", val:"%internet%"});
         }
       }
 
       if(mode === "MTC"){
-        // mtc cards: title contains mtc and $
         f.push({type:"ilike", col:"title", val:"%$%"});
         f.push({type:"not_ilike", col:"title", val:"%kl 1$%"});
         f.push({type:"not_ilike", col:"title", val:"%gb%"});
       }
 
       if(mode === "CREDIT_TRANSFER"){
-        // credit transfer: title contains "kl 1$"
         f.push({type:"ilike", col:"title", val:"%kl 1$%"});
       }
 
@@ -367,21 +358,19 @@
       setMsg("Loading...");
       grid.innerHTML = "";
 
+      // ✅ مهم: شلّينا شرط category لأنه كان عم يمنع النتائج إذا مش مزبوط بالـ DB
       let req = sb
         .from("products_with_min_price")
         .select("id,title,category,min_price")
         .eq("active", true)
-        .eq("category", "Phone recharge")
         .ilike("title", `%${baseKeyword()}%`)
         .limit(80);
 
-      // apply extra filters
       for(const f of extraFilters()){
         if(f.type === "ilike") req = req.ilike(f.col, f.val);
         if(f.type === "not_ilike") req = req.not(f.col, "ilike", f.val);
       }
 
-      // search
       if(q.length >= 2){
         req = req.ilike("title", `%${q}%`);
       }
@@ -392,9 +381,7 @@
         return;
       }
 
-      // special: internet tab currently may show none, so show friendly message
       if(mode === "ALFA" && alfaMode === "INTERNET"){
-        // if you don't have internet products yet
         render(data || []);
         if(!data || data.length === 0){
           setMsg("No Internet products yet.");
@@ -471,3 +458,4 @@
   </script>
 </body>
 </html>
+```0
