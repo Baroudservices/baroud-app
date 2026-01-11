@@ -458,13 +458,28 @@
 
     // ✅ image per product id
     function productImageHtml(productId){
-      const id = esc(productId);
-      return `
-        <div class="pimg">
-          <img src="assets/products/${id}.jpg"
-               onerror="this.onerror=null;this.src='assets/products/default.png';"
-               alt="product">
-        </div>
+  const id = encodeURIComponent(String(productId ?? "").trim());
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, "/")}`;
+  // base = مسار الصفحة الحالية (حتى لو كانت داخل فولدر)
+
+  const jpg = new URL(`assets/products/${id}.jpg`, base).toString();
+  const png = new URL(`assets/products/${id}.png`, base).toString();
+  const def = new URL(`assets/products/default.png`, base).toString();
+
+  return `
+    <div class="pimg">
+      <img
+        src="${jpg}"
+        alt="product"
+        onerror="
+          if(this.dataset.try!='png'){ this.dataset.try='png'; this.src='${png}'; return; }
+          if(this.dataset.try!='def'){ this.dataset.try='def'; this.src='${def}'; return; }
+          this.outerHTML = '<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;opacity:.7\\'>📦</div>';
+        "
+      >
+    </div>
+  `;
+}
       `;
     }
 
