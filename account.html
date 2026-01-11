@@ -158,6 +158,43 @@
     .msg{margin-top:10px; opacity:.85; font-size:13px}
     .danger{color:#ef4444}
     .ok{color:#22c55e}
+
+    /* ✅ Custom Modal */
+    .modal{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.72);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:999999;
+    }
+    .modalCard{
+      width:min(520px, 100%);
+      background: rgba(12, 16, 24, 0.98);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:18px;
+      padding:16px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.45);
+      backdrop-filter: blur(8px);
+    }
+    .mTitle{ font-weight:950; font-size:18px; margin-bottom:10px; text-align:center; }
+    .mText{ opacity:.85; font-weight:800; font-size:14px; text-align:center; line-height:1.5; }
+    .mBtns{ display:flex; gap:10px; margin-top: 14px; }
+    .mBtn{
+      flex:1;
+      border:0;
+      cursor:pointer;
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:950;
+      color:#fff;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+    }
+    .mBtn.secondary{
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+    }
   </style>
 </head>
 
@@ -267,6 +304,17 @@
     </div>
   </div>
 
+  <!-- ✅ Custom Modal -->
+  <div class="modal" id="uiModal">
+    <div class="modalCard">
+      <div class="mTitle" id="uiModalTitle">Notice</div>
+      <div class="mText" id="uiModalText">...</div>
+      <div class="mBtns" id="uiModalBtns">
+        <button class="mBtn" id="uiModalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
@@ -287,16 +335,54 @@
   const myOrdersBtn = document.getElementById("myOrdersBtn");
   const ordersMenu = document.getElementById("ordersMenu");
 
+  // ✅ modal elements
+  const uiModal = document.getElementById("uiModal");
+  const uiModalTitle = document.getElementById("uiModalTitle");
+  const uiModalText = document.getElementById("uiModalText");
+  const uiModalBtns = document.getElementById("uiModalBtns");
+  const uiModalOk = document.getElementById("uiModalOk");
+
   let PLAN_LIST = [];
   let currentProductId = null;
   let currentProduct = null;
   let selectedPlan = null;
-
-  // ✅ realtime channel للـ plans
   let plansChannel = null;
 
   function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function getId(){ return new URL(location.href).searchParams.get("id"); }
+
+  // ✅ Custom modal API
+  function closeUIModal(){ uiModal.style.display = "none"; }
+  uiModal.addEventListener("click", (e)=>{ if(e.target === uiModal) closeUIModal(); });
+
+  function showNotice(message, title="Notice"){
+    return new Promise((resolve)=>{
+      uiModalTitle.textContent = title;
+      uiModalText.textContent = message;
+
+      uiModalBtns.innerHTML = `<button class="mBtn" id="uiModalOk2">OK</button>`;
+      uiModal.style.display = "flex";
+
+      const okBtn = document.getElementById("uiModalOk2");
+      okBtn.onclick = ()=>{ closeUIModal(); resolve(true); };
+    });
+  }
+
+  function showConfirm(message, title="Confirm"){
+    return new Promise((resolve)=>{
+      uiModalTitle.textContent = title;
+      uiModalText.textContent = message;
+
+      uiModalBtns.innerHTML = `
+        <button class="mBtn secondary" id="uiModalCancel">Cancel</button>
+        <button class="mBtn" id="uiModalYes">Confirm</button>
+      `;
+      uiModal.style.display = "flex";
+
+      document.getElementById("uiModalCancel").onclick = ()=>{ closeUIModal(); resolve(false); };
+      document.getElementById("uiModalYes").onclick = ()=>{ closeUIModal(); resolve(true); };
+    });
+  }
 
   function clearAllInputs(){
     const ids = [
@@ -319,9 +405,7 @@
     return { product: p, features: f || [] };
   }
 
-  // ✅ Plans from admin-prices (product_plan_prices)
   async function loadPlans(productId){
-    // مهم: جدولك ما فيه sort، فرتبنا على price وبعدين id
     const { data, error } = await sb
       .from("product_plan_prices")
       .select("id, product_id, plan_key, plan_label, plan_name, price, active")
@@ -467,7 +551,6 @@
     };
   }
 
-  // ✅ Realtime subscribe: أي تعديل بالـ admin-prices ينعكس فوراً
   function subscribePlansRealtime(productId){
     try{
       if(plansChannel) sb.removeChannel(plansChannel);
@@ -477,14 +560,8 @@
       .channel("plans_" + productId)
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "product_plan_prices",
-          filter: `product_id=eq.${productId}`
-        },
+        { event: "*", schema: "public", table: "product_plan_prices", filter: `product_id=eq.${productId}` },
         async () => {
-          // reload plans + keep selected if still exists
           const prevKey = selectedPlan?.key;
           const plans = await loadPlans(productId);
           renderPlans(plans);
@@ -563,7 +640,10 @@
   }
 
   async function buyProduct(){
-    if(!selectedPlan){ alert("Select a plan first"); return; }
+    if(!selectedPlan){
+      await showNotice("Select a plan first", "Notice");
+      return;
+    }
 
     const pId = document.getElementById("input-player-id").value.trim();
     const zId = document.getElementById("input-zone-id").value.trim();
@@ -578,33 +658,34 @@
 
     const isVisible = (id)=> document.getElementById(id)?.style.display === "block";
 
-    if(isVisible("field-player-id") && !pId){ alert("ID is required"); return; }
-    if(isVisible("field-zone-id") && !zId){ alert("Zone ID is required"); return; }
-    if(isVisible("field-player-name") && !pName){ alert("Name is required"); return; }
-    if(isVisible("field-username") && !pUser){ alert("Username is required"); return; }
-    if(isVisible("field-whatsapp") && !pWhats){ alert("WhatsApp number is required"); return; }
-    if(isVisible("field-pass") && !pPass){ alert("Password is required"); return; }
-    if(isVisible("field-backup") && !pBackup){ alert("Backup codes are required"); return; }
-    if(isVisible("field-account-details") && !pAcc){ alert("Account details are required"); return; }
+    if(isVisible("field-player-id") && !pId){ await showNotice("ID is required", "Notice"); return; }
+    if(isVisible("field-zone-id") && !zId){ await showNotice("Zone ID is required", "Notice"); return; }
+    if(isVisible("field-player-name") && !pName){ await showNotice("Name is required", "Notice"); return; }
+    if(isVisible("field-username") && !pUser){ await showNotice("Username is required", "Notice"); return; }
+    if(isVisible("field-whatsapp") && !pWhats){ await showNotice("WhatsApp number is required", "Notice"); return; }
+    if(isVisible("field-pass") && !pPass){ await showNotice("Password is required", "Notice"); return; }
+    if(isVisible("field-backup") && !pBackup){ await showNotice("Backup codes are required", "Notice"); return; }
+    if(isVisible("field-account-details") && !pAcc){ await showNotice("Account details are required", "Notice"); return; }
 
     const titleText = (currentProduct.title || "").toLowerCase();
     if(titleText.includes("tiktok")){
       const emailShown = isVisible("field-email");
       const phoneShown = isVisible("field-phone");
       if((emailShown || phoneShown) && (!pEmail && !pPhone)){
-        alert("Enter Email or Phone number");
+        await showNotice("Enter Email or Phone number", "Notice");
         return;
       }
       if(isVisible("field-pass") && !pPass){
-        alert("Password is required");
+        await showNotice("Password is required", "Notice");
         return;
       }
     } else {
-      if(isVisible("field-email") && !pEmail){ alert("Email is required"); return; }
-      if(isVisible("field-phone") && !pPhone){ alert("Phone number is required"); return; }
+      if(isVisible("field-email") && !pEmail){ await showNotice("Email is required", "Notice"); return; }
+      if(isVisible("field-phone") && !pPhone){ await showNotice("Phone number is required", "Notice"); return; }
     }
 
-    if(!confirm("Proceed with purchase? Balance will be deducted.")) return;
+    const ok = await showConfirm("Proceed with purchase? Balance will be deducted.", "Confirm Order");
+    if(!ok) return;
 
     buyBtn.disabled = true;
     buyBtn.textContent = "Processing...";
@@ -642,10 +723,10 @@
       if(error) throw error;
 
       clearAllInputs();
-      alert("✅ Order Placed Successfully! ID: " + orderId);
+      await showNotice("✅ Order Placed Successfully! ID: " + orderId, "Success");
       location.href = "my-orders.html";
     }catch(e){
-      alert(e.message || "Purchase failed");
+      await showNotice(e.message || "Purchase failed", "Error");
     }finally{
       buyBtn.disabled = false;
       buyBtn.textContent = "Buy Now";
@@ -664,16 +745,15 @@
       const plans = await loadPlans(product.id);
       renderPlans(plans);
 
-      // ✅ subscribe realtime بعد ما نعرف productId
       subscribePlansRealtime(product.id);
 
     }catch(err){
       titleEl.textContent = "Error";
-      alert(err?.message || String(err));
+      await showNotice(err?.message || String(err), "Error");
     }
   })();
 </script>
 
-  <script src="app-ui.js?v=4"></script>
+  <script src="app-ui.js?v=3"></script>
 </body>
 </html>
