@@ -1,51 +1,118 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Orders</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Orders</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body{ margin:0; font-family:system-ui,Arial; background:linear-gradient(180deg,#0b1424,#050a14); color:#fff; min-height:100vh; padding:16px; }
+  .wrap{max-width:720px;margin:auto}
+  .top{ display:flex;align-items:center;gap:10px; margin-bottom:14px; }
+  .back{ width:46px;height:46px; display:flex;align-items:center;justify-content:center; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); cursor:pointer; text-decoration:none; color:#fff; font-weight:900;}
+  h2{margin:0;font-size:22px}
 
-  <style>
-    body{ margin:0; font-family:system-ui,Arial; background:linear-gradient(180deg,#0b1424,#050a14); color:#fff; min-height:100vh; padding:16px; }
-    .wrap{max-width:820px;margin:auto}
-    .top{ display:flex;align-items:center;gap:10px; margin-bottom:14px; }
-    .back{ padding:10px 14px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); cursor:pointer; text-decoration:none; color:#fff; }
-    h2{margin:0;font-size:22px}
-    .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
-    .row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
-    .name{font-weight:900; font-size:18px}
-    .small{opacity:.68;font-size:12px; line-height:1.35}
-    .price{font-weight:900;color:#38bdf8; font-size:18px}
-    .badge{
-      display:inline-block; padding:6px 10px; border-radius:999px; font-weight:900; font-size:12px;
-      border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06);
-      margin-top:8px;
-    }
-    .badge.pending{ color:#fbbf24; }
-    .badge.rejected{ color:#ff4d4d; }
-    .badge.done, .badge.paid{ color:#22c55e; }
+  .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
+  .row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
+  .name{font-weight:900; font-size:20px}
+  .small{opacity:.65;font-size:12px; line-height:1.35}
+  .price{font-weight:900;color:#38bdf8; font-size:22px}
 
-    .details{
-      margin-top:12px;
-      background:rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:14px;
-      padding:12px;
-    }
-    .kv{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
-    .kv:last-child{ border-bottom:0; }
-    .k{ opacity:.7; font-size:12px; font-weight:800; }
-    .v{ font-size:12px; font-weight:900; text-align:right; max-width:65%; word-break:break-word; }
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .chip{
+    padding:8px 10px; border-radius:999px; font-weight:900; font-size:12px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+  }
+  .chip.green{ color:#22c55e; border-color:rgba(34,197,94,.25); background:rgba(34,197,94,.08); }
+  .chip.yellow{ color:#fbbf24; border-color:rgba(251,191,36,.25); background:rgba(251,191,36,.08); }
+  .chip.red{ color:#ef4444; border-color:rgba(239,68,68,.25); background:rgba(239,68,68,.08); }
 
-    .empty{ opacity:.75; text-align:center; margin-top:40px; }
-  </style>
+  .details{
+    margin-top:12px;
+    background:rgba(0,0,0,.18);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:14px;
+    padding:12px;
+  }
+  .kv{ display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+  .kv:last-child{ border-bottom:0; }
+  .k{ opacity:.7; font-size:12px; font-weight:800; }
+  .v{ font-size:12px; font-weight:900; text-align:right; max-width:65%; word-break:break-word; }
+
+  .replyBox{ margin-top:10px; padding:12px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); }
+  .replyHeader{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .replyStatus{font-weight:900}
+  .replyStatus.done{color:#22c55e}
+  .replyStatus.pending{color:#fbbf24}
+  .replyStatus.rejected{color:#ef4444}
+
+  .replyBtn{
+    border:0;
+    cursor:pointer;
+    padding:10px 12px;
+    border-radius:12px;
+    font-weight:950;
+    color:#fff;
+    background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+    white-space:nowrap;
+  }
+  .replyBtn:disabled{ opacity:.55; cursor:not-allowed; }
+
+  .empty{ opacity:.7; text-align:center; margin-top:40px; }
+
+  /* Modal */
+  .modal{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:99999;
+  }
+  .modalCard{
+    width:min(520px,100%);
+    background: rgba(12, 16, 24, 0.98);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;
+    padding:16px;
+  }
+  .mTitle{ font-weight:950; font-size:16px; margin-bottom:10px; }
+  .mText{
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:12px;
+    font-weight:900;
+    font-size:13px;
+    white-space:pre-wrap;
+    word-break:break-word;
+    max-height:50vh;
+    overflow:auto;
+  }
+  .mBtns{ display:flex; gap:10px; margin-top: 12px; }
+  .mBtn{
+    flex:1;
+    border:0;
+    cursor:pointer;
+    padding:12px 14px;
+    border-radius:14px;
+    font-weight:950;
+    color:#fff;
+    background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+  }
+  .mBtn.secondary{
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.10);
+  }
+</style>
 </head>
 
 <body>
 <div class="wrap">
   <div class="top">
-    <a href="services.html" class="back">←</a>
+    <a class="back" href="services.html">←</a>
     <h2>My Orders</h2>
   </div>
 
@@ -53,39 +120,48 @@
   <div id="empty" class="empty" style="display:none">No orders</div>
 </div>
 
+<!-- Reply Modal -->
+<div class="modal" id="replyModal">
+  <div class="modalCard">
+    <div class="mTitle">Admin Reply</div>
+    <div class="mText" id="replyModalText"></div>
+    <div class="mBtns">
+      <button class="mBtn secondary" id="replyModalClose">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// keep admin replies in-memory to safely show them in a popup
+const replyById = new Map();
+
 function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function toArr(x){ return Array.isArray(x) ? x : []; }
 
-function statusClass(s){
-  const v = String(s||"pending").toLowerCase();
-  if(v.includes("reject")) return "rejected";
-  if(v.includes("done")) return "done";
-  if(v.includes("paid")) return "paid";
-  return "pending";
+function chipClassStatus(s){
+  s = (s || "pending").toLowerCase();
+  if(s === "paid" || s === "done") return "green";
+  if(s === "cancelled" || s === "rejected") return "red";
+  return "yellow";
 }
 
 function pickDetails(o){
-  // عرض أهم الحقول إذا موجودة (بدون ما نعلق على أسماء الأعمدة)
   const candidates = [
-    ["phone_number","Phone"],
     ["transfer_number","Phone"],
+    ["phone_number","Phone"],
     ["number","Phone"],
     ["player_id","Player ID"],
     ["player_name","Player Name"],
+    ["plan_label","Plan"],
+    ["product_title","Product"],
+    ["note","Note"],
+    ["duration","Duration"],
     ["account_email","Email"],
     ["account_password","Password"],
-    ["duration","Duration"],
-    ["note","Note"],
-    ["plan_label","Plan"],
-    ["title","Title"],
-    ["product_title","Product"],
-    ["alfa_amount","Amount"],
-    ["mtc_amount","Amount"],
   ];
 
   const out = [];
@@ -95,7 +171,7 @@ function pickDetails(o){
     }
   });
 
-  // إذا ما لقيت شي من فوق، جرّب تعرض أي مفاتيح إضافية غير الأساسية
+  // fallback any extra fields (if needed)
   if(out.length === 0 && o){
     const skip = new Set(["id","user_id","product_id","price","status","delivery_status","admin_reply","created_at","admin_reply_at","refunded_at","refunded_amount","refunded_txn"]);
     Object.keys(o).forEach(k=>{
@@ -107,28 +183,28 @@ function pickDetails(o){
       out.push([k, s]);
     });
   }
-
   return out;
 }
 
-async function loadOrders(){
+async function loadOrders() {
   const listEl = document.getElementById("list");
   const emptyEl = document.getElementById("empty");
+  replyById.clear();
+
   listEl.innerHTML = "";
   emptyEl.style.display = "none";
 
   const { data: { session } } = await sb.auth.getSession();
   if(!session) { location.replace("login.html"); return; }
 
-  // 1) fetch my orders (كل الأعمدة)
-  const { data: orders, error: e1 } = await sb
+  const { data: orders, error } = await sb
     .from("orders")
     .select("*")
     .eq("user_id", session.user.id)
     .order("created_at", { ascending:false });
 
-  if(e1){
-    listEl.innerHTML = `<div class="empty">Error: ${esc(e1.message)}</div>`;
+  if(error){
+    listEl.innerHTML = `<div class="empty">Error: ${esc(error.message)}</div>`;
     return;
   }
 
@@ -137,7 +213,7 @@ async function loadOrders(){
     return;
   }
 
-  // 2) map product titles (لو موجود products)
+  // product title lookup
   const ids = [...new Set(toArr(orders).map(o => o.product_id).filter(Boolean))];
   let titleById = {};
   if(ids.length){
@@ -146,12 +222,14 @@ async function loadOrders(){
   }
 
   listEl.innerHTML = orders.map(o => {
-    const title = titleById[o.product_id] || o.title || "Order";
-    const sc = statusClass(o.delivery_status || o.status);
-    const paidClass = statusClass(o.status);
-    const dt = o.created_at ? new Date(o.created_at).toLocaleString() : "";
-    const details = pickDetails(o);
+    const delivery = (o.delivery_status || "pending").toLowerCase();
+    const hasReply = (o.admin_reply && String(o.admin_reply).trim().length);
+    replyById.set(String(o.id), String(o.admin_reply || ""));
 
+    const title = titleById[o.product_id] || o.product_title || o.title || "Order";
+    const dt = o.created_at ? new Date(o.created_at).toLocaleString() : "";
+
+    const details = pickDetails(o);
     const detailsHtml = details.length ? `
       <div class="details">
         ${details.map(([k,v])=>`
@@ -160,19 +238,8 @@ async function loadOrders(){
             <div class="v">${esc(v)}</div>
           </div>
         `).join("")}
-        <div class="kv">
-          <div class="k">Admin Reply</div>
-          <div class="v">${esc(o.admin_reply || "No details yet")}</div>
-        </div>
       </div>
-    ` : `
-      <div class="details">
-        <div class="kv">
-          <div class="k">Admin Reply</div>
-          <div class="v">${esc(o.admin_reply || "No details yet")}</div>
-        </div>
-      </div>
-    `;
+    ` : "";
 
     return `
       <div class="card">
@@ -181,17 +248,59 @@ async function loadOrders(){
             <div class="name">${esc(title)}</div>
             <div class="small">${esc(dt)}</div>
             <div class="small">Order #${esc(o.id)}</div>
-            <div class="badge ${paidClass}">Payment: ${esc((o.status||"pending").toUpperCase())}</div>
-            <div class="badge ${sc}" style="margin-left:6px">Delivery: ${esc((o.delivery_status||"pending").toUpperCase())}</div>
           </div>
           <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
         </div>
 
+        <div class="chips">
+          <div class="chip ${chipClassStatus(o.status)}">Payment: ${(o.status || "pending").toUpperCase()}</div>
+          <div class="chip ${chipClassStatus(o.delivery_status)}">Delivery: ${(o.delivery_status || "pending").toUpperCase()}</div>
+        </div>
+
         ${detailsHtml}
+
+        <div class="replyBox">
+          <div class="replyHeader">
+            <div class="replyStatus ${hasReply ? 'done' : 'pending'}">Admin Reply</div>
+            ${
+              hasReply
+              ? `<button class="replyBtn" data-reply-id="${esc(o.id)}">View</button>`
+              : `<div class="small">No details yet</div>`
+            }
+          </div>
+        </div>
       </div>
     `;
-  }).join("");
+  }).join('');
+
+  // bind reply buttons (popup full text)
+  Array.from(document.querySelectorAll('[data-reply-id]')).forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      showReplyById(btn.getAttribute('data-reply-id'));
+    });
+  });
 }
+
+function showReplyById(orderId){
+  const text = replyById.get(String(orderId)) || "";
+  if(!text.trim()) return;
+  document.getElementById("replyModalText").textContent = text;
+  document.getElementById("replyModal").style.display = "flex";
+}
+
+function closeReplyModal(){
+  document.getElementById("replyModal").style.display = "none";
+}
+
+// close handlers
+document.getElementById("replyModalClose").addEventListener("click", closeReplyModal);
+document.getElementById("replyModal").addEventListener("click", (e)=>{
+  if(e.target.id === "replyModal") closeReplyModal();
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape") closeReplyModal();
+});
 
 loadOrders();
 </script>
