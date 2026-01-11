@@ -117,7 +117,6 @@
 
     .msg{ opacity:.7; font-weight:800; padding: 12px 4px; text-align:center; }
 
-    /* list style */
     .list{ display:flex; flex-direction:column; gap:12px; }
 
     .item{
@@ -161,7 +160,6 @@
     }
     .buy:disabled{ opacity:.55; cursor:not-allowed; }
 
-    /* credit transfer card */
     .ctCard{
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
@@ -187,7 +185,6 @@
     }
     .ctHelp{ opacity:.75; font-weight:800; font-size:12px; margin-top:6px; }
 
-    /* modal */
     .modal{
       position:fixed; inset:0;
       background: rgba(0,0,0,.72);
@@ -266,43 +263,34 @@
       <input id="qInput" type="text" placeholder="Search products..." />
     </div>
 
-    <!-- Main Tabs -->
     <div class="filters" id="filters">
       <div class="fbtn active" data-mode="ALFA">ALFA</div>
       <div class="fbtn" data-mode="MTC">MTC</div>
       <div class="fbtn" data-mode="CREDIT_TRANSFER">Credit Transfer</div>
     </div>
 
-    <!-- ALFA sub -->
     <div class="filters" id="alfaSub" style="margin-top:-6px;">
       <div class="fbtn active" data-alfa="CARDS">Cards</div>
       <div class="fbtn" data-alfa="USHARE">uShare</div>
       <div class="fbtn" data-alfa="INTERNET">Internet</div>
     </div>
 
-    <!-- Credit Transfer sub -->
     <div class="filters" id="ctSub" style="display:none; margin-top:-6px;">
       <div class="fbtn active" data-ct="CREDIT_ALFA">Credit ALFA</div>
       <div class="fbtn" data-ct="CREDIT_MTC">Credit MTC</div>
     </div>
 
     <div class="msg" id="msg"></div>
-
-    <!-- Products list -->
     <section class="list" id="list"></section>
 
-    <!-- Credit Transfer UI -->
     <div class="ctCard" id="ctCard" style="display:none;">
       <div class="ctHead">Enter amount in $</div>
-
       <div class="ctRow">
         <input id="ctAmount" class="ctInput" inputmode="decimal" placeholder="مثال: 10" />
       </div>
-
       <div class="ctRow">
         <input id="ctPhone" class="ctInput" inputmode="numeric" placeholder="Phone number (required)" />
       </div>
-
       <div style="font-size:24px; font-weight:950; color:#38bdf8;" id="ctTotal">$0.00</div>
       <div class="ctHelp" id="ctHelp"></div>
 
@@ -312,10 +300,9 @@
     </div>
   </main>
 
-  <!-- BUY MODAL -->
   <div class="modal" id="buyModal">
     <div class="modalCard">
-      <div class="mTitle" id="mTitle">Confirm Order</div>
+      <div class="mTitle">Confirm Order</div>
 
       <div class="mLine">
         <div style="font-weight:950;" id="mProdTitle">Product</div>
@@ -376,22 +363,6 @@
     function setMsg(t){ msg.textContent = t || ""; }
     function money(x){ return "$" + Number(x || 0).toFixed(2); }
 
-    function iconForMode(){
-      if(mode === "ALFA") return "🟦";
-      if(mode === "MTC") return "🟩";
-      if(mode === "CREDIT_TRANSFER") return "💸";
-      return "📦";
-    }
-    function iconForSection(){
-      if(mode === "ALFA"){
-        if(alfaMode === "CARDS") return "💳";
-        if(alfaMode === "USHARE") return "🌐";
-        if(alfaMode === "INTERNET") return "📶";
-      }
-      if(mode === "MTC") return "💳";
-      return "📦";
-    }
-
     document.getElementById("backBtn").onclick = () => {
       if (history.length > 1) history.back();
       else location.href = "services.html";
@@ -410,9 +381,7 @@
           .single();
 
         if (error) { el.textContent = "0.00 🇱🇧"; return; }
-
-        const b = Number(data?.balance || 0);
-        el.textContent = `${b.toFixed(2)} 🇱🇧`;
+        el.textContent = `${Number(data?.balance || 0).toFixed(2)} 🇱🇧`;
       } catch {
         el.textContent = "0.00 🇱🇧";
       }
@@ -420,13 +389,12 @@
     loadBalance();
 
     // ===== State =====
-    let mode = "ALFA";            // ALFA | MTC | CREDIT_TRANSFER
-    let alfaMode = "CARDS";       // CARDS | USHARE | INTERNET
-    let ctMode = "CREDIT_ALFA";   // CREDIT_ALFA | CREDIT_MTC
+    let mode = "ALFA";
+    let alfaMode = "CARDS";
+    let ctMode = "CREDIT_ALFA";
     let tmr = null;
 
-    // Modal state
-    let pendingBuy = null; // { product_id, product_title, category, plan_label, price, phone_required }
+    let pendingBuy = null; // { product_id, title, plan_label, price, phone_required, product_title }
 
     function showRightSubFilters(){
       if(mode === "ALFA"){
@@ -449,10 +417,29 @@
       }
     }
 
-    function isPhoneRequiredForCurrentSection(){
-      // uShare + credit transfer require phone
-      if(mode === "ALFA" && alfaMode === "USHARE") return true;
-      return false;
+    function sectionIcon(){
+      if(mode === "ALFA"){
+        if(alfaMode === "CARDS") return "💳";
+        if(alfaMode === "USHARE") return "🌐";
+        if(alfaMode === "INTERNET") return "📶";
+      }
+      if(mode === "MTC") return "💳";
+      return "📦";
+    }
+
+    function sectionProductLike(){
+      if(mode === "ALFA"){
+        if(alfaMode === "CARDS") return "ALFA Cards";
+        if(alfaMode === "USHARE") return "ALFA uShare";
+        if(alfaMode === "INTERNET") return "ALFA Internet";
+      }
+      if(mode === "MTC") return "MTC Cards";
+      return "";
+    }
+
+    function phoneRequiredForSection(){
+      if(mode === "ALFA" && alfaMode === "USHARE") return true; // uShare required
+      return false; // others optional
     }
 
     // ---- DB helpers ----
@@ -470,8 +457,7 @@
       return data[0];
     }
 
-    async function loadPlansForProduct(productId){
-      // Try product_plan_prices first (plan_label + price)
+    async function loadPlans(productId){
       const { data, error } = await sb
         .from("product_plan_prices")
         .select("plan_label,price,active")
@@ -483,8 +469,8 @@
       return { ok:true, rows: data || [] };
     }
 
-    async function fallbackLoadProductsWithMinPrice(keyword){
-      let req = sb
+    async function fallbackProductsWithMinPrice(keyword){
+      const { data, error } = await sb
         .from("products_with_min_price")
         .select("id,title,category,min_price,active")
         .eq("active", true)
@@ -492,7 +478,6 @@
         .ilike("title", `%${keyword}%`)
         .limit(200);
 
-      const { data, error } = await req;
       if(error) return { ok:false, error };
       return { ok:true, rows: data || [] };
     }
@@ -505,8 +490,7 @@
       }
       setMsg("");
 
-      listEl.innerHTML = rows.map(r=>{
-        const pr = Number(r.price || 0);
+      listEl.innerHTML = rows.map((r, idx)=>{
         return `
           <div class="item">
             <div class="iconBox">${esc(r.icon || "📦")}</div>
@@ -515,33 +499,30 @@
               <div class="meta">${esc(r.meta || "")}</div>
             </div>
             <div class="right">
-              <div class="price">${money(pr)}</div>
-              <button class="buy" data-buy="1">Buy</button>
+              <div class="price">${money(r.price || 0)}</div>
+              <button class="buy" data-idx="${idx}">Buy</button>
             </div>
           </div>
         `;
       }).join("");
 
-      Array.from(listEl.querySelectorAll(".item")).forEach((it, idx)=>{
-        const btn = it.querySelector(".buy");
-        btn.onclick = ()=> {
-          const r = rows[idx];
-          openBuyModal(r);
+      Array.from(listEl.querySelectorAll("[data-idx]")).forEach(btn=>{
+        btn.onclick = ()=>{
+          const idx = Number(btn.getAttribute("data-idx"));
+          openBuyModal(rows[idx]);
         };
       });
     }
 
-    // ---- Buy flow ----
-
+    // ---- Modal ----
     function openBuyModal(row){
       pendingBuy = row;
       mErr.textContent = "";
       mProdTitle.textContent = row.title || "Product";
       mPrice.textContent = money(row.price || 0);
       mPhone.value = "";
-      mNote.value = row.default_note || "";
+      mNote.value = "";
 
-      // phone required?
       if(row.phone_required){
         phoneReq.textContent = "(required)";
         phoneHint.textContent = row.phone_hint || "Required";
@@ -559,21 +540,59 @@
     mCancel.onclick = closeBuyModal;
     buyModal.addEventListener("click", (e)=>{ if(e.target === buyModal) closeBuyModal(); });
 
-    async function placeOrderRPC({ product_id, price, player_id, note, plan_label, product_title, category }){
+    // ---- RPC with FALLBACK PARAM NAMES ----
+    async function rpcPlaceOrder(payload){
+      // Try 1: transfer_number (your screenshot shows this exists)
+      let res = await sb.rpc("place_order_with_balance", {
+        p_product_id: payload.product_id,
+        p_price: payload.price,
+        p_note: payload.note || null,
+        p_plan_label: payload.plan_label || null,
+        p_product_title: payload.product_title || null,
+        p_category: payload.category || "Phone recharge",
+        p_transfer_number: payload.phone || null
+      });
+
+      if(!res.error) return res;
+
+      // Try 2: player_id (older versions)
+      res = await sb.rpc("place_order_with_balance", {
+        p_product_id: payload.product_id,
+        p_price: payload.price,
+        p_note: payload.note || null,
+        p_plan_label: payload.plan_label || null,
+        p_product_title: payload.product_title || null,
+        p_category: payload.category || "Phone recharge",
+        p_player_id: payload.phone || null
+      });
+
+      if(!res.error) return res;
+
+      // Try 3: minimal (in case your function only accepts 2-3 params)
+      res = await sb.rpc("place_order_with_balance", {
+        p_product_id: payload.product_id,
+        p_price: payload.price,
+        p_note: payload.note || null
+      });
+
+      return res; // return final (may include error)
+    }
+
+    async function placeOrder({ product_id, price, phone, note, plan_label, product_title }){
       const { data: { session } } = await sb.auth.getSession();
       if(!session){
         location.replace("login.html");
         return { ok:false, message:"Not logged in" };
       }
 
-      const { data, error } = await sb.rpc("place_order_with_balance", {
-        p_product_id: product_id,
-        p_price: price,
-        p_player_id: player_id || null,
-        p_note: note || null,
-        p_plan_label: plan_label || null,
-        p_product_title: product_title || null,
-        p_category: category || "Phone recharge"
+      const { data, error } = await rpcPlaceOrder({
+        product_id,
+        price,
+        phone,
+        note,
+        plan_label,
+        product_title,
+        category: "Phone recharge"
       });
 
       if(error) return { ok:false, message:error.message };
@@ -594,14 +613,13 @@
       mErr.textContent = "Processing...";
       mConfirm.disabled = true;
 
-      const res = await placeOrderRPC({
+      const res = await placeOrder({
         product_id: pendingBuy.product_id,
         price: pendingBuy.price,
-        player_id: phone,
+        phone,
         note,
         plan_label: pendingBuy.plan_label || null,
-        product_title: pendingBuy.product_title || pendingBuy.title,
-        category: "Phone recharge"
+        product_title: pendingBuy.product_title || pendingBuy.title
       });
 
       mConfirm.disabled = false;
@@ -613,28 +631,13 @@
 
       mErr.textContent = "Success ✅ Order #" + res.order_id;
       await loadBalance();
-
       setTimeout(()=> closeBuyModal(), 700);
     };
 
-    // ---- Main products loader (ALFA / MTC) ----
-
-    function sectionProductNameLike(){
-      if(mode === "ALFA"){
-        if(alfaMode === "CARDS") return "ALFA Cards";
-        if(alfaMode === "USHARE") return "ALFA uShare";
-        if(alfaMode === "INTERNET") return "ALFA Internet";
-      }
-      if(mode === "MTC"){
-        return "MTC Cards";
-      }
-      return "";
-    }
-
+    // ---- Load Section ----
     async function loadSection(){
       const q = (qInput.value || "").trim().toLowerCase();
 
-      // internet special (if you didn't create yet)
       if(mode === "ALFA" && alfaMode === "INTERNET"){
         setMsg("No Internet products yet.");
         listEl.innerHTML = "";
@@ -644,53 +647,43 @@
       setMsg("Loading...");
       listEl.innerHTML = "";
 
-      const like = sectionProductNameLike();
+      const like = sectionProductLike();
       const product = await findProductByTitleLike(like);
 
-      // 1) If product exists AND plan table exists -> show plans list
       if(product){
-        const plansRes = await loadPlansForProduct(product.id);
-
+        const plansRes = await loadPlans(product.id);
         if(plansRes.ok){
           let rows = plansRes.rows || [];
-
-          // filter by search (plan_label)
           if(q.length >= 2){
             rows = rows.filter(r => String(r.plan_label || "").toLowerCase().includes(q));
           }
 
-          // map to UI rows
-          const phoneReq = isPhoneRequiredForCurrentSection();
+          const reqPhone = phoneRequiredForSection();
           const uiRows = rows.map(r => ({
             product_id: product.id,
             product_title: product.title,
             plan_label: r.plan_label,
-            title: r.plan_label ? r.plan_label : product.title,
+            title: r.plan_label || product.title,
             meta: product.title,
             price: Number(r.price || 0),
-            icon: iconForSection(),
-            phone_required: phoneReq,
-            phone_hint: phoneReq ? "Required for uShare" : "Optional",
-            default_note: ""
+            icon: sectionIcon(),
+            phone_required: reqPhone,
+            phone_hint: reqPhone ? "Required for uShare" : "Optional"
           }));
 
           renderRows(uiRows);
           return;
         }
-
-        // if product_plan_prices doesn't exist (or error), fallback below
       }
 
-      // 2) Fallback: products_with_min_price (your old system)
-      // here we filter by keyword alfa/mtc and also by section
+      // fallback
       const keyword = (mode === "ALFA") ? "alfa" : "mtc";
-      const fb = await fallbackLoadProductsWithMinPrice(keyword);
+      const fb = await fallbackProductsWithMinPrice(keyword);
       if(!fb.ok){
         setMsg("Error: " + fb.error.message);
         return;
       }
 
-      // Apply section filter (cards/usshare)
       let rows = fb.rows || [];
       if(mode === "ALFA"){
         if(alfaMode === "CARDS"){
@@ -698,7 +691,7 @@
         }else if(alfaMode === "USHARE"){
           rows = rows.filter(p => String(p.title||"").toLowerCase().includes("ushare") || String(p.title||"").toLowerCase().includes("gb"));
         }
-      }else if(mode === "MTC"){
+      }else{
         rows = rows.filter(p => String(p.title||"").toLowerCase().includes("cards"));
       }
 
@@ -706,7 +699,7 @@
         rows = rows.filter(p => String(p.title||"").toLowerCase().includes(q));
       }
 
-      const phoneReq = isPhoneRequiredForCurrentSection();
+      const reqPhone = phoneRequiredForSection();
       const uiRows = rows.map(p => ({
         product_id: p.id,
         product_title: p.title,
@@ -714,17 +707,15 @@
         title: p.title,
         meta: "Phone recharge",
         price: Number(p.min_price || 0),
-        icon: iconForSection(),
-        phone_required: phoneReq,
-        phone_hint: phoneReq ? "Required for uShare" : "Optional",
-        default_note: ""
+        icon: sectionIcon(),
+        phone_required: reqPhone,
+        phone_hint: reqPhone ? "Required for uShare" : "Optional"
       }));
 
       renderRows(uiRows);
     }
 
     // ---- Credit Transfer ----
-
     function parseAmount(v){
       const x = Number(String(v || "").replace(/,/g,".").replace(/[^\d.]/g,""));
       return isFinite(x) ? x : 0;
@@ -735,40 +726,29 @@
     function ctProviderLabel(){
       return (ctMode === "CREDIT_ALFA") ? "ALFA" : "MTC";
     }
-
     async function getCreditTransferProduct(){
       return await findProductByTitleLike("Credit Transfer");
     }
-
     async function updateCtTotal(){
       const amt = parseAmount(ctAmount.value);
       const total = amt * ctMultiplier();
       ctTotal.textContent = money(total);
-
-      // NO multiplier shown to user (hidden)
-      ctHelp.textContent = `Credit Transfer (${ctProviderLabel()})`;
+      ctHelp.textContent = `Credit Transfer (${ctProviderLabel()})`; // multiplier hidden
       return { amt, total };
     }
 
     ctAmount.addEventListener("input", ()=> updateCtTotal());
-    ctSub.addEventListener("click", ()=> updateCtTotal());
 
     ctBuyBtn.onclick = async ()=>{
       const { amt, total } = await updateCtTotal();
       const phone = (ctPhone.value || "").trim();
 
-      if(amt <= 0){
-        alert("Please enter amount in $");
-        return;
-      }
-      if(phone.length < 6){
-        alert("Phone number is required");
-        return;
-      }
+      if(amt <= 0){ alert("Please enter amount in $"); return; }
+      if(phone.length < 6){ alert("Phone number is required"); return; }
 
       const product = await getCreditTransferProduct();
       if(!product){
-        alert("Credit Transfer product not found. Create product title contains 'Credit Transfer' and category 'Phone recharge'.");
+        alert("Credit Transfer product not found. Create product title contains 'Credit Transfer' + category 'Phone recharge'.");
         return;
       }
 
@@ -778,14 +758,13 @@
       const note = `Credit Transfer ${ctProviderLabel()} | amount $${amt.toFixed(2)}`;
       const planLabel = `${ctProviderLabel()} $${amt.toFixed(2)}`;
 
-      const res = await placeOrderRPC({
+      const res = await placeOrder({
         product_id: product.id,
         price: total,
-        player_id: phone,                 // ✅ phone saved in player_id
+        phone,
         note,
-        plan_label: planLabel,            // ✅ details to show in admin/my orders
-        product_title: product.title,
-        category: "Phone recharge"
+        plan_label: planLabel,
+        product_title: product.title
       });
 
       ctBuyBtn.disabled = false;
@@ -803,7 +782,7 @@
       await loadBalance();
     };
 
-    // ---- UI events ----
+    // ---- Events ----
     filters.addEventListener("click", (e)=>{
       const btn = e.target.closest(".fbtn");
       if(!btn) return;
@@ -829,10 +808,7 @@
       }
 
       showRightSubFilters();
-
-      if(mode !== "CREDIT_TRANSFER"){
-        loadSection();
-      }
+      if(mode !== "CREDIT_TRANSFER") loadSection();
     });
 
     alfaSub.addEventListener("click", (e)=>{
