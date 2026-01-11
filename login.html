@@ -115,9 +115,7 @@
 </head>
 
 <body>
-
   <main class="wrap">
-
     <div class="card">
       <button class="back" onclick="location.href='index.html'">←</button>
 
@@ -150,7 +148,6 @@
 
       <div class="hint" id="smallHint">REGISTER (Check your email 📧)</div>
     </div>
-
   </main>
 
   <script>
@@ -162,6 +159,14 @@
     const loginBtn = document.getElementById("loginBtn");
     const registerBtn = document.getElementById("registerBtn");
     const resetBtn = document.getElementById("resetBtn");
+
+    // ✅ base URL ديناميكي (بيشتغل على udservices او baroudservices)
+    function getBaseUrl(){
+      // لو المسار فيه فولدر مثل /baroud-app/ بيحافظ عليه
+      const basePath = location.pathname.replace(/[^\/]*$/, "");
+      return location.origin + basePath;
+    }
+    const BASE_URL = getBaseUrl();
 
     function showMsg(text, ok=false){
       msg.style.display="block";
@@ -180,7 +185,6 @@
       loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
     }
 
-    // ✅ إذا المستخدم عامل Login مسبقاً
     (async ()=>{
       try{
         const { data } = await sb.auth.getSession();
@@ -227,10 +231,44 @@
       }
     }
 
-    // ✅ Register صار يحوّل على صفحة التسجيل الجديدة (Create Account)
-    function goRegister(){
-      // غيّر الاسم إذا صفحتك اسمها مختلف
-      location.href = "welcome.html";
+    async function doRegister(){
+      hideMsg();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("pass").value;
+
+      if(!email || !password){
+        showMsg("Fill email and password.");
+        return;
+      }
+      if(password.length < 6){
+        showMsg("Password must be at least 6 characters.");
+        return;
+      }
+
+      setLoading(true, "Creating...");
+
+      try{
+        const { error } = await sb.auth.signUp({
+          email,
+          password,
+          options:{
+            // ✅ رجّع رابط التأكيد عـ login.html (مش welcome/confirmed)
+            emailRedirectTo: BASE_URL + "login.html"
+          }
+        });
+
+        if(error){
+          showMsg(error.message || "Register failed.");
+          return;
+        }
+
+        showMsg("Register successful ✅ Check your email 📧", true);
+
+      }catch(e){
+        showMsg("Network error. Try again.");
+      }finally{
+        setLoading(false);
+      }
     }
 
     async function doReset(){
@@ -245,7 +283,8 @@
 
       try{
         const { error } = await sb.auth.resetPasswordForEmail(email,{
-          redirectTo:"https://baroudservices.github.io/baroud-app/login.html"
+          // ✅ كمان reset يرجع على login
+          redirectTo: BASE_URL + "login.html"
         });
 
         if(error){
@@ -263,7 +302,7 @@
     }
 
     loginBtn.addEventListener("click", doLogin);
-    registerBtn.addEventListener("click", goRegister);
+    registerBtn.addEventListener("click", doRegister);
     resetBtn.addEventListener("click", doReset);
 
     document.getElementById("pass").addEventListener("keydown", e=>{
