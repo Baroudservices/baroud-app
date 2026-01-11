@@ -16,43 +16,30 @@
       color:#fff;
       min-height:100vh;
       overflow-x:hidden;
-      padding-bottom: 20px;
+      padding-bottom: 22px;
     }
     .wrap{ width: 100%; margin: 0 auto; padding: 14px; max-width: 520px; }
 
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 10px 0; margin-bottom: 12px;
-    }
+    .topbar{display:flex; align-items:center; justify-content:space-between; padding: 10px 0; margin-bottom: 12px;}
     .topbar-left{ display:flex; align-items:center; gap:12px; }
 
     .back-btn{
-      width:45px; height:45px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 12px;
-      display:flex; align-items:center; justify-content:center;
-      font-size: 22px; cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.1);
+      width:45px; height:45px; background: rgba(255,255,255,0.06);
+      border-radius: 12px; display:flex; align-items:center; justify-content:center;
+      font-size: 22px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
       user-select:none;
     }
 
     .wallet-pill{
       display:flex; align-items:center; gap:8px;
       background: rgba(255,255,255,0.05);
-      padding: 6px 14px;
-      border-radius: 20px;
+      padding: 6px 14px; border-radius: 20px;
       border: 1px solid rgba(255,255,255,0.1);
     }
     .star-icon{ color:#ffd700; font-size:18px; }
     .balance-text{ font-weight: 900; font-size: 15px; }
 
-    .brand-title{
-      font-weight: 900;
-      letter-spacing: 1.2px;
-      font-size: 18px;
-      text-transform: uppercase;
-      opacity: .95;
-    }
+    .brand-title{ font-weight: 900; letter-spacing: 1.2px; font-size: 18px; text-transform: uppercase; opacity: .95; }
 
     .hero{
       background: rgba(255,255,255,0.04);
@@ -115,98 +102,134 @@
       opacity:1;
     }
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .card{
-      background: #0b141d;
+    .msg{ opacity:.7; font-weight:800; padding: 10px 4px; text-align:center; }
+
+    /* LIST */
+    .list{display:flex; flex-direction:column; gap: 10px; margin-top: 8px;}
+    .row{
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 18px;
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,0.06);
-      cursor:pointer;
-      text-decoration:none;
-      color:inherit;
-      transition:.2s;
-    }
-    .card:hover{
-      transform: translateY(-1px);
-      border-color: rgba(56,189,248,.35);
-    }
-    .imgBox{
-      height: 120px;
-      width: 100%;
+      padding: 12px;
       display:flex;
       align-items:center;
-      justify-content:center;
-      background: radial-gradient(circle at 30% 30%, rgba(0,210,255,.12), transparent 55%),
-                  radial-gradient(circle at 70% 70%, rgba(255,0,200,.10), transparent 55%);
-    }
-    .imgBox span{ font-size: 40px; filter: drop-shadow(0 0 10px rgba(0,0,0,.35)); }
-    .cBody{
-      padding: 10px 12px 12px;
-      display:flex;
-      align-items:flex-end;
       justify-content:space-between;
-      gap:10px;
+      gap: 12px;
     }
-    .cTitle{ font-weight: 950; font-size: 13px; line-height: 1.2; }
-    .cMeta{ font-size: 11px; opacity:.65; margin-top: 4px; font-weight: 800; }
-    .cPrice{ font-weight: 950; color:#38bdf8; font-size: 13px; white-space: nowrap; }
+    .rowL{display:flex; flex-direction:column; gap: 4px; min-width: 0;}
+    .rowTitle{font-weight: 950; font-size: 14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .rowMeta{opacity:.65; font-weight:800; font-size: 12px;}
+    .rowR{display:flex; align-items:center; gap: 10px; flex: 0 0 auto;}
+    .rowPrice{font-weight: 950; color:#38bdf8; font-size: 14px; white-space:nowrap;}
+    .buyBtn{
+      border: none; cursor:pointer;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 950; color:#fff;
+      background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      transition:.2s;
+    }
+    .buyBtn:active{ transform: scale(.98); }
 
-    .msg{ opacity:.7; font-weight:800; padding: 12px 4px; text-align:center; }
-
-    /* Credit transfer calc box */
-    .calc{
+    /* Credit Transfer Panel */
+    .panel{
+      margin-top: 10px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 18px;
       padding: 14px;
-      margin-top: 8px;
     }
-    .calcRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      margin-top: 10px;
-    }
-    .calc input{
-      flex:1;
+    .panel h3{margin: 0 0 10px 0; font-size: 15px; font-weight: 950; opacity: .95;}
+    .field{margin-top: 10px; display:flex; flex-direction:column; gap: 8px;}
+    .field label{font-weight: 900; font-size: 12px; opacity:.7;}
+    .field input{
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 12px;
+      outline: none;
       color:#fff;
-      outline:none;
+      padding: 14px 14px;
+      border-radius: 16px;
       font-size: 15px;
-      font-weight: 850;
     }
-    .pill{
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.05);
-      font-weight: 900;
-      white-space:nowrap;
-      opacity:.9;
+    .panelFooter{
+      margin-top: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-    .calcPrice{
-      margin-top: 10px;
+    .total{font-weight: 950; font-size: 18px; color:#38bdf8;}
+    .subNote{font-weight: 800; font-size: 12px; opacity:.65; margin-top: 4px;}
+    .buyWide{width: 100%; padding: 12px; border-radius: 16px;}
+
+    /* Popup */
+    .overlayPop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index: 9999;
+      padding: 18px;
+    }
+    .overlayPop.show{ display:flex; }
+    .pop{
+      width: 100%;
+      max-width: 520px;
+      background: #06162a;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 18px;
+      padding: 14px;
+    }
+    .popTop{display:flex; align-items:center; justify-content:space-between; gap: 10px; margin-bottom: 10px;}
+    .popTop strong{ font-weight: 950; }
+    .closeX{
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      color:#fff;
       font-weight: 950;
-      color:#38bdf8;
-      font-size: 16px;
+      cursor:pointer;
     }
-    .calcNote{
-      opacity:.65;
-      font-weight: 800;
-      font-size: 12px;
-      margin-top: 6px;
+    .popActions{ margin-top: 12px; display:flex; gap:10px; }
+    .btnGhost{
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      color:#fff;
+      padding: 12px;
+      border-radius: 16px;
+      width: 100%;
+      font-weight: 900;
+      cursor:pointer;
     }
   </style>
 </head>
 
 <body>
+  <!-- Popup -->
+  <div class="overlayPop" id="overlayPop">
+    <div class="pop">
+      <div class="popTop">
+        <strong id="popTitle">Buy</strong>
+        <button class="closeX" id="closePop">✕</button>
+      </div>
+
+      <div class="field" id="phoneField">
+        <label>Phone Number (required)</label>
+        <input id="popPhone" type="tel" placeholder="مثال: 70912345" />
+      </div>
+
+      <div class="popActions">
+        <button class="btnGhost" id="cancelPop">Cancel</button>
+        <button class="buyBtn" style="width:100%;" id="confirmPop">BUY</button>
+      </div>
+    </div>
+  </div>
+
   <main class="wrap">
     <div class="topbar">
       <div class="topbar-left">
@@ -227,8 +250,8 @@
       <div style="opacity:.9; font-weight:950;">📱</div>
     </div>
 
-    <div class="search-box">
-      <input id="qInput" type="text" placeholder="Search products..." />
+    <div class="search-box" id="searchWrap">
+      <input id="qInput" type="text" placeholder="Search..." />
     </div>
 
     <!-- Main Tabs -->
@@ -253,18 +276,31 @@
 
     <div class="msg" id="msg"></div>
 
-    <!-- Credit transfer calculator -->
-    <div class="calc" id="ctCalc" style="display:none;">
-      <div style="font-weight:950;">Enter amount in $</div>
-      <div class="calcRow">
-        <input id="ctAmount" inputmode="decimal" placeholder="مثال: 10" />
-        <div class="pill" id="ctRatePill">× 1.30</div>
+    <!-- Credit Transfer panel -->
+    <div class="panel" id="ctPanel" style="display:none;">
+      <h3>Enter amount in $</h3>
+
+      <div class="field">
+        <label>Amount (USD)</label>
+        <input id="ctAmount" type="number" inputmode="decimal" placeholder="مثال: 10" min="1" step="0.01" />
       </div>
-      <div class="calcPrice" id="ctPrice">$0.00</div>
-      <div class="calcNote" id="ctNote">ALFA: amount × 1.30</div>
+
+      <div class="field">
+        <label>Phone Number (required)</label>
+        <input id="ctPhone" type="tel" placeholder="مثال: 70912345" />
+      </div>
+
+      <div class="panelFooter">
+        <div>
+          <div class="total" id="ctTotal">$0.00</div>
+          <div class="subNote" id="ctHint">Total will be calculated</div>
+        </div>
+        <button class="buyBtn buyWide" id="ctBuy">BUY</button>
+      </div>
     </div>
 
-    <section class="grid" id="grid"></section>
+    <!-- Products list -->
+    <section class="list" id="list"></section>
   </main>
 
   <script>
@@ -272,40 +308,86 @@
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const grid = document.getElementById("grid");
+    const CREDIT_TRANSFER_PRODUCT_ID = 57;
+
+    // ===== Prices (since no min_price in DB) =====
+    const PRICES = {
+      // ALFA Cards
+      "ALFA Cards 1.22$": 1.67,
+      "ALFA Cards 3.03$": 3.65,
+      "ALFA Cards 4.5$": 5.26,
+      "ALFA Cards 7.58$": 8.65,
+      "ALFA Cards 10$": 11.30,
+      "ALFA Cards 15.15$": 16.95,
+      "ALFA Cards 22.73$": 25.27,
+      "ALFA Cards 77.28$": 85.20,
+
+      // ALFA uShare
+      "ALFA uShare 5.5 GB": 6.80,
+      "ALFA uShare 11 GB": 8.30,
+      "ALFA uShare 16.5 GB": 11.11,
+      "ALFA uShare 22 GB": 12.22,
+      "ALFA uShare 33 GB": 15.00,
+      "ALFA uShare 44 GB": 19.45,
+      "ALFA uShare 55 GB": 24.45,
+      "ALFA uShare 66 GB": 27.25,
+
+      // MTC Cards
+      "MTC Cards 1.67$": 2.13,
+      "MTC Cards 3.79$": 4.48,
+      "MTC Cards 4.5$": 5.25,
+      "MTC Cards 7.58$": 8.65,
+      "MTC Cards 10$": 11.30,
+      "MTC Cards 15.15$": 16.95,
+      "MTC Cards 22.73$": 25.30,
+      "MTC Cards 77.28$": 85.16,
+
+      // MTC Start
+      "MTC Start 4.5$": 5.31
+    };
+
+    const listEl = document.getElementById("list");
     const msg = document.getElementById("msg");
     const qInput = document.getElementById("qInput");
     const filters = document.getElementById("filters");
     const alfaSub = document.getElementById("alfaSub");
     const ctSub = document.getElementById("ctSub");
 
-    const ctCalc = document.getElementById("ctCalc");
+    const ctPanel = document.getElementById("ctPanel");
     const ctAmount = document.getElementById("ctAmount");
-    const ctPrice = document.getElementById("ctPrice");
-    const ctRatePill = document.getElementById("ctRatePill");
-    const ctNote = document.getElementById("ctNote");
+    const ctPhone = document.getElementById("ctPhone");
+    const ctTotal = document.getElementById("ctTotal");
+    const ctHint = document.getElementById("ctHint");
+    const ctBuy = document.getElementById("ctBuy");
+
+    const searchWrap = document.getElementById("searchWrap");
+
+    const overlayPop = document.getElementById("overlayPop");
+    const closePop = document.getElementById("closePop");
+    const cancelPop = document.getElementById("cancelPop");
+    const confirmPop = document.getElementById("confirmPop");
+    const popTitle = document.getElementById("popTitle");
+    const popPhone = document.getElementById("popPhone");
+    const phoneField = document.getElementById("phoneField");
+
+    let popCtx = null;
 
     function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     function setMsg(t){ msg.textContent = t || ""; }
-
-    function iconForTitle(title){
-      const t = (title || "").toLowerCase();
-      if(t.includes("alfa")) return "🟦";
-      if(t.includes("mtc")) return "🟩";
-      if(t.includes("credit transfer")) return "💸";
-      if(t.includes("ushare")) return "🌐";
-      return "📦";
-    }
-
-    function openProduct(p){
-      // go to account.html (same logic as your site)
-      location.href = `account.html?id=${encodeURIComponent(p.id)}`;
-    }
 
     document.getElementById("backBtn").onclick = () => {
       if (history.length > 1) history.back();
       else location.href = "services.html";
     };
+
+    async function requireLogin(){
+      const { data:{session} } = await sb.auth.getSession();
+      if(!session){
+        location.href = "login.html";
+        return null;
+      }
+      return session;
+    }
 
     async function loadBalance() {
       const el = document.getElementById("balanceText");
@@ -335,126 +417,249 @@
     let mode = "ALFA";            // ALFA | MTC | CREDIT_TRANSFER
     let alfaMode = "CARDS";       // CARDS | USHARE | INTERNET
     let ctMode = "CREDIT_ALFA";   // CREDIT_ALFA | CREDIT_MTC
-    let allProducts = [];
     let tmr = null;
 
     function showRightSubFilters(){
       if(mode === "ALFA"){
         alfaSub.style.display = "flex";
         ctSub.style.display = "none";
-        ctCalc.style.display = "none";
       }else if(mode === "CREDIT_TRANSFER"){
         alfaSub.style.display = "none";
         ctSub.style.display = "flex";
-        ctCalc.style.display = "block";
       }else{
         alfaSub.style.display = "none";
         ctSub.style.display = "none";
-        ctCalc.style.display = "none";
       }
     }
 
-    function updateCreditTransferUI(){
-      const rate = (ctMode === "CREDIT_ALFA") ? 1.30 : 1.25;
-      ctRatePill.textContent = `× ${rate.toFixed(2)}`;
-      ctNote.textContent = (ctMode === "CREDIT_ALFA")
-        ? "ALFA: amount × 1.30"
-        : "MTC: amount × 1.25";
-
-      const val = parseFloat(String(ctAmount.value || "").replace(/,/g,"."));
-      const amount = isNaN(val) ? 0 : val;
-      const total = amount * rate;
-      ctPrice.textContent = `$${total.toFixed(2)}`;
+    function showCTPanel(){
+      if(mode === "CREDIT_TRANSFER"){
+        ctPanel.style.display = "block";
+        listEl.style.display = "none";
+        searchWrap.style.display = "none";
+      }else{
+        ctPanel.style.display = "none";
+        listEl.style.display = "flex";
+        searchWrap.style.display = "block";
+      }
     }
 
-    function render(list){
-      grid.innerHTML = "";
+    function isUshareTitle(title){
+      return (title || "").toLowerCase().includes("ushare");
+    }
+
+    function openPopup(ctx){
+      popCtx = ctx;
+      popTitle.textContent = "Buy: " + (ctx.note || "");
+      popPhone.value = "";
+      phoneField.style.display = ctx.phoneRequired ? "block" : "none";
+      overlayPop.classList.add("show");
+      if(ctx.phoneRequired) popPhone.focus();
+    }
+    function closePopup(){
+      overlayPop.classList.remove("show");
+      popCtx = null;
+    }
+    closePop.onclick = closePopup;
+    cancelPop.onclick = closePopup;
+    overlayPop.addEventListener("click", (e)=>{
+      if(e.target === overlayPop) closePopup();
+    });
+
+    async function createOrder({product_id, price, phone, note}){
+      const session = await requireLogin();
+      if(!session) return;
+
+      const payload = {
+        user_id: session.user.id,
+        product_id,
+        price,
+        status: "pending",
+        note: note || null
+      };
+      if(phone) payload.player_id = phone;
+
+      const { error } = await sb.from("orders").insert([payload]);
+      if(error){
+        alert("Order error: " + error.message);
+        return;
+      }
+
+      alert("✅ Order created");
+      loadBalance();
+    }
+
+    confirmPop.onclick = async ()=>{
+      if(!popCtx) return;
+
+      let phone = popPhone.value.trim();
+      if(popCtx.phoneRequired && !phone){
+        alert("Phone number is required");
+        return;
+      }
+
+      await createOrder({
+        product_id: popCtx.product_id,
+        price: popCtx.price,
+        phone: phone || null,
+        note: popCtx.note
+      });
+
+      closePopup();
+    };
+
+    // ===== Credit Transfer =====
+    function rateForCT(){
+      return (ctMode === "CREDIT_ALFA") ? 1.30 : 1.25;
+    }
+    function updateCTTotal(){
+      const amt = Number(ctAmount.value || 0);
+      const total = amt > 0 ? (amt * rateForCT()) : 0;
+      ctTotal.textContent = "$" + total.toFixed(2);
+      ctHint.textContent = total > 0 ? "Total calculated" : "Total will be calculated";
+    }
+    ctAmount.addEventListener("input", updateCTTotal);
+
+    ctBuy.onclick = async ()=>{
+      const amt = Number(ctAmount.value || 0);
+      const phone = (ctPhone.value || "").trim();
+
+      if(!(amt > 0)){
+        alert("Enter amount");
+        return;
+      }
+      if(!phone){
+        alert("Phone number is required");
+        return;
+      }
+
+      const total = (amt * rateForCT());
+      const note = (ctMode === "CREDIT_ALFA")
+        ? `Credit Transfer ALFA - Amount: ${amt}$`
+        : `Credit Transfer MTC - Amount: ${amt}$`;
+
+      await createOrder({
+        product_id: CREDIT_TRANSFER_PRODUCT_ID,
+        price: Number(total.toFixed(2)),
+        phone,
+        note
+      });
+
+      ctAmount.value = "";
+      ctPhone.value = "";
+      updateCTTotal();
+    };
+
+    // ===== Load products (from DB titles only) =====
+    async function fetchProducts(){
+      setMsg("Loading...");
+      listEl.innerHTML = "";
+
+      let req = sb
+        .from("products")
+        .select("id,title,category,active")
+        .eq("active", true)
+        .eq("category", "Phone recharge")
+        .limit(500);
+
+      // filter by mode
+      if(mode === "ALFA"){
+        req = req.ilike("title", "ALFA%");
+      }else if(mode === "MTC"){
+        req = req.ilike("title", "MTC%");
+      }else{
+        // credit transfer doesn't need list
+      }
+
+      const { data, error } = await req;
+      if(error){
+        setMsg("Error: " + error.message);
+        return [];
+      }
+      return (data || []);
+    }
+
+    function applySubFilter(list){
+      if(mode !== "ALFA") return list;
+
+      if(alfaMode === "CARDS"){
+        return list.filter(x => (x.title || "").toLowerCase().includes("cards"));
+      }
+      if(alfaMode === "USHARE"){
+        return list.filter(x => (x.title || "").toLowerCase().includes("ushare"));
+      }
+      // INTERNET
+      return list.filter(x => (x.title || "").toLowerCase().includes("internet"));
+    }
+
+    function applySearch(list){
+      const q = (qInput.value || "").trim().toLowerCase();
+      if(q.length < 2) return list;
+      return list.filter(x => (x.title || "").toLowerCase().includes(q));
+    }
+
+    function renderList(list){
+      listEl.innerHTML = "";
       if(!list || list.length === 0){
-        setMsg("No products found.");
+        setMsg(mode === "ALFA" && alfaMode === "INTERNET" ? "No Internet products yet." : "No products found.");
         return;
       }
       setMsg("");
 
-      grid.innerHTML = list.map(p=>{
-        const pr = Number(p.min_price || 0);
-        const ic = iconForTitle(p.title);
+      // sort for nicer order
+      list = list.slice().sort((a,b)=> String(a.title).localeCompare(String(b.title)));
+
+      listEl.innerHTML = list.map(p=>{
+        const price = PRICES[p.title] ?? 0;
+        const phoneReq = (mode==="ALFA" && alfaMode==="USHARE") ? 1 : 0;
         return `
-          <div class="card" data-id="${esc(p.id)}">
-            <div class="imgBox"><span>${ic}</span></div>
-            <div class="cBody">
-              <div>
-                <div class="cTitle">${esc(p.title)}</div>
-                <div class="cMeta">${esc(p.category || "")}</div>
-              </div>
-              <div class="cPrice">${pr ? "$"+pr.toFixed(2) : ""}</div>
+          <div class="row" data-id="${esc(p.id)}" data-title="${esc(p.title)}" data-price="${esc(price)}" data-phone="${phoneReq}">
+            <div class="rowL">
+              <div class="rowTitle">${esc(p.title)}</div>
+              <div class="rowMeta">${esc(p.category || "")}</div>
+            </div>
+            <div class="rowR">
+              <div class="rowPrice">${price ? "$"+Number(price).toFixed(2) : ""}</div>
+              <button class="buyBtn">BUY</button>
             </div>
           </div>
         `;
       }).join("");
 
-      Array.from(grid.querySelectorAll(".card")).forEach(el=>{
-        el.onclick = ()=>{
-          const id = el.getAttribute("data-id");
-          const p = list.find(x => String(x.id) === String(id));
-          if(p) openProduct(p);
+      Array.from(listEl.querySelectorAll(".row")).forEach(row=>{
+        const btn = row.querySelector(".buyBtn");
+        btn.onclick = async ()=>{
+          const product_id = Number(row.getAttribute("data-id"));
+          const title = row.getAttribute("data-title") || "";
+          const price = Number(row.getAttribute("data-price") || 0);
+          const phoneRequired = row.getAttribute("data-phone") === "1";
+
+          if(!price){
+            alert("Price missing for this item. Check PRICES in code.");
+            return;
+          }
+
+          openPopup({
+            product_id,
+            price,
+            note: title,
+            phoneRequired
+          });
         };
       });
     }
 
-    async function fetchPhoneRechargeProducts(){
-      setMsg("Loading...");
-      grid.innerHTML = "";
+    async function loadList(){
+      const data = await fetchProducts();
+      let list = data;
 
-      const { data, error } = await sb
-        .from("products_with_min_price")
-        .select("id,title,category,min_price,active")
-        .eq("active", true)
-        .eq("category", "Phone recharge")
-        .limit(200);
+      list = applySubFilter(list);
+      list = applySearch(list);
 
-      if(error){
-        setMsg("Error: " + error.message);
-        return;
-      }
-
-      allProducts = data || [];
-      loadProducts();
+      renderList(list);
     }
 
-    function loadProducts(){
-      const q = (qInput.value || "").trim().toLowerCase();
-
-      // Credit Transfer shows calculator only (no cards list)
-      if(mode === "CREDIT_TRANSFER"){
-        setMsg("");
-        grid.innerHTML = "";
-        updateCreditTransferUI();
-        return;
-      }
-
-      // Internet (coming soon)
-      if(mode === "ALFA" && alfaMode === "INTERNET"){
-        setMsg("No Internet products yet.");
-        grid.innerHTML = "";
-        return;
-      }
-
-      let wantedTitle = "";
-      if(mode === "ALFA" && alfaMode === "CARDS") wantedTitle = "ALFA Cards";
-      if(mode === "ALFA" && alfaMode === "USHARE") wantedTitle = "ALFA uShare";
-      if(mode === "MTC") wantedTitle = "MTC Cards";
-
-      let list = allProducts.filter(p => String(p.title || "").toLowerCase() === wantedTitle.toLowerCase());
-
-      // search within title
-      if(q.length >= 2){
-        list = list.filter(p => String(p.title || "").toLowerCase().includes(q));
-      }
-
-      render(list);
-    }
-
-    // ===== UI events =====
+    // ===== Tabs events =====
     filters.addEventListener("click", (e)=>{
       const btn = e.target.closest(".fbtn");
       if(!btn) return;
@@ -479,7 +684,14 @@
       }
 
       showRightSubFilters();
-      loadProducts();
+      showCTPanel();
+
+      if(mode !== "CREDIT_TRANSFER"){
+        loadList();
+      }else{
+        updateCTTotal();
+        setMsg("");
+      }
     });
 
     alfaSub.addEventListener("click", (e)=>{
@@ -493,7 +705,7 @@
       Array.from(alfaSub.querySelectorAll(".fbtn")).forEach(b=> b.classList.remove("active"));
       btn.classList.add("active");
 
-      loadProducts();
+      loadList();
     });
 
     ctSub.addEventListener("click", (e)=>{
@@ -507,19 +719,19 @@
       Array.from(ctSub.querySelectorAll(".fbtn")).forEach(b=> b.classList.remove("active"));
       btn.classList.add("active");
 
-      updateCreditTransferUI();
-      loadProducts();
+      updateCTTotal();
     });
 
     qInput.addEventListener("input", ()=>{
       clearTimeout(tmr);
-      tmr = setTimeout(loadProducts, 250);
+      tmr = setTimeout(loadList, 200);
     });
 
-    ctAmount.addEventListener("input", updateCreditTransferUI);
-
+    // init
     showRightSubFilters();
-    fetchPhoneRechargeProducts();
+    showCTPanel();
+    loadList();
+    updateCTTotal();
   </script>
 </body>
 </html>
