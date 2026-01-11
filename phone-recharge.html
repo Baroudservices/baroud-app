@@ -359,7 +359,6 @@
     const phoneReq = document.getElementById("phoneReq");
     const phoneHint = document.getElementById("phoneHint");
 
-    function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     function setMsg(t){ msg.textContent = t || ""; }
     function money(x){ return "$" + Number(x || 0).toFixed(2); }
 
@@ -394,7 +393,7 @@
     let ctMode = "CREDIT_ALFA";
     let tmr = null;
 
-    let pendingBuy = null; // { product_id, title, plan_label, price, phone_required, product_title }
+    let pendingBuy = null; // { product_id, product_title, plan_label, title, price, phone_required }
 
     function showRightSubFilters(){
       if(mode === "ALFA"){
@@ -438,11 +437,9 @@
     }
 
     function phoneRequiredForSection(){
-      if(mode === "ALFA" && alfaMode === "USHARE") return true; // uShare required
-      return false; // others optional
+      if(mode === "ALFA" && alfaMode === "USHARE") return true;
+      return false;
     }
-
-    // ---- DB helpers ----
 
     async function findProductByTitleLike(titleLike){
       const { data, error } = await sb
@@ -469,19 +466,6 @@
       return { ok:true, rows: data || [] };
     }
 
-    async function fallbackProductsWithMinPrice(keyword){
-      const { data, error } = await sb
-        .from("products_with_min_price")
-        .select("id,title,category,min_price,active")
-        .eq("active", true)
-        .eq("category", "Phone recharge")
-        .ilike("title", `%${keyword}%`)
-        .limit(200);
-
-      if(error) return { ok:false, error };
-      return { ok:true, rows: data || [] };
-    }
-
     function renderRows(rows){
       listEl.innerHTML = "";
       if(!rows || rows.length === 0){
@@ -493,10 +477,10 @@
       listEl.innerHTML = rows.map((r, idx)=>{
         return `
           <div class="item">
-            <div class="iconBox">${esc(r.icon || "📦")}</div>
+            <div class="iconBox">${r.icon || "📦"}</div>
             <div class="info">
-              <div class="title">${esc(r.title || "")}</div>
-              <div class="meta">${esc(r.meta || "")}</div>
+              <div class="title">${r.title || ""}</div>
+              <div class="meta">${r.meta || ""}</div>
             </div>
             <div class="right">
               <div class="price">${money(r.price || 0)}</div>
@@ -514,7 +498,7 @@
       });
     }
 
-    // ---- Modal ----
+    // ===== Modal =====
     function openBuyModal(row){
       pendingBuy = row;
       mErr.textContent = "";
@@ -525,76 +509,44 @@
 
       if(row.phone_required){
         phoneReq.textContent = "(required)";
-        phoneHint.textContent = row.phone_hint || "Required";
+        phoneHint.textContent = "Required";
       }else{
         phoneReq.textContent = "(optional)";
-        phoneHint.textContent = row.phone_hint || "Optional";
+        phoneHint.textContent = "Optional";
       }
 
       buyModal.style.display = "flex";
     }
+
     function closeBuyModal(){
       buyModal.style.display = "none";
       pendingBuy = null;
     }
+
     mCancel.onclick = closeBuyModal;
     buyModal.addEventListener("click", (e)=>{ if(e.target === buyModal) closeBuyModal(); });
 
-    // ---- RPC with FALLBACK PARAM NAMES ----
-    async function rpcPlaceOrder(payload){
-      // Try 1: transfer_number (your screenshot shows this exists)
-      let res = await sb.rpc("place_order_with_balance", {
-        p_product_id: payload.product_id,
-        p_price: payload.price,
-        p_note: payload.note || null,
-        p_plan_label: payload.plan_label || null,
-        p_product_title: payload.product_title || null,
-        p_category: payload.category || "Phone recharge",
-        p_transfer_number: payload.phone || null
-      });
-
-      if(!res.error) return res;
-
-      // Try 2: player_id (older versions)
-      res = await sb.rpc("place_order_with_balance", {
-        p_product_id: payload.product_id,
-        p_price: payload.price,
-        p_note: payload.note || null,
-        p_plan_label: payload.plan_label || null,
-        p_product_title: payload.product_title || null,
-        p_category: payload.category || "Phone recharge",
-        p_player_id: payload.phone || null
-      });
-
-      if(!res.error) return res;
-
-      // Try 3: minimal (in case your function only accepts 2-3 params)
-      res = await sb.rpc("place_order_with_balance", {
-        p_product_id: payload.product_id,
-        p_price: payload.price,
-        p_note: payload.note || null
-      });
-
-      return res; // return final (may include error)
-    }
-
-    async function placeOrder({ product_id, price, phone, note, plan_label, product_title }){
+    // ✅ IMPORTANT FIX:
+    // Use ONLY ONE signature to avoid ambiguity (the extended one)
+    async function placeOrderUnified({ product_id, price, phone, note, plan_label, product_title }){
       const { data: { session } } = await sb.auth.getSession();
       if(!session){
         location.replace("login.html");
         return { ok:false, message:"Not logged in" };
       }
 
-      const { data, error } = await rpcPlaceOrder({
-        product_id,
-        price,
-        phone,
-        note,
-        plan_label,
-        product_title,
-        category: "Phone recharge"
-      });
+      const payload = {
+        p_product_id: product_id,
+        p_price: price,
+        // ALWAYS send p_player_id (even if optional) to avoid RPC overload ambiguity
+        p_player_id: (phone && phone.trim()) ? phone.trim() : "",
+        p_note: note || "",
+        p_plan_label: plan_label || "",
+        p_product_title: product_title || "",
+        p_category: "Phone recharge"
+      };
 
+      const { data, error } = await sb.rpc("place_order_with_balance", payload);
       if(error) return { ok:false, message:error.message };
       return { ok:true, order_id: data };
     }
@@ -613,12 +565,12 @@
       mErr.textContent = "Processing...";
       mConfirm.disabled = true;
 
-      const res = await placeOrder({
+      const res = await placeOrderUnified({
         product_id: pendingBuy.product_id,
         price: pendingBuy.price,
         phone,
         note,
-        plan_label: pendingBuy.plan_label || null,
+        plan_label: pendingBuy.plan_label || "",
         product_title: pendingBuy.product_title || pendingBuy.title
       });
 
@@ -634,7 +586,7 @@
       setTimeout(()=> closeBuyModal(), 700);
     };
 
-    // ---- Load Section ----
+    // ---- Load Section from product_plan_prices ----
     async function loadSection(){
       const q = (qInput.value || "").trim().toLowerCase();
 
@@ -649,67 +601,32 @@
 
       const like = sectionProductLike();
       const product = await findProductByTitleLike(like);
-
-      if(product){
-        const plansRes = await loadPlans(product.id);
-        if(plansRes.ok){
-          let rows = plansRes.rows || [];
-          if(q.length >= 2){
-            rows = rows.filter(r => String(r.plan_label || "").toLowerCase().includes(q));
-          }
-
-          const reqPhone = phoneRequiredForSection();
-          const uiRows = rows.map(r => ({
-            product_id: product.id,
-            product_title: product.title,
-            plan_label: r.plan_label,
-            title: r.plan_label || product.title,
-            meta: product.title,
-            price: Number(r.price || 0),
-            icon: sectionIcon(),
-            phone_required: reqPhone,
-            phone_hint: reqPhone ? "Required for uShare" : "Optional"
-          }));
-
-          renderRows(uiRows);
-          return;
-        }
-      }
-
-      // fallback
-      const keyword = (mode === "ALFA") ? "alfa" : "mtc";
-      const fb = await fallbackProductsWithMinPrice(keyword);
-      if(!fb.ok){
-        setMsg("Error: " + fb.error.message);
+      if(!product){
+        setMsg("Product not found in DB (by title like).");
         return;
       }
 
-      let rows = fb.rows || [];
-      if(mode === "ALFA"){
-        if(alfaMode === "CARDS"){
-          rows = rows.filter(p => String(p.title||"").toLowerCase().includes("cards"));
-        }else if(alfaMode === "USHARE"){
-          rows = rows.filter(p => String(p.title||"").toLowerCase().includes("ushare") || String(p.title||"").toLowerCase().includes("gb"));
-        }
-      }else{
-        rows = rows.filter(p => String(p.title||"").toLowerCase().includes("cards"));
+      const plansRes = await loadPlans(product.id);
+      if(!plansRes.ok){
+        setMsg("Error loading plans: " + plansRes.error.message);
+        return;
       }
 
+      let rows = plansRes.rows || [];
       if(q.length >= 2){
-        rows = rows.filter(p => String(p.title||"").toLowerCase().includes(q));
+        rows = rows.filter(r => String(r.plan_label || "").toLowerCase().includes(q));
       }
 
       const reqPhone = phoneRequiredForSection();
-      const uiRows = rows.map(p => ({
-        product_id: p.id,
-        product_title: p.title,
-        plan_label: null,
-        title: p.title,
-        meta: "Phone recharge",
-        price: Number(p.min_price || 0),
+      const uiRows = rows.map(r => ({
+        product_id: product.id,
+        product_title: product.title,
+        plan_label: r.plan_label,
+        title: r.plan_label || product.title,
+        meta: product.title,
+        price: Number(r.price || 0),
         icon: sectionIcon(),
-        phone_required: reqPhone,
-        phone_hint: reqPhone ? "Required for uShare" : "Optional"
+        phone_required: reqPhone
       }));
 
       renderRows(uiRows);
@@ -736,7 +653,6 @@
       ctHelp.textContent = `Credit Transfer (${ctProviderLabel()})`; // multiplier hidden
       return { amt, total };
     }
-
     ctAmount.addEventListener("input", ()=> updateCtTotal());
 
     ctBuyBtn.onclick = async ()=>{
@@ -756,9 +672,9 @@
       ctBuyBtn.textContent = "Processing...";
 
       const note = `Credit Transfer ${ctProviderLabel()} | amount $${amt.toFixed(2)}`;
-      const planLabel = `${ctProviderLabel()} $${amt.toFixed(2)}`;
+      const planLabel = `Credit ${ctProviderLabel()} $${amt.toFixed(2)}`;
 
-      const res = await placeOrder({
+      const res = await placeOrderUnified({
         product_id: product.id,
         price: total,
         phone,
