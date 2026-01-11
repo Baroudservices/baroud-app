@@ -219,8 +219,10 @@
 
     <!-- ✅ Logout مباشرة تحت Help -->
     <button class="m-item logout-item" id="logoutBtn" type="button">
-      <div class="m-dot logout-dot"></div><span>Logout</span>
-    </button>
+  <div class="m-dot logout-dot"></div>
+  <span>Logout</span>
+</button>
+
 
     <!-- WhatsApp يبقى بالآخر -->
     <a class="m-item" style="margin-top:auto;"
@@ -382,8 +384,16 @@
     }
 
     const logoutBtn = document.getElementById("logoutBtn");
-    if(logoutBtn){
-      logoutBtn.addEventListener("click", ()=>{
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await sb.auth.signOut(); // logout من Supabase
+    } catch (e) {
+      console.error(e);
+    }
+    location.href = "index.html"; // تحويل
+  });
+}
         const logoutModal = document.getElementById("logoutModal");
 const logoutCancel = document.getElementById("logoutCancel");
 const logoutConfirm = document.getElementById("logoutConfirm");
