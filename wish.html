@@ -359,7 +359,7 @@
       const file = receipt.files?.[0];
       const transferNumber = (transferNumberEl.value || "").trim();
 
-      if(!amount || amount < 10){
+      if(!amount || amount < 4){
         sending = false;
         return showOverlay("Error ❌","Minimum deposit is 10$");
       }
