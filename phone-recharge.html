@@ -156,6 +156,53 @@
     .cPrice{ font-weight: 950; color:#38bdf8; font-size: 13px; white-space: nowrap; }
 
     .msg{ opacity:.7; font-weight:800; padding: 12px 4px; text-align:center; }
+
+    /* Credit transfer calc box */
+    .calc{
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 8px;
+    }
+    .calcRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top: 10px;
+    }
+    .calc input{
+      flex:1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      color:#fff;
+      outline:none;
+      font-size: 15px;
+      font-weight: 850;
+    }
+    .pill{
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
+      font-weight: 900;
+      white-space:nowrap;
+      opacity:.9;
+    }
+    .calcPrice{
+      margin-top: 10px;
+      font-weight: 950;
+      color:#38bdf8;
+      font-size: 16px;
+    }
+    .calcNote{
+      opacity:.65;
+      font-weight: 800;
+      font-size: 12px;
+      margin-top: 6px;
+    }
   </style>
 </head>
 
@@ -205,6 +252,18 @@
     </div>
 
     <div class="msg" id="msg"></div>
+
+    <!-- Credit transfer calculator -->
+    <div class="calc" id="ctCalc" style="display:none;">
+      <div style="font-weight:950;">Enter amount in $</div>
+      <div class="calcRow">
+        <input id="ctAmount" inputmode="decimal" placeholder="مثال: 10" />
+        <div class="pill" id="ctRatePill">× 1.30</div>
+      </div>
+      <div class="calcPrice" id="ctPrice">$0.00</div>
+      <div class="calcNote" id="ctNote">ALFA: amount × 1.30</div>
+    </div>
+
     <section class="grid" id="grid"></section>
   </main>
 
@@ -220,19 +279,26 @@
     const alfaSub = document.getElementById("alfaSub");
     const ctSub = document.getElementById("ctSub");
 
+    const ctCalc = document.getElementById("ctCalc");
+    const ctAmount = document.getElementById("ctAmount");
+    const ctPrice = document.getElementById("ctPrice");
+    const ctRatePill = document.getElementById("ctRatePill");
+    const ctNote = document.getElementById("ctNote");
+
     function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     function setMsg(t){ msg.textContent = t || ""; }
 
     function iconForTitle(title){
       const t = (title || "").toLowerCase();
-      if(t.includes("kl 1$")) return "💸";
-      if(t.includes("gb")) return "🌐";
       if(t.includes("alfa")) return "🟦";
       if(t.includes("mtc")) return "🟩";
+      if(t.includes("credit transfer")) return "💸";
+      if(t.includes("ushare")) return "🌐";
       return "📦";
     }
 
     function openProduct(p){
+      // go to account.html (same logic as your site)
       location.href = `account.html?id=${encodeURIComponent(p.id)}`;
     }
 
@@ -269,54 +335,36 @@
     let mode = "ALFA";            // ALFA | MTC | CREDIT_TRANSFER
     let alfaMode = "CARDS";       // CARDS | USHARE | INTERNET
     let ctMode = "CREDIT_ALFA";   // CREDIT_ALFA | CREDIT_MTC
+    let allProducts = [];
     let tmr = null;
 
     function showRightSubFilters(){
       if(mode === "ALFA"){
         alfaSub.style.display = "flex";
         ctSub.style.display = "none";
+        ctCalc.style.display = "none";
       }else if(mode === "CREDIT_TRANSFER"){
         alfaSub.style.display = "none";
         ctSub.style.display = "flex";
+        ctCalc.style.display = "block";
       }else{
         alfaSub.style.display = "none";
         ctSub.style.display = "none";
+        ctCalc.style.display = "none";
       }
     }
 
-    function baseKeyword(){
-      if(mode === "ALFA") return "alfa";
-      if(mode === "MTC") return "mtc";
-      return (ctMode === "CREDIT_ALFA") ? "alfa" : "mtc";
-    }
+    function updateCreditTransferUI(){
+      const rate = (ctMode === "CREDIT_ALFA") ? 1.30 : 1.25;
+      ctRatePill.textContent = `× ${rate.toFixed(2)}`;
+      ctNote.textContent = (ctMode === "CREDIT_ALFA")
+        ? "ALFA: amount × 1.30"
+        : "MTC: amount × 1.25";
 
-    function extraFilters(){
-      const f = [];
-
-      if(mode === "ALFA"){
-        if(alfaMode === "CARDS"){
-          f.push({type:"ilike", col:"title", val:"%$%"});
-          f.push({type:"not_ilike", col:"title", val:"%kl 1$%"});
-          f.push({type:"not_ilike", col:"title", val:"%gb%"});
-        }else if(alfaMode === "USHARE"){
-          f.push({type:"ilike", col:"title", val:"%gb%"});
-          f.push({type:"not_ilike", col:"title", val:"%kl 1$%"});
-        }else{
-          f.push({type:"ilike", col:"title", val:"%internet%"});
-        }
-      }
-
-      if(mode === "MTC"){
-        f.push({type:"ilike", col:"title", val:"%$%"});
-        f.push({type:"not_ilike", col:"title", val:"%kl 1$%"});
-        f.push({type:"not_ilike", col:"title", val:"%gb%"});
-      }
-
-      if(mode === "CREDIT_TRANSFER"){
-        f.push({type:"ilike", col:"title", val:"%kl 1$%"});
-      }
-
-      return f;
+      const val = parseFloat(String(ctAmount.value || "").replace(/,/g,"."));
+      const amount = isNaN(val) ? 0 : val;
+      const total = amount * rate;
+      ctPrice.textContent = `$${total.toFixed(2)}`;
     }
 
     function render(list){
@@ -353,43 +401,57 @@
       });
     }
 
-    async function loadProducts(){
-      const q = (qInput.value || "").trim().toLowerCase();
+    async function fetchPhoneRechargeProducts(){
       setMsg("Loading...");
       grid.innerHTML = "";
 
-      // ✅ مهم: شلّينا شرط category لأنه كان عم يمنع النتائج إذا مش مزبوط بالـ DB
-      let req = sb
+      const { data, error } = await sb
         .from("products_with_min_price")
-        .select("id,title,category,min_price")
+        .select("id,title,category,min_price,active")
         .eq("active", true)
-        .ilike("title", `%${baseKeyword()}%`)
-        .limit(80);
+        .eq("category", "Phone recharge")
+        .limit(200);
 
-      for(const f of extraFilters()){
-        if(f.type === "ilike") req = req.ilike(f.col, f.val);
-        if(f.type === "not_ilike") req = req.not(f.col, "ilike", f.val);
-      }
-
-      if(q.length >= 2){
-        req = req.ilike("title", `%${q}%`);
-      }
-
-      const { data, error } = await req;
       if(error){
         setMsg("Error: " + error.message);
         return;
       }
 
-      if(mode === "ALFA" && alfaMode === "INTERNET"){
-        render(data || []);
-        if(!data || data.length === 0){
-          setMsg("No Internet products yet.");
-        }
+      allProducts = data || [];
+      loadProducts();
+    }
+
+    function loadProducts(){
+      const q = (qInput.value || "").trim().toLowerCase();
+
+      // Credit Transfer shows calculator only (no cards list)
+      if(mode === "CREDIT_TRANSFER"){
+        setMsg("");
+        grid.innerHTML = "";
+        updateCreditTransferUI();
         return;
       }
 
-      render(data || []);
+      // Internet (coming soon)
+      if(mode === "ALFA" && alfaMode === "INTERNET"){
+        setMsg("No Internet products yet.");
+        grid.innerHTML = "";
+        return;
+      }
+
+      let wantedTitle = "";
+      if(mode === "ALFA" && alfaMode === "CARDS") wantedTitle = "ALFA Cards";
+      if(mode === "ALFA" && alfaMode === "USHARE") wantedTitle = "ALFA uShare";
+      if(mode === "MTC") wantedTitle = "MTC Cards";
+
+      let list = allProducts.filter(p => String(p.title || "").toLowerCase() === wantedTitle.toLowerCase());
+
+      // search within title
+      if(q.length >= 2){
+        list = list.filter(p => String(p.title || "").toLowerCase().includes(q));
+      }
+
+      render(list);
     }
 
     // ===== UI events =====
@@ -445,6 +507,7 @@
       Array.from(ctSub.querySelectorAll(".fbtn")).forEach(b=> b.classList.remove("active"));
       btn.classList.add("active");
 
+      updateCreditTransferUI();
       loadProducts();
     });
 
@@ -453,9 +516,10 @@
       tmr = setTimeout(loadProducts, 250);
     });
 
+    ctAmount.addEventListener("input", updateCreditTransferUI);
+
     showRightSubFilters();
-    loadProducts();
+    fetchPhoneRechargeProducts();
   </script>
 </body>
 </html>
-```0
