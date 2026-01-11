@@ -128,22 +128,15 @@
       align-items:center;
       gap: 12px;
     }
-
-    /* ✅ بدل iconBox: صور */
-    .pimg{
+    .iconBox{
       width:54px;height:54px;border-radius:16px;
-      border:1px solid rgba(255,255,255,0.10);
-      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      background: radial-gradient(circle at 30% 30%, rgba(0,210,255,.12), transparent 55%),
+                  radial-gradient(circle at 70% 70%, rgba(255,0,200,.10), transparent 55%);
+      border:1px solid rgba(255,255,255,0.06);
       flex:0 0 auto;
-      background: rgba(0,0,0,.18);
+      font-size: 22px;
     }
-    .pimg img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-
     .info{ flex:1; min-width:0; }
     .title{ font-weight:950; font-size:14px; line-height:1.2; }
     .meta{ opacity:.65; font-weight:800; font-size:12px; margin-top:4px; }
@@ -366,7 +359,6 @@
     const phoneReq = document.getElementById("phoneReq");
     const phoneHint = document.getElementById("phoneHint");
 
-    function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
     function setMsg(t){ msg.textContent = t || ""; }
     function money(x){ return "$" + Number(x || 0).toFixed(2); }
 
@@ -380,10 +372,18 @@
       try {
         const { data: { session } } = await sb.auth.getSession();
         if (!session) { el.textContent = "0.00 🇱🇧"; return; }
-        const { data, error } = await sb.from("profiles").select("balance").eq("id", session.user.id).single();
+
+        const { data, error } = await sb
+          .from("profiles")
+          .select("balance")
+          .eq("id", session.user.id)
+          .single();
+
         if (error) { el.textContent = "0.00 🇱🇧"; return; }
         el.textContent = `${Number(data?.balance || 0).toFixed(2)} 🇱🇧`;
-      } catch { el.textContent = "0.00 🇱🇧"; }
+      } catch {
+        el.textContent = "0.00 🇱🇧";
+      }
     }
     loadBalance();
 
@@ -414,6 +414,16 @@
         ctCard.style.display = "none";
         document.getElementById("searchWrap").style.display = "block";
       }
+    }
+
+    function sectionIcon(){
+      if(mode === "ALFA"){
+        if(alfaMode === "CARDS") return "💳";
+        if(alfaMode === "USHARE") return "🌐";
+        if(alfaMode === "INTERNET") return "📶";
+      }
+      if(mode === "MTC") return "💳";
+      return "📦";
     }
 
     function sectionProductLike(){
@@ -456,33 +466,6 @@
       return { ok:true, rows: data || [] };
     }
 
-    // ✅ image per product id
-    function productImageHtml(productId){
-  const id = encodeURIComponent(String(productId ?? "").trim());
-  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, "/")}`;
-  // base = مسار الصفحة الحالية (حتى لو كانت داخل فولدر)
-
-  const jpg = new URL(`assets/products/${id}.jpg`, base).toString();
-  const png = new URL(`assets/products/${id}.png`, base).toString();
-  const def = new URL(`assets/products/default.png`, base).toString();
-
-  return `
-    <div class="pimg">
-      <img
-        src="${jpg}"
-        alt="product"
-        onerror="
-          if(this.dataset.try!='png'){ this.dataset.try='png'; this.src='${png}'; return; }
-          if(this.dataset.try!='def'){ this.dataset.try='def'; this.src='${def}'; return; }
-          this.outerHTML = '<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;opacity:.7\\'>📦</div>';
-        "
-      >
-    </div>
-  `;
-}
-      `;
-    }
-
     function renderRows(rows){
       listEl.innerHTML = "";
       if(!rows || rows.length === 0){
@@ -494,10 +477,10 @@
       listEl.innerHTML = rows.map((r, idx)=>{
         return `
           <div class="item">
-            ${productImageHtml(r.product_id)}
+            <div class="iconBox">${r.icon || "📦"}</div>
             <div class="info">
-              <div class="title">${esc(r.title || "")}</div>
-              <div class="meta">${esc(r.meta || "")}</div>
+              <div class="title">${r.title || ""}</div>
+              <div class="meta">${r.meta || ""}</div>
             </div>
             <div class="right">
               <div class="price">${money(r.price || 0)}</div>
@@ -543,6 +526,8 @@
     mCancel.onclick = closeBuyModal;
     buyModal.addEventListener("click", (e)=>{ if(e.target === buyModal) closeBuyModal(); });
 
+    // ✅ IMPORTANT FIX:
+    // Use ONLY ONE signature to avoid ambiguity (the extended one)
     async function placeOrderUnified({ product_id, price, phone, note, plan_label, product_title }){
       const { data: { session } } = await sb.auth.getSession();
       if(!session){
@@ -553,6 +538,7 @@
       const payload = {
         p_product_id: product_id,
         p_price: price,
+        // ALWAYS send p_player_id (even if optional) to avoid RPC overload ambiguity
         p_player_id: (phone && phone.trim()) ? phone.trim() : "",
         p_note: note || "",
         p_plan_label: plan_label || "",
@@ -600,6 +586,7 @@
       setTimeout(()=> closeBuyModal(), 700);
     };
 
+    // ---- Load Section from product_plan_prices ----
     async function loadSection(){
       const q = (qInput.value || "").trim().toLowerCase();
 
@@ -638,6 +625,7 @@
         title: r.plan_label || product.title,
         meta: product.title,
         price: Number(r.price || 0),
+        icon: sectionIcon(),
         phone_required: reqPhone
       }));
 
@@ -662,8 +650,7 @@
       const amt = parseAmount(ctAmount.value);
       const total = amt * ctMultiplier();
       ctTotal.textContent = money(total);
-      // ✅ multiplier مخفي
-      ctHelp.textContent = `Credit Transfer (${ctProviderLabel()})`;
+      ctHelp.textContent = `Credit Transfer (${ctProviderLabel()})`; // multiplier hidden
       return { amt, total };
     }
     ctAmount.addEventListener("input", ()=> updateCtTotal());
