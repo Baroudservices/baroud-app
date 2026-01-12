@@ -127,10 +127,15 @@
 
   // ✅ إذا اليوزر مسجل دخول لا تخليه يعيد Register
   (async ()=>{
-    const { data: { session } } = await sb.auth.getSession();
-    if(session){
-      location.replace("index.html"); // عدّلها حسب صفحتك
-    }
+  const { data: { session } } = await sb.auth.getSession();
+
+  // ✅ إذا في session بس جايي من reset password (recovery) → خلّيه
+  const params = new URLSearchParams(window.location.search);
+  const isRecovery = params.get("type") === "recovery";
+
+  if(session && !isRecovery){
+    location.replace("index.html"); // أو services.html حسب نظامك
+  }
   })();
 
   btn.addEventListener("click", async ()=>{
