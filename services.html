@@ -206,7 +206,9 @@
 
     <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
       <div style="width:60px; height:60px; background:rgba(255,255,255,0.05); border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; border:2px solid #00d2ff; font-size:25px;">👤</div>
-      <div style="font-weight: 900;">Houssein Baroud</div>
+
+      <!-- ✅ CHANGE ONLY HERE: show logged-in email instead of fixed name -->
+      <div style="font-weight: 900;" id="userEmail">Loading...</div>
     </div>
 
     <div class="m-item" id="homeExit"><div class="m-dot"></div><span>Home</span></div>
@@ -335,6 +337,24 @@
 
     function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
+    // ✅ Load user email in drawer
+    async function loadUserEmail(){
+      const el = document.getElementById("userEmail");
+      if(!el) return;
+
+      try{
+        const { data: { session } } = await sb.auth.getSession();
+        if(!session || !session.user){
+          el.textContent = "Guest";
+          return;
+        }
+        el.textContent = session.user.email || "User";
+      }catch(e){
+        el.textContent = "User";
+      }
+    }
+    loadUserEmail();
+
     // ===== Balance =====
     async function loadBalance() {
       const el = document.getElementById("balanceText");
@@ -450,3 +470,4 @@
   <script src="app-ui.js?v=3"></script>
 </body>
 </html>
+```0
