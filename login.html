@@ -185,6 +185,7 @@
       loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
     }
 
+    // ✅ لو في Session روح مباشرة
     (async ()=>{
       try{
         const { data } = await sb.auth.getSession();
@@ -231,80 +232,18 @@
       }
     }
 
-    async function doRegister(){
-      hideMsg();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("pass").value;
-
-      if(!email || !password){
-        showMsg("Fill email and password.");
-        return;
-      }
-      if(password.length < 6){
-        showMsg("Password must be at least 6 characters.");
-        return;
-      }
-
-      setLoading(true, "Creating...");
-
-      try{
-        const { error } = await sb.auth.signUp({
-          email,
-          password,
-          options:{
-            // ✅ رجّع رابط التأكيد عـ login.html (مش welcome/confirmed)
-            emailRedirectTo: BASE_URL + "login.html"
-          }
-        });
-
-        if(error){
-          showMsg(error.message || "Register failed.");
-          return;
-        }
-
-        showMsg("Register successful ✅ Check your email 📧", true);
-
-      }catch(e){
-        showMsg("Network error. Try again.");
-      }finally{
-        setLoading(false);
-      }
-    }
-
-    async function doReset(){
-  hideMsg();
-  const email = document.getElementById("email").value.trim();
-  if(!email){
-    showMsg("Enter your email first.");
-    return;
-  }
-
-  setLoading(true, "Sending...");
-
-  try{
-    const { error } = await sb.auth.resetPasswordForEmail(email,{
-      // ✅ من الإيميل يفتح صفحة reset.html
-      redirectTo: "https://baroudservices.github.io/baroud-app/reset.html"
+    // ✅ Register button → register.html
+    registerBtn.addEventListener("click", ()=>{
+      location.href = "register.html";
     });
 
-    if(error){
-      showMsg(error.message || "Reset failed.");
-      return;
-    }
+    // ✅ Reset button → send-email-request.html
+    resetBtn.addEventListener("click", ()=>{
+      location.href = "send-email-request.html";
+    });
 
-    showMsg("Reset email sent ✅ Check inbox 📧", true);
-
-  }catch(e){
-    showMsg("Network error. Try again.");
-  }finally{
-    setLoading(false);
-  }
-}
-    }
-
+    // ✅ Login
     loginBtn.addEventListener("click", doLogin);
-    registerBtn.addEventListener("click", doRegister);
-    resetBtn.addEventListener("click", doReset);
 
     document.getElementById("pass").addEventListener("keydown", e=>{
       if(e.key==="Enter") doLogin();
