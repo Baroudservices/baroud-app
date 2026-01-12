@@ -1,38 +1,191 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reset Password</title>
+  <title>Register - Baroud Services</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.10);
+      --shadow:0 18px 70px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui, Arial;
+      background:linear-gradient(180deg,#0b1424,#050a14);
+      color:#fff; min-height:100vh; padding:16px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .wrap{width:min(520px,100%)}
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .brand{font-weight:950; text-align:center; opacity:.9; letter-spacing:.6px}
+    h1{margin:10px 0 6px; font-size:26px; text-align:center}
+    .sub{opacity:.7; text-align:center; margin-bottom:14px}
+    label{display:block; font-size:12px; opacity:.75; margin:10px 0 6px}
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      outline:none;
+      font-size:14px;
+    }
+    .btn{
+      width:100%;
+      padding:12px 14px;
+      border-radius:14px;
+      border:0;
+      cursor:pointer;
+      color:#fff;
+      font-weight:950;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      margin-top:12px;
+    }
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    @media (max-width:520px){ .row{grid-template-columns:1fr} }
+    .msg{margin-top:12px; font-size:13px; opacity:.9}
+    .ok{color:#22c55e}
+    .bad{color:#ef4444}
+    .links{margin-top:12px; display:flex; justify-content:space-between; gap:10px; opacity:.85; font-weight:800}
+    a{color:#7dd3fc; text-decoration:none}
+  </style>
 </head>
-<body style="background:#0b1424;color:#fff;font-family:system-ui;padding:20px">
-  <h2>Reset Password</h2>
-  <input id="newPass" type="password" placeholder="New password"
-    style="width:100%;padding:12px;border-radius:12px;margin:10px 0;">
-  <button id="save"
-    style="width:100%;padding:12px;border-radius:12px;font-weight:900;">
-    Save
-  </button>
-  <div id="msg" style="margin-top:10px;opacity:.85"></div>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">Baroud Services</div>
+      <h1>Register</h1>
+      <div class="sub">Create your account</div>
+
+      <div class="row">
+        <div>
+          <label>Email</label>
+          <input id="email" type="email" placeholder="name@email.com" autocomplete="email" />
+        </div>
+        <div>
+          <label>Phone Number</label>
+          <input id="phone" type="tel" placeholder="+961..." autocomplete="tel" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Password</label>
+          <input id="pass" type="password" placeholder="Min 6 characters" autocomplete="new-password" />
+        </div>
+        <div>
+          <label>Confirm Password</label>
+          <input id="pass2" type="password" placeholder="Repeat password" autocomplete="new-password" />
+        </div>
+      </div>
+
+      <button class="btn" id="btn">Create Account</button>
+      <div class="msg" id="msg"></div>
+
+      <div class="links">
+        <a href="login.html">Login</a>
+        <a href="login.html#reset">Forgot password?</a>
+      </div>
+    </div>
+  </div>
 
 <script>
+  // ✅ عدّلهم إذا لزم
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const SUPABASE_KEY = "sb_publishable_XXXXXXXXXXXX"; // حط مفتاحك
+  const BASE_URL = "https://baroudservices.github.io/baroud-app/";
+
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const msg = (t)=> document.getElementById("msg").textContent = t;
+  const elEmail = document.getElementById("email");
+  const elPhone = document.getElementById("phone");
+  const elPass  = document.getElementById("pass");
+  const elPass2 = document.getElementById("pass2");
+  const btn = document.getElementById("btn");
+  const msg = document.getElementById("msg");
 
-  document.getElementById("save").onclick = async () => {
-    const password = document.getElementById("newPass").value.trim();
-    if(!password){ msg("Enter new password"); return; }
+  function showMsg(t, ok=false){
+    msg.className = "msg " + (ok ? "ok" : "bad");
+    msg.textContent = t || "";
+  }
+  function setLoading(on){
+    btn.disabled = !!on;
+    btn.textContent = on ? "Creating..." : "Create Account";
+  }
 
-    const { error } = await sb.auth.updateUser({ password });
-    if(error){ msg(error.message); return; }
+  // ✅ إذا اليوزر مسجل دخول لا تخليه يعيد Register
+  (async ()=>{
+    const { data: { session } } = await sb.auth.getSession();
+    if(session){
+      location.replace("index.html"); // عدّلها حسب صفحتك
+    }
+  })();
 
-    msg("✅ Password updated. Redirecting to login...");
-    setTimeout(()=> location.href="login.html", 1200);
-  };
+  btn.addEventListener("click", async ()=>{
+    showMsg("");
+    const email = elEmail.value.trim();
+    const phone = elPhone.value.trim();
+    const pass  = elPass.value.trim();
+    const pass2 = elPass2.value.trim();
+
+    if(!email) return showMsg("Enter your email.");
+    if(!phone) return showMsg("Enter your phone number.");
+    if(pass.length < 6) return showMsg("Password must be at least 6 characters.");
+    if(pass !== pass2) return showMsg("Passwords do not match.");
+
+    // ✅ منع ضغط مرتين
+    if(btn.disabled) return;
+
+    setLoading(true);
+
+    try{
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password: pass,
+        options: {
+          // ✅ نخزن الهاتف بالـ metadata (وبالـ SQL تحت مننسخه على profiles تلقائيًا)
+          data: { phone }
+        }
+      });
+
+      if(error){
+        const m = (error.message || "").toLowerCase();
+
+        // ✅ أشهر حالة لما يكون الإيميل مسجل
+        if(m.includes("already") || m.includes("registered") || m.includes("exists")){
+          showMsg("This email is already registered. Please login instead.");
+          return;
+        }
+
+        showMsg(error.message || "Register failed.");
+        return;
+      }
+
+      // ✅ إذا عندك Email confirmation شغال:
+      // data.user موجود، بس session ممكن يكون null → طبيعي
+      showMsg("✅ Account created! Check your email to confirm.", true);
+
+      // (اختياري) بعد ثانيتين يوديه على login
+      setTimeout(()=> location.href = "login.html", 1200);
+
+    }catch(e){
+      showMsg("Network error. Try again.");
+    }finally{
+      setLoading(false);
+    }
+  });
 </script>
 </body>
 </html>
