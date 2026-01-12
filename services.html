@@ -34,6 +34,7 @@
       border-radius: 12px; display: flex; align-items: center;
       justify-content: center; font-size: 22px; cursor: pointer;
       border: 1px solid rgba(255,255,255,0.1);
+      user-select:none;
     }
 
     /* ===== GRID wide tile ===== */
@@ -192,6 +193,14 @@
       padding-top: 15px;
     }
     .logout-dot{ background:#ff4d4d; box-shadow:0 0 8px #ff4d4d; }
+
+    /* user email small */
+    .userEmail{
+      font-weight: 900;
+      font-size: 13px;
+      opacity:.9;
+      word-break:break-word;
+    }
   </style>
 </head>
 
@@ -207,8 +216,8 @@
     <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
       <div style="width:60px; height:60px; background:rgba(255,255,255,0.05); border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; border:2px solid #00d2ff; font-size:25px;">👤</div>
 
-      <!-- ✅ CHANGE ONLY HERE: show logged-in email instead of fixed name -->
-      <div style="font-weight: 900;" id="userEmail">Loading...</div>
+      <!-- ✅ هون بدل الاسم الثابت -->
+      <div class="userEmail" id="userEmail">Loading...</div>
     </div>
 
     <div class="m-item" id="homeExit"><div class="m-dot"></div><span>Home</span></div>
@@ -337,14 +346,14 @@
 
     function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-    // ✅ Load user email in drawer
+    // ✅ Show logged-in user email in sidebar
     async function loadUserEmail(){
       const el = document.getElementById("userEmail");
       if(!el) return;
 
       try{
         const { data: { session } } = await sb.auth.getSession();
-        if(!session || !session.user){
+        if(!session?.user){
           el.textContent = "Guest";
           return;
         }
@@ -380,7 +389,7 @@
     }
     loadBalance();
 
-    // ✅ Logout: signOut + redirect to index.html (بدون أي كود يكسر الصفحة)
+    // ✅ Logout: signOut + redirect to index.html
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", async () => {
@@ -470,4 +479,3 @@
   <script src="app-ui.js?v=3"></script>
 </body>
 </html>
-```0
