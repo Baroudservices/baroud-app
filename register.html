@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register - Baroud Services</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -72,22 +72,22 @@
       <div class="row">
         <div>
           <label>Email</label>
-          <input id="email" type="email" placeholder="name@email.com" autocomplete="email" />
+          <input id="email" type="email" placeholder="name@email.com" autocomplete="email"/>
         </div>
         <div>
           <label>Phone Number</label>
-          <input id="phone" type="tel" placeholder="+961..." autocomplete="tel" />
+          <input id="phone" type="tel" placeholder="+961..." autocomplete="tel"/>
         </div>
       </div>
 
       <div class="row">
         <div>
           <label>Password</label>
-          <input id="pass" type="password" placeholder="Min 6 characters" autocomplete="new-password" />
+          <input id="pass" type="password" placeholder="Min 6 characters" autocomplete="new-password"/>
         </div>
         <div>
           <label>Confirm Password</label>
-          <input id="pass2" type="password" placeholder="Repeat password" autocomplete="new-password" />
+          <input id="pass2" type="password" placeholder="Repeat password" autocomplete="new-password"/>
         </div>
       </div>
 
@@ -96,18 +96,23 @@
 
       <div class="links">
         <a href="login.html">Login</a>
-        <a href="login.html#reset">Forgot password?</a>
+        <a href="send-email-request.html">Forgot password?</a>
       </div>
     </div>
   </div>
 
 <script>
-  // ✅ عدّلهم إذا لزم
+  // Supabase
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ"; // حط مفتاحك
-  const BASE_URL = "https://baroudservices.github.io/baroud-app/";
-
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Base URL ديناميكي (يحافظ على /baroud-app/ أو غيرها)
+  function getBaseUrl(){
+    const basePath = location.pathname.replace(/[^\/]*$/, ""); // remove file name
+    return location.origin + basePath;
+  }
+  const BASE_URL = getBaseUrl();
 
   const elEmail = document.getElementById("email");
   const elPhone = document.getElementById("phone");
@@ -125,62 +130,58 @@
     btn.textContent = on ? "Creating..." : "Create Account";
   }
 
-  // ✅ إذا اليوزر مسجل دخول لا تخليه يعيد Register
+  // إذا في جلسة (ومش جايي من recovery) رجّعو على index.html
   (async ()=>{
-  const { data: { session } } = await sb.auth.getSession();
-
-  // ✅ إذا في session بس جايي من reset password (recovery) → خلّيه
-  const params = new URLSearchParams(window.location.search);
-  const isRecovery = params.get("type") === "recovery";
-
-  if(session && !isRecovery){
-    location.replace("index.html"); // أو services.html حسب نظامك
-  }
+    try{
+      const { data: { session } } = await sb.auth.getSession();
+      const params = new URLSearchParams(window.location.search);
+      const isRecovery = params.get("type") === "recovery";
+      if(session && !isRecovery){
+        location.replace("index.html"); // عدّلها إذا بدك services.html
+      }
+    }catch(e){}
   })();
 
   btn.addEventListener("click", async ()=>{
     showMsg("");
-    const email = elEmail.value.trim();
-    const phone = elPhone.value.trim();
-    const pass  = elPass.value.trim();
-    const pass2 = elPass2.value.trim();
+    const email = (elEmail.value || "").trim().toLowerCase();
+    const phone = (elPhone.value || "").trim();
+    const pass  = (elPass.value || "").trim();
+    const pass2 = (elPass2.value || "").trim();
 
     if(!email) return showMsg("Enter your email.");
     if(!phone) return showMsg("Enter your phone number.");
     if(pass.length < 6) return showMsg("Password must be at least 6 characters.");
     if(pass !== pass2) return showMsg("Passwords do not match.");
-
-    // ✅ منع ضغط مرتين
     if(btn.disabled) return;
 
     setLoading(true);
 
     try{
       const { data, error } = await sb.auth.signUp({
-  email,
-  password,
-  options: {
-    emailRedirectTo: BASE_URL + "login.html"
-  }
-});
+        email,
+        password: pass,
+        options:{
+          // نخزّن رقم الهاتف ضمن user_metadata ليوصلنا بعد التأكيد
+          data: { phone },
+          emailRedirectTo: BASE_URL + "login.html"
+        }
+      });
 
-if(error){
-  const m = (error.message || "").toLowerCase();
+      if(error){
+        const m = (error.message || "").toLowerCase();
+        if(m.includes("already") || m.includes("registered") || m.includes("exists")){
+          showMsg("❌ This email already has an account. Please login instead.");
+          return;
+        }
+        showMsg(error.message || "Register failed.");
+        return;
+      }
 
-  // ✅ إذا الإيميل موجود
-  if(m.includes("already") || m.includes("registered") || m.includes("exists")){
-    showMsg("❌ This email already has an account. Please login instead.");
-    return;
-  }
-
-  showMsg(error.message || "Register failed.");
-  return;
-}
-
-showMsg("✅ Account created! Check your email to confirm.", true);
+      showMsg("✅ Account created! Check your email to confirm.", true);
 
     }catch(e){
-      showMsg("Network error. Try again.");
+      showMsg(e.message || "Network error. Try again.");
     }finally{
       setLoading(false);
     }
