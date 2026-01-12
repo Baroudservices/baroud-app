@@ -1,103 +1,626 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Inventory Management</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Stock</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <style>
-    body { background: #050a14; color: #fff; font-family: system-ui; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
-    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
-    input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; }
-    button { background: #1bc7ff; color: #000; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-    .stock-list { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    .stock-list th, .stock-list td { padding: 12px; border: 1px solid rgba(255,255,255,0.1); text-align: left; }
-    .status-sold { color: #ff4d4d; }
-    .status-available { color: #19c37d; }
+    :root{
+      --bg:#050a14;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.10);
+      --shadow:0 16px 60px rgba(0,0,0,.35);
+      --accent:#0aa0ff;
+      --ok:#22c55e;
+      --bad:#ef4444;
+      --muted:rgba(255,255,255,.65);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#0b1424,var(--bg));
+      color:#fff;
+      min-height:100vh;
+      padding:16px;
+    }
+    .wrap{max-width:1100px;margin:0 auto}
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin-bottom:14px;
+    }
+    .title{font-weight:950; font-size:20px; letter-spacing:.5px}
+    .pill{
+      padding:8px 12px; border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      font-weight:900; font-size:13px;
+      display:flex; gap:10px; align-items:center;
+    }
+    .btn{
+      padding:10px 12px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:#fff; font-weight:950;
+      cursor:pointer;
+    }
+    .btn.primary{
+      border:none;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      box-shadow:0 0 16px rgba(10,160,255,.25);
+    }
+    .btn.danger{border-color:rgba(239,68,68,.35); color:#ffb4b4}
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+    .grid{
+      display:grid;
+      grid-template-columns: 340px 1fr;
+      gap:12px;
+      align-items:start;
+    }
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+    }
+    .cardHead h3{margin:0; font-size:14px; font-weight:950}
+    .cardBody{padding:12px 14px}
+    input, textarea, select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      outline:none;
+      font-size:14px;
+    }
+    textarea{min-height:120px; resize:vertical}
+    .muted{opacity:.7}
+    .list{
+      display:flex; flex-direction:column;
+      gap:8px;
+    }
+    .item{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      cursor:pointer;
+    }
+    .item:hover{background:rgba(255,255,255,.06)}
+    .item.active{
+      border-color: rgba(10,160,255,.45);
+      box-shadow:0 0 18px rgba(10,160,255,.15);
+    }
+    .itemTitle{
+      font-weight:950; font-size:13px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:210px;
+    }
+    .badge{
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      font-weight:950;
+      font-size:12px;
+      opacity:.9;
+      white-space:nowrap;
+    }
+    .badge.ok{border-color:rgba(34,197,94,.35); color:#a7f3d0}
+    .badge.bad{border-color:rgba(239,68,68,.35); color:#fecaca}
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .row > *{flex:1}
+    .stockRow{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+    }
+    .stockText{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12.5px;
+      white-space:pre-wrap;
+      word-break:break-word;
+      opacity:.95;
+    }
+    .miniBtns{display:flex; gap:8px}
+    .msg{margin-top:10px; font-weight:850; font-size:13px; opacity:.9}
+    .msg.ok{color:var(--ok)}
+    .msg.bad{color:var(--bad)}
+    .hint{
+      font-size:12px;
+      opacity:.7;
+      line-height:1.4;
+    }
+    .divider{height:1px;background:rgba(255,255,255,.06); margin:12px 0}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📦 Account Inventory</h1>
-    
-    <div class="card">
-      <h3>Add New Stock</h3>
-      <select id="productSelect"><option value="">Select Product...</option></select>
-      <p style="font-size: 12px; opacity: 0.6;">Enter accounts (One per line):</p>
-      <textarea id="accountsInput" rows="5" placeholder="user1:pass1&#10;user2:pass2"></textarea>
-      <button onclick="addStock()">Add to Stock</button>
-    </div>
+<div class="wrap">
 
-    <div class="card">
-      <h3>Current Stock</h3>
-      <table class="stock-list" id="stockTable">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Account Data</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="stockBody"></tbody>
-      </table>
+  <div class="topbar">
+    <div class="title">Admin • Stock</div>
+    <div class="row" style="justify-content:flex-end; flex:0 0 auto;">
+      <div class="pill" id="mePill">Checking session…</div>
+      <button class="btn danger" id="logoutBtn">Logout</button>
     </div>
   </div>
 
-  <script>
-    const SB_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SB_KEY = "YOUR_SUPABASE_KEY"; // حط مفتاحك هون
-    const sb = supabase.createClient(SB_URL, SB_KEY);
+  <div class="grid">
 
-    async function loadInitialData() {
-        // تحميل المنتجات للقائمة
-        const { data: products } = await sb.from('products').select('id, title');
-        const select = document.getElementById('productSelect');
-        products.forEach(p => {
-            select.innerHTML += `<option value="${p.id}">${p.title}</option>`;
-        });
-        loadStock();
+    <!-- LEFT: Products -->
+    <div class="card">
+      <div class="cardHead">
+        <h3>Products</h3>
+        <button class="btn" id="refreshProducts">Refresh</button>
+      </div>
+      <div class="cardBody">
+        <input id="productSearch" placeholder="Search product…" />
+        <div class="divider"></div>
+        <div class="list" id="productsList"></div>
+        <div class="hint" style="margin-top:10px">
+          Click a product to view its stock. Counts show <b>Available</b> / <b>Used</b>.
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Stock + Add -->
+    <div class="card">
+      <div class="cardHead">
+        <h3 id="rightTitle">Select a product</h3>
+        <div class="miniBtns">
+          <button class="btn" id="refreshStock" disabled>Refresh Stock</button>
+          <button class="btn primary" id="copyNext" disabled>Copy Next</button>
+        </div>
+      </div>
+
+      <div class="cardBody">
+        <div class="row">
+          <div class="pill" id="countsPill" style="justify-content:center; display:none;">—</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div id="stockList" class="list"></div>
+
+        <div class="divider"></div>
+
+        <h3 style="margin:0 0 8px; font-size:14px; font-weight:950;">Add Stock</h3>
+        <div class="hint">
+          Put accounts here (one per line). Example:<br/>
+          <span style="opacity:.85">email:pass</span> or <span style="opacity:.85">code</span>
+        </div>
+        <div style="margin-top:8px">
+          <textarea id="newStock" placeholder="one account per line…"></textarea>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="addStockBtn" disabled>Add</button>
+          <button class="btn" id="markAllUsedBtn" disabled>Mark ALL shown as Used</button>
+        </div>
+
+        <div id="msg" class="msg"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ===== Supabase =====
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ===== DOM =====
+  const mePill = document.getElementById("mePill");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  const productsList = document.getElementById("productsList");
+  const refreshProducts = document.getElementById("refreshProducts");
+  const productSearch = document.getElementById("productSearch");
+
+  const rightTitle = document.getElementById("rightTitle");
+  const refreshStock = document.getElementById("refreshStock");
+  const copyNext = document.getElementById("copyNext");
+  const stockList = document.getElementById("stockList");
+  const countsPill = document.getElementById("countsPill");
+
+  const newStock = document.getElementById("newStock");
+  const addStockBtn = document.getElementById("addStockBtn");
+  const markAllUsedBtn = document.getElementById("markAllUsedBtn");
+  const msgEl = document.getElementById("msg");
+
+  // ===== State =====
+  let SESSION = null;
+  let PRODUCTS = [];
+  let ACTIVE_PRODUCT = null;
+  let STOCK = []; // for active product
+
+  function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function setMsg(text, type=""){
+    msgEl.textContent = text || "";
+    msgEl.className = "msg " + (type || "");
+  }
+
+  async function ensureSession(){
+    const { data: { session } } = await sb.auth.getSession();
+    SESSION = session || null;
+
+    if(!SESSION){
+      mePill.textContent = "Not logged in";
+      location.href = "login.html";
+      return false;
     }
 
-    async function loadStock() {
-        const { data: stock } = await sb.from('product_stock').select('*, products(title)').order('created_at', {ascending: false});
-        const body = document.getElementById('stockBody');
-        body.innerHTML = stock.map(s => `
-            <tr>
-                <td>${s.products.title}</td>
-                <td><code>${s.account_data}</code></td>
-                <td class="${s.is_sold ? 'status-sold' : 'status-available'}">${s.is_sold ? 'SOLD' : 'AVAILABLE'}</td>
-                <td><button onclick="deleteStock(${s.id})" style="background:#ff4d4d; padding:5px 10px;">Delete</button></td>
-            </tr>
-        `).join('');
+    // Show email
+    mePill.textContent = SESSION.user.email || "Logged in";
+
+    // OPTIONAL: admin check (if you have profiles.is_admin)
+    // If you don't have it, comment this block.
+    try{
+      const { data, error } = await sb
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", SESSION.user.id)
+        .single();
+
+      if(!error && data && data.is_admin === false){
+        alert("Not allowed (admin only).");
+        location.href = "index.html";
+        return false;
+      }
+    }catch(e){ /* ignore if column doesn't exist */ }
+
+    return true;
+  }
+
+  logoutBtn.onclick = async ()=>{
+    try{ await sb.auth.signOut(); }catch(e){}
+    location.href = "index.html";
+  };
+
+  // ===== Products =====
+  function renderProducts(list){
+    productsList.innerHTML = "";
+
+    if(!list.length){
+      productsList.innerHTML = `<div class="hint">No products found.</div>`;
+      return;
     }
 
-    async function addStock() {
-        const productId = document.getElementById('productSelect').value;
-        const rawAccounts = document.getElementById('accountsInput').value.split('\n');
-        const accounts = rawAccounts.filter(a => a.trim() !== "");
+    list.forEach(p=>{
+      const isActive = ACTIVE_PRODUCT && String(ACTIVE_PRODUCT.id) === String(p.id);
+      const available = Number(p.stock_available || 0);
+      const used = Number(p.stock_used || 0);
 
-        if (!productId || accounts.length === 0) return Swal.fire('Error', 'Please fill all fields', 'error');
+      const el = document.createElement("div");
+      el.className = "item" + (isActive ? " active" : "");
+      el.innerHTML = `
+        <div style="min-width:0">
+          <div class="itemTitle">${esc(p.title || ("Product " + p.id))}</div>
+          <div class="muted" style="font-size:12px">${esc(p.category || "")}</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge ok">${available} Av</span>
+          <span class="badge bad">${used} Used</span>
+        </div>
+      `;
+      el.onclick = async ()=>{
+        ACTIVE_PRODUCT = p;
+        renderProducts(filterProducts());
+        await loadStockForActive();
+      };
+      productsList.appendChild(el);
+    });
+  }
 
-        const insertData = accounts.map(acc => ({ product_id: productId, account_data: acc }));
-        const { error } = await sb.from('product_stock').insert(insertData);
+  function filterProducts(){
+    const q = (productSearch.value || "").trim().toLowerCase();
+    if(!q) return PRODUCTS;
+    return PRODUCTS.filter(p =>
+      (p.title || "").toLowerCase().includes(q) ||
+      (p.category || "").toLowerCase().includes(q) ||
+      String(p.id).includes(q)
+    );
+  }
 
-        if (!error) {
-            Swal.fire('Success', `Added ${accounts.length} accounts`, 'success');
-            document.getElementById('accountsInput').value = "";
-            loadStock();
+  async function loadProducts(){
+    setMsg("");
+
+    // We fetch products + counts from product_stock
+    // Assumes tables: products, product_stock(product_id, used)
+    const { data, error } = await sb
+      .from("products")
+      .select("id,title,category,active")
+      .order("category", { ascending:true })
+      .order("title", { ascending:true });
+
+    if(error){
+      setMsg("Products error: " + error.message, "bad");
+      return;
+    }
+
+    PRODUCTS = (data || []).filter(p=>true);
+
+    // load counts for all products in one go
+    // If your product_stock table is huge, we can optimize later.
+    const { data: counts, error: e2 } = await sb
+      .from("product_stock")
+      .select("product_id, used");
+
+    if(e2){
+      // still render products without counts
+      PRODUCTS = PRODUCTS.map(p=>({ ...p, stock_available:0, stock_used:0 }));
+      renderProducts(filterProducts());
+      return;
+    }
+
+    const map = new Map();
+    (counts || []).forEach(r=>{
+      const k = String(r.product_id);
+      const cur = map.get(k) || { av:0, used:0 };
+      if(r.used) cur.used++; else cur.av++;
+      map.set(k, cur);
+    });
+
+    PRODUCTS = PRODUCTS.map(p=>{
+      const c = map.get(String(p.id)) || { av:0, used:0 };
+      return { ...p, stock_available:c.av, stock_used:c.used };
+    });
+
+    renderProducts(filterProducts());
+  }
+
+  refreshProducts.onclick = loadProducts;
+  productSearch.oninput = ()=> renderProducts(filterProducts());
+
+  // ===== Stock =====
+  function updateRightHeader(){
+    if(!ACTIVE_PRODUCT){
+      rightTitle.textContent = "Select a product";
+      refreshStock.disabled = true;
+      copyNext.disabled = true;
+      addStockBtn.disabled = true;
+      markAllUsedBtn.disabled = true;
+      countsPill.style.display = "none";
+      return;
+    }
+
+    rightTitle.textContent = `Stock • ${ACTIVE_PRODUCT.title || ACTIVE_PRODUCT.id}`;
+    refreshStock.disabled = false;
+    copyNext.disabled = false;
+    addStockBtn.disabled = false;
+    markAllUsedBtn.disabled = false;
+    countsPill.style.display = "flex";
+  }
+
+  function renderStock(){
+    stockList.innerHTML = "";
+
+    if(!ACTIVE_PRODUCT){
+      updateRightHeader();
+      stockList.innerHTML = `<div class="hint">Pick a product from the left.</div>`;
+      return;
+    }
+
+    updateRightHeader();
+
+    const av = STOCK.filter(x=>!x.used).length;
+    const used = STOCK.filter(x=>x.used).length;
+    countsPill.textContent = `Available: ${av}  •  Used: ${used}`;
+
+    if(!STOCK.length){
+      stockList.innerHTML = `<div class="hint">No stock yet for this product.</div>`;
+      return;
+    }
+
+    STOCK.forEach(row=>{
+      const wrap = document.createElement("div");
+      wrap.className = "stockRow";
+      wrap.innerHTML = `
+        <div class="stockText">${esc(row.content || "")}</div>
+        <div class="miniBtns">
+          <button class="btn" data-copy="1">Copy</button>
+          <button class="btn ${row.used ? "" : "primary"}" data-used="1">${row.used ? "Used" : "Mark Used"}</button>
+        </div>
+      `;
+
+      // Copy
+      wrap.querySelector('[data-copy="1"]').onclick = async ()=>{
+        try{
+          await navigator.clipboard.writeText(row.content || "");
+          setMsg("Copied ✅", "ok");
+        }catch(e){
+          setMsg("Copy failed: " + (e.message || e), "bad");
         }
+      };
+
+      // Mark used
+      wrap.querySelector('[data-used="1"]').onclick = async ()=>{
+        if(row.used) return;
+        await markRowUsed(row.id);
+      };
+
+      // Dim used rows
+      if(row.used){
+        wrap.style.opacity = "0.55";
+      }
+
+      stockList.appendChild(wrap);
+    });
+  }
+
+  async function loadStockForActive(){
+    setMsg("");
+    if(!ACTIVE_PRODUCT){ renderStock(); return; }
+
+    // load latest 200 rows for this product
+    const { data, error } = await sb
+      .from("product_stock")
+      .select("id, product_id, content, used, created_at, used_at")
+      .eq("product_id", ACTIVE_PRODUCT.id)
+      .order("used", { ascending:true })        // available first
+      .order("created_at", { ascending:false })
+      .limit(200);
+
+    if(error){
+      setMsg("Stock error: " + error.message, "bad");
+      STOCK = [];
+      renderStock();
+      return;
     }
 
-    async function deleteStock(id) {
-        if (!confirm('Are you sure?')) return;
-        await sb.from('product_stock').delete().eq('id', id);
-        loadStock();
+    STOCK = data || [];
+    renderStock();
+
+    // refresh product counts on the left quickly
+    await loadProducts();
+  }
+
+  refreshStock.onclick = loadStockForActive;
+
+  async function markRowUsed(stockId){
+    try{
+      setMsg("");
+      const { error } = await sb
+        .from("product_stock")
+        .update({ used:true, used_at: new Date().toISOString() })
+        .eq("id", stockId);
+
+      if(error) throw error;
+
+      // update local
+      STOCK = STOCK.map(r => r.id === stockId ? { ...r, used:true, used_at:new Date().toISOString() } : r);
+      renderStock();
+      await loadProducts();
+
+      setMsg("Marked used ✅", "ok");
+    }catch(e){
+      setMsg("Mark used failed: " + (e.message || e), "bad");
+    }
+  }
+
+  // Copy next available + mark used (so you don't copy same one twice)
+  copyNext.onclick = async ()=>{
+    if(!ACTIVE_PRODUCT) return;
+    setMsg("");
+
+    const next = STOCK.find(x=>!x.used);
+    if(!next){
+      setMsg("No available stock for this product.", "bad");
+      return;
     }
 
-    loadInitialData();
-  </script>
+    try{
+      await navigator.clipboard.writeText(next.content || "");
+      // mark it used immediately
+      await markRowUsed(next.id);
+      setMsg("Copied next ✅ (and marked used)", "ok");
+    }catch(e){
+      setMsg("Copy next failed: " + (e.message || e), "bad");
+    }
+  };
+
+  // Add stock (bulk)
+  addStockBtn.onclick = async ()=>{
+    if(!ACTIVE_PRODUCT) return;
+    setMsg("");
+
+    const lines = (newStock.value || "")
+      .split("\n")
+      .map(s=>s.trim())
+      .filter(Boolean);
+
+    if(!lines.length){
+      setMsg("Add at least 1 line.", "bad");
+      return;
+    }
+
+    // prevent duplicates in the same paste
+    const uniq = Array.from(new Set(lines));
+
+    const payload = uniq.map(content => ({
+      product_id: ACTIVE_PRODUCT.id,
+      content,
+      used: false
+    }));
+
+    addStockBtn.disabled = true;
+    addStockBtn.textContent = "Adding…";
+
+    try{
+      const { error } = await sb.from("product_stock").insert(payload);
+      if(error) throw error;
+
+      newStock.value = "";
+      setMsg(`Added ${payload.length} items ✅`, "ok");
+      await loadStockForActive();
+    }catch(e){
+      setMsg("Add failed: " + (e.message || e), "bad");
+    }finally{
+      addStockBtn.disabled = false;
+      addStockBtn.textContent = "Add";
+    }
+  };
+
+  // Mark all shown as used (careful)
+  markAllUsedBtn.onclick = async ()=>{
+    if(!ACTIVE_PRODUCT) return;
+
+    const notUsedIds = STOCK.filter(x=>!x.used).map(x=>x.id);
+    if(!notUsedIds.length){
+      setMsg("All are already used.", "ok");
+      return;
+    }
+
+    if(!confirm(`Mark ${notUsedIds.length} items as USED?`)) return;
+
+    try{
+      const { error } = await sb
+        .from("product_stock")
+        .update({ used:true, used_at: new Date().toISOString() })
+        .in("id", notUsedIds);
+
+      if(error) throw error;
+
+      STOCK = STOCK.map(r => ({ ...r, used:true, used_at: r.used_at || new Date().toISOString() }));
+      renderStock();
+      await loadProducts();
+      setMsg("Marked all as used ✅", "ok");
+    }catch(e){
+      setMsg("Failed: " + (e.message || e), "bad");
+    }
+  };
+
+  // ===== Init =====
+  (async function init(){
+    const ok = await ensureSession();
+    if(!ok) return;
+
+    await loadProducts();
+    renderStock(); // waiting for selection
+  })();
+</script>
 </body>
 </html>
