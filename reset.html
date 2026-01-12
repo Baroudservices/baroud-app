@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Password - Baroud Services</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.10);
+      --shadow:0 18px 70px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui, Arial;
+      background:linear-gradient(180deg,#0b1424,#050a14);
+      color:#fff; min-height:100vh; padding:16px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .wrap{width:min(520px,100%)}
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .brand{font-weight:950; text-align:center; opacity:.9; letter-spacing:.6px}
+    h1{margin:10px 0 6px; font-size:26px; text-align:center}
+    .sub{opacity:.7; text-align:center; margin-bottom:14px}
+    label{display:block; font-size:12px; opacity:.75; margin:10px 0 6px}
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      outline:none;
+      font-size:14px;
+    }
+    .btn{
+      width:100%;
+      padding:12px 14px;
+      border-radius:14px;
+      border:0;
+      cursor:pointer;
+      color:#fff;
+      font-weight:950;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      margin-top:12px;
+    }
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+    .msg{margin-top:12px; font-size:13px; opacity:.9}
+    .ok{color:#22c55e}
+    .bad{color:#ef4444}
+    a{color:#7dd3fc; text-decoration:none; font-weight:900}
+    .center{text-align:center; margin-top:12px; opacity:.85}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">Baroud Services</div>
+      <h1>Reset Password</h1>
+      <div class="sub">Set a new password for your account</div>
+
+      <label>New Password</label>
+      <input id="p1" type="password" placeholder="Min 6 characters" autocomplete="new-password" />
+
+      <label>Confirm Password</label>
+      <input id="p2" type="password" placeholder="Repeat password" autocomplete="new-password" />
+
+      <button class="btn" id="btn">Update Password</button>
+      <div class="msg" id="msg"></div>
+
+      <div class="center">
+        <a href="login.html">Back to Login</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_XXXXXXXXXXXX"; // حط مفتاحك
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const p1 = document.getElementById("p1");
+  const p2 = document.getElementById("p2");
+  const btn = document.getElementById("btn");
+  const msg = document.getElementById("msg");
+
+  function showMsg(t, ok=false){
+    msg.className = "msg " + (ok ? "ok" : "bad");
+    msg.textContent = t || "";
+  }
+  function setLoading(on){
+    btn.disabled = !!on;
+    btn.textContent = on ? "Updating..." : "Update Password";
+  }
+
+  // ✅ مهم: إذا الصفحة فتحت بدون رابط reset الحقيقي، ما في session
+  (async ()=>{
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){
+      showMsg("Invalid or expired reset link. Please request a new reset email.");
+      btn.disabled = true;
+    }
+  })();
+
+  btn.addEventListener("click", async ()=>{
+    showMsg("");
+    const a = p1.value.trim();
+    const b = p2.value.trim();
+
+    if(a.length < 6) return showMsg("Password must be at least 6 characters.");
+    if(a !== b) return showMsg("Passwords do not match.");
+    if(btn.disabled) return;
+
+    setLoading(true);
+    try{
+      const { error } = await sb.auth.updateUser({ password: a });
+      if(error){
+        showMsg(error.message || "Update failed.");
+        return;
+      }
+
+      showMsg("✅ Password updated successfully. Redirecting to login...", true);
+      await sb.auth.signOut();
+      setTimeout(()=> location.href="login.html", 900);
+
+    }catch(e){
+      showMsg("Network error. Try again.");
+    }finally{
+      setLoading(false);
+    }
+  });
+</script>
+</body>
+</html>
