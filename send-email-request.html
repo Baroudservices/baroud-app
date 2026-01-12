@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reset Password</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/layout.css">
+
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#06162a,#020b14);
+      color:#fff;
+      min-height:100vh;
+      padding:18px;
+    }
+    .wrap{
+      width:100%;
+      margin:0 auto;
+      max-width:520px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:calc(100vh - 36px);
+    }
+    .card{
+      width:100%;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:26px;
+      padding:18px;
+      box-shadow:0 30px 80px rgba(0,0,0,.5);
+      position:relative;
+    }
+    .back{
+      position:absolute;left:16px;top:16px;
+      width:44px;height:44px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;font-size:20px;
+      cursor:pointer;
+    }
+    .brand{font-weight:900;letter-spacing:2px;opacity:.85;text-align:center;margin-top:10px}
+    h1{margin:24px 0 6px;font-size:38px;text-align:center}
+    p{margin:0 0 18px;opacity:.75;text-align:center}
+
+    .field{
+      display:flex;align-items:center;gap:12px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:20px;
+      padding:14px;
+      margin:12px 0;
+    }
+    .field input{
+      width:100%;
+      background:transparent;border:none;outline:none;
+      color:#fff;font-size:16px;
+    }
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:26px;
+      padding:16px;
+      font-size:18px;
+      font-weight:900;
+      cursor:pointer;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      color:#fff;
+      box-shadow:0 18px 60px rgba(0,0,0,.35);
+      margin-top:10px;
+    }
+    .msg{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      display:none;
+      font-weight:700;
+    }
+    .err{background:#d05252}
+    .ok{background:#2aa96b}
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="card">
+      <button class="back" onclick="location.href='login.html'">←</button>
+
+      <div class="brand">Baroud Services</div>
+      <h1>Reset Password</h1>
+      <p>Enter your email to receive reset link</p>
+
+      <div id="msg" class="msg"></div>
+
+      <div class="field">
+        <span>📧</span>
+        <input id="email" type="email" placeholder="Email"/>
+      </div>
+
+      <button class="btn" id="sendBtn">Send Reset Email</button>
+    </div>
+  </main>
+
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const msg = document.getElementById("msg");
+  const sendBtn = document.getElementById("sendBtn");
+
+  function showMsg(text, ok=false){
+    msg.style.display="block";
+    msg.className="msg " + (ok ? "ok":"err");
+    msg.textContent=text;
+  }
+
+  function setLoading(on){
+    sendBtn.disabled = on;
+    sendBtn.textContent = on ? "Sending..." : "Send Reset Email";
+  }
+
+  async function sendReset(){
+    const email = document.getElementById("email").value.trim();
+    if(!email){
+      showMsg("Enter your email first");
+      return;
+    }
+
+    setLoading(true);
+    try{
+      const { error } = await sb.auth.resetPasswordForEmail(email,{
+        redirectTo: "https://baroudservices.github.io/baroud-app/reset.html"
+      });
+
+      if(error){
+        showMsg(error.message || "Failed");
+        return;
+      }
+
+      showMsg("Email sent ✅ Check your inbox 📧", true);
+
+    }catch(e){
+      showMsg("Network error");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  sendBtn.addEventListener("click", sendReset);
+</script>
+</body>
+</html>
