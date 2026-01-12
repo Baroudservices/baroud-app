@@ -290,13 +290,8 @@
   }
 
   async function requireSession(){
-    const { data: { session } } = await sb.auth.getSession();
-    if(!session){
-      location.href = "login.html";
-      return null;
-    }
-    return session;
-  }
+  return await requireAdmin();
+}
 
   async function loadProducts(){
     productsList.innerHTML = `<div class="muted">Loading...</div>`;
