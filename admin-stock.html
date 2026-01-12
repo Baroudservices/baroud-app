@@ -8,60 +8,36 @@
 
   <style>
     :root{
-      --bg:#050a14;
+      --bg1:#050a14;
+      --bg2:#0b1424;
       --card:rgba(255,255,255,.06);
       --stroke:rgba(255,255,255,.10);
       --shadow:0 16px 60px rgba(0,0,0,.35);
-      --accent:#0aa0ff;
-      --ok:#22c55e;
-      --bad:#ef4444;
+      --blue:#0aa0ff;
+      --blue2:#2a74ff;
       --muted:rgba(255,255,255,.65);
     }
     *{box-sizing:border-box}
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#0b1424,var(--bg));
-      color:#fff;
-      min-height:100vh;
+      margin:0; font-family:system-ui, Arial;
+      background:linear-gradient(180deg,var(--bg2),var(--bg1));
+      color:#fff; min-height:100vh;
       padding:16px;
     }
-    .wrap{max-width:1100px;margin:0 auto}
-    .topbar{
+    .wrap{max-width:1100px;margin:auto}
+    .top{
       display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin-bottom:14px;
+      gap:10px; margin-bottom:14px;
     }
-    .title{font-weight:950; font-size:20px; letter-spacing:.5px}
-    .pill{
-      padding:8px 12px; border-radius:999px;
+    .leftTop{display:flex; align-items:center; gap:10px}
+    .back{
+      padding:10px 14px; border-radius:14px;
       background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      font-weight:900; font-size:13px;
-      display:flex; gap:10px; align-items:center;
+      border:1px solid rgba(255,255,255,.08);
+      cursor:pointer; text-decoration:none; color:#fff;
+      font-weight:900;
     }
-    .btn{
-      padding:10px 12px; border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:#fff; font-weight:950;
-      cursor:pointer;
-    }
-    .btn.primary{
-      border:none;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      box-shadow:0 0 16px rgba(10,160,255,.25);
-    }
-    .btn.danger{border-color:rgba(239,68,68,.35); color:#ffb4b4}
-    .btn:disabled{opacity:.6; cursor:not-allowed}
-    .grid{
-      display:grid;
-      grid-template-columns: 340px 1fr;
-      gap:12px;
-      align-items:start;
-    }
-    @media (max-width:900px){
-      .grid{grid-template-columns:1fr}
-    }
+    h2{margin:0;font-size:22px}
     .card{
       background:var(--card);
       border:1px solid var(--stroke);
@@ -69,14 +45,35 @@
       box-shadow:var(--shadow);
       overflow:hidden;
     }
-    .cardHead{
-      padding:12px 14px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px;
+    .grid{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:12px;
+      align-items:start;
     }
-    .cardHead h3{margin:0; font-size:14px; font-weight:950}
-    .cardBody{padding:12px 14px}
+    @media (max-width: 900px){
+      .grid{grid-template-columns: 1fr;}
+    }
+
+    .head{
+      padding:14px 14px 12px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .head .title{font-weight:950}
+    .pill{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      font-weight:900;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .body{padding:12px 14px 14px;}
+
     input, textarea, select{
       width:100%;
       padding:12px 12px;
@@ -88,538 +85,450 @@
       font-size:14px;
     }
     textarea{min-height:120px; resize:vertical}
-    .muted{opacity:.7}
+    label{display:block; font-size:12px; opacity:.7; margin:10px 0 6px}
+
+    .btnRow{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    .btn{
+      border:0;
+      cursor:pointer;
+      color:#fff;
+      font-weight:950;
+      padding:12px 14px;
+      border-radius:14px;
+      background:linear-gradient(90deg,var(--blue),var(--blue2));
+      flex:1;
+      min-width:140px;
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .btn.danger{
+      background:rgba(239,68,68,.12);
+      border:1px solid rgba(239,68,68,.35);
+    }
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+
     .list{
       display:flex; flex-direction:column;
       gap:8px;
+      padding:12px 14px 14px;
     }
     .item{
       display:flex; align-items:center; justify-content:space-between;
       gap:10px;
-      padding:10px 12px;
+      padding:12px 12px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.08);
       background:rgba(255,255,255,.03);
       cursor:pointer;
     }
     .item:hover{background:rgba(255,255,255,.06)}
-    .item.active{
-      border-color: rgba(10,160,255,.45);
-      box-shadow:0 0 18px rgba(10,160,255,.15);
-    }
-    .itemTitle{
-      font-weight:950; font-size:13px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      max-width:210px;
-    }
-    .badge{
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
+    .item .name{
       font-weight:950;
-      font-size:12px;
-      opacity:.9;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
       white-space:nowrap;
     }
-    .badge.ok{border-color:rgba(34,197,94,.35); color:#a7f3d0}
-    .badge.bad{border-color:rgba(239,68,68,.35); color:#fecaca}
-    .row{display:flex; gap:10px; flex-wrap:wrap}
-    .row > *{flex:1}
+    .item .meta{
+      font-size:12px; color:var(--muted);
+      white-space:nowrap;
+    }
+    .item.active{
+      border-color:rgba(10,160,255,.55);
+      box-shadow:0 0 0 1px rgba(10,160,255,.25) inset;
+    }
+
     .stockRow{
-      display:grid;
-      grid-template-columns: 1fr auto;
+      display:flex; align-items:flex-start; justify-content:space-between;
       gap:10px;
-      align-items:center;
-      padding:10px 12px;
+      padding:12px 12px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.08);
       background:rgba(255,255,255,.03);
+      margin-bottom:10px;
     }
-    .stockText{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:12.5px;
+    .stockData{
+      flex:1; min-width:0;
+    }
+    .stockData pre{
+      margin:0;
       white-space:pre-wrap;
       word-break:break-word;
-      opacity:.95;
-    }
-    .miniBtns{display:flex; gap:8px}
-    .msg{margin-top:10px; font-weight:850; font-size:13px; opacity:.9}
-    .msg.ok{color:var(--ok)}
-    .msg.bad{color:var(--bad)}
-    .hint{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       font-size:12px;
-      opacity:.7;
-      line-height:1.4;
+      line-height:1.35;
+      color:rgba(255,255,255,.92);
     }
-    .divider{height:1px;background:rgba(255,255,255,.06); margin:12px 0}
+    .stockActions{
+      display:flex; flex-direction:column; gap:8px;
+      flex:0 0 auto;
+    }
+    .miniBtn{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      font-weight:950;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .miniBtn.copy{
+      background:linear-gradient(90deg,var(--blue),var(--blue2));
+      border:0;
+    }
+    .miniBtn.del{
+      background:rgba(239,68,68,.12);
+      border:1px solid rgba(239,68,68,.35);
+    }
+
+    .muted{opacity:.75; font-weight:800; font-size:13px}
+    .msg{margin-top:10px; font-weight:900; font-size:13px; opacity:.9}
+    .ok{color:#22c55e}
+    .bad{color:#ef4444}
+
+    .topTools{
+      display:flex; gap:10px; align-items:center;
+    }
+    .small{
+      padding:10px 12px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      color:#fff; font-weight:950; cursor:pointer;
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
+  <div class="wrap">
+    <div class="top">
+      <div class="leftTop">
+        <a class="back" href="javascript:history.back()">←</a>
+        <h2>Admin Stock</h2>
+      </div>
+      <div class="topTools">
+        <button class="small" id="refreshBtn">Refresh</button>
+        <button class="small" id="logoutBtn">Logout</button>
+      </div>
+    </div>
 
-  <div class="topbar">
-    <div class="title">Admin • Stock</div>
-    <div class="row" style="justify-content:flex-end; flex:0 0 auto;">
-      <div class="pill" id="mePill">Checking session…</div>
-      <button class="btn danger" id="logoutBtn">Logout</button>
+    <div class="grid">
+      <!-- Products -->
+      <div class="card">
+        <div class="head">
+          <div class="title">Products</div>
+          <div class="pill" id="prodCount">0</div>
+        </div>
+        <div class="body">
+          <input id="prodSearch" placeholder="Search product..." />
+        </div>
+        <div class="list" id="productsList">
+          <div class="muted">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Stock -->
+      <div class="card">
+        <div class="head">
+          <div class="title" id="stockTitle">Select a product</div>
+          <div class="pill" id="stockCount">0</div>
+        </div>
+
+        <div class="body">
+          <div class="muted" id="stockHint">Pick a product from the left to view its stock.</div>
+
+          <div id="stockTools" style="display:none;">
+            <label>Add accounts (one per line)</label>
+            <textarea id="addBox" placeholder="email:pass&#10;email2:pass2"></textarea>
+            <div class="btnRow">
+              <button class="btn" id="addBtn">Add</button>
+              <button class="btn secondary" id="reloadStockBtn">Reload Stock</button>
+            </div>
+
+            <div class="msg" id="msg"></div>
+
+            <div style="height:12px"></div>
+            <div style="font-weight:950;margin-bottom:8px">Available Stock (not sold)</div>
+            <div id="stockList"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <div class="grid">
-
-    <!-- LEFT: Products -->
-    <div class="card">
-      <div class="cardHead">
-        <h3>Products</h3>
-        <button class="btn" id="refreshProducts">Refresh</button>
-      </div>
-      <div class="cardBody">
-        <input id="productSearch" placeholder="Search product…" />
-        <div class="divider"></div>
-        <div class="list" id="productsList"></div>
-        <div class="hint" style="margin-top:10px">
-          Click a product to view its stock. Counts show <b>Available</b> / <b>Used</b>.
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT: Stock + Add -->
-    <div class="card">
-      <div class="cardHead">
-        <h3 id="rightTitle">Select a product</h3>
-        <div class="miniBtns">
-          <button class="btn" id="refreshStock" disabled>Refresh Stock</button>
-          <button class="btn primary" id="copyNext" disabled>Copy Next</button>
-        </div>
-      </div>
-
-      <div class="cardBody">
-        <div class="row">
-          <div class="pill" id="countsPill" style="justify-content:center; display:none;">—</div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div id="stockList" class="list"></div>
-
-        <div class="divider"></div>
-
-        <h3 style="margin:0 0 8px; font-size:14px; font-weight:950;">Add Stock</h3>
-        <div class="hint">
-          Put accounts here (one per line). Example:<br/>
-          <span style="opacity:.85">email:pass</span> or <span style="opacity:.85">code</span>
-        </div>
-        <div style="margin-top:8px">
-          <textarea id="newStock" placeholder="one account per line…"></textarea>
-        </div>
-
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" id="addStockBtn" disabled>Add</button>
-          <button class="btn" id="markAllUsedBtn" disabled>Mark ALL shown as Used</button>
-        </div>
-
-        <div id="msg" class="msg"></div>
-      </div>
-    </div>
-
-  </div>
-</div>
 
 <script>
-  // ===== Supabase =====
+  // ✅ Supabase
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // ===== DOM =====
-  const mePill = document.getElementById("mePill");
-  const logoutBtn = document.getElementById("logoutBtn");
-
   const productsList = document.getElementById("productsList");
-  const refreshProducts = document.getElementById("refreshProducts");
-  const productSearch = document.getElementById("productSearch");
+  const prodCount = document.getElementById("prodCount");
+  const prodSearch = document.getElementById("prodSearch");
 
-  const rightTitle = document.getElementById("rightTitle");
-  const refreshStock = document.getElementById("refreshStock");
-  const copyNext = document.getElementById("copyNext");
+  const stockTitle = document.getElementById("stockTitle");
+  const stockCount = document.getElementById("stockCount");
+  const stockHint = document.getElementById("stockHint");
+  const stockTools = document.getElementById("stockTools");
   const stockList = document.getElementById("stockList");
-  const countsPill = document.getElementById("countsPill");
 
-  const newStock = document.getElementById("newStock");
-  const addStockBtn = document.getElementById("addStockBtn");
-  const markAllUsedBtn = document.getElementById("markAllUsedBtn");
-  const msgEl = document.getElementById("msg");
+  const addBox = document.getElementById("addBox");
+  const addBtn = document.getElementById("addBtn");
+  const reloadStockBtn = document.getElementById("reloadStockBtn");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const msg = document.getElementById("msg");
 
-  // ===== State =====
-  let SESSION = null;
   let PRODUCTS = [];
-  let ACTIVE_PRODUCT = null;
-  let STOCK = []; // for active product
+  let selectedProduct = null;
 
   function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
-  function setMsg(text, type=""){
-    msgEl.textContent = text || "";
-    msgEl.className = "msg " + (type || "");
+  function setMsg(text, ok=true){
+    msg.className = "msg " + (ok ? "ok" : "bad");
+    msg.textContent = text || "";
   }
 
-  async function ensureSession(){
+  async function requireSession(){
     const { data: { session } } = await sb.auth.getSession();
-    SESSION = session || null;
-
-    if(!SESSION){
-      mePill.textContent = "Not logged in";
+    if(!session){
       location.href = "login.html";
-      return false;
+      return null;
+    }
+    return session;
+  }
+
+  async function loadProducts(){
+    productsList.innerHTML = `<div class="muted">Loading...</div>`;
+
+    // products table: id, title, active...
+    const { data, error } = await sb
+      .from("products")
+      .select("id,title,category,active")
+      .order("title", {ascending:true});
+
+    if(error){
+      productsList.innerHTML = `<div class="muted">Error: ${esc(error.message)}</div>`;
+      return;
     }
 
-    // Show email
-    mePill.textContent = SESSION.user.email || "Logged in";
+    PRODUCTS = data || [];
+    prodCount.textContent = String(PRODUCTS.length);
 
-    // OPTIONAL: admin check (if you have profiles.is_admin)
-    // If you don't have it, comment this block.
-    try{
-      const { data, error } = await sb
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", SESSION.user.id)
-        .single();
-
-      if(!error && data && data.is_admin === false){
-        alert("Not allowed (admin only).");
-        location.href = "index.html";
-        return false;
-      }
-    }catch(e){ /* ignore if column doesn't exist */ }
-
-    return true;
+    renderProducts(PRODUCTS);
   }
+
+  function renderProducts(list){
+    const q = (prodSearch.value || "").trim().toLowerCase();
+    const filtered = !q ? list : list.filter(p =>
+      (p.title || "").toLowerCase().includes(q) ||
+      (p.category || "").toLowerCase().includes(q) ||
+      String(p.id).toLowerCase().includes(q)
+    );
+
+    productsList.innerHTML = filtered.map(p=>{
+      const active = (selectedProduct && selectedProduct.id === p.id) ? "active" : "";
+      const status = p.active ? "active" : "off";
+      return `
+        <div class="item ${active}" data-id="${esc(p.id)}">
+          <div style="min-width:0">
+            <div class="name">${esc(p.title || ("Product " + p.id))}</div>
+            <div class="meta">${esc(p.category || "")} • ${status}</div>
+          </div>
+          <div class="meta">#${esc(p.id)}</div>
+        </div>
+      `;
+    }).join("");
+
+    Array.from(productsList.querySelectorAll(".item")).forEach(el=>{
+      el.onclick = async ()=>{
+        const id = el.getAttribute("data-id");
+        const p = PRODUCTS.find(x => String(x.id) === String(id));
+        if(!p) return;
+        selectedProduct = p;
+        renderProducts(PRODUCTS);
+
+        stockTitle.textContent = (p.title || "Product") + " — Stock";
+        stockHint.style.display = "none";
+        stockTools.style.display = "block";
+        setMsg("");
+
+        await loadStockForProduct(p.id);
+      };
+    });
+
+    if(!filtered.length){
+      productsList.innerHTML = `<div class="muted">No products</div>`;
+    }
+  }
+
+  async function loadStockForProduct(productId){
+    stockList.innerHTML = `<div class="muted">Loading stock...</div>`;
+    stockCount.textContent = "0";
+
+    const { data, error } = await sb
+      .from("product_stock")
+      .select("id, product_id, account_data, is_sold, created_at")
+      .eq("product_id", productId)
+      .eq("is_sold", false)
+      .order("id", { ascending: true });
+
+    if(error){
+      stockList.innerHTML = `<div class="muted">Error: ${esc(error.message)}</div>`;
+      return;
+    }
+
+    const rows = data || [];
+    stockCount.textContent = String(rows.length);
+
+    if(!rows.length){
+      stockList.innerHTML = `<div class="muted">No available stock for this product.</div>`;
+      return;
+    }
+
+    stockList.innerHTML = rows.map(r=>{
+      return `
+        <div class="stockRow" data-stock-id="${esc(r.id)}">
+          <div class="stockData">
+            <div class="muted" style="margin-bottom:6px">Stock ID: #${esc(r.id)}</div>
+            <pre>${esc(r.account_data || "")}</pre>
+          </div>
+          <div class="stockActions">
+            <button class="miniBtn copy" data-copy="${esc(r.account_data || "")}">Copy</button>
+            <button class="miniBtn del" data-del="${esc(r.id)}">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // copy handlers
+    Array.from(stockList.querySelectorAll('button[data-copy]')).forEach(btn=>{
+      btn.onclick = async ()=>{
+        const text = btn.getAttribute("data-copy") || "";
+        try{
+          await navigator.clipboard.writeText(text);
+          setMsg("✅ Copied!", true);
+          setTimeout(()=> setMsg(""), 900);
+        }catch(e){
+          // fallback
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+          setMsg("✅ Copied!", true);
+          setTimeout(()=> setMsg(""), 900);
+        }
+      };
+    });
+
+    // delete handlers
+    Array.from(stockList.querySelectorAll('button[data-del]')).forEach(btn=>{
+      btn.onclick = async ()=>{
+        const id = btn.getAttribute("data-del");
+        if(!id) return;
+        btn.disabled = true;
+
+        const { error } = await sb
+          .from("product_stock")
+          .delete()
+          .eq("id", id);
+
+        if(error){
+          btn.disabled = false;
+          setMsg("❌ Delete failed: " + error.message, false);
+          return;
+        }
+
+        // remove from UI
+        const row = stockList.querySelector(`[data-stock-id="${CSS.escape(id)}"]`);
+        if(row) row.remove();
+
+        // update counter
+        const cur = Number(stockCount.textContent || 0);
+        stockCount.textContent = String(Math.max(0, cur - 1));
+        setMsg("✅ Deleted", true);
+
+        if(!stockList.querySelector(".stockRow")){
+          stockList.innerHTML = `<div class="muted">No available stock for this product.</div>`;
+        }
+      };
+    });
+  }
+
+  async function addStockLines(){
+    if(!selectedProduct){
+      setMsg("Choose product first", false);
+      return;
+    }
+    const raw = (addBox.value || "").trim();
+    if(!raw){
+      setMsg("Paste accounts first", false);
+      return;
+    }
+
+    // each line = one stock row
+    const lines = raw.split("\n").map(x=>x.trim()).filter(Boolean);
+    if(!lines.length){
+      setMsg("No valid lines", false);
+      return;
+    }
+
+    addBtn.disabled = true;
+    addBtn.textContent = "Adding...";
+
+    const payload = lines.map(line => ({
+      product_id: selectedProduct.id,
+      account_data: line,
+      is_sold: false
+    }));
+
+    const { error } = await sb
+      .from("product_stock")
+      .insert(payload);
+
+    if(error){
+      setMsg("❌ Add failed: " + error.message, false);
+      addBtn.disabled = false;
+      addBtn.textContent = "Add";
+      return;
+    }
+
+    addBox.value = "";
+    setMsg("✅ Added " + lines.length + " accounts", true);
+    await loadStockForProduct(selectedProduct.id);
+
+    addBtn.disabled = false;
+    addBtn.textContent = "Add";
+  }
+
+  // UI events
+  prodSearch.addEventListener("input", ()=> renderProducts(PRODUCTS));
+  reloadStockBtn.onclick = async ()=> {
+    if(!selectedProduct) return;
+    setMsg("");
+    await loadStockForProduct(selectedProduct.id);
+  };
+  addBtn.onclick = addStockLines;
+
+  refreshBtn.onclick = async ()=>{
+    setMsg("");
+    await loadProducts();
+    if(selectedProduct){
+      await loadStockForProduct(selectedProduct.id);
+    }
+  };
 
   logoutBtn.onclick = async ()=>{
     try{ await sb.auth.signOut(); }catch(e){}
     location.href = "index.html";
   };
 
-  // ===== Products =====
-  function renderProducts(list){
-    productsList.innerHTML = "";
-
-    if(!list.length){
-      productsList.innerHTML = `<div class="hint">No products found.</div>`;
-      return;
-    }
-
-    list.forEach(p=>{
-      const isActive = ACTIVE_PRODUCT && String(ACTIVE_PRODUCT.id) === String(p.id);
-      const available = Number(p.stock_available || 0);
-      const used = Number(p.stock_used || 0);
-
-      const el = document.createElement("div");
-      el.className = "item" + (isActive ? " active" : "");
-      el.innerHTML = `
-        <div style="min-width:0">
-          <div class="itemTitle">${esc(p.title || ("Product " + p.id))}</div>
-          <div class="muted" style="font-size:12px">${esc(p.category || "")}</div>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <span class="badge ok">${available} Av</span>
-          <span class="badge bad">${used} Used</span>
-        </div>
-      `;
-      el.onclick = async ()=>{
-        ACTIVE_PRODUCT = p;
-        renderProducts(filterProducts());
-        await loadStockForActive();
-      };
-      productsList.appendChild(el);
-    });
-  }
-
-  function filterProducts(){
-    const q = (productSearch.value || "").trim().toLowerCase();
-    if(!q) return PRODUCTS;
-    return PRODUCTS.filter(p =>
-      (p.title || "").toLowerCase().includes(q) ||
-      (p.category || "").toLowerCase().includes(q) ||
-      String(p.id).includes(q)
-    );
-  }
-
-  async function loadProducts(){
-    setMsg("");
-
-    // We fetch products + counts from product_stock
-    // Assumes tables: products, product_stock(product_id, used)
-    const { data, error } = await sb
-      .from("products")
-      .select("id,title,category,active")
-      .order("category", { ascending:true })
-      .order("title", { ascending:true });
-
-    if(error){
-      setMsg("Products error: " + error.message, "bad");
-      return;
-    }
-
-    PRODUCTS = (data || []).filter(p=>true);
-
-    // load counts for all products in one go
-    // If your product_stock table is huge, we can optimize later.
-    const { data: counts, error: e2 } = await sb
-      .from("product_stock")
-      .select("product_id, used");
-
-    if(e2){
-      // still render products without counts
-      PRODUCTS = PRODUCTS.map(p=>({ ...p, stock_available:0, stock_used:0 }));
-      renderProducts(filterProducts());
-      return;
-    }
-
-    const map = new Map();
-    (counts || []).forEach(r=>{
-      const k = String(r.product_id);
-      const cur = map.get(k) || { av:0, used:0 };
-      if(r.used) cur.used++; else cur.av++;
-      map.set(k, cur);
-    });
-
-    PRODUCTS = PRODUCTS.map(p=>{
-      const c = map.get(String(p.id)) || { av:0, used:0 };
-      return { ...p, stock_available:c.av, stock_used:c.used };
-    });
-
-    renderProducts(filterProducts());
-  }
-
-  refreshProducts.onclick = loadProducts;
-  productSearch.oninput = ()=> renderProducts(filterProducts());
-
-  // ===== Stock =====
-  function updateRightHeader(){
-    if(!ACTIVE_PRODUCT){
-      rightTitle.textContent = "Select a product";
-      refreshStock.disabled = true;
-      copyNext.disabled = true;
-      addStockBtn.disabled = true;
-      markAllUsedBtn.disabled = true;
-      countsPill.style.display = "none";
-      return;
-    }
-
-    rightTitle.textContent = `Stock • ${ACTIVE_PRODUCT.title || ACTIVE_PRODUCT.id}`;
-    refreshStock.disabled = false;
-    copyNext.disabled = false;
-    addStockBtn.disabled = false;
-    markAllUsedBtn.disabled = false;
-    countsPill.style.display = "flex";
-  }
-
-  function renderStock(){
-    stockList.innerHTML = "";
-
-    if(!ACTIVE_PRODUCT){
-      updateRightHeader();
-      stockList.innerHTML = `<div class="hint">Pick a product from the left.</div>`;
-      return;
-    }
-
-    updateRightHeader();
-
-    const av = STOCK.filter(x=>!x.used).length;
-    const used = STOCK.filter(x=>x.used).length;
-    countsPill.textContent = `Available: ${av}  •  Used: ${used}`;
-
-    if(!STOCK.length){
-      stockList.innerHTML = `<div class="hint">No stock yet for this product.</div>`;
-      return;
-    }
-
-    STOCK.forEach(row=>{
-      const wrap = document.createElement("div");
-      wrap.className = "stockRow";
-      wrap.innerHTML = `
-        <div class="stockText">${esc(row.content || "")}</div>
-        <div class="miniBtns">
-          <button class="btn" data-copy="1">Copy</button>
-          <button class="btn ${row.used ? "" : "primary"}" data-used="1">${row.used ? "Used" : "Mark Used"}</button>
-        </div>
-      `;
-
-      // Copy
-      wrap.querySelector('[data-copy="1"]').onclick = async ()=>{
-        try{
-          await navigator.clipboard.writeText(row.content || "");
-          setMsg("Copied ✅", "ok");
-        }catch(e){
-          setMsg("Copy failed: " + (e.message || e), "bad");
-        }
-      };
-
-      // Mark used
-      wrap.querySelector('[data-used="1"]').onclick = async ()=>{
-        if(row.used) return;
-        await markRowUsed(row.id);
-      };
-
-      // Dim used rows
-      if(row.used){
-        wrap.style.opacity = "0.55";
-      }
-
-      stockList.appendChild(wrap);
-    });
-  }
-
-  async function loadStockForActive(){
-    setMsg("");
-    if(!ACTIVE_PRODUCT){ renderStock(); return; }
-
-    // load latest 200 rows for this product
-    const { data, error } = await sb
-      .from("product_stock")
-      .select("id, product_id, content, used, created_at, used_at")
-      .eq("product_id", ACTIVE_PRODUCT.id)
-      .order("used", { ascending:true })        // available first
-      .order("created_at", { ascending:false })
-      .limit(200);
-
-    if(error){
-      setMsg("Stock error: " + error.message, "bad");
-      STOCK = [];
-      renderStock();
-      return;
-    }
-
-    STOCK = data || [];
-    renderStock();
-
-    // refresh product counts on the left quickly
-    await loadProducts();
-  }
-
-  refreshStock.onclick = loadStockForActive;
-
-  async function markRowUsed(stockId){
-    try{
-      setMsg("");
-      const { error } = await sb
-        .from("product_stock")
-        .update({ used:true, used_at: new Date().toISOString() })
-        .eq("id", stockId);
-
-      if(error) throw error;
-
-      // update local
-      STOCK = STOCK.map(r => r.id === stockId ? { ...r, used:true, used_at:new Date().toISOString() } : r);
-      renderStock();
-      await loadProducts();
-
-      setMsg("Marked used ✅", "ok");
-    }catch(e){
-      setMsg("Mark used failed: " + (e.message || e), "bad");
-    }
-  }
-
-  // Copy next available + mark used (so you don't copy same one twice)
-  copyNext.onclick = async ()=>{
-    if(!ACTIVE_PRODUCT) return;
-    setMsg("");
-
-    const next = STOCK.find(x=>!x.used);
-    if(!next){
-      setMsg("No available stock for this product.", "bad");
-      return;
-    }
-
-    try{
-      await navigator.clipboard.writeText(next.content || "");
-      // mark it used immediately
-      await markRowUsed(next.id);
-      setMsg("Copied next ✅ (and marked used)", "ok");
-    }catch(e){
-      setMsg("Copy next failed: " + (e.message || e), "bad");
-    }
-  };
-
-  // Add stock (bulk)
-  addStockBtn.onclick = async ()=>{
-    if(!ACTIVE_PRODUCT) return;
-    setMsg("");
-
-    const lines = (newStock.value || "")
-      .split("\n")
-      .map(s=>s.trim())
-      .filter(Boolean);
-
-    if(!lines.length){
-      setMsg("Add at least 1 line.", "bad");
-      return;
-    }
-
-    // prevent duplicates in the same paste
-    const uniq = Array.from(new Set(lines));
-
-    const payload = uniq.map(content => ({
-      product_id: ACTIVE_PRODUCT.id,
-      content,
-      used: false
-    }));
-
-    addStockBtn.disabled = true;
-    addStockBtn.textContent = "Adding…";
-
-    try{
-      const { error } = await sb.from("product_stock").insert(payload);
-      if(error) throw error;
-
-      newStock.value = "";
-      setMsg(`Added ${payload.length} items ✅`, "ok");
-      await loadStockForActive();
-    }catch(e){
-      setMsg("Add failed: " + (e.message || e), "bad");
-    }finally{
-      addStockBtn.disabled = false;
-      addStockBtn.textContent = "Add";
-    }
-  };
-
-  // Mark all shown as used (careful)
-  markAllUsedBtn.onclick = async ()=>{
-    if(!ACTIVE_PRODUCT) return;
-
-    const notUsedIds = STOCK.filter(x=>!x.used).map(x=>x.id);
-    if(!notUsedIds.length){
-      setMsg("All are already used.", "ok");
-      return;
-    }
-
-    if(!confirm(`Mark ${notUsedIds.length} items as USED?`)) return;
-
-    try{
-      const { error } = await sb
-        .from("product_stock")
-        .update({ used:true, used_at: new Date().toISOString() })
-        .in("id", notUsedIds);
-
-      if(error) throw error;
-
-      STOCK = STOCK.map(r => ({ ...r, used:true, used_at: r.used_at || new Date().toISOString() }));
-      renderStock();
-      await loadProducts();
-      setMsg("Marked all as used ✅", "ok");
-    }catch(e){
-      setMsg("Failed: " + (e.message || e), "bad");
-    }
-  };
-
-  // ===== Init =====
+  // init
   (async function init(){
-    const ok = await ensureSession();
-    if(!ok) return;
-
+    await requireSession();
     await loadProducts();
-    renderStock(); // waiting for selection
   })();
 </script>
 </body>
