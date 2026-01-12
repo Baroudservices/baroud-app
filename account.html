@@ -131,7 +131,7 @@
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
     @media (max-width:700px){ .grid2{grid-template-columns:1fr} }
     label{display:block; font-size:12px; opacity:.7; margin-bottom:6px}
-    input, select, textarea{
+    input, textarea{
       width:100%;
       padding:12px 12px;
       border-radius:14px;
@@ -159,7 +159,7 @@
     .danger{color:#ef4444}
     .ok{color:#22c55e}
 
-    /* ✅ Custom Modal */
+    /* ✅ Custom Modal (Notice/Confirm) */
     .modal{
       position:fixed; inset:0;
       background: rgba(0,0,0,.72);
@@ -194,6 +194,140 @@
     .mBtn.secondary{
       background: rgba(255,255,255,0.06);
       border:1px solid rgba(255,255,255,0.10);
+    }
+
+    /* ✅ Plan Picker Button (بدل select) */
+    .planBtn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      cursor:pointer;
+      font-weight:950;
+    }
+    .planBtn small{opacity:.7; font-weight:800}
+    .planBtn .chev{opacity:.85}
+
+    /* ✅ Plans Bottom Sheet */
+    .plansOverlay{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.75);
+      opacity:0; pointer-events:none;
+      transition:.25s;
+      z-index:999998;
+    }
+    .plansOverlay.show{opacity:1; pointer-events:auto;}
+
+    .plansSheet{
+      position:fixed; left:50%; bottom:-120%;
+      transform:translateX(-50%);
+      width:min(520px, 94vw);
+      background:linear-gradient(180deg, rgba(12,16,24,.98), rgba(8,12,18,.98));
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:22px;
+      box-shadow:0 20px 60px rgba(0,0,0,.60);
+      z-index:999999;
+      transition:.28s;
+      overflow:hidden;
+    }
+    .plansSheet.show{bottom:16px;}
+
+    .plansHeader{
+      padding:14px 14px 10px;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .plansTitle{font-weight:950; font-size:18px;}
+    .plansSub{opacity:.7; font-size:12px; margin-top:2px;}
+    .plansClose{
+      width:38px; height:38px;
+      border-radius:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color:#fff; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px;
+    }
+
+    .plansList{
+      max-height:55vh;
+      overflow:auto;
+      padding:10px 10px 6px;
+    }
+
+    .planRow{
+      display:flex; align-items:center; gap:12px;
+      padding:12px 12px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      margin:8px 6px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .planRow:hover{background:rgba(255,255,255,.06);}
+
+    .planRow input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .planDot{
+      width:18px; height:18px;
+      border-radius:50%;
+      border:2px solid rgba(10,160,255,.75);
+      box-shadow:0 0 10px rgba(10,160,255,.25);
+      flex:0 0 auto;
+      position:relative;
+    }
+    .planRow input:checked + .planDot{
+      border-color:#0aa0ff;
+      box-shadow:0 0 14px rgba(10,160,255,.55);
+    }
+    .planRow input:checked + .planDot::after{
+      content:"";
+      position:absolute; inset:4px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#0aa0ff,#2a74ff);
+    }
+
+    .planInfo{flex:1; min-width:0;}
+    .planName{font-weight:950; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .planDesc{opacity:.65; font-size:11px; margin-top:2px;}
+
+    .planPrice{
+      font-weight:950;
+      color:#38bdf8;
+      font-size:14px;
+      flex:0 0 auto;
+    }
+
+    .plansFooter{
+      display:flex; gap:10px;
+      padding:12px 14px 14px;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+    .plansBtn{
+      flex:1;
+      height:44px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .plansBtn.primary{
+      border:none;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      box-shadow:0 0 16px rgba(10,160,255,.35);
     }
   </style>
 </head>
@@ -239,7 +373,15 @@
 
       <div style="margin-bottom:10px">
         <label>Plan</label>
-        <select id="planSelect"></select>
+
+        <!-- ✅ بدل select (حتى ما يطلع شكل نظام الموبايل البشع) -->
+        <button type="button" class="planBtn" id="planBtn">
+          <span id="planBtnText">Choose Plan</span>
+          <span class="chev">▾</span>
+        </button>
+
+        <!-- (مخفي بس إذا بدك تستخدمه لاحقاً) -->
+        <input type="hidden" id="planKeyHidden" value="">
       </div>
 
       <div style="margin-bottom:10px">
@@ -304,7 +446,28 @@
     </div>
   </div>
 
-  <!-- ✅ Custom Modal -->
+  <!-- ✅ Plans Bottom Sheet -->
+  <div class="plansOverlay" id="plansOverlay"></div>
+  <div class="plansSheet" id="plansSheet" aria-hidden="true">
+    <div class="plansHeader">
+      <div>
+        <div class="plansTitle">Choose Plan</div>
+        <div class="plansSub">Select one plan then confirm</div>
+      </div>
+      <button class="plansClose" id="plansClose" type="button">✕</button>
+    </div>
+
+    <div class="plansList" id="plansList">
+      <div style="opacity:.75;padding:12px 10px">Loading...</div>
+    </div>
+
+    <div class="plansFooter">
+      <button class="plansBtn" id="plansCancel" type="button">Cancel</button>
+      <button class="plansBtn primary" id="plansConfirm" type="button">Confirm</button>
+    </div>
+  </div>
+
+  <!-- ✅ Custom Modal (Notice/Confirm) -->
   <div class="modal" id="uiModal">
     <div class="modalCard">
       <div class="mTitle" id="uiModalTitle">Notice</div>
@@ -325,7 +488,6 @@
   const heroImgEl = document.getElementById("heroImg");
   const pillsEl = document.getElementById("pills");
   const featsEl = document.getElementById("features");
-  const planSelect = document.getElementById("planSelect");
   const priceEl = document.getElementById("price");
   const buyBtn = document.getElementById("buyBtn");
   const msgEl = document.getElementById("msg");
@@ -335,7 +497,19 @@
   const myOrdersBtn = document.getElementById("myOrdersBtn");
   const ordersMenu = document.getElementById("ordersMenu");
 
-  // ✅ modal elements
+  // ✅ Plan picker elements
+  const planBtn = document.getElementById("planBtn");
+  const planBtnText = document.getElementById("planBtnText");
+  const planKeyHidden = document.getElementById("planKeyHidden");
+
+  const plansOverlay = document.getElementById("plansOverlay");
+  const plansSheet = document.getElementById("plansSheet");
+  const plansClose = document.getElementById("plansClose");
+  const plansCancel = document.getElementById("plansCancel");
+  const plansConfirm = document.getElementById("plansConfirm");
+  const plansListEl = document.getElementById("plansList");
+
+  // ✅ modal elements (Notice/Confirm)
   const uiModal = document.getElementById("uiModal");
   const uiModalTitle = document.getElementById("uiModalTitle");
   const uiModalText = document.getElementById("uiModalText");
@@ -351,7 +525,7 @@
   function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function getId(){ return new URL(location.href).searchParams.get("id"); }
 
-  // ✅ Custom modal API
+  // ✅ Notice/Confirm modal API
   function closeUIModal(){ uiModal.style.display = "none"; }
   uiModal.addEventListener("click", (e)=>{ if(e.target === uiModal) closeUIModal(); });
 
@@ -359,12 +533,9 @@
     return new Promise((resolve)=>{
       uiModalTitle.textContent = title;
       uiModalText.textContent = message;
-
       uiModalBtns.innerHTML = `<button class="mBtn" id="uiModalOk2">OK</button>`;
       uiModal.style.display = "flex";
-
-      const okBtn = document.getElementById("uiModalOk2");
-      okBtn.onclick = ()=>{ closeUIModal(); resolve(true); };
+      document.getElementById("uiModalOk2").onclick = ()=>{ closeUIModal(); resolve(true); };
     });
   }
 
@@ -372,17 +543,59 @@
     return new Promise((resolve)=>{
       uiModalTitle.textContent = title;
       uiModalText.textContent = message;
-
       uiModalBtns.innerHTML = `
         <button class="mBtn secondary" id="uiModalCancel">Cancel</button>
         <button class="mBtn" id="uiModalYes">Confirm</button>
       `;
       uiModal.style.display = "flex";
-
       document.getElementById("uiModalCancel").onclick = ()=>{ closeUIModal(); resolve(false); };
       document.getElementById("uiModalYes").onclick = ()=>{ closeUIModal(); resolve(true); };
     });
   }
+
+  // ✅ Plans sheet open/close
+  function openPlans(){
+    plansOverlay.classList.add("show");
+    plansSheet.classList.add("show");
+    plansSheet.setAttribute("aria-hidden","false");
+  }
+  function closePlans(){
+    plansOverlay.classList.remove("show");
+    plansSheet.classList.remove("show");
+    plansSheet.setAttribute("aria-hidden","true");
+  }
+  plansOverlay.onclick = closePlans;
+  plansClose.onclick = closePlans;
+  plansCancel.onclick = closePlans;
+
+  planBtn.onclick = ()=>{
+    if(!PLAN_LIST.length){
+      // ما في خطط => ما في شي يفتح
+      return;
+    }
+    // حط checked على المختار الحالي
+    const k = selectedPlan?.key;
+    if(k){
+      const inp = plansListEl.querySelector(`input[name="planPick"][value="${CSS.escape(k)}"]`);
+      if(inp) inp.checked = true;
+    }
+    openPlans();
+  };
+
+  plansConfirm.onclick = ()=>{
+    const chosen = plansListEl.querySelector('input[name="planPick"]:checked');
+    if(!chosen){ showNotice("Choose a plan", "Notice"); return; }
+    const k = chosen.value;
+    const plan = PLAN_LIST.find(x=>x.key === k);
+    if(plan){
+      selectedPlan = plan;
+      planKeyHidden.value = plan.key;
+      planBtnText.textContent = `${plan.label} - $${Number(plan.price||0).toFixed(2)}`;
+      priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
+      applyDynamicFields();
+    }
+    closePlans();
+  };
 
   function clearAllInputs(){
     const ids = [
@@ -517,38 +730,40 @@
 
   function renderPlans(plans){
     PLAN_LIST = plans || [];
-    planSelect.innerHTML = "";
 
     if(!PLAN_LIST.length){
-      const opt = document.createElement("option");
-      opt.value = "none";
-      opt.textContent = "No plans";
-      planSelect.appendChild(opt);
-
       selectedPlan = { key:"default", label:"default", price:Number(currentProduct?.price || 0) };
+      planKeyHidden.value = selectedPlan.key;
+      planBtnText.textContent = "Default - $" + Number(selectedPlan.price||0).toFixed(2);
       priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
+      plansListEl.innerHTML = `<div style="opacity:.75;padding:12px 10px">No plans</div>`;
       applyDynamicFields();
       return;
     }
 
-    PLAN_LIST.forEach((pl, i)=>{
-      const opt = document.createElement("option");
-      opt.value = pl.key;
-      opt.textContent = `${pl.label} - $${Number(pl.price||0).toFixed(2)}`;
-      planSelect.appendChild(opt);
-      if(i===0) selectedPlan = pl;
-    });
-
+    // default first plan
+    selectedPlan = PLAN_LIST[0];
+    planKeyHidden.value = selectedPlan.key;
+    planBtnText.textContent = `${selectedPlan.label} - $${Number(selectedPlan.price||0).toFixed(2)}`;
     priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
-    applyDynamicFields();
 
-    planSelect.onchange = ()=>{
-      const k = planSelect.value;
-      const plan = PLAN_LIST.find(x=>x.key===k);
-      if(plan) selectedPlan = plan;
-      priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
-      applyDynamicFields();
-    };
+    // render list in sheet
+    plansListEl.innerHTML = PLAN_LIST.map((pl)=>{
+      const pr = Number(pl.price||0);
+      return `
+        <label class="planRow">
+          <input type="radio" name="planPick" value="${esc(pl.key)}" ${pl.key===selectedPlan.key ? "checked":""}>
+          <span class="planDot"></span>
+          <div class="planInfo">
+            <div class="planName">${esc(pl.label)}</div>
+            <div class="planDesc">Tap to select</div>
+          </div>
+          <div class="planPrice">$${pr.toFixed(2)}</div>
+        </label>
+      `;
+    }).join("");
+
+    applyDynamicFields();
   }
 
   function subscribePlansRealtime(productId){
@@ -570,9 +785,14 @@
             const still = PLAN_LIST.find(x => x.key === prevKey);
             if(still){
               selectedPlan = still;
-              planSelect.value = prevKey;
-              priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
+              planKeyHidden.value = prevKey;
+              planBtnText.textContent = `${still.label} - $${Number(still.price||0).toFixed(2)}`;
+              priceEl.textContent = "$" + Number(still.price || 0).toFixed(2);
               applyDynamicFields();
+
+              // update sheet checked
+              const inp = plansListEl.querySelector(`input[name="planPick"][value="${CSS.escape(prevKey)}"]`);
+              if(inp) inp.checked = true;
             }
           }
         }
