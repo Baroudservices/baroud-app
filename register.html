@@ -107,7 +107,7 @@
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Base URL ديناميكي (يحافظ على /baroud-app/ أو غيرها)
+  // Base URL ديناميكي (يحافظ على /baroud-app/)
   function getBaseUrl(){
     const basePath = location.pathname.replace(/[^\/]*$/, "");
     return location.origin + basePath;
@@ -125,11 +125,10 @@
     msg.className = "msg " + (ok ? "ok" : "bad");
     msg.textContent = t || "";
   }
-  function setLoading(on){
+  function setLoading(on, text){
     btn.disabled = !!on;
-    btn.textContent = on ? "Creating..." : "Create Account";
+    btn.textContent = on ? (text || "Please wait...") : "Create Account";
   }
-
   function cleanPhone(s){
     return String(s || "").replace(/\s+/g, "").trim();
   }
@@ -141,10 +140,34 @@
       const params = new URLSearchParams(window.location.search);
       const isRecovery = params.get("type") === "recovery";
       if(session && !isRecovery){
-        location.replace("services.html"); // عدّلها إذا بدك services.html
+        location.replace("services.html");
       }
     }catch(e){}
   })();
+
+  // ✅ فحص الإيميل إذا موجود عبر Edge Function
+  async function emailExists(email){
+    const url = SUPABASE_URL + "/functions/v1/check-email";
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // مهم: لازم Bearer للـ anon key
+        "Authorization": "Bearer " + SUPABASE_KEY
+      },
+      body: JSON.stringify({ email })
+    });
+
+    // لو صار خطأ بالشبكة/الفنكشن
+    if(!res.ok){
+      // بنرجّع null يعني ما قدرنا نفحص
+      return null;
+    }
+
+    const j = await res.json().catch(()=> ({}));
+    // نتوقع j.exists true/false
+    return !!j.exists;
+  }
 
   async function doRegister(){
     showMsg("");
@@ -160,21 +183,35 @@
     if(pass !== pass2) return showMsg("Passwords do not match.");
     if(btn.disabled) return;
 
-    setLoading(true);
+    setLoading(true, "Checking...");
 
     try{
+      // 1) check email exists
+      const exists = await emailExists(email);
+
+      if(exists === true){
+        showMsg("❌ This email already has an account. Please login instead.");
+        return;
+      }
+
+      // لو exists = null يعني الفنكشن ما ردّت
+      // منكمّل عادي بس مننبه (اختياري)
+      // if(exists === null){}
+
+      setLoading(true, "Creating...");
+
+      // 2) sign up
       const { error } = await sb.auth.signUp({
         email,
         password: pass,
         options:{
-          data: { phone },                 // ✅ user_metadata
+          data: { phone }, // user_metadata
           emailRedirectTo: BASE_URL + "login.html"
         }
       });
 
       if(error){
         const m = String(error.message || "").toLowerCase();
-
         const looksLikeEmailExists =
           m.includes("already") ||
           m.includes("registered") ||
@@ -182,16 +219,15 @@
           m.includes("duplicate");
 
         if(looksLikeEmailExists){
-          showMsg("This email already has an account. Please login instead.");
+          showMsg("❌ This email already has an account. Please login instead.");
           return;
         }
 
-        // ✅ رسالة نظيفة
-        showMsg("Register failed. Please try again.");
+        showMsg(error.message || "Register failed.");
         return;
       }
 
-      showMsg("Account created! Check your email to confirm.", true);
+      showMsg("✅ Account created! Check your email to confirm.", true);
 
     }catch(e){
       showMsg("Network error. Try again.");
@@ -202,7 +238,6 @@
 
   btn.addEventListener("click", doRegister);
 
-  // Enter على Confirm Password يعمل Register
   elPass2.addEventListener("keydown", (e)=>{
     if(e.key === "Enter") doRegister();
   });
