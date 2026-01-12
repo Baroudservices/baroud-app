@@ -157,33 +157,27 @@
 
     try{
       const { data, error } = await sb.auth.signUp({
-        email,
-        password: pass,
-        options: {
-          // ✅ نخزن الهاتف بالـ metadata (وبالـ SQL تحت مننسخه على profiles تلقائيًا)
-          data: { phone }
-        }
-      });
+  email,
+  password,
+  options: {
+    emailRedirectTo: BASE_URL + "login.html"
+  }
+});
 
-      if(error){
-        const m = (error.message || "").toLowerCase();
+if(error){
+  const m = (error.message || "").toLowerCase();
 
-        // ✅ أشهر حالة لما يكون الإيميل مسجل
-        if(m.includes("already") || m.includes("registered") || m.includes("exists")){
-          showMsg("This email is already registered. Please login instead.");
-          return;
-        }
+  // ✅ إذا الإيميل موجود
+  if(m.includes("already") || m.includes("registered") || m.includes("exists")){
+    showMsg("❌ This email already has an account. Please login instead.");
+    return;
+  }
 
-        showMsg(error.message || "Register failed.");
-        return;
-      }
+  showMsg(error.message || "Register failed.");
+  return;
+}
 
-      // ✅ إذا عندك Email confirmation شغال:
-      // data.user موجود، بس session ممكن يكون null → طبيعي
-      showMsg("✅ Account created! Check your email to confirm.", true);
-
-      // (اختياري) بعد ثانيتين يوديه على login
-      setTimeout(()=> location.href = "login.html", 1200);
+showMsg("✅ Account created! Check your email to confirm.", true);
 
     }catch(e){
       showMsg("Network error. Try again.");
