@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Password</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background:#0b1424;color:#fff;font-family:system-ui;padding:20px">
+  <h2>Reset Password</h2>
+  <input id="newPass" type="password" placeholder="New password"
+    style="width:100%;padding:12px;border-radius:12px;margin:10px 0;">
+  <button id="save"
+    style="width:100%;padding:12px;border-radius:12px;font-weight:900;">
+    Save
+  </button>
+  <div id="msg" style="margin-top:10px;opacity:.85"></div>
+
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const msg = (t)=> document.getElementById("msg").textContent = t;
+
+  document.getElementById("save").onclick = async () => {
+    const password = document.getElementById("newPass").value.trim();
+    if(!password){ msg("Enter new password"); return; }
+
+    const { error } = await sb.auth.updateUser({ password });
+    if(error){ msg(error.message); return; }
+
+    msg("✅ Password updated. Redirecting to login...");
+    setTimeout(()=> location.href="login.html", 1200);
+  };
+</script>
+</body>
+</html>
