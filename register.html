@@ -55,7 +55,7 @@
     .btn:disabled{opacity:.6; cursor:not-allowed}
     .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
     @media (max-width:520px){ .row{grid-template-columns:1fr} }
-    .msg{margin-top:12px; font-size:13px; opacity:.9}
+    .msg{margin-top:12px; font-size:13px; opacity:.95; font-weight:800}
     .ok{color:#22c55e}
     .bad{color:#ef4444}
     .links{margin-top:12px; display:flex; justify-content:space-between; gap:10px; opacity:.85; font-weight:800}
@@ -109,7 +109,7 @@
 
   // Base URL ديناميكي (يحافظ على /baroud-app/ أو غيرها)
   function getBaseUrl(){
-    const basePath = location.pathname.replace(/[^\/]*$/, ""); // remove file name
+    const basePath = location.pathname.replace(/[^\/]*$/, "");
     return location.origin + basePath;
   }
   const BASE_URL = getBaseUrl();
@@ -130,24 +130,29 @@
     btn.textContent = on ? "Creating..." : "Create Account";
   }
 
-  // إذا في جلسة (ومش جايي من recovery) رجّعو على index.html
+  function cleanPhone(s){
+    return String(s || "").replace(/\s+/g, "").trim();
+  }
+
+  // إذا في جلسة (ومش جايي من recovery) رجّعو
   (async ()=>{
     try{
       const { data: { session } } = await sb.auth.getSession();
       const params = new URLSearchParams(window.location.search);
       const isRecovery = params.get("type") === "recovery";
       if(session && !isRecovery){
-        location.replace("index.html"); // عدّلها إذا بدك services.html
+        location.replace("services.html"); // عدّلها إذا بدك services.html
       }
     }catch(e){}
   })();
 
-  btn.addEventListener("click", async ()=>{
+  async function doRegister(){
     showMsg("");
-    const email = (elEmail.value || "").trim().toLowerCase();
-    const phone = (elPhone.value || "").trim();
-    const pass  = (elPass.value || "").trim();
-    const pass2 = (elPass2.value || "").trim();
+
+    const email = String(elEmail.value || "").trim().toLowerCase();
+    const phone = cleanPhone(elPhone.value);
+    const pass  = String(elPass.value || "").trim();
+    const pass2 = String(elPass2.value || "").trim();
 
     if(!email) return showMsg("Enter your email.");
     if(!phone) return showMsg("Enter your phone number.");
@@ -158,33 +163,48 @@
     setLoading(true);
 
     try{
-      const { data, error } = await sb.auth.signUp({
+      const { error } = await sb.auth.signUp({
         email,
         password: pass,
         options:{
-          // نخزّن رقم الهاتف ضمن user_metadata ليوصلنا بعد التأكيد
-          data: { phone },
+          data: { phone },                 // ✅ user_metadata
           emailRedirectTo: BASE_URL + "login.html"
         }
       });
 
       if(error){
-        const m = (error.message || "").toLowerCase();
-        if(m.includes("already") || m.includes("registered") || m.includes("exists")){
-          showMsg("❌ This email already has an account. Please login instead.");
+        const m = String(error.message || "").toLowerCase();
+
+        const looksLikeEmailExists =
+          m.includes("already") ||
+          m.includes("registered") ||
+          m.includes("exists") ||
+          m.includes("duplicate");
+
+        if(looksLikeEmailExists){
+          showMsg("This email already has an account. Please login instead.");
           return;
         }
-        showMsg(error.message || "Register failed.");
+
+        // ✅ رسالة نظيفة
+        showMsg("Register failed. Please try again.");
         return;
       }
 
-      showMsg("✅ Account created! Check your email to confirm.", true);
+      showMsg("Account created! Check your email to confirm.", true);
 
     }catch(e){
-      showMsg(e.message || "Network error. Try again.");
+      showMsg("Network error. Try again.");
     }finally{
       setLoading(false);
     }
+  }
+
+  btn.addEventListener("click", doRegister);
+
+  // Enter على Confirm Password يعمل Register
+  elPass2.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") doRegister();
   });
 </script>
 </body>
