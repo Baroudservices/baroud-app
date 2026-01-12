@@ -131,7 +131,8 @@
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
     @media (max-width:700px){ .grid2{grid-template-columns:1fr} }
     label{display:block; font-size:12px; opacity:.7; margin-bottom:6px}
-    input, textarea{
+
+    input, textarea, select{
       width:100%;
       padding:12px 12px;
       border-radius:14px;
@@ -142,6 +143,7 @@
       font-size:14px;
     }
     textarea{min-height:90px; resize:vertical}
+
     .btn{
       width:100%;
       padding:12px 14px;
@@ -410,6 +412,16 @@
           <input id="input-email" placeholder="Enter email" />
         </div>
 
+        <!-- ✅ Netflix device type (TV/Mobile) -->
+        <div id="field-device-type" style="display:none">
+          <label id="device-type-label">TV or Mobile</label>
+          <select id="input-device-type">
+            <option value="">Select...</option>
+            <option value="TV">TV</option>
+            <option value="Mobile">Mobile</option>
+          </select>
+        </div>
+
         <div id="field-phone" style="display:none">
           <label id="phone-label">PHONE NUMBER</label>
           <input id="input-phone" placeholder="Enter phone number" />
@@ -570,10 +582,8 @@
 
   planBtn.onclick = ()=>{
     if(!PLAN_LIST.length){
-      // ما في خطط => ما في شي يفتح
       return;
     }
-    // حط checked على المختار الحالي
     const k = selectedPlan?.key;
     if(k){
       const inp = plansListEl.querySelector(`input[name="planPick"][value="${CSS.escape(k)}"]`);
@@ -601,7 +611,7 @@
     const ids = [
       "customerNote",
       "input-player-id","input-zone-id","input-player-name",
-      "input-email","input-phone","input-whatsapp","input-username",
+      "input-email","input-device-type","input-phone","input-whatsapp","input-username",
       "input-pass","input-backup","input-account-details"
     ];
     ids.forEach(id=>{
@@ -652,6 +662,7 @@
     const fZone = document.getElementById("field-zone-id");
     const fName = document.getElementById("field-player-name");
     const fEmail = document.getElementById("field-email");
+    const fDevice = document.getElementById("field-device-type");
     const fPhone = document.getElementById("field-phone");
     const fWhats = document.getElementById("field-whatsapp");
     const fUser = document.getElementById("field-username");
@@ -660,12 +671,13 @@
     const fAcc = document.getElementById("field-account-details");
 
     df.style.display = "none";
-    [fId,fZone,fName,fEmail,fPhone,fWhats,fUser,fPass,fBackup,fAcc].forEach(el=>el.style.display="none");
+    [fId,fZone,fName,fEmail,fDevice,fPhone,fWhats,fUser,fPass,fBackup,fAcc].forEach(el=>el.style.display="none");
 
     document.getElementById("id-label").textContent = currentProduct.player_id_label || "PLAYER ID";
     document.getElementById("zone-label").textContent = currentProduct.zone_id_label || "ZONE ID";
     document.getElementById("name-label").textContent = currentProduct.player_name_label || "PLAYER NAME";
     document.getElementById("email-label").textContent = currentProduct.email_label || "EMAIL";
+    document.getElementById("device-type-label").textContent = "TV or Mobile";
     document.getElementById("phone-label").textContent = currentProduct.phone_label || "PHONE NUMBER";
     document.getElementById("whatsapp-label").textContent = currentProduct.whatsapp_label || "WHATSAPP NUMBER";
     document.getElementById("username-label").textContent = currentProduct.username_label || "USERNAME";
@@ -684,6 +696,8 @@
     let needBackup = !!currentProduct.require_backup_codes;
     let needAcc = !!currentProduct.require_account_details;
 
+    let needDevice = false; // ✅ Netflix only
+
     const planText = ((selectedPlan?.label || selectedPlan?.key || "") + "").toLowerCase();
     const titleText = (currentProduct.title || "").toLowerCase();
 
@@ -695,12 +709,18 @@
       needEmail = true; needPass = false;
     }
 
-    if(needId || needZone || needName || needEmail || needPhone || needWhats || needUser || needPass || needBackup || needAcc){
+    // ✅ Netflix: TV/Mobile required
+    if(titleText.includes("netflix")){
+      needDevice = true;
+    }
+
+    if(needId || needZone || needName || needEmail || needDevice || needPhone || needWhats || needUser || needPass || needBackup || needAcc){
       df.style.display = "grid";
       if(needId) fId.style.display = "block";
       if(needZone) fZone.style.display = "block";
       if(needName) fName.style.display = "block";
       if(needEmail) fEmail.style.display = "block";
+      if(needDevice) fDevice.style.display = "block";
       if(needPhone) fPhone.style.display = "block";
       if(needWhats) fWhats.style.display = "block";
       if(needUser) fUser.style.display = "block";
@@ -741,13 +761,11 @@
       return;
     }
 
-    // default first plan
     selectedPlan = PLAN_LIST[0];
     planKeyHidden.value = selectedPlan.key;
     planBtnText.textContent = `${selectedPlan.label} - $${Number(selectedPlan.price||0).toFixed(2)}`;
     priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
 
-    // render list in sheet
     plansListEl.innerHTML = PLAN_LIST.map((pl)=>{
       const pr = Number(pl.price||0);
       return `
@@ -790,7 +808,6 @@
               priceEl.textContent = "$" + Number(still.price || 0).toFixed(2);
               applyDynamicFields();
 
-              // update sheet checked
               const inp = plansListEl.querySelector(`input[name="planPick"][value="${CSS.escape(prevKey)}"]`);
               if(inp) inp.checked = true;
             }
@@ -869,6 +886,7 @@
     const zId = document.getElementById("input-zone-id").value.trim();
     const pName = document.getElementById("input-player-name").value.trim();
     const pEmail = document.getElementById("input-email").value.trim();
+    const pDevice = document.getElementById("input-device-type")?.value?.trim() || "";
     const pPhone = document.getElementById("input-phone").value.trim();
     const pWhats = document.getElementById("input-whatsapp").value.trim();
     const pUser = document.getElementById("input-username").value.trim();
@@ -881,6 +899,7 @@
     if(isVisible("field-player-id") && !pId){ await showNotice("ID is required", "Notice"); return; }
     if(isVisible("field-zone-id") && !zId){ await showNotice("Zone ID is required", "Notice"); return; }
     if(isVisible("field-player-name") && !pName){ await showNotice("Name is required", "Notice"); return; }
+    if(isVisible("field-device-type") && !pDevice){ await showNotice("Please select TV or Mobile", "Notice"); return; }
     if(isVisible("field-username") && !pUser){ await showNotice("Username is required", "Notice"); return; }
     if(isVisible("field-whatsapp") && !pWhats){ await showNotice("WhatsApp number is required", "Notice"); return; }
     if(isVisible("field-pass") && !pPass){ await showNotice("Password is required", "Notice"); return; }
@@ -917,6 +936,7 @@
       const baseNote = (customerNoteEl.value || "").trim();
       const extraNote = buildExtraNote({
         "Plan": selectedPlan.label || selectedPlan.key,
+        "Device Type": pDevice,
         "ID": pId,
         "Zone ID": zId,
         "Name": pName,
