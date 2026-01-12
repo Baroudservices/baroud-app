@@ -894,7 +894,11 @@
     const pBackup = document.getElementById("input-backup").value.trim();
     const pAcc = document.getElementById("input-account-details").value.trim();
 
-    const isVisible = (id)=> document.getElementById(id)?.style.display === "block";
+    // ✅ FIX: isVisible صار يشتغل صح لأي display مش بس block
+    const isVisible = (id)=> {
+      const el = document.getElementById(id);
+      return !!(el && el.style.display !== "none");
+    };
 
     if(isVisible("field-player-id") && !pId){ await showNotice("ID is required", "Notice"); return; }
     if(isVisible("field-zone-id") && !zId){ await showNotice("Zone ID is required", "Notice"); return; }
@@ -907,15 +911,30 @@
     if(isVisible("field-account-details") && !pAcc){ await showNotice("Account details are required", "Notice"); return; }
 
     const titleText = (currentProduct.title || "").toLowerCase();
+
+    // ✅ FIX: TikTok logic (Email+Pass OR Phone only)
     if(titleText.includes("tiktok")){
-      const emailShown = isVisible("field-email");
-      const phoneShown = isVisible("field-phone");
-      if((emailShown || phoneShown) && (!pEmail && !pPhone)){
+      const hasEmail = !!pEmail;
+      const hasPhone = !!pPhone;
+      const hasPass  = !!pPass;
+
+      if(!hasEmail && !hasPhone){
         await showNotice("Enter Email or Phone number", "Notice");
         return;
       }
-      if(isVisible("field-pass") && !pPass){
-        await showNotice("Password is required", "Notice");
+
+      if(hasEmail && hasPhone){
+        await showNotice("Choose ONE only: Email+Password OR Phone only", "Notice");
+        return;
+      }
+
+      if(hasEmail && !hasPass){
+        await showNotice("Password is required with Email", "Notice");
+        return;
+      }
+
+      if(hasPhone && hasPass){
+        await showNotice("Do NOT enter password when using phone", "Notice");
         return;
       }
     } else {
@@ -949,6 +968,10 @@
       });
       const finalNote = (baseNote + extraNote).trim();
 
+      // ✅ FIX: send login value (email OR phone) + password فقط إذا email
+      const accLogin = pEmail ? pEmail : (pPhone ? pPhone : null);
+      const accPassToSend = pEmail ? (pPass || null) : null;
+
       const { data: orderId, error } = await sb.rpc("place_order", {
         p_product_id: currentProductId,
         p_price: selectedPlan.price,
@@ -956,8 +979,8 @@
         p_note: finalNote || null,
         p_player_id: pId || null,
         p_player_name: pName || null,
-        p_acc_email: (pEmail || pPhone) || null,
-        p_acc_pass: pPass || null
+        p_acc_email: accLogin,
+        p_acc_pass: accPassToSend
       });
 
       if(error) throw error;
