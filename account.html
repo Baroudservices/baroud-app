@@ -534,6 +534,9 @@
   let selectedPlan = null;
   let plansChannel = null;
 
+  // ✅ TikTok helper (حتى يظهر/يختفي Password حسب email)
+  let tiktokEmailToggleAttached = false;
+
   function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function getId(){ return new URL(location.href).searchParams.get("id"); }
 
@@ -714,6 +717,21 @@
       needDevice = true;
     }
 
+    // ✅ Tango: ID required (حسب طلبك)
+    if(titleText.includes("tango")){
+      needId = true;
+    }
+
+    // ✅ TikTok: يا اما Phone لوحده (بدون Password) يا اما Email + Password
+    if(titleText.includes("tiktok")){
+      // خليهن ينعرضوا الاثنين، والتحقق النهائي بالـ buyProduct
+      needEmail = true;
+      needPhone = true;
+
+      // لا تفرض Password من الداتا (لأنو Phone ما بدو Password)
+      needPass = false;
+    }
+
     if(needId || needZone || needName || needEmail || needDevice || needPhone || needWhats || needUser || needPass || needBackup || needAcc){
       df.style.display = "grid";
       if(needId) fId.style.display = "block";
@@ -727,6 +745,38 @@
       if(needPass) fPass.style.display = "block";
       if(needBackup) fBackup.style.display = "block";
       if(needAcc) fAcc.style.display = "block";
+    }
+
+    // ✅ TikTok: إظهار Password فقط إذا المستخدم كتب Email
+    if(titleText.includes("tiktok")){
+      const emailInput = document.getElementById("input-email");
+      const passWrap = document.getElementById("field-pass");
+      const passInput = document.getElementById("input-pass");
+
+      // ابدأ مخفي
+      if(passWrap){
+        passWrap.style.display = "none";
+      }
+
+      // attach once
+      if(emailInput && passWrap && passInput && !tiktokEmailToggleAttached){
+        tiktokEmailToggleAttached = true;
+        emailInput.addEventListener("input", ()=>{
+          const v = (emailInput.value || "").trim();
+          if(v){
+            passWrap.style.display = "block";
+          }else{
+            passWrap.style.display = "none";
+            passInput.value = "";
+          }
+        });
+      }
+
+      // إذا أصلاً في email موجود (مثلاً رجع المستخدم) خلّي password يطلع
+      const v0 = (emailInput?.value || "").trim();
+      if(v0 && passWrap){
+        passWrap.style.display = "block";
+      }
     }
   }
 
@@ -894,11 +944,7 @@
     const pBackup = document.getElementById("input-backup").value.trim();
     const pAcc = document.getElementById("input-account-details").value.trim();
 
-    // ✅ FIX: isVisible صار يشتغل صح لأي display مش بس block
-    const isVisible = (id)=> {
-      const el = document.getElementById(id);
-      return !!(el && el.style.display !== "none");
-    };
+    const isVisible = (id)=> document.getElementById(id)?.style.display === "block";
 
     if(isVisible("field-player-id") && !pId){ await showNotice("ID is required", "Notice"); return; }
     if(isVisible("field-zone-id") && !zId){ await showNotice("Zone ID is required", "Notice"); return; }
@@ -906,35 +952,30 @@
     if(isVisible("field-device-type") && !pDevice){ await showNotice("Please select TV or Mobile", "Notice"); return; }
     if(isVisible("field-username") && !pUser){ await showNotice("Username is required", "Notice"); return; }
     if(isVisible("field-whatsapp") && !pWhats){ await showNotice("WhatsApp number is required", "Notice"); return; }
-    if(isVisible("field-pass") && !pPass){ await showNotice("Password is required", "Notice"); return; }
+
+    // ✅ لا تعمل check عام على password قبل TikTok logic
+    const titleText = (currentProduct.title || "").toLowerCase();
+    if(!titleText.includes("tiktok")){
+      if(isVisible("field-pass") && !pPass){ await showNotice("Password is required", "Notice"); return; }
+    }
+
     if(isVisible("field-backup") && !pBackup){ await showNotice("Backup codes are required", "Notice"); return; }
     if(isVisible("field-account-details") && !pAcc){ await showNotice("Account details are required", "Notice"); return; }
 
-    const titleText = (currentProduct.title || "").toLowerCase();
-
-    // ✅ FIX: TikTok logic (Email+Pass OR Phone only)
+    // ✅ TikTok: يا اما Phone بدون Password - يا اما Email + Password
     if(titleText.includes("tiktok")){
-      const hasEmail = !!pEmail;
-      const hasPhone = !!pPhone;
-      const hasPass  = !!pPass;
+      const emailShown = isVisible("field-email");
+      const phoneShown = isVisible("field-phone");
 
-      if(!hasEmail && !hasPhone){
+      // لازم واحد منهم
+      if((emailShown || phoneShown) && (!pEmail && !pPhone)){
         await showNotice("Enter Email or Phone number", "Notice");
         return;
       }
 
-      if(hasEmail && hasPhone){
-        await showNotice("Choose ONE only: Email+Password OR Phone only", "Notice");
-        return;
-      }
-
-      if(hasEmail && !hasPass){
-        await showNotice("Password is required with Email", "Notice");
-        return;
-      }
-
-      if(hasPhone && hasPass){
-        await showNotice("Do NOT enter password when using phone", "Notice");
+      // إذا اختار Email → لازم Password
+      if(pEmail && !pPass){
+        await showNotice("Password is required when using Email", "Notice");
         return;
       }
     } else {
@@ -968,10 +1009,6 @@
       });
       const finalNote = (baseNote + extraNote).trim();
 
-      // ✅ FIX: send login value (email OR phone) + password فقط إذا email
-      const accLogin = pEmail ? pEmail : (pPhone ? pPhone : null);
-      const accPassToSend = pEmail ? (pPass || null) : null;
-
       const { data: orderId, error } = await sb.rpc("place_order", {
         p_product_id: currentProductId,
         p_price: selectedPlan.price,
@@ -979,8 +1016,8 @@
         p_note: finalNote || null,
         p_player_id: pId || null,
         p_player_name: pName || null,
-        p_acc_email: accLogin,
-        p_acc_pass: accPassToSend
+        p_acc_email: (pEmail || pPhone) || null,
+        p_acc_pass: pPass || null
       });
 
       if(error) throw error;
