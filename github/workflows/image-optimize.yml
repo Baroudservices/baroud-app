@@ -1,24 +1,36 @@
 name: Optimize Images
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+    paths:
+      - "assets/**"
+      - "**/*.png"
+      - "**/*.jpg"
+      - "**/*.jpeg"
+      - "**/*.webp"
+
+permissions:
+  contents: write
 
 jobs:
   optimize:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Optimize images
         uses: calibreapp/image-actions@main
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          compressOnly: true
+          jpegQuality: "75"
+          pngQuality: "75"
+          webpQuality: "75"
 
-      - name: Commit optimized images
+      - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: optimize images"
-          
