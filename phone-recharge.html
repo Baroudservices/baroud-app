@@ -393,7 +393,7 @@
     let ctMode = "CREDIT_ALFA";
     let tmr = null;
 
-    let pendingBuy = null; // { product_id, product_title, plan_label, title, price, phone_required }
+    let pendingBuy = null;
 
     function showRightSubFilters(){
       if(mode === "ALFA"){
@@ -441,12 +441,12 @@
       return false;
     }
 
+    // ✅ FIX #1: remove wrong category filter (it was blocking your real data)
     async function findProductByTitleLike(titleLike){
       const { data, error } = await sb
         .from("products")
         .select("id,title,category,active")
         .eq("active", true)
-        .eq("category", "Phone recharge")
         .ilike("title", `%${titleLike}%`)
         .limit(1);
 
@@ -526,8 +526,6 @@
     mCancel.onclick = closeBuyModal;
     buyModal.addEventListener("click", (e)=>{ if(e.target === buyModal) closeBuyModal(); });
 
-    // ✅ IMPORTANT FIX:
-    // Use ONLY ONE signature to avoid ambiguity (the extended one)
     async function placeOrderUnified({ product_id, price, phone, note, plan_label, product_title }){
       const { data: { session } } = await sb.auth.getSession();
       if(!session){
@@ -538,7 +536,6 @@
       const payload = {
         p_product_id: product_id,
         p_price: price,
-        // ALWAYS send p_player_id (even if optional) to avoid RPC overload ambiguity
         p_player_id: (phone && phone.trim()) ? phone.trim() : "",
         p_note: note || "",
         p_plan_label: plan_label || "",
@@ -590,11 +587,8 @@
     async function loadSection(){
       const q = (qInput.value || "").trim().toLowerCase();
 
-      if(mode === "ALFA" && alfaMode === "INTERNET"){
-        setMsg("No Internet products yet.");
-        listEl.innerHTML = "";
-        return;
-      }
+      // ✅ FIX #2: REMOVE the Internet hard-block
+      // (كان يمنع عرض الإنترنت حتى لو موجود بالداتا)
 
       setMsg("Loading...");
       listEl.innerHTML = "";
@@ -650,7 +644,7 @@
       const amt = parseAmount(ctAmount.value);
       const total = amt * ctMultiplier();
       ctTotal.textContent = money(total);
-      ctHelp.textContent = `Credit Transfer (${ctProviderLabel()})`; // multiplier hidden
+      ctHelp.textContent = `Credit Transfer (${ctProviderLabel()})`;
       return { amt, total };
     }
     ctAmount.addEventListener("input", ()=> updateCtTotal());
@@ -664,7 +658,7 @@
 
       const product = await getCreditTransferProduct();
       if(!product){
-        alert("Credit Transfer product not found. Create product title contains 'Credit Transfer' + category 'Phone recharge'.");
+        alert("Credit Transfer product not found. Create product title contains 'Credit Transfer'.");
         return;
       }
 
