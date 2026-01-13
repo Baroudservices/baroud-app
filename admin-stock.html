@@ -289,9 +289,31 @@
     msg.textContent = text || "";
   }
 
+  // ✅ ADMIN GUARD (added) — prevents non-admin users from accessing this page
+  async function requireAdmin(){
+    const { data: { session }, error: sErr } = await sb.auth.getSession();
+    if (sErr || !session) {
+      location.replace("login.html");
+      throw new Error("Not logged in");
+    }
+
+    const { data: prof, error: pErr } = await sb
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", session.user.id)
+      .single();
+
+    if (pErr || !prof || prof.is_admin !== true) {
+      location.replace("services.html"); // change to index.html if you want
+      throw new Error("Not admin");
+    }
+
+    return true;
+  }
+
   async function requireSession(){
-  return await requireAdmin();
-}
+    return await requireAdmin();
+  }
 
   async function loadProducts(){
     productsList.innerHTML = `<div class="muted">Loading...</div>`;
