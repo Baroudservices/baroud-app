@@ -145,23 +145,20 @@ function toArr(x){ return Array.isArray(x) ? x : []; }
 
 /* ✅ ADMIN GUARD */
 async function requireAdmin(){
-  // 1) لازم يكون في session
   const { data: { session }, error: sErr } = await sb.auth.getSession();
   if(sErr || !session){
     location.replace("login.html");
     throw new Error("Not logged in");
   }
 
-  // 2) نقرأ is_admin من profiles
   const { data: prof, error: pErr } = await sb
     .from("profiles")
     .select("is_admin")
     .eq("id", session.user.id)
     .single();
 
-  // إذا ما في profile أو مش أدمن → برا
   if(pErr || !prof || prof.is_admin !== true){
-    location.replace("services.html"); // أو index.html
+    location.replace("services.html");
     throw new Error("Not admin");
   }
 
@@ -220,7 +217,6 @@ async function loadOrders(){
   listEl.innerHTML = "";
   emptyEl.style.display = "none";
 
-  // ✅ حماية الأدمن
   await requireAdmin();
 
   const { data: orders, error: e1 } = await sb
@@ -371,16 +367,22 @@ function openReplyModal(orderId){
   replyModal.style.display = "flex";
 }
 
+/* ✅ FIXED: لا تمسح currentReplyOrderId قبل تحديث الكاش */
 rmSave.onclick = ()=>{
   if(!currentReplyOrderId) return;
-  const hidden = document.getElementById(`reply_${currentReplyOrderId}`);
-  if(hidden) hidden.value = rmText.value || "";
-  closeReplyModal();
 
-  const idx = ordersCache.findIndex(o => String(o.id) === String(currentReplyOrderId));
+  const orderId = currentReplyOrderId;                 // ✅ خزّن قبل الإغلاق
+  const value = (rmText.value || "").trim();
+
+  const hidden = document.getElementById(`reply_${orderId}`);
+  if(hidden) hidden.value = value;
+
+  const idx = ordersCache.findIndex(o => String(o.id) === String(orderId));
   if(idx >= 0){
-    ordersCache[idx].admin_reply = rmText.value || "";
+    ordersCache[idx].admin_reply = value;
   }
+
+  closeReplyModal();
   renderOrders();
 };
 
