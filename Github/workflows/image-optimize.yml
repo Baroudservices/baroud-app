@@ -6,16 +6,15 @@ on:
     branches: [ "main" ]
     paths:
       - "assets/**"
-      - "**/*.png"
-      - "**/*.jpg"
-      - "**/*.jpeg"
-      - "**/*.webp"
 
 permissions:
   contents: write
 
 jobs:
   optimize:
+    # يمنع إعادة التشغيل بسبب الكوميت اللي بيعمله البوت
+    if: github.actor != 'github-actions[bot]'
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
