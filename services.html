@@ -201,54 +201,56 @@
       opacity:.9;
       word-break:break-word;
     }
-  .waModal{
-    position:fixed; inset:0;
-    background:rgba(0,0,0,.75);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-    z-index:999999;
-  }
-  .waCard{
-    width:min(520px,100%);
-    background:#0c1018;
-    border:1px solid rgba(255,255,255,.15);
-    border-radius:18px;
-    padding:18px;
-    color:#fff;
-    text-align:center;
-  }
-  .waTitle{
-    font-weight:950;
-    font-size:20px;
-    margin-bottom:8px;
-  }
-  .waText{
-    opacity:.85;
-    font-weight:800;
-    font-size:14px;
-    line-height:1.5;
-  }
-  .waBtns{
-    display:flex;
-    gap:10px;
-    margin-top:16px;
-  }
-  .waBtn{
-    flex:1;
-    border:0;
-    cursor:pointer;
-    padding:12px 14px;
-    border-radius:14px;
-    font-weight:950;
-    color:#fff;
-    background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-  }
-  .waBtn.secondary{
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.12);
-  }
+
+    /* WhatsApp Popup */
+    .waModal{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.75);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:999999;
+    }
+    .waCard{
+      width:min(520px,100%);
+      background:#0c1018;
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:18px;
+      padding:18px;
+      color:#fff;
+      text-align:center;
+    }
+    .waTitle{
+      font-weight:950;
+      font-size:20px;
+      margin-bottom:8px;
+    }
+    .waText{
+      opacity:.85;
+      font-weight:800;
+      font-size:14px;
+      line-height:1.5;
+    }
+    .waBtns{
+      display:flex;
+      gap:10px;
+      margin-top:16px;
+    }
+    .waBtn{
+      flex:1;
+      border:0;
+      cursor:pointer;
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:950;
+      color:#fff;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+    }
+    .waBtn.secondary{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
   </style>
 </head>
 
@@ -263,8 +265,6 @@
 
     <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
       <div style="width:60px; height:60px; background:rgba(255,255,255,0.05); border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; border:2px solid #00d2ff; font-size:25px;">👤</div>
-
-      <!-- ✅ هون بدل الاسم الثابت -->
       <div class="userEmail" id="userEmail">Loading...</div>
     </div>
 
@@ -277,13 +277,11 @@
     <a href="security.html" class="m-item"><div class="m-dot"></div><span>Security</span></a>
     <a href="help.html" class="m-item"><div class="m-dot"></div><span>Help</span></a>
 
-    <!-- ✅ Logout مباشرة تحت Help -->
     <button class="m-item logout-item" id="logoutBtn" type="button">
       <div class="m-dot logout-dot"></div>
       <span>Logout</span>
     </button>
 
-    <!-- WhatsApp يبقى بالآخر -->
     <a class="m-item" style="margin-top:auto;"
        href="https://wa.me/96170385398?text=Hello%20Houssein%20I%20need%20Help"
        target="_blank" rel="noopener noreferrer">
@@ -326,20 +324,22 @@
     </div>
 
     <div id="searchResults"></div>
-    
-<div class="waModal" id="waModal">
-  <div class="waCard">
-    <div class="waTitle">Join our WhatsApp Community</div>
-    <div class="waText">
-      Get offers, updates and instant support on WhatsApp
+
+    <!-- WhatsApp Popup -->
+    <div class="waModal" id="waModal">
+      <div class="waCard">
+        <div class="waTitle">Join our WhatsApp Community</div>
+        <div class="waText">
+          Get offers, updates and instant support on WhatsApp
+        </div>
+
+        <div class="waBtns">
+          <button class="waBtn secondary" id="waLater">Later</button>
+          <button class="waBtn" id="waJoin">Join</button>
+        </div>
+      </div>
     </div>
 
-    <div class="waBtns">
-      <button class="waBtn secondary" id="waLater">Later</button>
-      <button class="waBtn" id="waJoin">Join</button>
-    </div>
-  </div>
-</div>
     <section class="grid" id="serviceGrid">
       <a href="accounts.html?category=Accounts" class="neon-tile">
         <img src="assets/accounts.png" alt="Accounts">
@@ -519,29 +519,33 @@
         };
       });
     }
-(function(){
-  const WA_LINK = "https://chat.whatsapp.com/D7ORsbcGnRpJmHpoIVBbYw";
-  const modal = document.getElementById("waModal");
 
-  window.addEventListener("load", ()=>{
-    modal.style.display = "flex";
-  });
+    // ✅ WhatsApp Popup (moved here: OUTSIDE searchProducts)
+    (function(){
+      const WA_LINK = "https://chat.whatsapp.com/D7ORsbcGnRpJmHpoIVBbYw";
+      const modal = document.getElementById("waModal");
+      const laterBtn = document.getElementById("waLater");
+      const joinBtn = document.getElementById("waJoin");
 
-  document.getElementById("waLater").onclick = ()=>{
-    modal.style.display = "none";
-  };
+      window.addEventListener("load", ()=>{
+        if(modal) modal.style.display = "flex";
+      });
 
-  document.getElementById("waJoin").onclick = ()=>{
-    window.open(WA_LINK, "_blank");
-    modal.style.display = "none";
-  };
+      if(laterBtn) laterBtn.onclick = ()=>{ modal.style.display = "none"; };
+      if(joinBtn) joinBtn.onclick = ()=>{
+        window.open(WA_LINK, "_blank");
+        modal.style.display = "none";
+      };
 
-  modal.addEventListener("click", (e)=>{
-    if(e.target === modal){
-      modal.style.display = "none";
-    }
-  });
-})();
+      if(modal){
+        modal.addEventListener("click", (e)=>{
+          if(e.target === modal){
+            modal.style.display = "none";
+          }
+        });
+      }
+    })();
+
     if(searchInput){
       searchInput.addEventListener("input", ()=>{
         clearTimeout(tmr);
