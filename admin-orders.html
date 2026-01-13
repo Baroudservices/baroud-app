@@ -35,9 +35,6 @@
     border:1px solid rgba(255,255,255,.12);
     background:rgba(255,255,255,.06);
   }
-  .btnDanger{
-    background:linear-gradient(90deg,#ef4444,#b91c1c);
-  }
   .empty{ opacity:.7; text-align:center; margin-top:40px; }
 
   .details{
@@ -146,6 +143,31 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function toArr(x){ return Array.isArray(x) ? x : []; }
 
+/* ✅ ADMIN GUARD */
+async function requireAdmin(){
+  // 1) لازم يكون في session
+  const { data: { session }, error: sErr } = await sb.auth.getSession();
+  if(sErr || !session){
+    location.replace("login.html");
+    throw new Error("Not logged in");
+  }
+
+  // 2) نقرأ is_admin من profiles
+  const { data: prof, error: pErr } = await sb
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", session.user.id)
+    .single();
+
+  // إذا ما في profile أو مش أدمن → برا
+  if(pErr || !prof || prof.is_admin !== true){
+    location.replace("services.html"); // أو index.html
+    throw new Error("Not admin");
+  }
+
+  return true;
+}
+
 function pickDetails(o){
   const candidates = [
     ["phone_number","Phone"],
@@ -169,7 +191,6 @@ function pickDetails(o){
     }
   });
 
-  // fallback: أي حقول إضافية (غير الأساسية)
   if(out.length === 0 && o){
     const skip = new Set([
       "id","user_id","product_id","price","status","delivery_status",
@@ -199,7 +220,7 @@ async function loadOrders(){
   listEl.innerHTML = "";
   emptyEl.style.display = "none";
 
-  // 🔐 تحقق أدمن
+  // ✅ حماية الأدمن
   await requireAdmin();
 
   const { data: orders, error: e1 } = await sb
@@ -219,7 +240,6 @@ async function loadOrders(){
     return;
   }
 
-  // map product titles
   const ids = [...new Set(ordersCache.map(o => o.product_id).filter(Boolean))];
   titleById = {};
   if(ids.length){
@@ -324,19 +344,16 @@ function toggleDetails(orderId){
   el.style.display = (el.style.display === "none" || !el.style.display) ? "block" : "none";
 }
 
-/* Reply Modal Logic */
+/* Reply Modal */
 const replyModal = document.getElementById("replyModal");
-const rmTitle = document.getElementById("rmTitle");
 const rmMeta = document.getElementById("rmMeta");
 const rmText = document.getElementById("rmText");
-const rmErr  = document.getElementById("rmErr");
 const rmCancel = document.getElementById("rmCancel");
 const rmSave = document.getElementById("rmSave");
 
 function closeReplyModal(){
   replyModal.style.display = "none";
   currentReplyOrderId = null;
-  rmErr.textContent = "";
 }
 
 replyModal.addEventListener("click", (e)=>{ if(e.target === replyModal) closeReplyModal(); });
@@ -345,14 +362,11 @@ rmCancel.onclick = closeReplyModal;
 function openReplyModal(orderId){
   currentReplyOrderId = orderId;
 
-  const titleEl = document.querySelector(`#card_${orderId} .name`);
   const userLine = document.querySelector(`#card_${orderId} .small:nth-child(3)`);
   const replyHidden = document.getElementById(`reply_${orderId}`);
 
-  rmTitle.textContent = "Admin Reply";
   rmMeta.textContent = `Order #${orderId}` + (userLine ? ` • ${userLine.textContent}` : "");
   rmText.value = replyHidden ? (replyHidden.value || "") : "";
-  rmErr.textContent = "";
 
   replyModal.style.display = "flex";
 }
@@ -363,17 +377,11 @@ rmSave.onclick = ()=>{
   if(hidden) hidden.value = rmText.value || "";
   closeReplyModal();
 
-  // update preview without reload
-  const card = document.getElementById(`card_${currentReplyOrderId}`);
-  if(card){
-    // reload all for simplicity (keeps UI consistent)
-    // lightweight: just re-render
-    const idx = ordersCache.findIndex(o => String(o.id) === String(currentReplyOrderId));
-    if(idx >= 0){
-      ordersCache[idx].admin_reply = rmText.value || "";
-    }
-    renderOrders();
+  const idx = ordersCache.findIndex(o => String(o.id) === String(currentReplyOrderId));
+  if(idx >= 0){
+    ordersCache[idx].admin_reply = rmText.value || "";
   }
+  renderOrders();
 };
 
 async function saveOrder(orderId){
@@ -384,38 +392,28 @@ async function saveOrder(orderId){
   const delivery_status = document.getElementById(`delivery_${orderId}`).value;
   const admin_reply = (document.getElementById(`reply_${orderId}`)?.value || "").trim();
 
-  // Confirm when rejecting
   if(delivery_status === "rejected"){
-    const ok = confirm(
-      "Delivery is REJECTED.\n\n✅ If DB trigger/refund function is enabled, user balance will be refunded automatically.\n\nContinue?"
-    );
+    const ok = confirm("Delivery is REJECTED.\n\nContinue?");
     if(!ok){
       msg.textContent = "Cancelled.";
       return;
     }
   }
 
-  // admin_reply_at if reply exists (optional)
   const payload = { status, delivery_status, admin_reply };
   if(admin_reply){
     payload.admin_reply_at = new Date().toISOString();
   }
 
-  const { error } = await sb
-    .from("orders")
-    .update(payload)
-    .eq("id", orderId);
+  const { error } = await sb.from("orders").update(payload).eq("id", orderId);
 
   if(error){
     msg.textContent = `Error: ${error.message}`;
     return;
   }
 
-  msg.textContent = delivery_status === "rejected"
-    ? "Saved ✅ (Rejected) — refund should be auto-processed by DB."
-    : "Saved ✅";
+  msg.textContent = "Saved ✅";
 
-  // update cache
   const idx = ordersCache.findIndex(o => String(o.id) === String(orderId));
   if(idx >= 0){
     ordersCache[idx].status = status;
@@ -425,9 +423,9 @@ async function saveOrder(orderId){
 }
 
 document.getElementById("q").addEventListener("input", ()=> renderOrders());
-
 loadOrders();
 </script>
-    <script src="app-ui.js?v=3"></script>
+
+<script src="app-ui.js?v=3"></script>
 </body>
 </html>
