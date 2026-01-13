@@ -45,15 +45,6 @@
       box-shadow:var(--shadow);
       overflow:hidden;
     }
-    .grid{
-      display:grid;
-      grid-template-columns: 360px 1fr;
-      gap:12px;
-      align-items:start;
-    }
-    @media (max-width: 900px){
-      .grid{grid-template-columns: 1fr;}
-    }
 
     .head{
       padding:14px 14px 12px;
@@ -103,10 +94,6 @@
       background:rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.10);
     }
-    .btn.danger{
-      background:rgba(239,68,68,.12);
-      border:1px solid rgba(239,68,68,.35);
-    }
     .btn:disabled{opacity:.6; cursor:not-allowed}
 
     .list{
@@ -140,6 +127,46 @@
       box-shadow:0 0 0 1px rgba(10,160,255,.25) inset;
     }
 
+    .muted{opacity:.75; font-weight:800; font-size:13px}
+    .msg{margin-top:10px; font-weight:900; font-size:13px; opacity:.9}
+    .ok{color:#22c55e}
+    .bad{color:#ef4444}
+
+    .topTools{
+      display:flex; gap:10px; align-items:center;
+    }
+    .small{
+      padding:10px 12px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      color:#fff; font-weight:950; cursor:pointer;
+    }
+
+    /* ✅ Inline Stock Panel under product */
+    .inlinePanel{
+      margin-top:8px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      padding:12px;
+    }
+    .panelTop{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .panelTitle{font-weight:950}
+    .panelCount{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      font-weight:900;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
     .stockRow{
       display:flex; align-items:flex-start; justify-content:space-between;
       gap:10px;
@@ -149,9 +176,7 @@
       background:rgba(255,255,255,.03);
       margin-bottom:10px;
     }
-    .stockData{
-      flex:1; min-width:0;
-    }
+    .stockData{ flex:1; min-width:0; }
     .stockData pre{
       margin:0;
       white-space:pre-wrap;
@@ -183,23 +208,9 @@
       background:rgba(239,68,68,.12);
       border:1px solid rgba(239,68,68,.35);
     }
-
-    .muted{opacity:.75; font-weight:800; font-size:13px}
-    .msg{margin-top:10px; font-weight:900; font-size:13px; opacity:.9}
-    .ok{color:#22c55e}
-    .bad{color:#ef4444}
-
-    .topTools{
-      display:flex; gap:10px; align-items:center;
-    }
-    .small{
-      padding:10px 12px; border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.05);
-      color:#fff; font-weight:950; cursor:pointer;
-    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <div class="top">
@@ -213,46 +224,19 @@
       </div>
     </div>
 
-    <div class="grid">
-      <!-- Products -->
-      <div class="card">
-        <div class="head">
-          <div class="title">Products</div>
-          <div class="pill" id="prodCount">0</div>
-        </div>
-        <div class="body">
-          <input id="prodSearch" placeholder="Search product..." />
-        </div>
-        <div class="list" id="productsList">
-          <div class="muted">Loading...</div>
-        </div>
+    <!-- ✅ Only one main card (products + inline stock panel under selected item) -->
+    <div class="card">
+      <div class="head">
+        <div class="title">Products</div>
+        <div class="pill" id="prodCount">0</div>
       </div>
 
-      <!-- Stock -->
-      <div class="card">
-        <div class="head">
-          <div class="title" id="stockTitle">Select a product</div>
-          <div class="pill" id="stockCount">0</div>
-        </div>
+      <div class="body">
+        <input id="prodSearch" placeholder="Search product..." />
+      </div>
 
-        <div class="body">
-          <div class="muted" id="stockHint">Pick a product from the left to view its stock.</div>
-
-          <div id="stockTools" style="display:none;">
-            <label>Add accounts (one per line)</label>
-            <textarea id="addBox" placeholder="email:pass&#10;email2:pass2"></textarea>
-            <div class="btnRow">
-              <button class="btn" id="addBtn">Add</button>
-              <button class="btn secondary" id="reloadStockBtn">Reload Stock</button>
-            </div>
-
-            <div class="msg" id="msg"></div>
-
-            <div style="height:12px"></div>
-            <div style="font-weight:950;margin-bottom:8px">Available Stock (not sold)</div>
-            <div id="stockList"></div>
-          </div>
-        </div>
+      <div class="list" id="productsList">
+        <div class="muted">Loading...</div>
       </div>
     </div>
   </div>
@@ -267,29 +251,15 @@
   const prodCount = document.getElementById("prodCount");
   const prodSearch = document.getElementById("prodSearch");
 
-  const stockTitle = document.getElementById("stockTitle");
-  const stockCount = document.getElementById("stockCount");
-  const stockHint = document.getElementById("stockHint");
-  const stockTools = document.getElementById("stockTools");
-  const stockList = document.getElementById("stockList");
-
-  const addBox = document.getElementById("addBox");
-  const addBtn = document.getElementById("addBtn");
-  const reloadStockBtn = document.getElementById("reloadStockBtn");
   const refreshBtn = document.getElementById("refreshBtn");
   const logoutBtn = document.getElementById("logoutBtn");
-  const msg = document.getElementById("msg");
 
   let PRODUCTS = [];
   let selectedProduct = null;
 
   function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-  function setMsg(text, ok=true){
-    msg.className = "msg " + (ok ? "ok" : "bad");
-    msg.textContent = text || "";
-  }
 
-  // ✅ ADMIN GUARD (added) — prevents non-admin users from accessing this page
+  // ✅ ADMIN GUARD (kept)
   async function requireAdmin(){
     const { data: { session }, error: sErr } = await sb.auth.getSession();
     if (sErr || !session) {
@@ -315,10 +285,20 @@
     return await requireAdmin();
   }
 
+  // ---------------------------
+  // Inline panel refs (rebound after render)
+  // ---------------------------
+  let addBox = null, addBtn = null, reloadStockBtn = null, msg = null, stockList = null, stockCountEl = null;
+
+  function setMsg(text, ok=true){
+    if(!msg) return;
+    msg.className = "msg " + (ok ? "ok" : "bad");
+    msg.textContent = text || "";
+  }
+
   async function loadProducts(){
     productsList.innerHTML = `<div class="muted">Loading...</div>`;
 
-    // products table: id, title, active...
     const { data, error } = await sb
       .from("products")
       .select("id,title,category,active")
@@ -344,44 +324,96 @@
     );
 
     productsList.innerHTML = filtered.map(p=>{
-      const active = (selectedProduct && selectedProduct.id === p.id) ? "active" : "";
+      const isActive = (selectedProduct && selectedProduct.id === p.id);
+      const activeClass = isActive ? "active" : "";
       const status = p.active ? "active" : "off";
-      return `
-        <div class="item ${active}" data-id="${esc(p.id)}">
-          <div style="min-width:0">
-            <div class="name">${esc(p.title || ("Product " + p.id))}</div>
-            <div class="meta">${esc(p.category || "")} • ${status}</div>
+
+      // ✅ Inline stock panel only for selected product
+      const panelHtml = isActive ? `
+        <div class="inlinePanel" id="inlinePanel">
+          <div class="panelTop">
+            <div class="panelTitle">${esc(p.title || ("Product " + p.id))} — Stock</div>
+            <div class="panelCount" id="stockCount">0</div>
           </div>
-          <div class="meta">#${esc(p.id)}</div>
+
+          <label>Add accounts (one per line)</label>
+          <textarea id="addBox" placeholder="email:pass&#10;email2:pass2"></textarea>
+
+          <div class="btnRow">
+            <button class="btn" id="addBtn">Add</button>
+            <button class="btn secondary" id="reloadStockBtn">Reload Stock</button>
+          </div>
+
+          <div class="msg" id="msg"></div>
+
+          <div style="height:12px"></div>
+          <div style="font-weight:950;margin-bottom:8px">Available Stock (not sold)</div>
+          <div id="stockList"><div class="muted">Loading stock...</div></div>
+        </div>
+      ` : "";
+
+      return `
+        <div>
+          <div class="item ${activeClass}" data-id="${esc(p.id)}">
+            <div style="min-width:0">
+              <div class="name">${esc(p.title || ("Product " + p.id))}</div>
+              <div class="meta">${esc(p.category || "")} • ${status}</div>
+            </div>
+            <div class="meta">#${esc(p.id)}</div>
+          </div>
+          ${panelHtml}
         </div>
       `;
     }).join("");
 
+    // click handlers
     Array.from(productsList.querySelectorAll(".item")).forEach(el=>{
       el.onclick = async ()=>{
         const id = el.getAttribute("data-id");
         const p = PRODUCTS.find(x => String(x.id) === String(id));
         if(!p) return;
+
         selectedProduct = p;
-        renderProducts(PRODUCTS);
-
-        stockTitle.textContent = (p.title || "Product") + " — Stock";
-        stockHint.style.display = "none";
-        stockTools.style.display = "block";
-        setMsg("");
-
-        await loadStockForProduct(p.id);
+        renderProducts(PRODUCTS);          // re-render to show panel under clicked product
+        bindInlinePanelElements();         // rebind refs + buttons
+        await loadStockForProduct(p.id);   // load stock into inline panel
       };
     });
 
     if(!filtered.length){
       productsList.innerHTML = `<div class="muted">No products</div>`;
+      return;
+    }
+
+    // if already selected and list rerendered by search, bind panel again
+    if(selectedProduct && document.getElementById("inlinePanel")){
+      bindInlinePanelElements();
+      // do NOT auto-reload every keypress unless you want; but safe to refresh panel display
+      // (optional) loadStockForProduct(selectedProduct.id);
     }
   }
 
+  function bindInlinePanelElements(){
+    addBox = document.getElementById("addBox");
+    addBtn = document.getElementById("addBtn");
+    reloadStockBtn = document.getElementById("reloadStockBtn");
+    msg = document.getElementById("msg");
+    stockList = document.getElementById("stockList");
+    stockCountEl = document.getElementById("stockCount");
+
+    if(addBtn) addBtn.onclick = addStockLines;
+    if(reloadStockBtn) reloadStockBtn.onclick = async ()=> {
+      if(!selectedProduct) return;
+      setMsg("");
+      await loadStockForProduct(selectedProduct.id);
+    };
+  }
+
   async function loadStockForProduct(productId){
+    if(!stockList) return;
+
     stockList.innerHTML = `<div class="muted">Loading stock...</div>`;
-    stockCount.textContent = "0";
+    if(stockCountEl) stockCountEl.textContent = "0";
 
     const { data, error } = await sb
       .from("product_stock")
@@ -396,7 +428,7 @@
     }
 
     const rows = data || [];
-    stockCount.textContent = String(rows.length);
+    if(stockCountEl) stockCountEl.textContent = String(rows.length);
 
     if(!rows.length){
       stockList.innerHTML = `<div class="muted">No available stock for this product.</div>`;
@@ -427,7 +459,6 @@
           setMsg("✅ Copied!", true);
           setTimeout(()=> setMsg(""), 900);
         }catch(e){
-          // fallback
           const ta = document.createElement("textarea");
           ta.value = text;
           document.body.appendChild(ta);
@@ -458,13 +489,11 @@
           return;
         }
 
-        // remove from UI
         const row = stockList.querySelector(`[data-stock-id="${CSS.escape(id)}"]`);
         if(row) row.remove();
 
-        // update counter
-        const cur = Number(stockCount.textContent || 0);
-        stockCount.textContent = String(Math.max(0, cur - 1));
+        const cur = Number(stockCountEl?.textContent || 0);
+        if(stockCountEl) stockCountEl.textContent = String(Math.max(0, cur - 1));
         setMsg("✅ Deleted", true);
 
         if(!stockList.querySelector(".stockRow")){
@@ -479,13 +508,12 @@
       setMsg("Choose product first", false);
       return;
     }
-    const raw = (addBox.value || "").trim();
+    const raw = (addBox?.value || "").trim();
     if(!raw){
       setMsg("Paste accounts first", false);
       return;
     }
 
-    // each line = one stock row
     const lines = raw.split("\n").map(x=>x.trim()).filter(Boolean);
     if(!lines.length){
       setMsg("No valid lines", false);
@@ -522,18 +550,21 @@
 
   // UI events
   prodSearch.addEventListener("input", ()=> renderProducts(PRODUCTS));
-  reloadStockBtn.onclick = async ()=> {
-    if(!selectedProduct) return;
-    setMsg("");
-    await loadStockForProduct(selectedProduct.id);
-  };
-  addBtn.onclick = addStockLines;
 
   refreshBtn.onclick = async ()=>{
-    setMsg("");
+    // keep selected product if still exists
+    const keepId = selectedProduct?.id;
     await loadProducts();
-    if(selectedProduct){
-      await loadStockForProduct(selectedProduct.id);
+    if(keepId){
+      const p = PRODUCTS.find(x => String(x.id) === String(keepId));
+      if(p){
+        selectedProduct = p;
+        renderProducts(PRODUCTS);
+        bindInlinePanelElements();
+        await loadStockForProduct(p.id);
+      }else{
+        selectedProduct = null;
+      }
     }
   };
 
