@@ -140,7 +140,7 @@
       const params = new URLSearchParams(window.location.search);
       const isRecovery = params.get("type") === "recovery";
       if(session && !isRecovery){
-        location.replace("services.html");
+        location.replace("services.html?v=" + Date.now());
       }
     }catch(e){}
   })();
@@ -152,20 +152,16 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // مهم: لازم Bearer للـ anon key
         "Authorization": "Bearer " + SUPABASE_KEY
       },
       body: JSON.stringify({ email })
     });
 
-    // لو صار خطأ بالشبكة/الفنكشن
     if(!res.ok){
-      // بنرجّع null يعني ما قدرنا نفحص
-      return null;
+      return null; // ما قدرنا نفحص
     }
 
     const j = await res.json().catch(()=> ({}));
-    // نتوقع j.exists true/false
     return !!j.exists;
   }
 
@@ -194,19 +190,16 @@
         return;
       }
 
-      // لو exists = null يعني الفنكشن ما ردّت
-      // منكمّل عادي بس مننبه (اختياري)
-      // if(exists === null){}
-
       setLoading(true, "Creating...");
 
       // 2) sign up
-      const { error } = await sb.auth.signUp({
+      const { data, error } = await sb.auth.signUp({
         email,
         password: pass,
         options:{
           data: { phone }, // user_metadata
-          emailRedirectTo: BASE_URL + "login.html"
+          // ✅ إذا Confirm Email ON: بعد ما يضغط الرابط يروح هون
+          emailRedirectTo: BASE_URL + "services.html"
         }
       });
 
@@ -227,7 +220,15 @@
         return;
       }
 
-      showMsg("✅ Account created!", true);
+      // ✅ إذا Confirm Email OFF: Supabase بيرجع session فوراً => فوت دغري
+      if(data?.session){
+        showMsg("✅ Account created! Redirecting...", true);
+        location.replace("services.html?v=" + Date.now());
+        return;
+      }
+
+      // ❗ إذا Confirm Email ON: ما في session، لازم تأكيد
+      showMsg("✅ Account created! Please confirm your email 📧 then you’ll be redirected.", true);
 
     }catch(e){
       showMsg("Network error. Try again.");
