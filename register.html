@@ -67,7 +67,6 @@
     .row{display:flex;gap:10px}
     .secondary{background:#1f2937}
     
-    /* Back link */
     .back-link {
       display: block; text-align: center; margin-top: 15px;
       color: rgba(255,255,255,0.5); text-decoration: none; font-size: 13px;
@@ -139,7 +138,6 @@ function show(text, ok=false){
 
 function cleanPhone(v){
   v = v.replace(/\s+/g,"");
-  // If user starts typing without +, we help them
   if(!v.startsWith("+")) v = "+" + v;
   return v;
 }
@@ -148,7 +146,7 @@ phone.addEventListener("input", ()=> {
   phone.value = cleanPhone(phone.value);
 });
 
-/* ================= CALL FUNCTION ================= */
+/* ================= CALL EDGE FUNCTION ================= */
 async function callFn(name, body){
   const { data:{session} } = await sb.auth.getSession();
 
@@ -169,7 +167,7 @@ async function callFn(name, body){
   return j;
 }
 
-/* ================= REGISTER ================= */
+/* ================= REGISTER LOGIC ================= */
 btn.onclick = async ()=>{
   show("");
   const e = email.value.trim();
@@ -177,72 +175,82 @@ btn.onclick = async ()=>{
   const pw = pass.value;
   const pw2 = pass2.value;
 
+  // Validation
   if(!e) return show("Enter email");
-  if(!p.startsWith("+961") || p.length < 11) return show("Enter valid phone (+961...)");
+  if(!p.startsWith("+961") || p.length < 11) return show("Phone must be +961XXXXXXXX");
   if(pw.length < 6) return show("Password too short");
   if(pw !== pw2) return show("Passwords do not match");
 
   btn.disabled = true;
   btn.textContent = "Creating...";
 
-  try{
-    const { error } = await sb.auth.signUp({
-      email:e,
-      password:pw,
-      options:{ data:{ phone:p } }
+  try {
+    // 1. Create User in Supabase Auth
+    const { error: signUpError } = await sb.auth.signUp({
+      email: e,
+      password: pw,
+      options: { data: { phone: p } }
     });
-    if(error) throw error;
+    if (signUpError) throw signUpError;
 
-    const { data } = await sb.auth.signInWithPassword({ email:e, password:pw });
+    // 2. Auto Login to get session (needed for calling secure functions)
+    const { data: signInData, error: signInError } = await sb.auth.signInWithPassword({
+      email: e,
+      password: pw 
+    });
     
-    if(!data.session){
-      show("Check your email to activate account", true);
-      return;
-    }
-
+    // 3. Send SMS via your Edge Function
     LAST_PHONE = p;
-    otpBox.style.display="block";
+    await callFn(FN_SEND, { phone: p });
+    
+    // 4. Show OTP UI
+    otpBox.style.display = "block";
+    show("Account created! SMS code sent to " + p, true);
 
-    await callFn(FN_SEND,{ phone:p });
-    show("SMS code sent", true);
-
-  } catch(err){
+  } catch (err) {
     show(err.message || "Register failed");
-  } finally{
+  } finally {
     btn.disabled = false;
     btn.textContent = "Create Account";
   }
 };
 
-/* ================= OTP ================= */
-resend.onclick = async ()=>{
-  if(!LAST_PHONE) return;
-  try{
-    await callFn(FN_SEND,{ phone:LAST_PHONE });
-    show("Code resent", true);
-  }catch(e){
-    show("Failed to resend");
-  }
-};
-
+/* ================= VERIFY LOGIC ================= */
 verify.onclick = async ()=>{
   const c = otp.value.trim();
-  if(c.length < 4) return show("Enter code");
+  if(c.length < 4) return show("Enter 6-digit code");
 
   verify.disabled = true;
   verify.textContent = "Verifying...";
 
-  try{
-    await callFn(FN_CHECK,{ phone:LAST_PHONE, code:c });
+  try {
+    // Call your check-phone-otp Edge Function
+    await callFn(FN_CHECK, { phone: LAST_PHONE, code: c });
+    
     show("Phone verified! Redirecting...", true);
     setTimeout(() => {
         location.replace("services.html");
     }, 1500);
-  }catch(e){
-    show("Wrong or expired code");
-  }finally{
+
+  } catch (e) {
+    show(e.message || "Wrong or expired code");
+  } finally {
     verify.disabled = false;
     verify.textContent = "Verify";
+  }
+};
+
+/* ================= RESEND LOGIC ================= */
+resend.onclick = async ()=>{
+  if(!LAST_PHONE) return;
+  resend.disabled = true;
+  try {
+    await callFn(FN_SEND, { phone: LAST_PHONE });
+    show("Code resent to " + LAST_PHONE, true);
+  } catch(e) {
+    show("Failed to resend code");
+  } finally {
+    setTimeout(() => { resend.disabled = false; }, 5000);
   }
 };
 </script>
