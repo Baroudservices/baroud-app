@@ -136,11 +136,25 @@ function show(text, ok=false){
   msg.textContent = text;
 }
 
+// وظيفة تنظيف الرقم وتثبيت +961
 function cleanPhone(v){
-  v = v.replace(/\s+/g,"");
-  if(!v.startsWith("+")) v = "+" + v;
-  return v;
+  let digits = v.replace(/\D/g, ""); // منشيل أي شي مش رقم
+  
+  // إذا بلش يكتب 961 منشيلها عشان ما تتدبل
+  if (digits.startsWith("961")) {
+    digits = digits.substring(3);
+  }
+  
+  // منركب الرقم (أقصى حد 8 أرقام لبنانية بعد الكود)
+  return "+961" + digits.slice(0, 8);
 }
+
+// عند الكبس على الخانة، إذا فاضية حط +961
+phone.addEventListener("focus", () => {
+  if(!phone.value || phone.value === "+") {
+    phone.value = "+961";
+  }
+});
 
 phone.addEventListener("input", ()=> {
   phone.value = cleanPhone(phone.value);
@@ -175,8 +189,8 @@ btn.onclick = async ()=>{
   const pw = pass.value;
   const pw2 = pass2.value;
 
-  // Validation
   if(!e) return show("Enter email");
+  // التأكد من أن الرقم كامل (12 حرف مع الـ +961)
   if(!p.startsWith("+961") || p.length < 11) return show("Phone must be +961XXXXXXXX");
   if(pw.length < 6) return show("Password too short");
   if(pw !== pw2) return show("Passwords do not match");
@@ -185,7 +199,6 @@ btn.onclick = async ()=>{
   btn.textContent = "Creating...";
 
   try {
-    // 1. Create User in Supabase Auth
     const { error: signUpError } = await sb.auth.signUp({
       email: e,
       password: pw,
@@ -193,17 +206,14 @@ btn.onclick = async ()=>{
     });
     if (signUpError) throw signUpError;
 
-    // 2. Auto Login to get session (needed for calling secure functions)
-    const { data: signInData, error: signInError } = await sb.auth.signInWithPassword({
+    const { error: signInError } = await sb.auth.signInWithPassword({
       email: e,
       password: pw 
     });
     
-    // 3. Send SMS via your Edge Function
     LAST_PHONE = p;
     await callFn(FN_SEND, { phone: p });
     
-    // 4. Show OTP UI
     otpBox.style.display = "block";
     show("Account created! SMS code sent to " + p, true);
 
@@ -224,7 +234,6 @@ verify.onclick = async ()=>{
   verify.textContent = "Verifying...";
 
   try {
-    // Call your check-phone-otp Edge Function
     await callFn(FN_CHECK, { phone: LAST_PHONE, code: c });
     
     show("Phone verified! Redirecting...", true);
