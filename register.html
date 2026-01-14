@@ -17,6 +17,7 @@
       background:linear-gradient(180deg,#0b1424,#050a14);
       font-family:system-ui,Arial;
       color:#fff;
+      padding:16px;
     }
     .card{
       width:100%;
@@ -38,6 +39,7 @@
       background:rgba(0,0,0,.25);
       color:#fff;
       outline: none;
+      font-size:14px;
     }
     input:focus{ border-color: #0aa0ff; }
     button{
@@ -50,10 +52,11 @@
       color:#fff;
       cursor:pointer;
       transition: opacity 0.2s;
+      font-size:15px;
     }
     button:active{ transform: scale(0.98); }
     button:disabled{opacity:.6; cursor: not-allowed;}
-    .msg{margin-top:12px;font-weight:800; text-align: center; min-height: 20px;}
+    .msg{margin-top:12px;font-weight:800; text-align:center; min-height:22px; white-space:pre-wrap;}
     .ok{color:#22c55e}
     .bad{color:#ef4444}
     .otpBox{
@@ -64,12 +67,11 @@
       background:rgba(0,0,0,.2);
       border: 1px solid rgba(255,255,255,0.1);
     }
-    .row{display:flex;gap:10px}
+    .row{display:flex;gap:10px;margin-top:10px}
     .secondary{background:#1f2937}
-    
-    .back-link {
-      display: block; text-align: center; margin-top: 15px;
-      color: rgba(255,255,255,0.5); text-decoration: none; font-size: 13px;
+    .back-link{
+      display:block; text-align:center; margin-top:15px;
+      color: rgba(255,255,255,0.5); text-decoration:none; font-size:13px;
     }
   </style>
 </head>
@@ -79,26 +81,27 @@
   <h1>Register</h1>
 
   <label>Email</label>
-  <input id="email" type="email" placeholder="Enter your email">
+  <input id="email" type="email" placeholder="Enter your email" autocomplete="email">
 
   <label>Phone Number</label>
-  <input id="phone" type="tel" placeholder="+961XXXXXXXX">
+  <input id="phone" type="tel" placeholder="+961XXXXXXXX" inputmode="tel" autocomplete="tel">
 
   <label>Password</label>
-  <input id="pass" type="password" placeholder="••••••••">
+  <input id="pass" type="password" placeholder="••••••••" autocomplete="new-password">
 
   <label>Confirm Password</label>
-  <input id="pass2" type="password" placeholder="••••••••">
+  <input id="pass2" type="password" placeholder="••••••••" autocomplete="new-password">
 
-  <button id="btn">Create Account</button>
+  <button id="btn" type="button">Create Account</button>
   <div class="msg" id="msg"></div>
 
   <div class="otpBox" id="otpBox">
     <label>Verification Code</label>
-    <input id="otp" placeholder="123456" maxlength="6">
+    <input id="otp" placeholder="123456" maxlength="6" inputmode="numeric">
+
     <div class="row">
-      <button class="secondary" id="resend">Resend</button>
-      <button id="verify">Verify</button>
+      <button class="secondary" id="resend" type="button">Resend</button>
+      <button id="verify" type="button">Verify</button>
     </div>
   </div>
 
@@ -116,10 +119,10 @@ const FN_CHECK = "check-phone-otp";
 /* ================= INIT ================= */
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const email = document.getElementById("email");
-const phone = document.getElementById("phone");
-const pass = document.getElementById("pass");
-const pass2 = document.getElementById("pass2");
+const elEmail = document.getElementById("email");
+const elPhone = document.getElementById("phone");
+const elPass  = document.getElementById("pass");
+const elPass2 = document.getElementById("pass2");
 const btn = document.getElementById("btn");
 const msg = document.getElementById("msg");
 
@@ -130,75 +133,86 @@ const verify = document.getElementById("verify");
 
 let LAST_PHONE = "";
 
-/* ================= HELPERS ================= */
+/* ================= UI HELPERS ================= */
 function show(text, ok=false){
-  msg.className = "msg " + (ok?"ok":"bad");
-  msg.textContent = text;
+  msg.className = "msg " + (ok ? "ok" : "bad");
+  msg.textContent = text || "";
+}
+function setBtnLoading(on, text){
+  btn.disabled = !!on;
+  btn.textContent = on ? (text || "Please wait...") : "Create Account";
+}
+function setVerifyLoading(on){
+  verify.disabled = !!on;
+  verify.textContent = on ? "Verifying..." : "Verify";
+}
+function setResendLoading(on){
+  resend.disabled = !!on;
+  resend.textContent = on ? "Sending..." : "Resend";
 }
 
-// وظيفة تنظيف الرقم وتثبيت +961
+/* ================= PHONE (FORCE +961) ================= */
 function cleanPhone(v){
-  let digits = v.replace(/\D/g, ""); // منشيل أي شي مش رقم
-  
-  // إذا بلش يكتب 961 منشيلها عشان ما تتدبل
-  if (digits.startsWith("961")) {
-    digits = digits.substring(3);
-  }
-  
-  // منركب الرقم (أقصى حد 8 أرقام لبنانية بعد الكود)
-  return "+961" + digits.slice(0, 8);
+  let digits = String(v || "").replace(/\D/g, "");
+  // prevent double 961
+  if (digits.startsWith("961")) digits = digits.slice(3);
+  // Lebanese local numbers typically 8 digits after +961
+  digits = digits.slice(0, 8);
+  return "+961" + digits;
 }
 
-// عند الكبس على الخانة، إذا فاضية حط +961
-phone.addEventListener("focus", () => {
-  if(!phone.value || phone.value === "+") {
-    phone.value = "+961";
-  }
+elPhone.addEventListener("focus", () => {
+  if(!elPhone.value || elPhone.value === "+") elPhone.value = "+961";
+});
+elPhone.addEventListener("input", () => {
+  elPhone.value = cleanPhone(elPhone.value);
 });
 
-phone.addEventListener("input", ()=> {
-  phone.value = cleanPhone(phone.value);
-});
-
-/* ================= CALL EDGE FUNCTION ================= */
+/* ================= CALL EDGE FUNCTION (FIXED) =================
+   IMPORTANT:
+   - Use apikey header
+   - Use Authorization Bearer with ANON key for public functions
+   - Do NOT depend on session here (to avoid 403)
+*/
 async function callFn(name, body){
-  const { data:{session} } = await sb.auth.getSession();
-
-  const res = await fetch(
-    SUPABASE_URL + "/functions/v1/" + name,
-    {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer " + (session?.access_token || SUPABASE_ANON_KEY)
-      },
-      body:JSON.stringify(body)
-    }
-  );
+  const res = await fetch(SUPABASE_URL + "/functions/v1/" + name, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify(body || {})
+  });
 
   const j = await res.json().catch(()=> ({}));
-  if(!res.ok) throw new Error(j.error || "Function error");
+  if(!res.ok){
+    throw new Error(j?.error || j?.message || ("HTTP " + res.status));
+  }
   return j;
 }
 
 /* ================= REGISTER LOGIC ================= */
-btn.onclick = async ()=>{
+btn.addEventListener("click", async ()=>{
   show("");
-  const e = email.value.trim();
-  const p = phone.value.trim();
-  const pw = pass.value;
-  const pw2 = pass2.value;
+
+  const e  = String(elEmail.value || "").trim().toLowerCase();
+  const p  = String(elPhone.value || "").trim();
+  const pw = String(elPass.value || "");
+  const pw2= String(elPass2.value || "");
 
   if(!e) return show("Enter email");
-  // التأكد من أن الرقم كامل (12 حرف مع الـ +961)
-  if(!p.startsWith("+961") || p.length < 11) return show("Phone must be +961XXXXXXXX");
-  if(pw.length < 6) return show("Password too short");
+  // +961 + 8 digits = length 12
+  if(!p.startsWith("+961") || p.length !== 12) return show("Phone must be +961XXXXXXXX");
+  if(pw.length < 6) return show("Password too short (min 6)");
   if(pw !== pw2) return show("Passwords do not match");
 
-  btn.disabled = true;
-  btn.textContent = "Creating...";
+  if(btn.disabled) return;
+
+  setBtnLoading(true, "Creating...");
 
   try {
+    // 1) Sign up
     const { error: signUpError } = await sb.auth.signUp({
       email: e,
       password: pw,
@@ -206,62 +220,62 @@ btn.onclick = async ()=>{
     });
     if (signUpError) throw signUpError;
 
+    // 2) Sign in (to make sure user exists & can proceed)
     const { error: signInError } = await sb.auth.signInWithPassword({
       email: e,
-      password: pw 
+      password: pw
     });
-    
+    if (signInError) throw signInError;
+
+    // 3) Send OTP via Edge Function
     LAST_PHONE = p;
+    setBtnLoading(true, "Sending SMS...");
     await callFn(FN_SEND, { phone: p });
-    
+
     otpBox.style.display = "block";
-    show("Account created! SMS code sent to " + p, true);
+    show("✅ Account created! SMS code sent to " + p, true);
 
   } catch (err) {
-    show(err.message || "Register failed");
+    show("❌ " + (err?.message || "Register failed"));
   } finally {
-    btn.disabled = false;
-    btn.textContent = "Create Account";
+    setBtnLoading(false);
   }
-};
+});
 
 /* ================= VERIFY LOGIC ================= */
-verify.onclick = async ()=>{
-  const c = otp.value.trim();
-  if(c.length < 4) return show("Enter 6-digit code");
+verify.addEventListener("click", async ()=>{
+  const c = String(otp.value || "").trim();
+  if(!LAST_PHONE) return show("Missing phone. Please register again.", false);
+  if(c.length < 4) return show("Enter the code", false);
 
-  verify.disabled = true;
-  verify.textContent = "Verifying...";
+  setVerifyLoading(true);
 
   try {
     await callFn(FN_CHECK, { phone: LAST_PHONE, code: c });
-    
-    show("Phone verified! Redirecting...", true);
-    setTimeout(() => {
-        location.replace("services.html");
-    }, 1500);
-
+    show("✅ Phone verified! Redirecting...", true);
+    setTimeout(() => location.replace("services.html?v=" + Date.now()), 600);
   } catch (e) {
-    show(e.message || "Wrong or expired code");
+    show("❌ " + (e?.message || "Wrong or expired code"));
   } finally {
-    verify.disabled = false;
-    verify.textContent = "Verify";
+    setVerifyLoading(false);
   }
-};
+});
 
 /* ================= RESEND LOGIC ================= */
-resend.onclick = async ()=>{
-  if(!LAST_PHONE) return;
-  resend.disabled = true;
+resend.addEventListener("click", async ()=>{
+  if(!LAST_PHONE) return show("Missing phone. Please register again.", false);
+
+  setResendLoading(true);
   try {
     await callFn(FN_SEND, { phone: LAST_PHONE });
-    show("Code resent to " + LAST_PHONE, true);
+    show("✅ Code resent to " + LAST_PHONE, true);
   } catch(e) {
-    show("Failed to resend code");
+    show("❌ " + (e?.message || "Failed to resend code"));
   } finally {
-    setTimeout(() => { resend.disabled = false; }, 5000);
+    // prevent spam
+    setTimeout(()=> setResendLoading(false), 2500);
   }
-};
+});
 </script>
 </body>
 </html>
