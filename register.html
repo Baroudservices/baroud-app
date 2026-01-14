@@ -27,328 +27,155 @@
       box-shadow:var(--shadow);
       padding:18px;
     }
-    .brand{font-weight:950; text-align:center; opacity:.9; letter-spacing:.6px}
-    h1{margin:10px 0 6px; font-size:26px; text-align:center}
-    .sub{opacity:.7; text-align:center; margin-bottom:14px}
-    label{display:block; font-size:12px; opacity:.75; margin:10px 0 6px}
+    .brand{font-weight:950; text-align:center; opacity:.9}
+    h1{text-align:center;margin:10px 0}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:520px){.row{grid-template-columns:1fr}}
+    label{font-size:12px;opacity:.7}
     input{
-      width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.25);
-      color:#fff;
-      outline:none;
-      font-size:14px;
+      width:100%;padding:12px;border-radius:14px;
+      background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12);
+      color:#fff;font-size:14px;
     }
     .btn{
-      width:100%;
-      padding:12px 14px;
-      border-radius:14px;
-      border:0;
-      cursor:pointer;
-      color:#fff;
-      font-weight:950;
+      width:100%;margin-top:12px;padding:12px;
+      border-radius:14px;border:0;cursor:pointer;
       background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      margin-top:12px;
+      color:#fff;font-weight:900;
     }
-    .btn.secondary{
-      background:rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .btn:disabled{opacity:.6; cursor:not-allowed}
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    @media (max-width:520px){ .row{grid-template-columns:1fr} }
-    .msg{margin-top:12px; font-size:13px; opacity:.95; font-weight:800; white-space:pre-wrap}
+    .btn.secondary{background:rgba(255,255,255,.1)}
+    .msg{margin-top:10px;font-weight:900}
     .ok{color:#22c55e}
     .bad{color:#ef4444}
-    .links{margin-top:12px; display:flex; justify-content:space-between; gap:10px; opacity:.85; font-weight:800}
-    a{color:#7dd3fc; text-decoration:none}
 
-    /* OTP box */
     .otpBox{
-      margin-top:14px;
-      padding:14px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      display:none;
+      display:none;margin-top:14px;padding:14px;
+      border-radius:18px;background:rgba(0,0,0,.2);
+      border:1px solid rgba(255,255,255,.1);
     }
-    .otpTitle{font-weight:950; margin-bottom:6px}
-    .otpHint{opacity:.75; font-weight:800; font-size:12px; line-height:1.4}
-    .otpRow{display:flex; gap:10px; margin-top:10px}
-    .otpRow .btn{margin-top:0}
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="brand">Baroud Services</div>
-      <h1>Register</h1>
-      <div class="sub">Create your account</div>
+<div class="wrap">
+  <div class="card">
+    <div class="brand">Baroud Services</div>
+    <h1>Register</h1>
 
-      <div class="row" id="regForm">
-        <div>
-          <label>Email</label>
-          <input id="email" type="email" placeholder="name@email.com" autocomplete="email"/>
-        </div>
-        <div>
-          <label>Phone Number</label>
-          <input id="phone" type="tel" placeholder="+961..." autocomplete="tel"/>
-        </div>
-
-        <div>
-          <label>Password</label>
-          <input id="pass" type="password" placeholder="Min 6 characters" autocomplete="new-password"/>
-        </div>
-        <div>
-          <label>Confirm Password</label>
-          <input id="pass2" type="password" placeholder="Repeat password" autocomplete="new-password"/>
-        </div>
+    <div class="row">
+      <div>
+        <label>Email</label>
+        <input id="email" type="email" placeholder="name@email.com">
       </div>
-
-      <button class="btn" id="btn">Create Account</button>
-      <div class="msg" id="msg"></div>
-
-      <!-- ✅ OTP STEP -->
-      <div class="otpBox" id="otpBox">
-        <div class="otpTitle">Verify your phone</div>
-        <div class="otpHint" id="otpHint">We sent you a 6-digit code by SMS.</div>
-
-        <label style="margin-top:10px">Code</label>
-        <input id="otpCode" inputmode="numeric" placeholder="123456" maxlength="6"/>
-
-        <div class="otpRow">
-          <button class="btn secondary" id="resendBtn" type="button">Resend</button>
-          <button class="btn" id="verifyBtn" type="button">Verify</button>
-        </div>
+      <div>
+        <label>Phone Number</label>
+        <input id="phone" type="tel" value="+961" placeholder="+961XXXXXXXX">
       </div>
-
-      <div class="links">
-        <a href="login.html">Login</a>
-        <a href="send-email-request.html">Forgot password?</a>
+      <div>
+        <label>Password</label>
+        <input id="pass" type="password">
+      </div>
+      <div>
+        <label>Confirm Password</label>
+        <input id="pass2" type="password">
       </div>
     </div>
+
+    <button class="btn" id="btn">Create Account</button>
+    <div class="msg" id="msg"></div>
+
+    <!-- OTP -->
+    <div class="otpBox" id="otpBox">
+      <p><b>Verify phone number</b></p>
+      <input id="otpCode" placeholder="6-digit code">
+      <button class="btn secondary" id="resendBtn">Resend</button>
+      <button class="btn" id="verifyBtn">Verify</button>
+    </div>
   </div>
+</div>
 
 <script>
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  function getBaseUrl(){
-    const basePath = location.pathname.replace(/[^\/]*$/, "");
-    return location.origin + basePath;
+const elEmail = email;
+const elPhone = phone;
+const elPass = pass;
+const elPass2 = pass2;
+const btn = btn;
+const msg = document.getElementById("msg");
+const otpBox = document.getElementById("otpBox");
+const otpCode = document.getElementById("otpCode");
+
+let LAST_PHONE = "";
+
+function showMsg(t, ok=false){
+  msg.className = "msg " + (ok ? "ok":"bad");
+  msg.textContent = t;
+}
+
+/* 🔒 فرض +961 */
+elPhone.addEventListener("input", ()=>{
+  if(!elPhone.value.startsWith("+961")){
+    elPhone.value = "+961";
   }
-  const BASE_URL = getBaseUrl();
+});
 
-  const elEmail = document.getElementById("email");
-  const elPhone = document.getElementById("phone");
-  const elPass  = document.getElementById("pass");
-  const elPass2 = document.getElementById("pass2");
-  const btn = document.getElementById("btn");
-  const msg = document.getElementById("msg");
+/* 📲 Call edge function */
+async function callFn(name, body){
+  const { data:{session} } = await sb.auth.getSession();
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer " + (session?.access_token || SUPABASE_KEY)
+    },
+    body:JSON.stringify(body)
+  });
+  if(!res.ok) throw new Error("Failed");
+}
 
-  const otpBox = document.getElementById("otpBox");
-  const otpHint = document.getElementById("otpHint");
-  const otpCode = document.getElementById("otpCode");
-  const resendBtn = document.getElementById("resendBtn");
-  const verifyBtn = document.getElementById("verifyBtn");
+/* 🚀 Register */
+btn.onclick = async ()=>{
+  msg.textContent="";
+  const email = elEmail.value.trim().toLowerCase();
+  const phone = elPhone.value.trim();
+  const pass = elPass.value;
+  const pass2 = elPass2.value;
 
-  let LAST_PHONE = "";
+  if(!email) return showMsg("Enter email");
+  if(!phone.startsWith("+961") || phone.length < 11) return showMsg("Phone must be Lebanese (+961)");
+  if(pass.length < 6) return showMsg("Password too short");
+  if(pass !== pass2) return showMsg("Passwords do not match");
 
-  function showMsg(t, ok=false){
-    msg.className = "msg " + (ok ? "ok" : "bad");
-    msg.textContent = t || "";
-  }
-  function setLoading(on, text){
-    btn.disabled = !!on;
-    btn.textContent = on ? (text || "Please wait...") : "Create Account";
-  }
-  function cleanPhone(s){
-    return String(s || "").replace(/\s+/g, "").trim();
-  }
-
-  // إذا في session رجّعو (بس إذا كان phone_verified true)
-  (async ()=>{
-    try{
-      const { data: { session } } = await sb.auth.getSession();
-      if(!session) return;
-
-      // check profile
-      const { data: prof } = await sb.from("profiles").select("phone_verified").eq("id", session.user.id).single();
-      if(prof?.phone_verified === true){
-        location.replace("services.html?v=" + Date.now());
-      }else{
-        // لو فات قبل وما كمل verify
-        otpBox.style.display = "block";
-        LAST_PHONE = (session.user.user_metadata?.phone || "").trim();
-        if(LAST_PHONE) otpHint.textContent = "Enter the code we sent to " + LAST_PHONE;
-      }
-    }catch(e){}
-  })();
-
-  // (اختياري) check email exists function (مثل ما عندك)
-  async function emailExists(email){
-    try{
-      const url = SUPABASE_URL + "/functions/v1/check-email";
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type":"application/json", "Authorization":"Bearer " + SUPABASE_KEY },
-        body: JSON.stringify({ email })
-      });
-      if(!res.ok) return null;
-      const j = await res.json().catch(()=> ({}));
-      return !!j.exists;
-    }catch(e){
-      return null;
-    }
-  }
-
-  async function callFn(name, body){
-    const url = SUPABASE_URL + "/functions/v1/" + name;
-    const { data: { session } } = await sb.auth.getSession();
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type":"application/json",
-        // لازم JWT للمستخدم لأنه function رح تحدث profiles
-        "Authorization": "Bearer " + (session?.access_token || SUPABASE_KEY)
-      },
-      body: JSON.stringify(body || {})
-    });
-
-    const j = await res.json().catch(()=> ({}));
-    if(!res.ok){
-      const m = j?.error || j?.message || ("HTTP " + res.status);
-      throw new Error(m);
-    }
-    return j;
-  }
-
-  async function sendOtp(phone){
-    await callFn("twilio-send-otp", { phone });
-  }
-
-  async function verifyOtp(phone, code){
-    await callFn("twilio-verify-otp", { phone, code });
-  }
-
-  function showOtpUI(phone){
-    LAST_PHONE = phone;
-    otpBox.style.display = "block";
-    otpHint.textContent = "Enter the 6-digit code sent to " + phone;
-    otpCode.value = "";
-    otpCode.focus();
-  }
-
-  async function doRegister(){
-    showMsg("");
-
-    const email = String(elEmail.value || "").trim().toLowerCase();
-    const phone = cleanPhone(elPhone.value);
-    const pass  = String(elPass.value || "").trim();
-    const pass2 = String(elPass2.value || "").trim();
-
-    if(!email) return showMsg("Enter your email.");
-    if(!phone) return showMsg("Enter your phone number (ex: +961...).");
-    if(!phone.startsWith("+")) return showMsg("Phone must start with + (example: +961...).");
-    if(pass.length < 6) return showMsg("Password must be at least 6 characters.");
-    if(pass !== pass2) return showMsg("Passwords do not match.");
-    if(btn.disabled) return;
-
-    setLoading(true, "Checking...");
-
-    try{
-      const exists = await emailExists(email);
-      if(exists === true){
-        showMsg("❌ This email already has an account. Please login instead.");
-        return;
-      }
-
-      setLoading(true, "Creating...");
-
-      // ملاحظة مهمة:
-      // حتى لو Confirm Email ON، signUp ممكن ما يرجع session.
-      // لإجبار auto-login + phone verify فوراً: خلّي Confirm Email OFF من Supabase Auth settings.
-      const { error: signErr } = await sb.auth.signUp({
-        email,
-        password: pass,
-        options:{
-          data: { phone },
-          emailRedirectTo: BASE_URL + "services.html"
-        }
-      });
-
-      if(signErr){
-        showMsg(signErr.message || "Register failed.");
-        return;
-      }
-
-      // ✅ حاول sign-in فوراً (إذا Confirm Email OFF رح يزبط)
-      const { data: signInData, error: signInErr } = await sb.auth.signInWithPassword({ email, password: pass });
-      if(signInErr || !signInData?.session){
-        // اذا Confirm Email ON رح يفشل هون
-        showMsg("✅ Account created.\nNow confirm your email 📧 then login to verify phone.", true);
-        return;
-      }
-
-      // ✅ صار في session: ابعت OTP
-      showMsg("✅ Account created! Sending SMS code...", true);
-      showOtpUI(phone);
-
-      try{
-        await sendOtp(phone);
-        showMsg("✅ Code sent by SMS. Enter it below.", true);
-      }catch(e){
-        showMsg("❌ Could not send SMS: " + (e.message || "Error"), false);
-      }
-
-    }catch(e){
-      showMsg("Network error. Try again.");
-    }finally{
-      setLoading(false);
-    }
-  }
-
-  btn.addEventListener("click", doRegister);
-  elPass2.addEventListener("keydown", (e)=>{ if(e.key === "Enter") doRegister(); });
-
-  resendBtn.addEventListener("click", async ()=>{
-    if(!LAST_PHONE) return;
-    resendBtn.disabled = true;
-    resendBtn.textContent = "Sending...";
-    try{
-      await sendOtp(LAST_PHONE);
-      showMsg("✅ Code resent.", true);
-    }catch(e){
-      showMsg("❌ Resend failed: " + (e.message || "Error"), false);
-    }finally{
-      resendBtn.disabled = false;
-      resendBtn.textContent = "Resend";
-    }
+  const { error } = await sb.auth.signUp({
+    email,
+    password: pass,
+    options:{ data:{ phone } }
   });
 
-  verifyBtn.addEventListener("click", async ()=>{
-    const code = String(otpCode.value || "").trim();
-    if(!LAST_PHONE) return showMsg("Missing phone number.", false);
-    if(code.length < 4) return showMsg("Enter the code.", false);
+  if(error) return showMsg(error.message);
 
-    verifyBtn.disabled = true;
-    verifyBtn.textContent = "Verifying...";
+  const { data } = await sb.auth.signInWithPassword({ email, password: pass });
+  if(!data?.session) return showMsg("Check your email first");
 
-    try{
-      await verifyOtp(LAST_PHONE, code);
-      showMsg("✅ Phone verified! Redirecting...", true);
-      location.replace("services.html?v=" + Date.now());
-    }catch(e){
-      showMsg("❌ Wrong code or expired. Try again.", false);
-    }finally{
-      verifyBtn.disabled = false;
-      verifyBtn.textContent = "Verify";
-    }
-  });
+  LAST_PHONE = phone;
+  otpBox.style.display="block";
+  await callFn("twilio-send-otp",{ phone });
+  showMsg("SMS code sent", true);
+};
+
+/* ✅ Verify OTP */
+verifyBtn.onclick = async ()=>{
+  try{
+    await callFn("twilio-verify-otp",{ phone:LAST_PHONE, code:otpCode.value });
+    showMsg("Verified! Redirecting...", true);
+    location.replace("services.html");
+  }catch{
+    showMsg("Wrong code");
+  }
+};
 </script>
 </body>
 </html>
