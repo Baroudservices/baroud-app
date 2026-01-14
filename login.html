@@ -84,13 +84,14 @@
       border:1px solid rgba(255,255,255,.10);
       box-shadow:none;
     }
+    .btn:disabled{opacity:.65;cursor:not-allowed}
     .msg{
       margin-top:12px;
       padding:12px 14px;
       border-radius:14px;
       display:none;
-      font-weight:700;
-      line-height:1.3;
+      font-weight:800;
+      line-height:1.35;
       white-space:pre-wrap;
     }
     .err{background:#d05252}
@@ -98,7 +99,7 @@
     .hint{
       margin-top:12px;
       text-align:center;
-      opacity:.7;
+      opacity:.75;
       font-weight:800;
     }
     .row{
@@ -121,7 +122,7 @@
       </div>
 
       <h1>Login</h1>
-      <p>Sign in to continue.</p>
+      <p>Sign in or create an account.</p>
 
       <div id="msg" class="msg"></div>
 
@@ -132,23 +133,26 @@
 
       <div class="field">
         <span>🔒</span>
-        <input id="pass" type="password" placeholder="Password" autocomplete="current-password"/>
+        <input id="pass" type="password" placeholder="Password (min 6)" autocomplete="current-password"/>
       </div>
 
       <button class="btn" id="loginBtn">Login</button>
 
       <div class="row">
-        <button class="btn secondary" id="registerBtn">Register</button>
-        <button class="btn secondary" id="resetBtn">Reset Password</button>
+        <button class="btn secondary" id="registerBtn" type="button">Register</button>
+        <button class="btn secondary" id="resetBtn" type="button">Reset Password</button>
       </div>
 
-      <div class="hint" id="smallHint">REGISTER (Check your email 📧)</div>
+      <div class="hint" id="smallHint">
+        If email confirmation is ON, you must confirm email first.
+      </div>
     </div>
   </main>
 
   <script>
+    // ✅ ضع هون بيانات مشروعك الصح
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_"; // sb_publishable_...
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const msg = document.getElementById("msg");
@@ -171,22 +175,15 @@
       registerBtn.disabled = isLoading;
       resetBtn.disabled = isLoading;
       loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
+      registerBtn.textContent = isLoading ? "Please wait..." : "Register";
     }
 
-    // ✅ لو في Session:
-    // - إذا phone_verified true → services
-    // - إذا لا → رجّع على register.html ليكمل verify
+    // ✅ إذا في Session دخّله عالـ services مباشرة
     (async ()=>{
       try{
         const { data: { session } } = await sb.auth.getSession();
-        if(!session?.user) return;
-
-        const { data: prof } = await sb.from("profiles").select("phone_verified").eq("id", session.user.id).single();
-        if(prof?.phone_verified === true){
+        if(session?.user){
           location.replace("services.html?v=" + Date.now());
-        }else{
-          // كمل verify
-          location.replace("register.html?v=" + Date.now());
         }
       }catch(e){}
     })();
@@ -205,35 +202,18 @@
 
       try{
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error){
+        if(error){
           showMsg(error.message || "Login failed.");
           return;
         }
 
         const user = data?.user;
         const confirmedAt = user?.email_confirmed_at || user?.confirmed_at;
+
+        // إذا Confirm Email ON وما مؤكّد بعد
         if(!confirmedAt){
           await sb.auth.signOut();
-          showMsg("Please confirm your email first 📧");
-          return;
-        }
-
-        // ✅ check phone_verified
-        const { data: prof, error: pErr } = await sb
-          .from("profiles")
-          .select("phone_verified")
-          .eq("id", user.id)
-          .single();
-
-        if(pErr){
-          showMsg("Login ok, but profile missing.\nPlease contact support.", false);
-          return;
-        }
-
-        if(prof?.phone_verified !== true){
-          showMsg("✅ Login ok.\nNow verify your phone to continue.", true);
-          // مؤقتاً نرجعو على register ليطلع OTP step
-          setTimeout(()=> location.replace("register.html?v=" + Date.now()), 350);
+          showMsg("Please confirm your email first 📧\nThen login again.", false);
           return;
         }
 
@@ -247,7 +227,55 @@
       }
     }
 
-    registerBtn.addEventListener("click", ()=>{ location.href = "register.html"; });
+    async function doRegister(){
+      hideMsg();
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("pass").value;
+
+      if(!email || !password){
+        showMsg("Enter email and password to register.");
+        return;
+      }
+      if(password.length < 6){
+        showMsg("Password must be at least 6 characters.");
+        return;
+      }
+
+      setLoading(true, "Creating...");
+
+      try{
+        // 1) signUp
+        const { error: signErr } = await sb.auth.signUp({
+          email,
+          password,
+          options: {
+            // إذا Confirm Email ON رح يوصلك إيميل
+            emailRedirectTo: location.origin + location.pathname.replace(/[^\/]*$/, "") + "services.html"
+          }
+        });
+
+        if(signErr){
+          showMsg(signErr.message || "Register failed.");
+          return;
+        }
+
+        // 2) جرّب signIn فوراً (بيزبط إذا Confirm Email OFF)
+        const { data: signInData, error: signInErr } = await sb.auth.signInWithPassword({ email, password });
+
+        if(signInErr || !signInData?.session){
+          showMsg("✅ Account created.\nNow confirm your email 📧 then login.", true);
+          return;
+        }
+
+        showMsg("✅ Account created & logged in!", true);
+        setTimeout(()=> location.replace("services.html?v=" + Date.now()), 250);
+
+      }catch(e){
+        showMsg("Network error. Try again.");
+      }finally{
+        setLoading(false);
+      }
+    }
 
     resetBtn.addEventListener("click", ()=>{
       const email = document.getElementById("email").value.trim();
@@ -259,7 +287,11 @@
     });
 
     loginBtn.addEventListener("click", doLogin);
-    document.getElementById("pass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+    registerBtn.addEventListener("click", doRegister);
+
+    document.getElementById("pass").addEventListener("keydown", e=>{
+      if(e.key==="Enter") doLogin();
+    });
   </script>
 
   <script src="app-ui.js?v=3"></script>
