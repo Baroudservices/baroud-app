@@ -28,8 +28,8 @@
       padding:20px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     }
-    h1{text-align:center;margin:10px 0; font-weight: 900; letter-spacing: 1px;}
-    label{font-size:12px; opacity:.7; font-weight: 600; margin-left: 5px;}
+    h1{text-align:center;margin:10px 0; font-weight:900; letter-spacing:1px;}
+    label{font-size:12px; opacity:.7; font-weight:600; margin-left:5px;}
     input{
       width:100%;
       margin:6px 0 12px;
@@ -38,10 +38,10 @@
       border:1px solid rgba(255,255,255,.15);
       background:rgba(0,0,0,.25);
       color:#fff;
-      outline: none;
+      outline:none;
       font-size:15px;
     }
-    input:focus{ border-color: #0aa0ff; }
+    input:focus{ border-color:#0aa0ff; }
     button{
       width:100%;
       padding:14px;
@@ -51,75 +51,58 @@
       background:linear-gradient(90deg,#0aa0ff,#2a74ff);
       color:#fff;
       cursor:pointer;
-      transition: opacity 0.2s;
+      transition:opacity .2s;
       font-size:16px;
     }
-    button:active{ transform: scale(0.98); }
-    button:disabled{opacity:.6; cursor: not-allowed;}
-    .msg{margin-top:12px;font-weight:800; text-align: center; min-height: 20px; white-space:pre-wrap;}
+    button:active{ transform:scale(.98); }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
+    .msg{
+      margin-top:12px;
+      font-weight:800;
+      text-align:center;
+      min-height:20px;
+      white-space:pre-wrap;
+    }
     .ok{color:#22c55e}
     .bad{color:#ef4444}
-    .otpBox{
-      display:none;
-      margin-top:16px;
-      padding:14px;
-      border-radius:16px;
-      background:rgba(0,0,0,.2);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .row{display:flex;gap:10px; margin-top:10px}
-    .row button{width:50%}
-    .secondary{background:#1f2937}
-    .back-link {
-      display: block; text-align: center; margin-top: 15px;
-      color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px;
+    .back-link{
+      display:block;
+      text-align:center;
+      margin-top:15px;
+      color:rgba(255,255,255,.6);
+      text-decoration:none;
+      font-size:13px;
       font-weight:700;
     }
   </style>
 </head>
 
 <body>
-<div class="card">
-  <h1>Register</h1>
+  <div class="card">
+    <h1>Register</h1>
 
-  <label>Email</label>
-  <input id="email" type="email" placeholder="Enter your email" autocomplete="email">
+    <label>Email</label>
+    <input id="email" type="email" placeholder="Enter your email" autocomplete="email">
 
-  <label>Phone Number</label>
-  <input id="phone" type="tel" placeholder="+961XXXXXXXX" autocomplete="tel" inputmode="tel">
+    <label>Phone Number</label>
+    <input id="phone" type="tel" placeholder="+961XXXXXXXX" autocomplete="tel" inputmode="tel">
 
-  <label>Password</label>
-  <input id="pass" type="password" placeholder="••••••••" autocomplete="new-password">
+    <label>Password</label>
+    <input id="pass" type="password" placeholder="••••••••" autocomplete="new-password">
 
-  <label>Confirm Password</label>
-  <input id="pass2" type="password" placeholder="••••••••" autocomplete="new-password">
+    <label>Confirm Password</label>
+    <input id="pass2" type="password" placeholder="••••••••" autocomplete="new-password">
 
-  <button id="btn">Create Account</button>
-  <div class="msg" id="msg"></div>
+    <button id="btn">Create Account</button>
+    <div class="msg" id="msg"></div>
 
-  <div class="otpBox" id="otpBox">
-    <label>Verification Code</label>
-    <input id="otp" placeholder="123456" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
-
-    <div class="row">
-      <button class="secondary" id="resend" type="button">Resend</button>
-      <button id="verify" type="button">Verify</button>
-    </div>
+    <a href="index.html" class="back-link">Back to Home</a>
   </div>
-
-  <a href="index.html" class="back-link">Back to Home</a>
-</div>
 
 <script>
 /* ================= CONFIG ================= */
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-
-/* ✅ حط هون الـ Publishable key تبعك (sb_publishable_...) */
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-
-/* Edge Functions names */
-const FN_SEND  = "send-phone-otp";
-const FN_CHECK = "check-phone-otp";
 
 /* ================= INIT ================= */
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -130,13 +113,6 @@ const pass  = document.getElementById("pass");
 const pass2 = document.getElementById("pass2");
 const btn   = document.getElementById("btn");
 const msg   = document.getElementById("msg");
-
-const otpBox = document.getElementById("otpBox");
-const otp    = document.getElementById("otp");
-const resend = document.getElementById("resend");
-const verify = document.getElementById("verify");
-
-let LAST_PHONE = "";
 
 /* ================= HELPERS ================= */
 function show(text, ok=false){
@@ -162,67 +138,10 @@ phone.addEventListener("input", ()=> {
   phone.value = cleanPhone(phone.value);
 });
 
-/* ================= SAFE FETCH (timeout + retry) ================= */
-async function fetchWithTimeout(url, options={}, timeoutMs=12000){
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), timeoutMs);
-  try{
-    const res = await fetch(url, { ...options, signal: controller.signal });
-    return res;
-  } finally {
-    clearTimeout(t);
-  }
-}
-
-/*
-  ✅ callFn:
-  - محاولة #1: apikey + Authorization Bearer (بعض الأجهزة/المتصفحات بتحتاجها)
-  - محاولة #2 (fallback): apikey فقط
-  - إذا الشبكة/كورز عطلت: منرجع رسالة واضحة بدل "Failed to fetch"
-*/
-async function callFn(name, body){
-  const url = SUPABASE_URL + "/functions/v1/" + name;
-
-  const baseOptions = {
-    method: "POST",
-    mode: "cors",
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_PUBLISHABLE_KEY
-    },
-    body: JSON.stringify(body || {})
-  };
-
-  // Try #1: with Authorization
-  try{
-    const res1 = await fetchWithTimeout(url, {
-      ...baseOptions,
-      headers: {
-        ...baseOptions.headers,
-        "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
-      }
-    });
-
-    const j1 = await res1.json().catch(()=> ({}));
-    if(!res1.ok) throw new Error(j1?.error || j1?.message || ("Edge function error: HTTP " + res1.status));
-    return j1;
-  }catch(e1){
-    // Try #2: without Authorization
-    try{
-      const res2 = await fetchWithTimeout(url, baseOptions);
-      const j2 = await res2.json().catch(()=> ({}));
-      if(!res2.ok) throw new Error(j2?.error || j2?.message || ("Edge function error: HTTP " + res2.status));
-      return j2;
-    }catch(e2){
-      // Network/CORS/timeout
-      const msg = (String(e2 || e1 || "")).toLowerCase();
-      if(msg.includes("failed to fetch") || msg.includes("network") || msg.includes("cors") || msg.includes("abort")){
-        throw new Error("Failed to fetch (network/CORS).\n✅ تأكد الـ Edge Function عم ترجع CORS headers بكل الحالات + Deploy updates.");
-      }
-      throw new Error(e2?.message || e1?.message || "Function error");
-    }
-  }
+async function trySignIn(email, password){
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) return { ok:false, error };
+  return { ok:true, data };
 }
 
 /* ================= REGISTER ================= */
@@ -242,84 +161,42 @@ btn.addEventListener("click", async ()=>{
   setBtnLoading(true, "Creating...");
 
   try{
-    // 1) Signup
-    const { error: signUpError } = await sb.auth.signUp({
+    // ✅ Signup and store phone in metadata
+    const { data, error: signUpError } = await sb.auth.signUp({
       email: e,
       password: pw,
-      options: { data: { phone: p } }
+      options: {
+        data: { phone: p } // <-- هون تخزين الرقم
+      }
     });
+
     if(signUpError) throw signUpError;
 
-    // 2) Try Sign-in (if confirm email ON, may fail)
-    const { error: signInError } = await sb.auth.signInWithPassword({ email: e, password: pw });
-    if(signInError){
-      // confirm email غالباً شغال
-      show("✅ Account created.\nPlease confirm email then login.", true);
+    // ✅ إذا Confirm Email ON: غالباً ما في session هون
+    // منجرب نعمل sign-in مباشرة (إذا مسموح)
+    const login = await trySignIn(e, pw);
+
+    if(login.ok){
+      show("✅ Account created & logged in!", true);
+      // روح على الخدمات
+      setTimeout(()=> location.replace("services.html?v=" + Date.now()), 400);
       return;
     }
 
-    // 3) Send OTP
-    LAST_PHONE = p;
-    await callFn(FN_SEND, { phone: p });
-
-    otpBox.style.display = "block";
-    show("✅ Account created! SMS code sent to " + p, true);
-    otp.value = "";
-    otp.focus();
+    // ✅ إذا ما قدر يعمل login، معناته لازم تأكيد ايميل
+    show("✅ Account created!\n📧 Please confirm your email then login.", true);
+    setTimeout(()=> location.replace("login.html?v=" + Date.now()), 1200);
 
   }catch(err){
-    show(err?.message || "Register failed");
+    const m = err?.message || "Register failed";
+    show(m);
   }finally{
     setBtnLoading(false);
   }
 });
 
-/* ================= VERIFY ================= */
-verify.addEventListener("click", async ()=>{
-  show("");
-
-  const c = String(otp.value || "").trim();
-  if(!LAST_PHONE) return show("Missing phone. Please register again.");
-  if(c.length < 4) return show("Enter the code");
-
-  verify.disabled = true;
-  verify.textContent = "Verifying...";
-
-  try{
-    const r = await callFn(FN_CHECK, { phone: LAST_PHONE, code: c });
-
-    if(r?.success === true){
-      show("✅ Phone verified! Redirecting...", true);
-      setTimeout(()=> location.replace("services.html?v=" + Date.now()), 600);
-    }else{
-      show("❌ Invalid or expired code");
-    }
-  }catch(e){
-    show(e?.message || "Wrong or expired code");
-  }finally{
-    verify.disabled = false;
-    verify.textContent = "Verify";
-  }
-});
-
-/* ================= RESEND ================= */
-resend.addEventListener("click", async ()=>{
-  show("");
-  if(!LAST_PHONE) return show("Missing phone. Please register again.");
-
-  resend.disabled = true;
-  resend.textContent = "Sending...";
-
-  try{
-    await callFn(FN_SEND, { phone: LAST_PHONE });
-    show("✅ Code resent to " + LAST_PHONE, true);
-  }catch(e){
-    show(e?.message || "Failed to resend");
-  }finally{
-    resend.disabled = false;
-    resend.textContent = "Resend";
-  }
-});
+// Enter key support
+pass2.addEventListener("keydown", (e)=>{ if(e.key === "Enter") btn.click(); });
 </script>
 </body>
 </html>
