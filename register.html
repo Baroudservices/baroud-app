@@ -182,9 +182,8 @@
     setLoading(true, "Checking...");
 
     try{
-      // 1) check email exists
+      // 1) check email exists (اختياري)
       const exists = await emailExists(email);
-
       if(exists === true){
         showMsg("❌ This email already has an account. Please login instead.");
         return;
@@ -192,14 +191,17 @@
 
       setLoading(true, "Creating...");
 
+      // ✅ مهم: إذا Confirm Email ON، لازم يرجّع على صفحة بتتعامل مع ?type=signup / token
+      // عشان هيك منستعمل auth callback بسيط (services.html كمان بيمشي إذا فيه كود يتعامل مع session)
+      const emailRedirectTo = BASE_URL + "services.html";
+
       // 2) sign up
       const { data, error } = await sb.auth.signUp({
         email,
         password: pass,
         options:{
-          data: { phone }, // user_metadata
-          // ✅ إذا Confirm Email ON: بعد ما يضغط الرابط يروح هون
-          emailRedirectTo: BASE_URL + "services.html"
+          data: { phone },
+          emailRedirectTo
         }
       });
 
@@ -220,15 +222,15 @@
         return;
       }
 
-      // ✅ إذا Confirm Email OFF: Supabase بيرجع session فوراً => فوت دغري
+      // ✅ إذا Confirm Email OFF: بيرجع session فوراً => فوت دغري
       if(data?.session){
         showMsg("✅ Account created! Redirecting...", true);
         location.replace("services.html?v=" + Date.now());
         return;
       }
 
-      // ❗ إذا Confirm Email ON: ما في session، لازم تأكيد
-      showMsg("✅ Account created! Please confirm your email 📧 then you’ll be redirected.", true);
+      // ❗ إذا Confirm Email ON: ما في session، لازم تأكيد ايميل
+      showMsg("✅ Account created! Check your email 📧 to confirm, then you’ll be redirected.", true);
 
     }catch(e){
       showMsg("Network error. Try again.");
@@ -245,3 +247,4 @@
 </script>
 </body>
 </html>
+```0
