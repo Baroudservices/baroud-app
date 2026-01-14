@@ -206,6 +206,17 @@
       background:linear-gradient(90deg,#21f07a,#0fe067);
     }
 
+    /* الستايل الجديد لكبسة Sign Up باللون الأزرق */
+    .signupBtn {
+      display: block; text-align: center;
+      padding: 14px; border-radius: 22px;
+      font-weight: 900; text-decoration: none;
+      color: #fff;
+      background: linear-gradient(90deg, #21a0f0, #0f76e0);
+      margin-top: 10px;
+      box-shadow: 0 4px 15px rgba(33, 160, 240, 0.2);
+    }
+
     .menu{
       margin-top:14px;
       padding-top:10px;
@@ -255,6 +266,7 @@
       <h2>Login</h2>
       <p>Sign in to continue.</p>
       <a class="loginBtn" href="login.html?v=1">Login</a>
+      <a class="signupBtn" href="register.html">Sign Up</a>
     </div>
 
     <div class="menu">
@@ -282,7 +294,6 @@
       </div>
     </div>
 
-    <!-- Banner Slider -->
     <div class="banner slider" id="slider">
       <div class="slides" id="slides">
         <div class="slide"><img src="assets/banner1.jpg" alt="banner 1"></div>
@@ -292,7 +303,6 @@
       <div class="dots" id="dots"></div>
     </div>
 
-    <!-- Support ticker -->
     <div class="support">
       <div class="support-slider">
         <div class="support-track" id="supportTrack">
@@ -302,7 +312,6 @@
       </div>
     </div>
 
-    <!-- Search (كان ناقص عندك فبيرجع وبيشتغل) -->
     <div class="searchBox">
       <input id="search" placeholder="Search" />
     </div>
@@ -382,7 +391,6 @@
     (function(){
       const track = document.getElementById("supportTrack");
       if(!track) return;
-      // كرر المحتوى ليصير -50% دايمًا صحيح
       track.innerHTML = track.innerHTML + track.innerHTML;
     })();
 
@@ -400,15 +408,13 @@
       let dx = 0;
       let dragging = false;
 
-      // fallback images if missing
       slidesEl.querySelectorAll("img").forEach(img=>{
         img.addEventListener("error", ()=>{
           img.onerror = null;
-          img.src = "assets/products/default.png"; // عندك هيدا موجود عادة
+          img.src = "assets/products/default.png"; 
         });
       });
 
-      // dots
       dotsEl.innerHTML = "";
       slides.forEach((_, idx) => {
         const d = document.createElement("button");
@@ -441,7 +447,6 @@
         timer = null;
       }
 
-      // Swipe
       slider.addEventListener("touchstart", (e) => {
         dragging = true;
         stop();
