@@ -18,7 +18,6 @@
       min-height:100vh;
       padding:18px;
     }
-
     .wrap{
       width:100%;
       margin:0 auto;
@@ -28,7 +27,6 @@
       justify-content:center;
       min-height:calc(100vh - 36px);
     }
-
     .card{
       width:100%;
       background:rgba(255,255,255,.06);
@@ -38,13 +36,11 @@
       box-shadow:0 30px 80px rgba(0,0,0,.5);
       position:relative;
     }
-
     @media (min-width: 992px){
       .wrap{ max-width:1200px; }
       .card{ max-width:900px; }
       h1{ font-size:52px; }
     }
-
     .back{
       position:absolute;left:16px;top:16px;
       width:44px;height:44px;border-radius:14px;
@@ -57,7 +53,6 @@
     .brand{font-weight:900;letter-spacing:2px;opacity:.85}
     h1{margin:14px 0 6px;font-size:44px}
     p{margin:0 0 18px;opacity:.75}
-
     .field{
       display:flex;align-items:center;gap:12px;
       background:rgba(255,255,255,.08);
@@ -96,6 +91,7 @@
       display:none;
       font-weight:700;
       line-height:1.3;
+      white-space:pre-wrap;
     }
     .err{background:#d05252}
     .ok{background:#2aa96b}
@@ -160,18 +156,10 @@
     const registerBtn = document.getElementById("registerBtn");
     const resetBtn = document.getElementById("resetBtn");
 
-    // ✅ base URL ديناميكي (بيشتغل على udservices او baroudservices)
-    function getBaseUrl(){
-      // لو المسار فيه فولدر مثل /baroud-app/ بيحافظ عليه
-      const basePath = location.pathname.replace(/[^\/]*$/, "");
-      return location.origin + basePath;
-    }
-    const BASE_URL = getBaseUrl();
-
     function showMsg(text, ok=false){
       msg.style.display="block";
       msg.className = "msg " + (ok ? "ok" : "err");
-      msg.textContent = text;
+      msg.textContent = text || "";
     }
     function hideMsg(){
       msg.style.display="none";
@@ -185,17 +173,27 @@
       loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
     }
 
-    // ✅ لو في Session روح مباشرة
+    // ✅ لو في Session:
+    // - إذا phone_verified true → services
+    // - إذا لا → رجّع على register.html ليكمل verify
     (async ()=>{
       try{
-        const { data } = await sb.auth.getSession();
-        if (data.session?.user) location.replace("services.html?v=" + Date.now());
+        const { data: { session } } = await sb.auth.getSession();
+        if(!session?.user) return;
+
+        const { data: prof } = await sb.from("profiles").select("phone_verified").eq("id", session.user.id).single();
+        if(prof?.phone_verified === true){
+          location.replace("services.html?v=" + Date.now());
+        }else{
+          // كمل verify
+          location.replace("register.html?v=" + Date.now());
+        }
       }catch(e){}
     })();
 
     async function doLogin(){
       hideMsg();
-      const email = document.getElementById("email").value.trim();
+      const email = document.getElementById("email").value.trim().toLowerCase();
       const password = document.getElementById("pass").value;
 
       if(!email || !password){
@@ -207,7 +205,6 @@
 
       try{
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
         if (error){
           showMsg(error.message || "Login failed.");
           return;
@@ -215,10 +212,28 @@
 
         const user = data?.user;
         const confirmedAt = user?.email_confirmed_at || user?.confirmed_at;
-
         if(!confirmedAt){
           await sb.auth.signOut();
           showMsg("Please confirm your email first 📧");
+          return;
+        }
+
+        // ✅ check phone_verified
+        const { data: prof, error: pErr } = await sb
+          .from("profiles")
+          .select("phone_verified")
+          .eq("id", user.id)
+          .single();
+
+        if(pErr){
+          showMsg("Login ok, but profile missing.\nPlease contact support.", false);
+          return;
+        }
+
+        if(prof?.phone_verified !== true){
+          showMsg("✅ Login ok.\nNow verify your phone to continue.", true);
+          // مؤقتاً نرجعو على register ليطلع OTP step
+          setTimeout(()=> location.replace("register.html?v=" + Date.now()), 350);
           return;
         }
 
@@ -232,14 +247,8 @@
       }
     }
 
-    // ✅ Register button → register.html
-    registerBtn.addEventListener("click", ()=>{
-      location.href = "register.html";
-    });
+    registerBtn.addEventListener("click", ()=>{ location.href = "register.html"; });
 
-    // ✅ Reset Password:
-    // - إذا الإيميل معبّى: روح مباشرة على reset.html ومعه الإيميل
-    // - إذا فاضي: روح على صفحة إدخال الإيميل (send-email-request.html)
     resetBtn.addEventListener("click", ()=>{
       const email = document.getElementById("email").value.trim();
       if(email){
@@ -249,12 +258,8 @@
       }
     });
 
-    // ✅ Login
     loginBtn.addEventListener("click", doLogin);
-
-    document.getElementById("pass").addEventListener("keydown", e=>{
-      if(e.key==="Enter") doLogin();
-    });
+    document.getElementById("pass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
   </script>
 
   <script src="app-ui.js?v=3"></script>
