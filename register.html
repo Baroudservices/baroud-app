@@ -29,7 +29,7 @@
       box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     }
     h1{text-align:center;margin:10px 0; font-weight: 900; letter-spacing: 1px;}
-    label{font-size:12px; opacity:.7; font-weight: 700; margin-left: 5px;}
+    label{font-size:12px; opacity:.7; font-weight: 600; margin-left: 5px;}
     input{
       width:100%;
       margin:6px 0 12px;
@@ -39,7 +39,7 @@
       background:rgba(0,0,0,.25);
       color:#fff;
       outline: none;
-      font-size:14px;
+      font-size:15px;
     }
     input:focus{ border-color: #0aa0ff; }
     button{
@@ -51,11 +51,12 @@
       background:linear-gradient(90deg,#0aa0ff,#2a74ff);
       color:#fff;
       cursor:pointer;
-      transition: opacity 0.2s, transform .05s;
+      transition: opacity 0.2s;
+      font-size:16px;
     }
-    button:active{ transform: scale(0.99); }
+    button:active{ transform: scale(0.98); }
     button:disabled{opacity:.6; cursor: not-allowed;}
-    .msg{margin-top:12px;font-weight:900; text-align: center; min-height: 20px;}
+    .msg{margin-top:12px;font-weight:800; text-align: center; min-height: 20px; white-space:pre-wrap;}
     .ok{color:#22c55e}
     .bad{color:#ef4444}
     .otpBox{
@@ -66,13 +67,13 @@
       background:rgba(0,0,0,.2);
       border: 1px solid rgba(255,255,255,0.1);
     }
-    .row{display:flex;gap:10px}
+    .row{display:flex;gap:10px; margin-top:10px}
     .row button{width:50%}
     .secondary{background:#1f2937}
     .back-link {
       display: block; text-align: center; margin-top: 15px;
       color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px;
-      font-weight:800;
+      font-weight:700;
     }
   </style>
 </head>
@@ -85,7 +86,7 @@
   <input id="email" type="email" placeholder="Enter your email" autocomplete="email">
 
   <label>Phone Number</label>
-  <input id="phone" type="tel" placeholder="+961XXXXXXXX" inputmode="numeric" autocomplete="tel">
+  <input id="phone" type="tel" placeholder="+961XXXXXXXX" autocomplete="tel" inputmode="tel">
 
   <label>Password</label>
   <input id="pass" type="password" placeholder="••••••••" autocomplete="new-password">
@@ -93,12 +94,13 @@
   <label>Confirm Password</label>
   <input id="pass2" type="password" placeholder="••••••••" autocomplete="new-password">
 
-  <button id="btn" type="button">Create Account</button>
+  <button id="btn">Create Account</button>
   <div class="msg" id="msg"></div>
 
   <div class="otpBox" id="otpBox">
     <label>Verification Code</label>
     <input id="otp" placeholder="123456" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+
     <div class="row">
       <button class="secondary" id="resend" type="button">Resend</button>
       <button id="verify" type="button">Verify</button>
@@ -112,26 +114,27 @@
 /* ================= CONFIG ================= */
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 
-/* ✅ حط هون publishable key تبعك (sb_publishable_...) */
+/* ✅ حط هون الـ Publishable key تبعك (sb_publishable_...) */
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 
+/* Edge Functions names */
 const FN_SEND  = "send-phone-otp";
 const FN_CHECK = "check-phone-otp";
 
 /* ================= INIT ================= */
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-const elEmail  = document.getElementById("email");
-const elPhone  = document.getElementById("phone");
-const elPass   = document.getElementById("pass");
-const elPass2  = document.getElementById("pass2");
-const btn      = document.getElementById("btn");
-const msg      = document.getElementById("msg");
+const email = document.getElementById("email");
+const phone = document.getElementById("phone");
+const pass  = document.getElementById("pass");
+const pass2 = document.getElementById("pass2");
+const btn   = document.getElementById("btn");
+const msg   = document.getElementById("msg");
 
-const otpBox   = document.getElementById("otpBox");
-const otp      = document.getElementById("otp");
-const resend   = document.getElementById("resend");
-const verify   = document.getElementById("verify");
+const otpBox = document.getElementById("otpBox");
+const otp    = document.getElementById("otp");
+const resend = document.getElementById("resend");
+const verify = document.getElementById("verify");
 
 let LAST_PHONE = "";
 
@@ -140,149 +143,134 @@ function show(text, ok=false){
   msg.className = "msg " + (ok ? "ok" : "bad");
   msg.textContent = text || "";
 }
-function setMainLoading(on, text){
-  btn.disabled = on;
+
+function setBtnLoading(on, text){
+  btn.disabled = !!on;
   btn.textContent = on ? (text || "Please wait...") : "Create Account";
-  resend.disabled = on;
-  verify.disabled = on;
 }
-function onlyDigits(s){ return String(s||"").replace(/\D/g,""); }
 
-/* ✅ تثبيت +961 و 8 digits بعده */
 function cleanPhone(v){
-  let d = onlyDigits(v);
-  if (d.startsWith("961")) d = d.slice(3);
-  d = d.slice(0, 8);
-  return "+961" + d;
-}
-function isValidLbPhone(p){
-  // +961 + 8 digits => length 12
-  return typeof p === "string" && p.startsWith("+961") && p.length === 12;
+  let digits = String(v || "").replace(/\D/g, "");
+
+  if (digits.startsWith("961")) digits = digits.substring(3);
+
+  // لبنان عادة 8 أرقام بعد 961
+  return "+961" + digits.slice(0, 8);
 }
 
-/* Phone UX */
-elPhone.addEventListener("focus", () => {
-  if(!elPhone.value || elPhone.value === "+") elPhone.value = "+961";
+phone.addEventListener("focus", () => {
+  if(!phone.value || phone.value === "+") phone.value = "+961";
 });
-elPhone.addEventListener("input", () => {
-  elPhone.value = cleanPhone(elPhone.value);
+phone.addEventListener("input", ()=> {
+  phone.value = cleanPhone(phone.value);
 });
 
-/* ================= CALL EDGE FUNCTION ================= */
-/* ✅ هون السر: apikey + Authorization Bearer publishable key */
+/* ================= CALL EDGE FUNCTION =================
+✅ الحل: ممنوع Authorization: Bearer publish key
+✅ نستعمل apikey فقط
+*/
 async function callFn(name, body){
-  const url = `${SUPABASE_URL}/functions/v1/${name}`;
+  const url = SUPABASE_URL + "/functions/v1/" + name;
 
-  let res;
-  try{
-    res = await fetch(url, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_,
-        "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY,
-      },
-      body: JSON.stringify(body || {})
-    });
-  }catch(e){
-    throw new Error("Failed to fetch (network/CORS).");
-  }
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_PUBLISHABLE_KEY
+    },
+    body: JSON.stringify(body || {})
+  });
 
-  const text = await res.text().catch(()=> "");
-  let j = {};
-  try { j = text ? JSON.parse(text) : {}; } catch {}
-
+  const j = await res.json().catch(()=> ({}));
   if(!res.ok){
-    const errMsg =
-      (j && (j.error || j.message)) ||
-      (text || `Edge Function error (HTTP ${res.status})`);
-    throw new Error(`${errMsg} (HTTP ${res.status})`);
+    throw new Error(j?.error || j?.message || ("Edge function error: HTTP " + res.status));
   }
-
   return j;
 }
 
 /* ================= REGISTER ================= */
-btn.addEventListener("click", async () => {
+btn.addEventListener("click", async ()=>{
   show("");
 
-  const email = String(elEmail.value || "").trim().toLowerCase();
-  const phone = cleanPhone(elPhone.value);
-  const pw    = String(elPass.value || "");
-  const pw2   = String(elPass2.value || "");
+  const e  = String(email.value || "").trim().toLowerCase();
+  const p  = String(phone.value || "").trim();
+  const pw = String(pass.value || "");
+  const pw2= String(pass2.value || "");
 
-  elPhone.value = phone; // ثبتها بالواجهة
+  if(!e) return show("Enter email");
+  if(!p.startsWith("+961") || p.length < 12) return show("Phone must be +961XXXXXXXX");
+  if(pw.length < 6) return show("Password must be at least 6 characters");
+  if(pw !== pw2) return show("Passwords do not match");
 
-  if(!email) return show("Enter email.");
-  if(!isValidLbPhone(phone)) return show("Phone must be +961XXXXXXXX (8 digits).");
-  if(pw.length < 6) return show("Password must be at least 6 characters.");
-  if(pw !== pw2) return show("Passwords do not match.");
-
-  setMainLoading(true, "Creating...");
+  setBtnLoading(true, "Creating...");
 
   try{
     // 1) Signup
     const { error: signUpError } = await sb.auth.signUp({
-      email,
+      email: e,
       password: pw,
-      options: { data: { phone } }
+      options: { data: { phone: p } }
     });
-    if(signUpError) throw new Error(signUpError.message || "Signup failed.");
 
-    // 2) حاول sign-in (إذا confirm email ON ممكن يفشل — بس مش مشكلة للـ OTP functions)
-    const { error: signInError } = await sb.auth.signInWithPassword({ email, password: pw });
+    if(signUpError) throw signUpError;
+
+    // 2) Sign-in (حتى يصير عنا session - مش ضروري للـ functions هلأ بس مفيد)
+    const { error: signInError } = await sb.auth.signInWithPassword({ email: e, password: pw });
     if(signInError){
-      // ما منوقف — بس منكمّل OTP لأنه functions بتشتغل بالpublishable
+      // إذا Confirm Email ON، رح يفشل هون
+      show("✅ Account created.\nPlease confirm email then login.", true);
+      return;
     }
 
-    // 3) Send OTP
-    LAST_PHONE = phone;
-    await callFn(FN_SEND, { phone });
+    // 3) Send OTP via Edge Function
+    LAST_PHONE = p;
+    await callFn(FN_SEND, { phone: p });
 
     otpBox.style.display = "block";
-    show("✅ Account created! SMS sent to " + phone, true);
+    show("✅ Account created! SMS code sent to " + p, true);
+    otp.value = "";
+    otp.focus();
 
-  }catch(e){
-    show("❌ " + (e.message || "Register failed"), false);
+  }catch(err){
+    show(err?.message || "Register failed");
   }finally{
-    setMainLoading(false);
+    setBtnLoading(false);
   }
 });
 
-/* ================= VERIFY OTP ================= */
-verify.addEventListener("click", async () => {
+/* ================= VERIFY ================= */
+verify.addEventListener("click", async ()=>{
   show("");
 
-  const code = String(otp.value || "").trim();
-  if(!LAST_PHONE) return show("Missing phone (try register again).");
-  if(code.length < 4) return show("Enter the code.");
+  const c = String(otp.value || "").trim();
+  if(!LAST_PHONE) return show("Missing phone. Please register again.");
+  if(c.length < 4) return show("Enter the code");
 
   verify.disabled = true;
   verify.textContent = "Verifying...";
 
   try{
-    const r = await callFn(FN_CHECK, { phone: LAST_PHONE, code });
+    const r = await callFn(FN_CHECK, { phone: LAST_PHONE, code: c });
 
     if(r?.success === true){
       show("✅ Phone verified! Redirecting...", true);
       setTimeout(()=> location.replace("services.html?v=" + Date.now()), 600);
     }else{
-      show("❌ " + (r?.error || "Invalid or expired code"), false);
+      show("❌ Invalid or expired code");
     }
   }catch(e){
-    show("❌ " + (e.message || "Verify failed"), false);
+    show(e?.message || "Wrong or expired code");
   }finally{
     verify.disabled = false;
     verify.textContent = "Verify";
   }
 });
 
-/* ================= RESEND OTP ================= */
-resend.addEventListener("click", async () => {
+/* ================= RESEND ================= */
+resend.addEventListener("click", async ()=>{
   show("");
+  if(!LAST_PHONE) return show("Missing phone. Please register again.");
 
-  if(!LAST_PHONE) return show("Missing phone (try register again).");
   resend.disabled = true;
   resend.textContent = "Sending...";
 
@@ -290,12 +278,10 @@ resend.addEventListener("click", async () => {
     await callFn(FN_SEND, { phone: LAST_PHONE });
     show("✅ Code resent to " + LAST_PHONE, true);
   }catch(e){
-    show("❌ " + (e.message || "Resend failed"), false);
+    show(e?.message || "Failed to resend");
   }finally{
-    setTimeout(()=>{
-      resend.disabled = false;
-      resend.textContent = "Resend";
-    }, 1200);
+    resend.disabled = false;
+    resend.textContent = "Resend";
   }
 });
 </script>
