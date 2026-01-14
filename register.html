@@ -1,66 +1,78 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register - Baroud Services</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Baroud Services</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<style>
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:linear-gradient(180deg,#0b1424,#050a14);
-  font-family:system-ui,Arial;
-  color:#fff;
-}
-.card{
-  width:100%;
-  max-width:420px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:22px;
-  padding:20px;
-}
-h1{text-align:center;margin:10px 0}
-label{font-size:12px;opacity:.7}
-input{
-  width:100%;
-  margin:6px 0 12px;
-  padding:12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.15);
-  background:rgba(0,0,0,.25);
-  color:#fff;
-}
-button{
-  width:100%;
-  padding:14px;
-  border-radius:16px;
-  border:0;
-  font-weight:900;
-  background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-  color:#fff;
-  cursor:pointer;
-}
-button:disabled{opacity:.6}
-.msg{margin-top:12px;font-weight:800}
-.ok{color:#22c55e}
-.bad{color:#ef4444}
-.otpBox{
-  display:none;
-  margin-top:16px;
-  padding:14px;
-  border-radius:16px;
-  background:rgba(0,0,0,.2);
-}
-.row{display:flex;gap:10px}
-.secondary{background:#1f2937}
-</style>
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(180deg,#0b1424,#050a14);
+      font-family:system-ui,Arial;
+      color:#fff;
+    }
+    .card{
+      width:100%;
+      max-width:420px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:22px;
+      padding:20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    h1{text-align:center;margin:10px 0; font-weight: 900; letter-spacing: 1px;}
+    label{font-size:12px; opacity:.7; font-weight: 600; margin-left: 5px;}
+    input{
+      width:100%;
+      margin:6px 0 12px;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      outline: none;
+    }
+    input:focus{ border-color: #0aa0ff; }
+    button{
+      width:100%;
+      padding:14px;
+      border-radius:16px;
+      border:0;
+      font-weight:900;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      color:#fff;
+      cursor:pointer;
+      transition: opacity 0.2s;
+    }
+    button:active{ transform: scale(0.98); }
+    button:disabled{opacity:.6; cursor: not-allowed;}
+    .msg{margin-top:12px;font-weight:800; text-align: center; min-height: 20px;}
+    .ok{color:#22c55e}
+    .bad{color:#ef4444}
+    .otpBox{
+      display:none;
+      margin-top:16px;
+      padding:14px;
+      border-radius:16px;
+      background:rgba(0,0,0,.2);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .row{display:flex;gap:10px}
+    .secondary{background:#1f2937}
+    
+    /* Back link */
+    .back-link {
+      display: block; text-align: center; margin-top: 15px;
+      color: rgba(255,255,255,0.5); text-decoration: none; font-size: 13px;
+    }
+  </style>
 </head>
 
 <body>
@@ -68,21 +80,20 @@ button:disabled{opacity:.6}
   <h1>Register</h1>
 
   <label>Email</label>
-  <input id="email" type="email" placeholder="name@email.com">
+  <input id="email" type="email" placeholder="Enter your email">
 
   <label>Phone Number</label>
-  <input id="phone" type="tel" value="+961">
+  <input id="phone" type="tel" placeholder="+961XXXXXXXX">
 
   <label>Password</label>
-  <input id="pass" type="password">
+  <input id="pass" type="password" placeholder="••••••••">
 
   <label>Confirm Password</label>
-  <input id="pass2" type="password">
+  <input id="pass2" type="password" placeholder="••••••••">
 
   <button id="btn">Create Account</button>
   <div class="msg" id="msg"></div>
 
-  <!-- OTP -->
   <div class="otpBox" id="otpBox">
     <label>Verification Code</label>
     <input id="otp" placeholder="123456" maxlength="6">
@@ -91,6 +102,8 @@ button:disabled{opacity:.6}
       <button id="verify">Verify</button>
     </div>
   </div>
+
+  <a href="index.html" class="back-link">Back to Home</a>
 </div>
 
 <script>
@@ -98,7 +111,6 @@ button:disabled{opacity:.6}
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
 
-/* function names (عدّل إذا أسماءك مختلفة) */
 const FN_SEND = "send-phone-otp";
 const FN_CHECK = "check-phone-otp";
 
@@ -127,9 +139,9 @@ function show(text, ok=false){
 
 function cleanPhone(v){
   v = v.replace(/\s+/g,"");
-  if(!v.startsWith("+961")) v = "+961";
-  v = "+961" + v.replace("+961","").replace(/\D/g,"");
-  return v.slice(0,12); // +961XXXXXXXX
+  // If user starts typing without +, we help them
+  if(!v.startsWith("+")) v = "+" + v;
+  return v;
 }
 
 phone.addEventListener("input", ()=> {
@@ -161,14 +173,14 @@ async function callFn(name, body){
 btn.onclick = async ()=>{
   show("");
   const e = email.value.trim();
-  const p = cleanPhone(phone.value);
+  const p = phone.value.trim();
   const pw = pass.value;
   const pw2 = pass2.value;
 
   if(!e) return show("Enter email");
-  if(!p.startsWith("+961") || p.length!==12) return show("Phone must be +961XXXXXXXX");
-  if(pw.length<6) return show("Password too short");
-  if(pw!==pw2) return show("Passwords do not match");
+  if(!p.startsWith("+961") || p.length < 11) return show("Enter valid phone (+961...)");
+  if(pw.length < 6) return show("Password too short");
+  if(pw !== pw2) return show("Passwords do not match");
 
   btn.disabled = true;
   btn.textContent = "Creating...";
@@ -182,8 +194,9 @@ btn.onclick = async ()=>{
     if(error) throw error;
 
     const { data } = await sb.auth.signInWithPassword({ email:e, password:pw });
+    
     if(!data.session){
-      show("Check your email to activate account",true);
+      show("Check your email to activate account", true);
       return;
     }
 
@@ -191,13 +204,13 @@ btn.onclick = async ()=>{
     otpBox.style.display="block";
 
     await callFn(FN_SEND,{ phone:p });
-    show("SMS code sent",true);
+    show("SMS code sent", true);
 
-  }catch(err){
+  } catch(err){
     show(err.message || "Register failed");
-  }finally{
-    btn.disabled=false;
-    btn.textContent="Create Account";
+  } finally{
+    btn.disabled = false;
+    btn.textContent = "Create Account";
   }
 };
 
@@ -206,7 +219,7 @@ resend.onclick = async ()=>{
   if(!LAST_PHONE) return;
   try{
     await callFn(FN_SEND,{ phone:LAST_PHONE });
-    show("Code resent",true);
+    show("Code resent", true);
   }catch(e){
     show("Failed to resend");
   }
@@ -214,20 +227,22 @@ resend.onclick = async ()=>{
 
 verify.onclick = async ()=>{
   const c = otp.value.trim();
-  if(c.length<4) return show("Enter code");
+  if(c.length < 4) return show("Enter code");
 
-  verify.disabled=true;
-  verify.textContent="Verifying...";
+  verify.disabled = true;
+  verify.textContent = "Verifying...";
 
   try{
     await callFn(FN_CHECK,{ phone:LAST_PHONE, code:c });
-    show("Phone verified",true);
-    location.replace("services.html");
+    show("Phone verified! Redirecting...", true);
+    setTimeout(() => {
+        location.replace("services.html");
+    }, 1500);
   }catch(e){
     show("Wrong or expired code");
   }finally{
-    verify.disabled=false;
-    verify.textContent="Verify";
+    verify.disabled = false;
+    verify.textContent = "Verify";
   }
 };
 </script>
