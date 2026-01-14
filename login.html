@@ -143,7 +143,7 @@
 
       <div class="row">
         <button class="btn secondary" id="registerBtn">Register</button>
-        <button class="btn secondary" id="resetBtn">Reset</button>
+        <button class="btn secondary" id="resetBtn">Reset Password</button>
       </div>
 
       <div class="hint" id="smallHint">REGISTER (Check your email 📧)</div>
@@ -237,9 +237,16 @@
       location.href = "register.html";
     });
 
-    // ✅ Reset button → send-email-request.html
+    // ✅ Reset Password:
+    // - إذا الإيميل معبّى: روح مباشرة على reset.html ومعه الإيميل
+    // - إذا فاضي: روح على صفحة إدخال الإيميل (send-email-request.html)
     resetBtn.addEventListener("click", ()=>{
-      location.href = "send-email-request.html";
+      const email = document.getElementById("email").value.trim();
+      if(email){
+        location.href = "reset.html?email=" + encodeURIComponent(email);
+      }else{
+        location.href = "send-email-request.html";
+      }
     });
 
     // ✅ Login
