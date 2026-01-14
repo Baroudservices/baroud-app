@@ -110,14 +110,14 @@
 /* ================= CONFIG ================= */
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 
-/** ✅ لازم يكون ANON JWT (الطويل اللي بيبلّش eyJ...) */
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
+/** ✅ هون حط publishable key تبعك */
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 
 const FN_SEND  = "send-phone-otp";
 const FN_CHECK = "check-phone-otp";
 
 /* ================= INIT ================= */
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const email = document.getElementById("email");
 const phone = document.getElementById("phone");
@@ -138,42 +138,38 @@ function show(text, ok=false){
   msg.className = "msg " + (ok ? "ok" : "bad");
   msg.textContent = text || "";
 }
-
 function setMainLoading(on, text){
   btn.disabled = !!on;
   btn.textContent = on ? (text || "Please wait...") : "Create Account";
 }
-
 function cleanPhone(v){
   let digits = String(v || "").replace(/\D/g, "");
   if (digits.startsWith("961")) digits = digits.slice(3);
-  digits = digits.slice(0, 8); // 8 digits after +961
+  digits = digits.slice(0, 8);
   return "+961" + digits;
 }
-
 phone.addEventListener("focus", () => {
   if(!phone.value || phone.value === "+") phone.value = "+961";
 });
-
 phone.addEventListener("input", () => {
   phone.value = cleanPhone(phone.value);
 });
 
-/* ================= CALL EDGE FUNCTION (FIXED) ================= */
+/* ================= CALL EDGE FUNCTION ================= */
 async function callFn(name, body, retries=2){
   const url = SUPABASE_URL + "/functions/v1/" + name;
 
   for(let attempt=0; attempt<=retries; attempt++){
     try{
-      const { data:{session} } = await sb.auth.getSession();
-      const token = session?.access_token || SUPABASE_ANON_KEY;
+      const { data:{ session } } = await sb.auth.getSession();
+      const bearer = session?.access_token || SUPABASE_PUBLISHABLE_KEY;
 
       const res = await fetch(url, {
         method:"POST",
         headers:{
           "Content-Type":"application/json",
-          "Authorization":"Bearer " + token,
-          "apikey": SUPABASE_ANON_KEY,            // ✅ مهم جداً
+          "apikey": SUPABASE_PUBLISHABLE_KEY,
+          "Authorization":"Bearer " + bearer
         },
         body: JSON.stringify(body || {})
       });
@@ -182,7 +178,6 @@ async function callFn(name, body, retries=2){
       let j = {};
       try{ j = JSON.parse(text || "{}"); }catch(e){ j = { raw:text }; }
 
-      // ✅ ما بقا نتركك برسالة عامة
       if(!res.ok){
         const errMsg =
           (j && (j.error || j.message)) ||
@@ -193,15 +188,14 @@ async function callFn(name, body, retries=2){
       return j;
 
     }catch(e){
-      // retry only if fetch/network/cold start
-      const msg = String(e?.message || e);
-      const isRetryable =
-        msg.includes("Failed to fetch") ||
-        msg.includes("NetworkError") ||
-        msg.includes("503") ||
-        msg.includes("504");
+      const m = String(e?.message || e);
+      const retryable =
+        m.includes("Failed to fetch") ||
+        m.includes("NetworkError") ||
+        m.includes("503") ||
+        m.includes("504");
 
-      if(attempt < retries && isRetryable){
+      if(attempt < retries && retryable){
         await new Promise(r => setTimeout(r, 400));
         continue;
       }
@@ -227,7 +221,7 @@ btn.addEventListener("click", async ()=>{
   setMainLoading(true, "Creating...");
 
   try{
-    // 1) signup
+    // signup
     const { error: signUpError } = await sb.auth.signUp({
       email: e,
       password: pw,
@@ -235,14 +229,12 @@ btn.addEventListener("click", async ()=>{
     });
     if(signUpError) throw new Error(signUpError.message || "Signup failed");
 
-    // 2) signin (حتى ناخد session)
+    // signin to get session token
     const { data: signInData, error: signInError } = await sb.auth.signInWithPassword({ email:e, password:pw });
     if(signInError || !signInData?.session) throw new Error(signInError?.message || "Login after signup failed");
 
-    // 3) send otp
+    // send otp
     LAST_PHONE = p;
-
-    // ✅ ما نفتح OTP box إلا بعد نجاح الإرسال
     await callFn(FN_SEND, { phone: p });
 
     otpBox.style.display = "block";
@@ -288,7 +280,6 @@ verify.addEventListener("click", async ()=>{
 /* ================= RESEND ================= */
 resend.addEventListener("click", async ()=>{
   show("");
-
   if(!LAST_PHONE) return show("Register first.");
 
   resend.disabled = true;
