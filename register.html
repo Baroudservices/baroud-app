@@ -1,179 +1,239 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register - Baroud Services</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - Baroud Services</title>
 
-<style>
-body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:linear-gradient(180deg,#0b1424,#050a14);
-  color:#fff;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.card{
-  width:100%;
-  max-width:420px;
-  background:rgba(255,255,255,.06);
-  border-radius:22px;
-  padding:20px;
-  box-shadow:0 18px 70px rgba(0,0,0,.45);
-}
-h1{text-align:center}
-label{font-size:12px;opacity:.7}
-input{
-  width:100%;
-  padding:12px;
-  margin-top:6px;
-  margin-bottom:12px;
-  border-radius:14px;
-  background:rgba(0,0,0,.25);
-  border:1px solid rgba(255,255,255,.12);
-  color:#fff;
-}
-button{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:0;
-  background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-  color:#fff;
-  font-weight:900;
-  cursor:pointer;
-}
-.msg{margin-top:10px;font-weight:900}
-.ok{color:#22c55e}
-.bad{color:#ef4444}
-.otpBox{
-  display:none;
-  margin-top:16px;
-  padding:14px;
-  background:rgba(0,0,0,.25);
-  border-radius:16px;
-}
-</style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(180deg,#0b1424,#050a14);
+      font-family:system-ui,Arial;
+      color:#fff;
+      padding:16px;
+    }
+    .card{
+      width:100%;
+      max-width:420px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:22px;
+      padding:20px;
+      box-shadow:0 18px 70px rgba(0,0,0,.45);
+    }
+    h1{text-align:center;margin:10px 0 20px}
+    label{font-size:13px;opacity:.8}
+    input{
+      width:100%;
+      padding:12px;
+      margin-top:6px;
+      margin-bottom:14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(0,0,0,.3);
+      color:#fff;
+      outline:none;
+      font-size:15px;
+    }
+    button{
+      width:100%;
+      padding:14px;
+      border-radius:14px;
+      border:none;
+      font-weight:900;
+      cursor:pointer;
+      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+      color:#fff;
+      font-size:16px;
+    }
+    button:disabled{opacity:.6}
+    .msg{margin-top:12px;font-weight:800}
+    .ok{color:#22c55e}
+    .bad{color:#ef4444}
+
+    .otpBox{
+      display:none;
+      margin-top:20px;
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.15);
+    }
+  </style>
 </head>
 
 <body>
 <div class="card">
-<h1>Register</h1>
 
-<label>Email</label>
-<input id="email" type="email" placeholder="name@email.com">
+  <h1>Register</h1>
 
-<label>Phone Number</label>
-<input id="phone" type="tel" value="+961">
+  <label>Email</label>
+  <input id="email" type="email" placeholder="name@email.com"/>
 
-<label>Password</label>
-<input id="pass" type="password">
+  <label>Phone Number</label>
+  <input
+    id="phone"
+    type="tel"
+    value="+961"
+    inputmode="numeric"
+  />
 
-<label>Confirm Password</label>
-<input id="pass2" type="password">
+  <label>Password</label>
+  <input id="pass" type="password"/>
 
-<button id="createBtn">Create Account</button>
+  <label>Confirm Password</label>
+  <input id="pass2" type="password"/>
 
-<div id="msg" class="msg"></div>
+  <button id="btn">Create Account</button>
 
-<div class="otpBox" id="otpBox">
-  <label>Verification Code</label>
-  <input id="otpCode" placeholder="123456">
-  <button id="verifyBtn">Verify</button>
-</div>
+  <div id="msg" class="msg"></div>
+
+  <!-- OTP -->
+  <div id="otpBox" class="otpBox">
+    <label>Verification Code</label>
+    <input id="otpCode" inputmode="numeric" placeholder="123456"/>
+
+    <button id="verifyBtn" style="margin-top:10px">Verify Phone</button>
+  </div>
+
 </div>
 
 <script>
-/* ✅ SUPABASE */
+/* ================== CONFIG ================== */
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_ANON_KEY = "PUT_YOUR_ANON_KEY_HERE"; // anon public key فقط
 
-/* ✅ ELEMENTS (صح) */
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ================== ELEMENTS ================== */
 const emailEl = document.getElementById("email");
 const phoneEl = document.getElementById("phone");
-const passEl = document.getElementById("pass");
+const passEl  = document.getElementById("pass");
 const pass2El = document.getElementById("pass2");
-const createBtn = document.getElementById("createBtn");
-const msgEl = document.getElementById("msg");
-const otpBox = document.getElementById("otpBox");
+const btn     = document.getElementById("btn");
+const msg     = document.getElementById("msg");
+
+const otpBox  = document.getElementById("otpBox");
 const otpCode = document.getElementById("otpCode");
 const verifyBtn = document.getElementById("verifyBtn");
 
-let LAST_PHONE = "";
+let CURRENT_PHONE = "";
 
-/* 🔒 فرض +961 */
+/* ================== HELPERS ================== */
+function showMsg(t, ok=false){
+  msg.textContent = t;
+  msg.className = "msg " + (ok ? "ok" : "bad");
+}
+
+/* ================== PHONE ENFORCE +961 ================== */
 phoneEl.addEventListener("input", ()=>{
   if(!phoneEl.value.startsWith("+961")){
     phoneEl.value = "+961";
   }
 });
 
-/* 🧠 helpers */
-function showMsg(t, ok=false){
-  msgEl.className = "msg " + (ok ? "ok":"bad");
-  msgEl.textContent = t;
-}
-
-/* 📞 call edge fn */
-async function callFn(name, body){
-  const { data:{session} } = await sb.auth.getSession();
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer " + (session?.access_token || SUPABASE_KEY)
-    },
-    body:JSON.stringify(body)
-  });
-  if(!res.ok) throw new Error("Function error");
-}
-
-/* 🚀 REGISTER */
-createBtn.onclick = async ()=>{
+/* ================== REGISTER ================== */
+btn.onclick = async () => {
   showMsg("");
 
   const email = emailEl.value.trim().toLowerCase();
   const phone = phoneEl.value.trim();
-  const pass = passEl.value;
+  const pass  = passEl.value;
   const pass2 = pass2El.value;
 
   if(!email) return showMsg("Enter email");
-  if(!phone.startsWith("+961") || phone.length < 11) return showMsg("Invalid Lebanese number");
+  if(!phone.startsWith("+961") || phone.length < 7)
+    return showMsg("Phone must start with +961");
   if(pass.length < 6) return showMsg("Password too short");
   if(pass !== pass2) return showMsg("Passwords do not match");
+
+  btn.disabled = true;
+  btn.textContent = "Creating...";
 
   const { error } = await sb.auth.signUp({
     email,
     password: pass,
-    options:{ data:{ phone } }
+    options:{
+      data:{ phone }
+    }
   });
 
-  if(error) return showMsg(error.message);
+  if(error){
+    showMsg(error.message);
+    btn.disabled = false;
+    btn.textContent = "Create Account";
+    return;
+  }
 
-  const { data } = await sb.auth.signInWithPassword({ email, password: pass });
-  if(!data?.session) return showMsg("Check your email");
+  // login مباشرة
+  const { data, error:loginErr } =
+    await sb.auth.signInWithPassword({ email, password: pass });
 
-  LAST_PHONE = phone;
+  if(loginErr){
+    showMsg("Account created. Please login.");
+    return;
+  }
+
+  CURRENT_PHONE = phone;
+
+  // send OTP
+  const res = await fetch(
+    SUPABASE_URL + "/functions/v1/send-phone-otp",
+    {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ phone })
+    }
+  );
+
+  if(!res.ok){
+    showMsg("Failed to send SMS");
+    return;
+  }
+
+  showMsg("SMS sent. Enter code below.", true);
   otpBox.style.display = "block";
-
-  await callFn("twilio-send-otp",{ phone });
-  showMsg("SMS code sent", true);
+  btn.style.display = "none";
 };
 
-/* ✅ VERIFY */
-verifyBtn.onclick = async ()=>{
-  try{
-    await callFn("twilio-verify-otp",{ phone:LAST_PHONE, code:otpCode.value });
-    showMsg("Verified! Redirecting...", true);
-    location.href = "services.html";
-  }catch{
-    showMsg("Wrong code");
+/* ================== VERIFY OTP ================== */
+verifyBtn.onclick = async () => {
+  const code = otpCode.value.trim();
+  if(code.length < 4) return showMsg("Enter code");
+
+  verifyBtn.disabled = true;
+  verifyBtn.textContent = "Verifying...";
+
+  const res = await fetch(
+    SUPABASE_URL + "/functions/v1/check-phone-otp",
+    {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        phone: CURRENT_PHONE,
+        code
+      })
+    }
+  );
+
+  const j = await res.json();
+
+  if(!res.ok || j.valid !== true){
+    showMsg("Invalid or expired code");
+    verifyBtn.disabled = false;
+    verifyBtn.textContent = "Verify Phone";
+    return;
   }
+
+  showMsg("Phone verified. Redirecting...", true);
+  setTimeout(()=>{
+    location.href = "services.html";
+  }, 800);
 };
 </script>
 </body>
