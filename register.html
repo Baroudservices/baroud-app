@@ -151,11 +151,8 @@ function setBtnLoading(on, text){
 
 function cleanPhone(v){
   let digits = String(v || "").replace(/\D/g, "");
-
   if (digits.startsWith("961")) digits = digits.substring(3);
-
-  // لبنان عادة 8 أرقام بعد 961
-  return "+961" + digits.slice(0, 8);
+  return "+961" + digits.slice(0, 8); // 8 digits after 961
 }
 
 phone.addEventListener("focus", () => {
@@ -165,27 +162,67 @@ phone.addEventListener("input", ()=> {
   phone.value = cleanPhone(phone.value);
 });
 
-/* ================= CALL EDGE FUNCTION =================
-✅ الحل: ممنوع Authorization: Bearer publish key
-✅ نستعمل apikey فقط
+/* ================= SAFE FETCH (timeout + retry) ================= */
+async function fetchWithTimeout(url, options={}, timeoutMs=12000){
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+  try{
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+/*
+  ✅ callFn:
+  - محاولة #1: apikey + Authorization Bearer (بعض الأجهزة/المتصفحات بتحتاجها)
+  - محاولة #2 (fallback): apikey فقط
+  - إذا الشبكة/كورز عطلت: منرجع رسالة واضحة بدل "Failed to fetch"
 */
 async function callFn(name, body){
   const url = SUPABASE_URL + "/functions/v1/" + name;
 
-  const res = await fetch(url, {
+  const baseOptions = {
     method: "POST",
+    mode: "cors",
+    cache: "no-store",
     headers: {
       "Content-Type": "application/json",
       "apikey": SUPABASE_PUBLISHABLE_KEY
     },
     body: JSON.stringify(body || {})
-  });
+  };
 
-  const j = await res.json().catch(()=> ({}));
-  if(!res.ok){
-    throw new Error(j?.error || j?.message || ("Edge function error: HTTP " + res.status));
+  // Try #1: with Authorization
+  try{
+    const res1 = await fetchWithTimeout(url, {
+      ...baseOptions,
+      headers: {
+        ...baseOptions.headers,
+        "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
+      }
+    });
+
+    const j1 = await res1.json().catch(()=> ({}));
+    if(!res1.ok) throw new Error(j1?.error || j1?.message || ("Edge function error: HTTP " + res1.status));
+    return j1;
+  }catch(e1){
+    // Try #2: without Authorization
+    try{
+      const res2 = await fetchWithTimeout(url, baseOptions);
+      const j2 = await res2.json().catch(()=> ({}));
+      if(!res2.ok) throw new Error(j2?.error || j2?.message || ("Edge function error: HTTP " + res2.status));
+      return j2;
+    }catch(e2){
+      // Network/CORS/timeout
+      const msg = (String(e2 || e1 || "")).toLowerCase();
+      if(msg.includes("failed to fetch") || msg.includes("network") || msg.includes("cors") || msg.includes("abort")){
+        throw new Error("Failed to fetch (network/CORS).\n✅ تأكد الـ Edge Function عم ترجع CORS headers بكل الحالات + Deploy updates.");
+      }
+      throw new Error(e2?.message || e1?.message || "Function error");
+    }
   }
-  return j;
 }
 
 /* ================= REGISTER ================= */
@@ -198,7 +235,7 @@ btn.addEventListener("click", async ()=>{
   const pw2= String(pass2.value || "");
 
   if(!e) return show("Enter email");
-  if(!p.startsWith("+961") || p.length < 12) return show("Phone must be +961XXXXXXXX");
+  if(!p.startsWith("+961") || p.length !== 12) return show("Phone must be +961XXXXXXXX (8 digits)");
   if(pw.length < 6) return show("Password must be at least 6 characters");
   if(pw !== pw2) return show("Passwords do not match");
 
@@ -211,18 +248,17 @@ btn.addEventListener("click", async ()=>{
       password: pw,
       options: { data: { phone: p } }
     });
-
     if(signUpError) throw signUpError;
 
-    // 2) Sign-in (حتى يصير عنا session - مش ضروري للـ functions هلأ بس مفيد)
+    // 2) Try Sign-in (if confirm email ON, may fail)
     const { error: signInError } = await sb.auth.signInWithPassword({ email: e, password: pw });
     if(signInError){
-      // إذا Confirm Email ON، رح يفشل هون
+      // confirm email غالباً شغال
       show("✅ Account created.\nPlease confirm email then login.", true);
       return;
     }
 
-    // 3) Send OTP via Edge Function
+    // 3) Send OTP
     LAST_PHONE = p;
     await callFn(FN_SEND, { phone: p });
 
