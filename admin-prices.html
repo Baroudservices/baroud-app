@@ -38,12 +38,8 @@ select{
 }
 
 /* Search UI */
-.searchRow{
-  display:flex; gap:10px; flex-wrap:wrap; align-items:center; width:100%;
-}
-.searchInput{
-  width:min(340px,100%);
-}
+.searchRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; width:100%;}
+.searchInput{width:min(340px,100%);}
 
 /* ===== Manage Plans Modal ===== */
 .modal{
@@ -124,18 +120,18 @@ select{
     </div>
 
     <div style="max-height: 400px; overflow-y: auto; margin-top: 10px;">
-        <table class="plansTable">
-          <thead>
-            <tr>
-              <th style="width:160px">plan_key</th>
-              <th>plan_label</th>
-              <th style="width:140px">price</th>
-              <th style="width:110px">active</th>
-              <th style="width:120px">remove</th>
-            </tr>
-          </thead>
-          <tbody id="plansTbody"></tbody>
-        </table>
+      <table class="plansTable">
+        <thead>
+          <tr>
+            <th style="width:160px">plan_key</th>
+            <th>plan_label</th>
+            <th style="width:140px">price</th>
+            <th style="width:110px">active</th>
+            <th style="width:120px">remove</th>
+          </tr>
+        </thead>
+        <tbody id="plansTbody"></tbody>
+      </table>
     </div>
 
     <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
@@ -152,7 +148,7 @@ select{
 <script>
 // 1. Supabase Config
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_"; 
+const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const DEFAULT_PLAN_LIST = [
@@ -172,7 +168,7 @@ const msg = document.getElementById("msg");
 const plansModal = document.getElementById("plansModal");
 const plansTbody = document.getElementById("plansTbody");
 
-// ✅ NEW: search elements + products cache
+// search elements + products cache
 const productSearch = document.getElementById("productSearch");
 const btnSearch = document.getElementById("btnSearch");
 const btnClearSearch = document.getElementById("btnClearSearch");
@@ -182,18 +178,27 @@ function esc(s){
   return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+function setMsg(text){ msg.textContent = text || ""; }
+
 // Auth & Admin Check
 async function boot(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session) { window.location.href="login.html"; return; }
-  
-  const { data: profile } = await sb.from("profiles").select("is_admin").eq("id", session.user.id).single();
+
+  const { data: profile, error: pErr } = await sb
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", session.user.id)
+    .single();
+
+  if(pErr){ alert("Profile error: " + pErr.message); return; }
+
   if(!profile?.is_admin){
     alert("Access Denied: Admins Only");
     window.location.href = "services.html";
     return;
   }
-  
+
   IS_ADMIN = true;
   await loadProducts();
 }
@@ -209,70 +214,68 @@ function renderProductSelect(list){
 }
 
 async function loadProducts(){
+  setMsg("Loading products...");
   const { data, error } = await sb.from("products").select("id,title,active").order("title");
-  if(error) return;
+  if(error){ setMsg("Error loading products: " + error.message); return; }
 
   ALL_PRODUCTS = data || [];
   renderProductSelect(ALL_PRODUCTS);
 
   if(ALL_PRODUCTS.length > 0){
-    loadPlans(productSelect.value);
+    productSelect.value = ALL_PRODUCTS[0].id;
+    await loadPlans(productSelect.value);
+  } else {
+    setMsg("No products found.");
   }
+  setMsg("");
 }
 
-// ✅ NEW: search/filter function
+// search/filter
 function applySearch(){
   const q = String(productSearch.value || "").trim().toLowerCase();
-
   if(!q){
     renderProductSelect(ALL_PRODUCTS);
     return;
   }
-
-  const filtered = ALL_PRODUCTS.filter(p =>
-    String(p.title || "").toLowerCase().includes(q)
-  );
-
+  const filtered = ALL_PRODUCTS.filter(p => String(p.title || "").toLowerCase().includes(q));
   renderProductSelect(filtered);
-
-  // auto select first match
-  if(filtered.length > 0){
-    productSelect.value = filtered[0].id;
-  }
+  if(filtered.length > 0) productSelect.value = filtered[0].id;
 }
 
 btnSearch.onclick = applySearch;
 btnClearSearch.onclick = () => {
   productSearch.value = "";
   renderProductSelect(ALL_PRODUCTS);
-  if(ALL_PRODUCTS.length > 0){
-    productSelect.value = ALL_PRODUCTS[0].id;
-  }
+  if(ALL_PRODUCTS.length > 0) productSelect.value = ALL_PRODUCTS[0].id;
 };
 
-// live filter while typing
-productSearch.addEventListener("input", () => {
-  applySearch();
+productSearch.addEventListener("input", applySearch);
+productSearch.addEventListener("keydown", (e) => {
+  if(e.key === "Enter"){ e.preventDefault(); applySearch(); }
 });
 
 async function loadPlans(productId){
   if(!productId) return;
-  msg.textContent = "Fetching plans...";
-  _currentPlansProductId = productId;
-  
-  const { data: dbPlans, error } = await sb.from("product_plan_prices").select("*").eq("product_id", productId);
-  if(error) { msg.textContent = "Error: " + error.message; return; }
 
-  // Update Global PLAN_LIST
-  PLAN_LIST = dbPlans.length > 0 
-    ? dbPlans.map(x => ({ key: x.plan_key, label: x.plan_label || x.plan_key }))
+  setMsg("Fetching plans...");
+  _currentPlansProductId = productId;
+
+  const { data: dbPlans, error } = await sb
+    .from("product_plan_prices")
+    .select("*")
+    .eq("product_id", productId);
+
+  if(error) { setMsg("Error: " + error.message); return; }
+
+  PLAN_LIST = (dbPlans && dbPlans.length > 0)
+    ? dbPlans.map(x => ({ key: String(x.plan_key), label: x.plan_label || x.plan_key }))
     : DEFAULT_PLAN_LIST.slice();
 
   const map = {};
-  dbPlans.forEach(r => map[r.plan_key] = r);
+  (dbPlans || []).forEach(r => map[String(r.plan_key)] = r);
 
   const title = productSelect.options[productSelect.selectedIndex]?.textContent || "Product";
-  
+
   editor.innerHTML = `
     <div class="card">
       <div class="title">${esc(title)}</div>
@@ -298,31 +301,46 @@ async function loadPlans(productId){
     </div>`;
 
   document.getElementById("btnSave").onclick = () => savePrices(productId);
-  document.getElementById("btnManagePlans").onclick = () => {
-    loadPlansForManage(productId);
+  document.getElementById("btnManagePlans").onclick = async () => {
+    await loadPlansForManage(productId);
     plansModal.style.display = "flex";
   };
-  msg.textContent = "Ready.";
+
+  setMsg("Ready.");
+}
+
+function dedupeRowsByKey(rows){
+  const m = new Map();
+  for(const r of rows){
+    const k = `${r.product_id}__${String(r.plan_key).trim()}`;
+    m.set(k, r);
+  }
+  return [...m.values()];
 }
 
 async function savePrices(productId){
   if(!IS_ADMIN) return;
-  msg.textContent = "Updating database...";
-  
+  setMsg("Updating database...");
+
   const rows = PLAN_LIST.map(pl => ({
     product_id: Number(productId),
-    plan_key: pl.key,
-    plan_label: pl.label,
+    plan_key: String(pl.key).trim(),
+    plan_label: String(pl.label || pl.key).trim(),
     price: parseFloat(editor.querySelector(`input[data-price-key="${pl.key}"]`).value) || 0,
-    active: editor.querySelector(`input[data-active-key="${pl.key}"]`).checked,
-    updated_at: new Date().toISOString()
+    active: !!editor.querySelector(`input[data-active-key="${pl.key}"]`).checked
+    // ✅ removed updated_at to avoid column missing errors
   }));
 
-  const { error } = await sb.from("product_plan_prices").upsert(rows, { onConflict: "product_id,plan_key" });
-  if(error) msg.textContent = "Error: " + error.message;
+  const uniqueRows = dedupeRowsByKey(rows);
+
+  const { error } = await sb
+    .from("product_plan_prices")
+    .upsert(uniqueRows, { onConflict: "product_id,plan_key" });
+
+  if(error) setMsg("Error: " + error.message);
   else {
-      msg.textContent = "Prices Saved Successfully! ✅";
-      setTimeout(() => msg.textContent = "", 2000);
+    setMsg("Prices Saved Successfully! ✅");
+    setTimeout(() => setMsg(""), 2000);
   }
 }
 
@@ -338,7 +356,9 @@ function renderPlanRow(row){
 }
 
 async function loadPlansForManage(productId){
-  const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", productId);
+  const { data, error } = await sb.from("product_plan_prices").select("*").eq("product_id", productId);
+  if(error){ alert("Error loading plans: " + error.message); return; }
+
   plansTbody.innerHTML = "";
   if(data && data.length > 0) data.forEach(renderPlanRow);
   else renderPlanRow({ plan_key:"", plan_label:"", price:0, active:true });
@@ -346,6 +366,7 @@ async function loadPlansForManage(productId){
 
 document.getElementById("btnPlansSave").onclick = async () => {
   const trs = Array.from(plansTbody.querySelectorAll("tr"));
+
   const rows = trs.map(tr => ({
     product_id: Number(_currentPlansProductId),
     plan_key: tr.querySelector("[data-k]").value.trim(),
@@ -356,10 +377,23 @@ document.getElementById("btnPlansSave").onclick = async () => {
 
   if(rows.length === 0) { alert("Please add at least one plan"); return; }
 
-  const { error } = await sb.from("product_plan_prices").upsert(rows, { onConflict: "product_id,plan_key" });
+  // ✅ prevent duplicates BEFORE upsert
+  const keys = rows.map(r => r.plan_key);
+  const dup = keys.find((k, i) => keys.indexOf(k) !== i);
+  if(dup){
+    alert(`Duplicate plan_key found: "${dup}".\nEach plan_key must be unique.`);
+    return;
+  }
+
+  const uniqueRows = dedupeRowsByKey(rows);
+
+  const { error } = await sb
+    .from("product_plan_prices")
+    .upsert(uniqueRows, { onConflict: "product_id,plan_key" });
+
   if(!error) {
     plansModal.style.display = "none";
-    loadPlans(_currentPlansProductId);
+    await loadPlans(_currentPlansProductId);
   } else {
     alert("Error: " + error.message);
   }
