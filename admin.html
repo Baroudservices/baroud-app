@@ -16,10 +16,10 @@ body{
   padding:16px;
 }
 .wrap{max-width:1000px;margin:auto}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
 .btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;background:#1e293b;color:#fff}
 table{width:100%;border-collapse:collapse}
-th,td{padding:10px;border-bottom:1px solid #334155;font-size:14px}
+th,td{padding:10px;border-bottom:1px solid #334155;font-size:14px;vertical-align:top}
 th{color:#93c5fd;text-align:left}
 .status{font-weight:bold}
 .ok{color:#22c55e}
@@ -38,6 +38,7 @@ th{color:#93c5fd;text-align:left}
   align-items:center;
   justify-content:center;
   text-decoration:none;
+  min-width:38px;
 }
 .actionBtn:active{transform:scale(.98)}
 .actionBtn.okBtn{background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.35)}
@@ -46,6 +47,14 @@ th{color:#93c5fd;text-align:left}
 .actionBtn:disabled{opacity:.55; cursor:not-allowed; transform:none}
 
 .small{opacity:.75;font-size:12px}
+.notice{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  white-space:pre-wrap;
+}
 </style>
 </head>
 
@@ -53,23 +62,25 @@ th{color:#93c5fd;text-align:left}
 <div class="wrap">
   <div class="top">
     <h2 style="margin:0;">Admin – Deposit Requests</h2>
-    <div>
+    <div style="display:flex; gap:10px;">
       <button class="btn" id="btnRefresh">Refresh</button>
       <button class="btn" id="btnLogout">Logout</button>
     </div>
   </div>
 
+  <div id="notice" class="notice" style="display:none;"></div>
+
   <table>
     <thead>
       <tr>
-        <th>ID</th>
+        <th style="width:70px">ID</th>
         <th>User</th>
         <th>Amount</th>
         <th>Method</th>
         <th>Status</th>
         <th>Receipt</th>
         <th>Transfer #</th>
-        <th>Action</th>
+        <th style="width:120px">Action</th>
       </tr>
     </thead>
     <tbody id="rows"></tbody>
@@ -79,16 +90,22 @@ th{color:#93c5fd;text-align:left}
 </div>
 
 <script>
+/* ================= CONFIG ================= */
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
+
+/* ✅ استخدم publishable key */
+const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* ================= DOM ================= */
 const rowsEl = document.getElementById("rows");
 const emptyEl = document.getElementById("empty");
 const btnRefresh = document.getElementById("btnRefresh");
 const btnLogout = document.getElementById("btnLogout");
+const noticeEl = document.getElementById("notice");
 
+/* ================= HELPERS ================= */
 function esc(s){
   return String(s ?? "")
     .replaceAll("&","&amp;")
@@ -98,7 +115,25 @@ function esc(s){
     .replaceAll("'","&#039;");
 }
 
-// ✅ deposits.id BIGINT فقط
+function showNotice(text){
+  if(!text){
+    noticeEl.style.display = "none";
+    noticeEl.textContent = "";
+    return;
+  }
+  noticeEl.style.display = "block";
+  noticeEl.textContent = text;
+}
+
+function fmtErr(e){
+  const msg = (e?.message ?? String(e ?? "Error"));
+  const det = e?.details ? `\nDetails: ${e.details}` : "";
+  const hint = e?.hint ? `\nHint: ${e.hint}` : "";
+  const code = e?.code ? `\nCode: ${e.code}` : "";
+  return msg + det + hint + code;
+}
+
+/* deposits.id = bigint */
 function normalizeDepositId(raw){
   const s = String(raw ?? "").trim();
   const n = Number(s);
@@ -112,6 +147,7 @@ function setBusy(isBusy){
   rowsEl.querySelectorAll("button.actionBtn").forEach(b => b.disabled = isBusy);
 }
 
+/* ================= AUTH / ADMIN ================= */
 async function requireSession(){
   const { data: s, error: sErr } = await sb.auth.getSession();
   if(sErr) throw sErr;
@@ -138,7 +174,9 @@ async function requireAdmin(session){
   return true;
 }
 
+/* ================= LOAD TABLE ================= */
 async function load(){
+  showNotice("");
   rowsEl.innerHTML = `<tr><td colspan="8">Loading...</td></tr>`;
   emptyEl.style.display = "none";
 
@@ -152,10 +190,10 @@ async function load(){
       return;
     }
 
-    // ✅ Load deposits (receipt_url + transfer_number)
+    // ✅ Load deposits (receipt_url OR receipt_path) + transfer_number
     const { data, error } = await sb
       .from("deposits")
-      .select("id,user_id,amount,method,status,created_at,receipt_url,transfer_number")
+      .select("id,user_id,amount,method,status,created_at,receipt_url,receipt_path,transfer_number")
       .order("created_at", { ascending:false });
 
     if(error) throw error;
@@ -173,18 +211,20 @@ async function load(){
         st==="approved" ? "ok" :
         st==="rejected" ? "no" : "pending";
 
-      const receipt = (d.receipt_url ?? "").toString().trim();
-      const transferNum = (d.transfer_number ?? "").toString().trim();
+      const receipt = String(d.receipt_url || d.receipt_path || "").trim();
+      const transferNum = String(d.transfer_number || "").trim();
 
       rowsEl.innerHTML += `
         <tr>
           <td>${esc(d.id)}</td>
 
-          <td><div class="small">${esc(d.user_id)}</div></td>
+          <td>
+            <div class="small">${esc(d.user_id)}</div>
+          </td>
 
           <td><b>$${esc(d.amount)}</b></td>
 
-          <td>${esc(d.method)}</td>
+          <td>${esc(d.method || "—")}</td>
 
           <td class="status ${stClass}">${esc(st)}</td>
 
@@ -212,12 +252,18 @@ async function load(){
     }
 
   }catch(e){
-    rowsEl.innerHTML = `<tr><td colspan="8" style="color:#ffb4b4">Error: ${esc(e?.message || e)}</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="8" style="color:#ffb4b4">Error:\n${esc(fmtErr(e))}</td></tr>`;
   }
 }
 
+/* ================= UPDATE STATUS =================
+  ✅ Strategy:
+  1) Try direct UPDATE on deposits (best / simplest).
+  2) If blocked (RLS/permissions) fallback to RPC admin_set_deposit_status.
+*/
 async function setStatus(rawId, status){
   try{
+    showNotice("");
     setBusy(true);
 
     const session = await requireSession();
@@ -228,26 +274,57 @@ async function setStatus(rawId, status){
 
     const id = normalizeDepositId(rawId);
 
-    const { error } = await sb.rpc("admin_set_deposit_status", {
+    if(status !== "approved" && status !== "rejected"){
+      throw new Error("Invalid status");
+    }
+
+    // ---------- TRY #1: direct update deposits ----------
+    const patch = { status: status };
+
+    // (اختياري) إذا عندك أعمدة approved_at/updated_at رح تتعبّى
+    patch.updated_at = new Date().toISOString();
+    if(status === "approved") patch.approved_at = new Date().toISOString();
+
+    const direct = await sb
+      .from("deposits")
+      .update(patch)
+      .eq("id", id)
+      .select("id,status")
+      .single();
+
+    if(!direct.error){
+      await load();
+      return;
+    }
+
+    // If direct failed, show in notice and fallback to RPC
+    showNotice("Direct UPDATE failed, trying RPC...\n" + fmtErr(direct.error));
+
+    // ---------- TRY #2: RPC fallback ----------
+    const { error: rpcErr } = await sb.rpc("admin_set_deposit_status", {
       p_deposit_id: id,
       p_status: status
     });
 
-    if(error) throw error;
+    if(rpcErr) throw rpcErr;
 
     await load();
+
   }catch(e){
-    alert(e?.message || e);
+    console.log("setStatus error full:", e);
+    alert(fmtErr(e));
   }finally{
     setBusy(false);
   }
 }
 
+/* ================= LOGOUT ================= */
 async function logout(){
   await sb.auth.signOut();
   location.href="login.html";
 }
 
+/* ================= EVENTS ================= */
 rowsEl.addEventListener("click", (ev)=>{
   const btn = ev.target.closest("button[data-id][data-status]");
   if(!btn) return;
@@ -261,6 +338,5 @@ btnLogout.addEventListener("click", logout);
 
 load();
 </script>
-<script src="app-ui.js?v=3"></script>
 </body>
 </html>
