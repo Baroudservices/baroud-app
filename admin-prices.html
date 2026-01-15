@@ -37,6 +37,14 @@ select{
   background:rgba(0,0,0,.25);color:#fff;outline:none;font-weight:900
 }
 
+/* Search UI */
+.searchRow{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center; width:100%;
+}
+.searchInput{
+  width:min(340px,100%);
+}
+
 /* ===== Manage Plans Modal ===== */
 .modal{
   position:fixed; inset:0;
@@ -86,7 +94,14 @@ select{
   </div>
 
   <div class="card">
-    <div class="row">
+    <div class="row searchRow">
+      <div class="small">Search product:</div>
+      <input id="productSearch" class="searchInput" placeholder="Type product name..." />
+      <button class="btn" id="btnSearch" type="button">Search</button>
+      <button class="btn" id="btnClearSearch" type="button">Clear</button>
+    </div>
+
+    <div class="row" style="margin-top:10px">
       <div class="small">Quick select product:</div>
       <select id="productSelect"></select>
       <button class="btn save" id="btnOpen">Open</button>
@@ -157,6 +172,12 @@ const msg = document.getElementById("msg");
 const plansModal = document.getElementById("plansModal");
 const plansTbody = document.getElementById("plansTbody");
 
+// ✅ NEW: search elements + products cache
+const productSearch = document.getElementById("productSearch");
+const btnSearch = document.getElementById("btnSearch");
+const btnClearSearch = document.getElementById("btnClearSearch");
+let ALL_PRODUCTS = []; // cache
+
 function esc(s){
   return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
@@ -177,14 +198,65 @@ async function boot(){
   await loadProducts();
 }
 
+function renderProductSelect(list){
+  productSelect.innerHTML = list
+    .map(p => `<option value="${p.id}">#${p.id} – ${esc(p.title)}</option>`)
+    .join("");
+
+  if(list.length === 0){
+    productSelect.innerHTML = `<option value="">No products found</option>`;
+  }
+}
+
 async function loadProducts(){
   const { data, error } = await sb.from("products").select("id,title,active").order("title");
   if(error) return;
-  productSelect.innerHTML = data.map(p => `<option value="${p.id}">#${p.id} – ${p.title}</option>`).join('');
-  if(data.length > 0) loadPlans(productSelect.value);
+
+  ALL_PRODUCTS = data || [];
+  renderProductSelect(ALL_PRODUCTS);
+
+  if(ALL_PRODUCTS.length > 0){
+    loadPlans(productSelect.value);
+  }
 }
 
+// ✅ NEW: search/filter function
+function applySearch(){
+  const q = String(productSearch.value || "").trim().toLowerCase();
+
+  if(!q){
+    renderProductSelect(ALL_PRODUCTS);
+    return;
+  }
+
+  const filtered = ALL_PRODUCTS.filter(p =>
+    String(p.title || "").toLowerCase().includes(q)
+  );
+
+  renderProductSelect(filtered);
+
+  // auto select first match
+  if(filtered.length > 0){
+    productSelect.value = filtered[0].id;
+  }
+}
+
+btnSearch.onclick = applySearch;
+btnClearSearch.onclick = () => {
+  productSearch.value = "";
+  renderProductSelect(ALL_PRODUCTS);
+  if(ALL_PRODUCTS.length > 0){
+    productSelect.value = ALL_PRODUCTS[0].id;
+  }
+};
+
+// live filter while typing
+productSearch.addEventListener("input", () => {
+  applySearch();
+});
+
 async function loadPlans(productId){
+  if(!productId) return;
   msg.textContent = "Fetching plans...";
   _currentPlansProductId = productId;
   
@@ -287,7 +359,7 @@ document.getElementById("btnPlansSave").onclick = async () => {
   const { error } = await sb.from("product_plan_prices").upsert(rows, { onConflict: "product_id,plan_key" });
   if(!error) {
     plansModal.style.display = "none";
-    loadPlans(_currentPlansProductId); // تم تصحيح المتغير هنا
+    loadPlans(_currentPlansProductId);
   } else {
     alert("Error: " + error.message);
   }
