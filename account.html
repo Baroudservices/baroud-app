@@ -1045,6 +1045,28 @@
   }
 
   buyBtn.onclick = buyProduct;
+  async function loadProduct(id){
+  const { data: product, error: e1 } = await sb
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if(e1) throw e1;
+
+  const { data: features, error: e2 } = await sb
+    .from("product_features")
+    .select("*")
+    .eq("product_id", id)
+    .order("sort", { ascending: true });
+
+  if(e2) throw e2;
+
+  return {
+    product,
+    features: features || []
+  };
+}
 
   (async function init(){
     const id = getId();
