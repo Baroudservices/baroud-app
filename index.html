@@ -2,303 +2,300 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Baroud Services</title>
 
   <style>
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#06162a,#020b14);
-      color:#fff;
-      min-height:100vh;
-      -webkit-tap-highlight-color:transparent;
-      overflow-x:hidden;
+    /* ===== RESET & BASE ===== */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #06162a, #020b14);
+      color: #fff;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
     }
 
-    /* ===== GLOBAL WRAP ===== */
-    .wrap{
+    /* ===== UTILS ===== */
+    .wrap {
       width: 100%;
       margin: 0 auto;
-      padding: 14px 14px 40px;
+      padding: 14px 14px 60px; /* Extra padding bottom for scroll */
       max-width: 520px;
     }
 
-    /* ===== TOPBAR ===== */
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      margin-top:6px;
-    }
-    .iconBtn{
-      width:54px;height:54px;border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      user-select:none;
-      touch-action:manipulation;
-    }
-    .hamburger{width:22px}
-    .hamburger span{
-      display:block;height:2px;background:#fff;margin:5px 0;border-radius:9px;opacity:.95
+    /* ===== TOPBAR (Glass Effect) ===== */
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 0;
+      /* Glassmorphism hack if you want sticky header background, else keeps transparent */
+      /* background: rgba(6, 22, 42, 0.85); backdrop-filter: blur(8px); padding: 10px 14px; margin: -14px -14px 14px -14px; width: calc(100% + 28px); */
     }
 
-    .brandRow{
-      display:flex;align-items:center;gap:10px;justify-content:flex-end;flex:1;
+    .iconBtn {
+      width: 50px; height: 50px; border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    .logo{
-      width:42px;height:42px;border-radius:14px;
-      object-fit:cover;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      box-shadow:0 12px 30px rgba(0,0,0,.25);
+    .iconBtn:active { background: rgba(255, 255, 255, 0.15); }
+    
+    .hamburger { width: 20px; }
+    .hamburger span {
+      display: block; height: 2px; background: #fff; margin: 5px 0; border-radius: 4px;
     }
-    .brandText{
-      font-weight:900;letter-spacing:2px;opacity:.95;font-size:18px;
+
+    .brandRow {
+      display: flex; align-items: center; gap: 12px; justify-content: flex-end; flex: 1;
+    }
+    .logo {
+      width: 40px; height: 40px; border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .brandText {
+      font-weight: 800; letter-spacing: 1.5px; font-size: 18px;
+      background: linear-gradient(90deg, #fff, #ccc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     /* ===== BANNER ===== */
-    .banner{
-      margin-top:14px;border-radius:24px;overflow:hidden;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.04);
-      box-shadow:0 22px 70px rgba(0,0,0,.35);
+    .banner {
+      margin-top: 10px; border-radius: 24px; overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #000;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+    .slider { position: relative; overflow: hidden; border-radius: 24px; }
+    .slides { display: flex; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); will-change: transform; }
+    .slide { min-width: 100%; height: 180px; position: relative; }
+    .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* Gradient overlay on banner bottom for text readability if needed */
+    .slide::after {
+        content:''; position:absolute; inset:0;
+        background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+        pointer-events: none;
     }
 
-    /* Slider styles */
-    .slider{position:relative;overflow:hidden;border-radius:24px}
-    .slides{display:flex;transition:transform .55s ease;will-change:transform}
-    .slide{min-width:100%;height:170px}
-    .slide img{width:100%;height:170px;object-fit:cover;display:block}
+    .dots {
+      position: absolute; left: 0; right: 0; bottom: 12px;
+      display: flex; justify-content: center; gap: 6px; z-index: 5;
+    }
+    .dotBtn {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      border: none; padding: 0; transition: all 0.3s ease;
+    }
+    .dotBtn.active { width: 24px; border-radius: 4px; background: #fff; }
 
-    .dots{
-      position:absolute;left:0;right:0;bottom:10px;
-      display:flex;justify-content:center;gap:7px;
-      z-index:5;
+    /* ===== TICKER ===== */
+    .support {
+      margin-top: 16px;
+      padding: 10px 14px; border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      font-size: 13px; font-weight: 600; color: #ddd;
     }
-    .dotBtn{
-      width:8px;height:8px;border-radius:99px;
-      background:rgba(255,255,255,.30);
-      border:1px solid rgba(255,255,255,.10);
-      cursor:pointer;
-      padding:0;
-      outline:none;
+    .support-track {
+      display: flex; gap: 40px; width: max-content;
+      animation: scrollSupport 20s linear infinite;
     }
-    .dotBtn.active{width:18px;background:rgba(255,255,255,.85)}
-
-    /* ===== Support ticker ===== */
-    .support{
-      margin-top:12px;
-      padding:12px 14px;border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      opacity:.9;
-      overflow:hidden;
-      font-weight:700;
-      box-shadow:0 18px 60px rgba(0,0,0,.18);
-    }
-    .support-slider{overflow:hidden;width:100%}
-    .support-track{
-      display:flex;
-      gap:40px;
-      width:max-content;
-      animation: scrollSupport 14s linear infinite;
-      will-change:transform;
-    }
-    .support-track span{white-space:nowrap;font-weight:800}
-    @keyframes scrollSupport{
-      from{ transform:translateX(0); }
-      to{ transform:translateX(-50%); }
+    @keyframes scrollSupport {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
     }
 
     /* ===== SEARCH ===== */
-    .searchBox{
-      margin-top:12px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:26px;
-      padding:14px 16px;
-      box-shadow:0 18px 60px rgba(0,0,0,.18);
+    .searchBox {
+      margin-top: 16px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 4px 16px;
+      display: flex; align-items: center;
+      transition: border-color 0.2s;
     }
-    .searchBox input{
-      width:100%;background:transparent;border:none;outline:none;
-      color:#fff;font-size:16px;
+    .searchBox:focus-within { border-color: rgba(255,255,255,0.4); }
+    .searchBox form { width: 100%; }
+    .searchBox input {
+      width: 100%; background: transparent; border: none; outline: none;
+      color: #fff; font-size: 16px; padding: 10px 0; height: 44px;
     }
-    .searchBox input::placeholder{color:rgba(255,255,255,.45)}
+    .searchBox input::placeholder { color: rgba(255, 255, 255, 0.4); }
 
     /* ===== GRID ===== */
-    .grid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .tile{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:22px;
-      overflow:hidden;
-      cursor:pointer;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
-      user-select:none;
-      touch-action:manipulation;
-      transition:transform .12s ease;
+    .grid { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    
+    .tile {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s ease, background 0.2s;
     }
-    .tile:active{transform:scale(.98)}
-    .tile img{
-      width:100%;
-      height:140px;
-      object-fit:cover;
-      display:block;
+    .tile:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
+    
+    .tile img {
+      width: 100%; height: 130px; object-fit: cover; display: block;
+      transition: transform 0.3s;
     }
-    .label{
-      padding:12px 10px;text-align:center;
-      font-weight:900;letter-spacing:.6px;opacity:.92;font-size:15px
+    .tile:hover img { transform: scale(1.03); }
+
+    .label {
+      padding: 12px; text-align: center;
+      font-weight: 700; font-size: 15px; color: #eee;
     }
 
-    .hint{margin-top:14px;text-align:center;color:rgba(255,255,255,.35);font-size:12px}
-
-    /* ===== DRAWER ===== */
-    .overlay{
-      position:fixed;inset:0;
-      background:rgba(0,0,0,.55);
-      opacity:0;pointer-events:none;
-      transition:opacity .2s ease;
-      z-index:50;
-    }
-    .overlay.show{opacity:1;pointer-events:auto}
-
-    .drawer{
-      position:fixed;top:0;left:0;
-      width:min(320px,86vw);
-      height:100vh;
-      background:linear-gradient(180deg,#071a30,#020b14);
-      border-right:1px solid rgba(255,255,255,.06);
-      transform:translateX(-105%);
-      transition:transform .22s ease;
-      z-index:60;
-      padding:14px;
-      overflow:auto;
-    }
-    .drawer.show{transform:translateX(0)}
-
-    .drawerTop{display:flex;justify-content:flex-end;padding-bottom:10px}
-    .closeBtn{
-      width:44px;height:44px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;font-size:22px;
-      cursor:pointer;
+    /* No Results Message */
+    .no-results {
+        display: none;
+        text-align: center; margin-top: 30px;
+        color: rgba(255,255,255,0.5); font-size: 14px;
     }
 
-    .loginCard{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:22px;
-      padding:16px;
-      box-shadow:0 18px 60px rgba(0,0,0,.25);
-    }
-    .loginCard h2{margin:0 0 6px}
-    .loginCard p{margin:0 0 12px;color:rgba(255,255,255,.7);font-weight:600}
+    .hint { margin-top: 30px; text-align: center; color: rgba(255, 255, 255, 0.3); font-size: 12px; }
 
-    .loginBtn{
-      display:block;text-align:center;
-      padding:14px;border-radius:22px;
-      font-weight:900;text-decoration:none;
-      color:#0b1a12;
-      background:linear-gradient(90deg,#21f07a,#0fe067);
+    /* ===== DRAWER (Glassmorphism) ===== */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 50;
     }
+    .overlay.show { opacity: 1; pointer-events: auto; }
 
-    /* الستايل الجديد لكبسة Sign Up باللون الأزرق */
-    .signupBtn {
-      display: block; text-align: center;
-      padding: 14px; border-radius: 22px;
-      font-weight: 900; text-decoration: none;
-      color: #fff;
-      background: linear-gradient(90deg, #21a0f0, #0f76e0);
-      margin-top: 10px;
-      box-shadow: 0 4px 15px rgba(33, 160, 240, 0.2);
+    .drawer {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: min(300px, 85vw);
+      background: linear-gradient(170deg, rgba(7, 26, 48, 0.95), rgba(2, 11, 20, 0.98));
+      backdrop-filter: blur(12px); /* Blur effect */
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      transform: translateX(-105%); transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+      z-index: 60; padding: 20px;
+      overflow-y: auto;
     }
+    .drawer.show { transform: translateX(0); }
 
-    .menu{
-      margin-top:14px;
-      padding-top:10px;
-      border-top:1px solid rgba(255,255,255,.06);
-    }
-    .mItem{
-      display:flex;align-items:center;gap:12px;
-      padding:12px 10px;border-radius:16px;
-      cursor:pointer;user-select:none;
-    }
-    .mItem:hover{background:rgba(255,255,255,.05)}
-    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35)}
-    .mItem span:last-child{font-weight:800;color:rgba(255,255,255,.85)}
-
-    .social{
-      margin-top:14px;display:flex;gap:10px;justify-content:center;
-      padding-top:12px;border-top:1px solid rgba(255,255,255,.06);
-    }
-    .social a{
-      width:54px;height:54px;border-radius:18px;
-      display:flex;align-items:center;justify-content:center;
-      text-decoration:none;color:#fff;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      font-weight:900;
+    .drawerTop { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+    .closeBtn {
+      width: 40px; height: 40px; border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff; font-size: 20px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
     }
 
-    /* ===== DESKTOP / PC ===== */
+    /* Login Card in Drawer */
+    .loginCard {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px; padding: 18px;
+      text-align: center; margin-bottom: 20px;
+    }
+    .loginCard h2 { margin: 0 0 4px; font-size: 20px; }
+    .loginCard p { margin: 0 0 16px; color: rgba(255, 255, 255, 0.6); font-size: 13px; }
+
+    .btn {
+      display: block; width: 100%; padding: 12px;
+      border-radius: 14px; font-weight: 800; font-size: 14px;
+      text-decoration: none; margin-bottom: 10px;
+      transition: transform 0.1s;
+    }
+    .btn:active { transform: scale(0.98); }
+    
+    .loginBtn { background: #21f07a; color: #06162a; }
+    .signupBtn { background: #21a0f0; color: #fff; }
+
+    /* Menu Items */
+    .menu { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 10px; }
+    .mItem {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 10px; border-radius: 14px;
+      cursor: pointer; transition: background 0.1s;
+    }
+    .mItem:active { background: rgba(255, 255, 255, 0.05); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #21a0f0; box-shadow: 0 0 10px #21a0f0; }
+    .mItem span:last-child { font-weight: 600; font-size: 15px; }
+
+    .social { margin-top: 20px; display: flex; gap: 10px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1); justify-content: center; }
+    .social a {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff; text-decoration: none; font-weight: bold; border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Desktop Tweaks */
     @media (min-width: 992px){
-      .wrap{ max-width: 1200px; padding: 32px; }
-      .grid{ grid-template-columns: repeat(4, 1fr); gap: 20px; }
-      .slide, .slide img{ height: 300px; }
-      .tile img{ height: 180px; }
+      .wrap { max-width: 1000px; padding: 40px; }
+      .grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+      .slide { height: 320px; }
+      .tile img { height: 180px; }
     }
   </style>
 </head>
 
 <body>
   <div class="overlay" id="overlay"></div>
-
   <aside class="drawer" id="drawer" aria-hidden="true">
     <div class="drawerTop">
-      <button class="closeBtn" type="button" id="closeBtn">×</button>
+      <button class="closeBtn" type="button" id="closeBtn">✕</button>
     </div>
 
     <div class="loginCard">
-      <h2>Login</h2>
-      <p>Sign in to continue.</p>
-      <a class="loginBtn" href="login.html?v=1">Login</a>
-      <a class="signupBtn" href="register.html">Sign Up</a>
+      <h2>Welcome</h2>
+      <p>Sign in to access premium features.</p>
+      <a class="btn loginBtn" href="login.html">Login</a>
+      <a class="btn signupBtn" href="register.html">Create Account</a>
     </div>
 
     <div class="menu">
-      <div class="mItem" id="homeItem"><span class="dot"></span><span>Home</span></div>
-      <div class="mItem" id="aboutItem"><span class="dot"></span><span>About Us</span></div>
+      <div class="mItem" onclick="navTo('index.html')">
+        <span class="dot" style="background:#21f07a; box-shadow:0 0 8px #21f07a"></span>
+        <span>Home</span>
+      </div>
+      <div class="mItem" onclick="alert('Coming soon!')">
+        <span class="dot" style="background:#f0a021; box-shadow:0 0 8px #f0a021"></span>
+        <span>About Us</span>
+      </div>
     </div>
 
     <div class="social">
-      <a href="https://wa.me/96181812024" target="_blank" rel="noopener">WA</a>
-      <a href="#" id="ttBtn">♪</a>
+      <a href="https://wa.me/96181812024" target="_blank">WA</a>
+      <a href="#">TT</a>
+      <a href="#">IG</a>
     </div>
-
-    <div class="hint">© Baroud Services</div>
+    <div class="hint">© 2024 Baroud Services</div>
   </aside>
 
   <main class="wrap">
+    
     <div class="topbar">
-      <div class="iconBtn" id="menuBtn" role="button" aria-label="Open menu">
+      <div class="iconBtn" id="menuBtn">
         <div class="hamburger"><span></span><span></span><span></span></div>
       </div>
-
       <div class="brandRow">
-        <img class="logo" src="assets/logo.png" alt="Baroud Services" />
+        <img class="logo" src="assets/logo.png" alt="Logo" onerror="this.src='https://placehold.co/100x100/111/FFF?text=B'"/>
         <div class="brandText">BAROUD</div>
       </div>
     </div>
 
     <div class="banner slider" id="slider">
       <div class="slides" id="slides">
-        <div class="slide"><img src="assets/banner1.jpg" alt="banner 1"></div>
-        <div class="slide"><img src="assets/banner2.jpg" alt="banner 2"></div>
-        <div class="slide"><img src="assets/banner3.jpg" alt="banner 3"></div>
+        <div class="slide"><img src="assets/banner1.jpg" alt="Slide 1" loading="lazy"></div>
+        <div class="slide"><img src="assets/banner2.jpg" alt="Slide 2" loading="lazy"></div>
+        <div class="slide"><img src="assets/banner3.jpg" alt="Slide 3" loading="lazy"></div>
       </div>
       <div class="dots" id="dots"></div>
     </div>
@@ -306,175 +303,175 @@
     <div class="support">
       <div class="support-slider">
         <div class="support-track" id="supportTrack">
-          <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
-          <span>📞 Support Number: +961 70385398 | Houssein Baroud</span>
+          <span>🔥 Best Prices in Lebanon &nbsp;&nbsp; • &nbsp;&nbsp; 📞 Support: +961 70385398 &nbsp;&nbsp; • &nbsp;&nbsp; ⚡ Instant Delivery &nbsp;&nbsp; • &nbsp;&nbsp; </span>
+          <span>🔥 Best Prices in Lebanon &nbsp;&nbsp; • &nbsp;&nbsp; 📞 Support: +961 70385398 &nbsp;&nbsp; • &nbsp;&nbsp; ⚡ Instant Delivery &nbsp;&nbsp; • &nbsp;&nbsp; </span>
         </div>
       </div>
     </div>
 
     <div class="searchBox">
-      <input id="search" placeholder="Search" />
+      <form onsubmit="return false;">
+        <input id="search" type="search" placeholder="Search for games, cards..." autocomplete="off">
+      </form>
     </div>
 
     <section class="grid" id="grid">
-      <div class="tile" data-name="accounts" onclick="goLogin()">
-        <img src="assets/accounts.png" alt="Accounts" />
+      <div class="tile" data-name="accounts netflix pubg" onclick="goLogin()">
+        <img src="assets/accounts.png" alt="Accounts" loading="lazy" onerror="this.src='https://placehold.co/400x300/1a1a1a/FFF?text=Accounts'">
         <div class="label">Accounts</div>
       </div>
 
-      <div class="tile" data-name="games" onclick="goLogin()">
-        <img src="assets/games.png" alt="Games" />
+      <div class="tile" data-name="games steam psn" onclick="goLogin()">
+        <img src="assets/games.png" alt="Games" loading="lazy" onerror="this.src='https://placehold.co/400x300/1a1a1a/FFF?text=Games'">
         <div class="label">Games</div>
       </div>
 
-      <div class="tile" data-name="gift cards" onclick="goLogin()">
-        <img src="assets/giftcards.png" alt="Gift Cards" />
+      <div class="tile" data-name="gift cards itunes google" onclick="goLogin()">
+        <img src="assets/giftcards.png" alt="Gift Cards" loading="lazy" onerror="this.src='https://placehold.co/400x300/1a1a1a/FFF?text=Cards'">
         <div class="label">Gift Cards</div>
       </div>
 
-      <div class="tile" data-name="apps" onclick="goLogin()">
-        <img src="assets/apps.png" alt="Apps" />
+      <div class="tile" data-name="apps spotify" onclick="goLogin()">
+        <img src="assets/apps.png" alt="Apps" loading="lazy" onerror="this.src='https://placehold.co/400x300/1a1a1a/FFF?text=Apps'">
         <div class="label">Apps</div>
       </div>
     </section>
+
+    <div id="noResults" class="no-results">
+      <p>😕 No items found matching your search.</p>
+    </div>
 
     <div class="hint">baroudlb.com</div>
   </main>
 
   <script>
-    // ===== Drawer =====
-    const drawer  = document.getElementById("drawer");
+    // ===== Navigation =====
+    function navTo(url) {
+      window.location.href = url;
+    }
+    function goLogin(){
+      window.location.href = "login.html"; // Removed Date.now() to fix caching
+    }
+
+    // ===== Drawer Logic =====
+    const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
     const closeBtn = document.getElementById("closeBtn");
 
-    function openDrawer(){
-      drawer.classList.add("show");
-      overlay.classList.add("show");
-      drawer.setAttribute("aria-hidden","false");
-    }
-    function closeDrawer(){
-      drawer.classList.remove("show");
-      overlay.classList.remove("show");
-      drawer.setAttribute("aria-hidden","true");
+    function toggleDrawer(show) {
+      drawer.classList.toggle("show", show);
+      overlay.classList.toggle("show", show);
+      drawer.setAttribute("aria-hidden", !show);
+      document.body.style.overflow = show ? "hidden" : ""; // Prevent body scroll when drawer is open
     }
 
-    menuBtn.addEventListener("click", openDrawer);
-    menuBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); openDrawer(); }, {passive:false});
-    overlay.addEventListener("click", closeDrawer);
-    closeBtn.addEventListener("click", closeDrawer);
+    menuBtn.addEventListener("click", () => toggleDrawer(true));
+    closeBtn.addEventListener("click", () => toggleDrawer(false));
+    overlay.addEventListener("click", () => toggleDrawer(false));
 
-    document.getElementById("homeItem").addEventListener("click", ()=>{
-      closeDrawer();
-      location.assign("index.html?v=" + Date.now());
-    });
-    document.getElementById("aboutItem").addEventListener("click", ()=>{
-      closeDrawer();
-      alert("About Us");
-    });
+    // ===== Search Logic =====
+    const searchInput = document.getElementById("search");
+    const grid = document.getElementById("grid");
+    const noResults = document.getElementById("noResults");
+    
+    searchInput.addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      const tiles = document.querySelectorAll(".tile");
+      let visibleCount = 0;
 
-    function goLogin(){
-      location.assign("login.html?v=" + Date.now());
-    }
-
-    // ===== Search filter =====
-    const search = document.getElementById("search");
-    search.addEventListener("input", () => {
-      const q = search.value.trim().toLowerCase();
-      document.querySelectorAll(".tile").forEach(t => {
-        const name = (t.getAttribute("data-name") || t.innerText).toLowerCase();
-        t.style.display = name.includes(q) ? "" : "none";
+      tiles.forEach(tile => {
+        const text = (tile.getAttribute("data-name") + " " + tile.innerText).toLowerCase();
+        const match = text.includes(q);
+        tile.style.display = match ? "" : "none";
+        if(match) visibleCount++;
       });
+
+      noResults.style.display = visibleCount === 0 ? "block" : "none";
     });
 
-    // ===== Support ticker ensure enough length =====
-    (function(){
-      const track = document.getElementById("supportTrack");
-      if(!track) return;
-      track.innerHTML = track.innerHTML + track.innerHTML;
-    })();
-
-    // ===== Banner Slider (Auto + Swipe + dots) =====
+    // ===== Slider Logic (Optimized) =====
     document.addEventListener("DOMContentLoaded", () => {
       const slider = document.getElementById("slider");
       const slidesEl = document.getElementById("slides");
-      const slides = [...slider.querySelectorAll(".slide")];
+      const slides = Array.from(slidesEl.querySelectorAll(".slide"));
       const dotsEl = document.getElementById("dots");
-
-      let i = 0;
-      let timer = null;
-
+      
+      let index = 0;
+      let interval;
       let startX = 0;
-      let dx = 0;
-      let dragging = false;
+      let isDragging = false;
+      let currentTranslate = 0;
+      let prevTranslate = 0;
 
-      slidesEl.querySelectorAll("img").forEach(img=>{
-        img.addEventListener("error", ()=>{
-          img.onerror = null;
-          img.src = "assets/products/default.png"; 
+      // Handle missing images
+      document.querySelectorAll("img").forEach(img => {
+        img.addEventListener("error", function(){
+           // Fallback if image fails (removes broken icon)
+           this.style.opacity = "0.5";
         });
       });
 
+      // Create Dots
       dotsEl.innerHTML = "";
-      slides.forEach((_, idx) => {
+      slides.forEach((_, i) => {
         const d = document.createElement("button");
-        d.type = "button";
-        d.className = "dotBtn" + (idx === 0 ? " active" : "");
-        d.setAttribute("aria-label", "Go to slide " + (idx+1));
-        d.addEventListener("click", () => goTo(idx, true));
+        d.className = `dotBtn ${i === 0 ? 'active' : ''}`;
+        d.onclick = () => setSlide(i);
         dotsEl.appendChild(d);
       });
 
-      function setDots(){
-        [...dotsEl.children].forEach((d, idx) => d.classList.toggle("active", idx === i));
+      function updateDots() {
+        Array.from(dotsEl.children).forEach((d, i) => {
+          d.classList.toggle("active", i === index);
+        });
       }
 
-      function goTo(n, user=false){
-        i = (n + slides.length) % slides.length;
-        slidesEl.style.transition = user ? "transform .45s ease" : "transform .55s ease";
-        slidesEl.style.transform = `translateX(${-i * 100}%)`;
-        setDots();
+      function setSlide(i) {
+        index = (i + slides.length) % slides.length;
+        slidesEl.style.transform = `translateX(${-index * 100}%)`;
+        updateDots();
+        resetTimer();
       }
 
-      function next(){ goTo(i + 1); }
-
-      function play(){
-        stop();
-        timer = setInterval(next, 4500);
-      }
-      function stop(){
-        if(timer) clearInterval(timer);
-        timer = null;
+      function nextSlide() { setSlide(index + 1); }
+      function resetTimer() {
+        clearInterval(interval);
+        interval = setInterval(nextSlide, 4000);
       }
 
-      slider.addEventListener("touchstart", (e) => {
-        dragging = true;
-        stop();
+      // Touch Events for Swipe
+      slider.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
-        dx = 0;
-        slidesEl.style.transition = "none";
-      }, {passive:true});
+        isDragging = true;
+        clearInterval(interval);
+        slidesEl.style.transition = 'none'; // Remove transition for instant drag
+      }, {passive: true});
 
-      slider.addEventListener("touchmove", (e) => {
-        if(!dragging) return;
-        dx = e.touches[0].clientX - startX;
-        const percent = (dx / slider.clientWidth) * 100;
-        slidesEl.style.transform = `translateX(${(-i * 100) + percent}%)`;
-      }, {passive:true});
+      slider.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const currentX = e.touches[0].clientX;
+        const diff = currentX - startX;
+        // Basic drag visual
+        const move = (-index * 100) + (diff / slider.clientWidth * 100);
+        slidesEl.style.transform = `translateX(${move}%)`;
+      }, {passive: true});
 
-      slider.addEventListener("touchend", () => {
-        if(!dragging) return;
-        dragging = false;
-
-        if (dx > 60) goTo(i - 1, true);
-        else if (dx < -60) goTo(i + 1, true);
-        else goTo(i, true);
-
-        play();
+      slider.addEventListener('touchend', (e) => {
+        isDragging = false;
+        const endX = e.changedTouches[0].clientX;
+        const diff = endX - startX;
+        slidesEl.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'; // Restore transition
+        
+        if (Math.abs(diff) > 50) {
+          if (diff > 0) setSlide(index - 1);
+          else setSlide(index + 1);
+        } else {
+          setSlide(index); // Snap back
+        }
       });
 
-      goTo(0);
-      play();
+      resetTimer();
     });
   </script>
 </body>
