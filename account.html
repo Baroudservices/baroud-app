@@ -623,33 +623,44 @@
     });
   }
 
-  async function loadProduct(id){
-    const { data: p, error: e1 } = await sb.from("products").select("*").eq("id", id).single();
-    if(e1) throw e1;
+  async function loadPlans(productId){
+  const { data, error } = await sb
+    .from("product_plan_prices")
+    .select("id, product_id, plan_key, plan_label, plan_name, price, active")
+    .eq("product_id", productId)
+    .eq("active", true);
 
-    const { data: f } = await sb.from("product_features").select("*").eq("product_id", id).order("sort");
-    return { product: p, features: f || [] };
+  if(error){
+    console.log("loadPlans error:", error);
+    return [];
   }
 
-  async function loadPlans(productId){
-    const { data, error } = await sb
-      .from("product_plan_prices")
-      .select("id, product_id, plan_key, plan_label, plan_name, price, active")
-      .eq("product_id", productId)
-      .eq("active", true)
-      .order("price", { ascending: true })
-      .order("id", { ascending: true });
+  const rows = (data || []).map(r => ({
+    key: String(r.plan_key ?? r.id).trim(),
+    label: (r.plan_label || r.plan_name || r.plan_key || ("Plan " + r.id)).toString(),
+    price: Number(r.price || 0)
+  }));
 
-    if(error){
-      console.log("loadPlans error:", error);
-      return [];
-    }
+  // ✅ ترتيب حسب plan_key (أرقام أول شي 1,2,3,10 وبعدها النصوص)
+  rows.sort((a,b)=>{
+    const ak = a.key.toLowerCase();
+    const bk = b.key.toLowerCase();
 
-    return (data || []).map(r => ({
-      key: r.plan_key || String(r.id),
-      label: r.plan_label || r.plan_name || r.plan_key || ("Plan " + r.id),
-      price: Number(r.price || 0)
-    }));
+    const an = Number(ak);
+    const bn = Number(bk);
+
+    const aIsNum = ak !== "" && Number.isFinite(an);
+    const bIsNum = bk !== "" && Number.isFinite(bn);
+
+    if(aIsNum && bIsNum) return an - bn;   // 1,2,3,10
+    if(aIsNum && !bIsNum) return -1;
+    if(!aIsNum && bIsNum) return 1;
+
+    return ak.localeCompare(bk);           // vip, 1m, 2y...
+  });
+
+  return rows;
+}
   }
 
   function renderFeatures(features){
