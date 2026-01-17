@@ -92,7 +92,8 @@
       box-shadow: 0 4px 15px rgba(42, 116, 255, 0.3);
     }
     
-    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .actions { margin-top: 12px; } /* Removed Grid since only one button remains */
+    
     .btn-secondary {
       background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9);
     }
@@ -106,11 +107,6 @@
     }
     .msg.err { background: rgba(255, 82, 82, 0.15); color: #ff5252; border: 1px solid rgba(255, 82, 82, 0.2); }
     .msg.ok { background: rgba(33, 240, 122, 0.15); color: #21f07a; border: 1px solid rgba(33, 240, 122, 0.2); }
-
-    .hint {
-      margin-top: 20px; text-align: center; font-size: 12px; 
-      color: rgba(255,255,255,0.4); padding: 0 10px; line-height: 1.4;
-    }
 
     /* Spinner */
     .spinner {
@@ -158,15 +154,11 @@
       </button>
 
       <div class="actions">
-        <button class="btn btn-secondary" id="registerBtn" type="button">Create Account</button>
         <button class="btn btn-secondary" id="resetBtn" type="button">Forgot Pass?</button>
       </div>
     </form>
 
-    <div class="hint">
-      If email confirmation is enabled, please check your inbox before logging in.
     </div>
-  </div>
 
   <script>
     // ✅ Supabase Config
@@ -177,7 +169,6 @@
     // Elements
     const msg = document.getElementById("msg");
     const loginBtn = document.getElementById("loginBtn");
-    const registerBtn = document.getElementById("registerBtn");
     const resetBtn = document.getElementById("resetBtn");
     const btnText = document.getElementById("btnText");
     const loadingSpn = document.getElementById("loadingSpn");
@@ -194,7 +185,6 @@
 
     function setLoading(isLoading){
       loginBtn.disabled = isLoading;
-      registerBtn.disabled = isLoading;
       resetBtn.disabled = isLoading;
       
       if(isLoading) {
@@ -211,7 +201,6 @@
     togglePassBtn.addEventListener("click", () => {
       const type = passInput.getAttribute("type") === "password" ? "text" : "password";
       passInput.setAttribute("type", type);
-      // Optional: Change icon opacity slightly to indicate state
       togglePassBtn.style.opacity = type === "text" ? "1" : "0.5";
     });
 
@@ -246,17 +235,7 @@
         if(error) throw error;
 
         const user = data?.user;
-        // Check for Email Confirmation (Standard Supabase Logic)
-        if (user && !user.email_confirmed_at && !user.confirmed_at && user.aud === 'authenticated') {
-           // Note: Sometimes Supabase allows login even if not confirmed depending on settings,
-           // but if your app enforces it, we check here.
-           // If your project requires confirmation, usually 'signIn' returns error 'Email not confirmed'.
-           // If it didn't return error but you still want to block:
-           // await sb.auth.signOut();
-           // showMsg("Please confirm your email first.", false);
-           // return;
-        }
-
+        
         showMsg("Success! Redirecting...", true);
         setTimeout(() => window.location.replace("services.html"), 500);
 
@@ -267,61 +246,10 @@
       }
     }
 
-    // Register Function
-    async function doRegister(){
-      hideMsg();
-      const email = emailInput.value.trim().toLowerCase();
-      const password = passInput.value;
-
-      if(!email || !password){
-        showMsg("Enter email and password to create an account.");
-        return;
-      }
-      if(password.length < 6){
-        showMsg("Password must be at least 6 characters.");
-        return;
-      }
-
-      setLoading(true);
-      btnText.textContent = "Creating...";
-
-      try {
-        // 1. Sign Up
-        const { data, error } = await sb.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin + "/services.html"
-          }
-        });
-
-        if(error) throw error;
-
-        // 2. Auto Login Attempt (Works if 'Confirm Email' is OFF)
-        if (data?.session) {
-           showMsg("Account created! Logging in...", true);
-           setTimeout(() => window.location.replace("services.html"), 500);
-        } else {
-           // 'Confirm Email' is ON
-           showMsg("Account created! 📧 Please check your email to confirm.", true);
-        }
-
-      } catch(e) {
-        showMsg(e.message || "Registration failed.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
     // Events
     loginBtn.addEventListener("click", (e) => {
-      e.preventDefault(); // Stop form submit
+      e.preventDefault(); 
       doLogin();
-    });
-
-    registerBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      doRegister();
     });
 
     resetBtn.addEventListener("click", () => {
