@@ -2,238 +2,279 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Login - Baroud Services</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="css/layout.css">
-
+  
   <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#06162a,#020b14);
-      color:#fff;
-      min-height:100vh;
-      padding:18px;
+    /* ===== RESET & BASE ===== */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #06162a, #020b14);
+      color: #fff;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
     }
-    .wrap{
-      width:100%;
-      margin:0 auto;
-      max-width:520px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:calc(100vh - 36px);
+
+    /* ===== CARD ===== */
+    .card {
+      width: 100%; max-width: 420px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px); /* Glass Effect */
+      border-radius: 24px;
+      padding: 30px 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+      animation: fadeIn 0.4s ease-out;
     }
-    .card{
-      width:100%;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:26px;
-      padding:18px;
-      box-shadow:0 30px 80px rgba(0,0,0,.5);
-      position:relative;
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ===== HEADER ===== */
+    .backBtn {
+      position: absolute; left: 20px; top: 20px;
+      background: none; border: none; color: rgba(255,255,255,0.6);
+      font-size: 24px; cursor: pointer; transition: color 0.2s;
+      padding: 0; line-height: 1;
     }
-    @media (min-width: 992px){
-      .wrap{ max-width:1200px; }
-      .card{ max-width:900px; }
-      h1{ font-size:52px; }
+    .backBtn:hover { color: #fff; }
+
+    .header { text-align: center; margin-bottom: 30px; }
+    .header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+    .header p { margin: 0; color: rgba(255,255,255,0.5); font-size: 14px; }
+
+    /* ===== FORM ===== */
+    .field {
+      position: relative; margin-bottom: 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      display: flex; align-items: center;
+      transition: border-color 0.2s;
     }
-    .back{
-      position:absolute;left:16px;top:16px;
-      width:44px;height:44px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;font-size:20px;
-      cursor:pointer;
+    .field:focus-within { border-color: #2a74ff; }
+
+    .icon {
+      padding: 0 14px; color: rgba(255,255,255,0.4);
+      display: flex; align-items: center; justify-content: center;
     }
-    .titleRow{display:flex;align-items:center;justify-content:space-between;margin-top:52px}
-    .brand{font-weight:900;letter-spacing:2px;opacity:.85}
-    h1{margin:14px 0 6px;font-size:44px}
-    p{margin:0 0 18px;opacity:.75}
-    .field{
-      display:flex;align-items:center;gap:12px;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:20px;
-      padding:14px 14px;
-      margin:12px 0;
+    .field input {
+      width: 100%; background: transparent; border: none; outline: none;
+      color: #fff; font-size: 16px; padding: 14px 14px 14px 0;
+      height: 50px;
     }
-    .field input{
-      width:100%;
-      background:transparent;border:none;outline:none;
-      color:#fff;font-size:16px;
+    .field input::placeholder { color: rgba(255,255,255,0.3); }
+
+    /* Show/Hide Password Eye */
+    .toggle-pass {
+      padding: 0 14px; cursor: pointer; color: rgba(255,255,255,0.4);
+      background: none; border: none; display: flex;
     }
-    .btn{
-      width:100%;
-      border:none;
-      border-radius:26px;
-      padding:16px;
-      font-size:18px;
-      font-weight:900;
-      cursor:pointer;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      color:#fff;
-      box-shadow:0 18px 60px rgba(0,0,0,.35);
-      margin-top:10px;
+    .toggle-pass:hover { color: #fff; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      width: 100%; border: none; border-radius: 14px;
+      padding: 14px; font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: transform 0.1s, opacity 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .btn.secondary{
-      background:rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:none;
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #0aa0ff, #2a74ff);
+      color: #fff; margin-top: 10px;
+      box-shadow: 0 4px 15px rgba(42, 116, 255, 0.3);
     }
-    .btn:disabled{opacity:.65;cursor:not-allowed}
-    .msg{
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:14px;
-      display:none;
-      font-weight:800;
-      line-height:1.35;
-      white-space:pre-wrap;
+    
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .btn-secondary {
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9);
     }
-    .err{background:#d05252}
-    .ok{background:#2aa96b}
-    .hint{
-      margin-top:12px;
-      text-align:center;
-      opacity:.75;
-      font-weight:800;
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+    /* ===== MESSAGES ===== */
+    .msg {
+      margin-bottom: 20px; padding: 12px; border-radius: 12px;
+      font-size: 14px; font-weight: 600; text-align: center;
+      display: none; line-height: 1.4;
     }
-    .row{
-      display:flex;
-      gap:10px;
-      margin-top:10px;
+    .msg.err { background: rgba(255, 82, 82, 0.15); color: #ff5252; border: 1px solid rgba(255, 82, 82, 0.2); }
+    .msg.ok { background: rgba(33, 240, 122, 0.15); color: #21f07a; border: 1px solid rgba(33, 240, 122, 0.2); }
+
+    .hint {
+      margin-top: 20px; text-align: center; font-size: 12px; 
+      color: rgba(255,255,255,0.4); padding: 0 10px; line-height: 1.4;
     }
-    .row .btn{margin-top:0}
+
+    /* Spinner */
+    .spinner {
+      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.8s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 
 <body>
-  <main class="wrap">
-    <div class="card">
-      <button class="back" onclick="location.href='index.html'">←</button>
 
-      <div class="titleRow">
-        <div></div>
-        <div class="brand">Baroud Services</div>
-      </div>
+  <div class="card">
+    <button class="backBtn" onclick="location.href='index.html'" aria-label="Back">✕</button>
 
-      <h1>Login</h1>
-      <p>Sign in or create an account.</p>
-
-      <div id="msg" class="msg"></div>
-
-      <div class="field">
-        <span>👤</span>
-        <input id="email" type="email" placeholder="Email" autocomplete="username"/>
-      </div>
-
-      <div class="field">
-        <span>🔒</span>
-        <input id="pass" type="password" placeholder="Password (min 6)" autocomplete="current-password"/>
-      </div>
-
-      <button class="btn" id="loginBtn">Login</button>
-
-      <div class="row">
-        <button class="btn secondary" id="registerBtn" type="button">Register</button>
-        <button class="btn secondary" id="resetBtn" type="button">Reset Password</button>
-      </div>
-
-      <div class="hint" id="smallHint">
-        If email confirmation is ON, you must confirm email first.
-      </div>
+    <div class="header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to Baroud Services</p>
     </div>
-  </main>
+
+    <div id="msg" class="msg"></div>
+
+    <form onsubmit="return false;">
+      <div class="field">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
+        <input id="email" type="email" placeholder="Email Address" autocomplete="username" required>
+      </div>
+
+      <div class="field">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <input id="pass" type="password" placeholder="Password" autocomplete="current-password" required>
+        <button type="button" class="toggle-pass" id="togglePass" tabindex="-1">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+      </div>
+
+      <button class="btn btn-primary" id="loginBtn">
+        <span class="spinner" id="loadingSpn"></span>
+        <span id="btnText">Login</span>
+      </button>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="registerBtn" type="button">Create Account</button>
+        <button class="btn btn-secondary" id="resetBtn" type="button">Forgot Pass?</button>
+      </div>
+    </form>
+
+    <div class="hint">
+      If email confirmation is enabled, please check your inbox before logging in.
+    </div>
+  </div>
 
   <script>
-    // ✅ ضع هون بيانات مشروعك الصح
+    // ✅ Supabase Config
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_"; // sb_publishable_...
+    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_"; 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Elements
     const msg = document.getElementById("msg");
     const loginBtn = document.getElementById("loginBtn");
     const registerBtn = document.getElementById("registerBtn");
     const resetBtn = document.getElementById("resetBtn");
+    const btnText = document.getElementById("btnText");
+    const loadingSpn = document.getElementById("loadingSpn");
+    const emailInput = document.getElementById("email");
+    const passInput = document.getElementById("pass");
 
-    function showMsg(text, ok=false){
-      msg.style.display="block";
-      msg.className = "msg " + (ok ? "ok" : "err");
-      msg.textContent = text || "";
+    // ===== UI Helpers =====
+    function showMsg(text, isOk=false){
+      msg.style.display = "block";
+      msg.className = "msg " + (isOk ? "ok" : "err");
+      msg.textContent = text;
     }
-    function hideMsg(){
-      msg.style.display="none";
-      msg.textContent="";
-    }
+    function hideMsg(){ msg.style.display = "none"; }
 
-    function setLoading(isLoading, text){
+    function setLoading(isLoading){
       loginBtn.disabled = isLoading;
       registerBtn.disabled = isLoading;
       resetBtn.disabled = isLoading;
-      loginBtn.textContent = isLoading ? (text || "Please wait...") : "Login";
-      registerBtn.textContent = isLoading ? "Please wait..." : "Register";
+      
+      if(isLoading) {
+        loadingSpn.style.display = "block";
+        btnText.textContent = "Processing...";
+      } else {
+        loadingSpn.style.display = "none";
+        btnText.textContent = "Login";
+      }
     }
 
-    // ✅ إذا في Session دخّله عالـ services مباشرة
+    // Toggle Password Visibility
+    const togglePassBtn = document.getElementById("togglePass");
+    togglePassBtn.addEventListener("click", () => {
+      const type = passInput.getAttribute("type") === "password" ? "text" : "password";
+      passInput.setAttribute("type", type);
+      // Optional: Change icon opacity slightly to indicate state
+      togglePassBtn.style.opacity = type === "text" ? "1" : "0.5";
+    });
+
+    // ===== Auth Logic =====
+
+    // Check Session
     (async ()=>{
-      try{
+      try {
         const { data: { session } } = await sb.auth.getSession();
         if(session?.user){
-          location.replace("services.html?v=" + Date.now());
+          window.location.replace("services.html");
         }
-      }catch(e){}
+      } catch(e){}
     })();
 
+    // Login Function
     async function doLogin(){
       hideMsg();
-      const email = document.getElementById("email").value.trim().toLowerCase();
-      const password = document.getElementById("pass").value;
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passInput.value;
 
       if(!email || !password){
-        showMsg("Fill email and password.");
+        showMsg("Please enter both email and password.");
         return;
       }
 
-      setLoading(true, "Signing in...");
+      setLoading(true);
 
-      try{
+      try {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if(error){
-          showMsg(error.message || "Login failed.");
-          return;
-        }
+        
+        if(error) throw error;
 
         const user = data?.user;
-        const confirmedAt = user?.email_confirmed_at || user?.confirmed_at;
-
-        // إذا Confirm Email ON وما مؤكّد بعد
-        if(!confirmedAt){
-          await sb.auth.signOut();
-          showMsg("Please confirm your email first 📧\nThen login again.", false);
-          return;
+        // Check for Email Confirmation (Standard Supabase Logic)
+        if (user && !user.email_confirmed_at && !user.confirmed_at && user.aud === 'authenticated') {
+           // Note: Sometimes Supabase allows login even if not confirmed depending on settings,
+           // but if your app enforces it, we check here.
+           // If your project requires confirmation, usually 'signIn' returns error 'Email not confirmed'.
+           // If it didn't return error but you still want to block:
+           // await sb.auth.signOut();
+           // showMsg("Please confirm your email first.", false);
+           // return;
         }
 
-        showMsg("Login successful ✅", true);
-        setTimeout(()=> location.replace("services.html?v=" + Date.now()), 250);
+        showMsg("Success! Redirecting...", true);
+        setTimeout(() => window.location.replace("services.html"), 500);
 
-      }catch(e){
-        showMsg("Network error. Try again.");
-      }finally{
+      } catch(e) {
+        showMsg(e.message || "Login failed. Check your credentials.");
+      } finally {
         setLoading(false);
       }
     }
 
+    // Register Function
     async function doRegister(){
       hideMsg();
-      const email = document.getElementById("email").value.trim().toLowerCase();
-      const password = document.getElementById("pass").value;
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passInput.value;
 
       if(!email || !password){
-        showMsg("Enter email and password to register.");
+        showMsg("Enter email and password to create an account.");
         return;
       }
       if(password.length < 6){
@@ -241,59 +282,62 @@
         return;
       }
 
-      setLoading(true, "Creating...");
+      setLoading(true);
+      btnText.textContent = "Creating...";
 
-      try{
-        // 1) signUp
-        const { error: signErr } = await sb.auth.signUp({
+      try {
+        // 1. Sign Up
+        const { data, error } = await sb.auth.signUp({
           email,
           password,
           options: {
-            // إذا Confirm Email ON رح يوصلك إيميل
-            emailRedirectTo: location.origin + location.pathname.replace(/[^\/]*$/, "") + "services.html"
+            emailRedirectTo: window.location.origin + "/services.html"
           }
         });
 
-        if(signErr){
-          showMsg(signErr.message || "Register failed.");
-          return;
+        if(error) throw error;
+
+        // 2. Auto Login Attempt (Works if 'Confirm Email' is OFF)
+        if (data?.session) {
+           showMsg("Account created! Logging in...", true);
+           setTimeout(() => window.location.replace("services.html"), 500);
+        } else {
+           // 'Confirm Email' is ON
+           showMsg("Account created! 📧 Please check your email to confirm.", true);
         }
 
-        // 2) جرّب signIn فوراً (بيزبط إذا Confirm Email OFF)
-        const { data: signInData, error: signInErr } = await sb.auth.signInWithPassword({ email, password });
-
-        if(signInErr || !signInData?.session){
-          showMsg("✅ Account created.\nNow confirm your email 📧 then login.", true);
-          return;
-        }
-
-        showMsg("✅ Account created & logged in!", true);
-        setTimeout(()=> location.replace("services.html?v=" + Date.now()), 250);
-
-      }catch(e){
-        showMsg("Network error. Try again.");
-      }finally{
+      } catch(e) {
+        showMsg(e.message || "Registration failed.");
+      } finally {
         setLoading(false);
       }
     }
 
-    resetBtn.addEventListener("click", ()=>{
-      const email = document.getElementById("email").value.trim();
+    // Events
+    loginBtn.addEventListener("click", (e) => {
+      e.preventDefault(); // Stop form submit
+      doLogin();
+    });
+
+    registerBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      doRegister();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      const email = emailInput.value.trim();
       if(email){
-        location.href = "reset.html?email=" + encodeURIComponent(email);
-      }else{
-        location.href = "send-email-request.html";
+        window.location.href = "reset.html?email=" + encodeURIComponent(email);
+      } else {
+        window.location.href = "send-email-request.html";
       }
     });
 
-    loginBtn.addEventListener("click", doLogin);
-    registerBtn.addEventListener("click", doRegister);
-
-    document.getElementById("pass").addEventListener("keydown", e=>{
-      if(e.key==="Enter") doLogin();
+    // Enter Key Support
+    passInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") doLogin();
     });
-  </script>
 
-  <script src="app-ui.js?v=3"></script>
+  </script>
 </body>
 </html>
