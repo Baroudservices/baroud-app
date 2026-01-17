@@ -13,7 +13,20 @@
   h2{margin:0;font-size:22px}
   .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
   .row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
-  .name{font-weight:900}
+  
+  /* Name & Dot Style */
+  .name{ font-weight:900; display: flex; align-items: center; }
+  .status-dot {
+    width: 10px; height: 10px; 
+    border-radius: 50%; 
+    margin-right: 8px; 
+    display: inline-block;
+    box-shadow: 0 0 8px currentColor; /* Glow effect */
+  }
+  .st-pending { background-color: #facc15; color: #facc15; } /* Asfar */
+  .st-done { background-color: #4ade80; color: #4ade80; }    /* Akhdar */
+  .st-rejected { background-color: #f87171; color: #f87171; } /* A7mar */
+
   .small{opacity:.65;font-size:12px; line-height:1.35}
   .price{font-weight:900;color:#38bdf8; font-size:18px}
 
@@ -116,7 +129,6 @@
   <div id="empty" class="empty" style="display:none">No orders</div>
 </div>
 
-<!-- Reply Modal -->
 <div class="modal" id="replyModal">
   <div class="modalCard">
     <div class="mTitle" id="rmTitle">Admin Reply</div>
@@ -284,11 +296,19 @@ function renderOrders(){
 
     const replyPreview = reply ? reply.slice(0, 60) + (reply.length > 60 ? "..." : "") : "No reply yet";
 
+    /* ✅ LOGIC FOR LIGHT COLOR */
+    let dotClass = "st-pending"; // Default Yellow
+    if(delivery === "done") dotClass = "st-done";      // Green
+    if(delivery === "rejected") dotClass = "st-rejected"; // Red
+
     return `
       <div class="card" id="card_${esc(o.id)}">
         <div class="row">
           <div>
-            <div class="name">${esc(title)}</div>
+            <div class="name">
+              <span class="status-dot ${dotClass}"></span>
+              ${esc(title)}
+            </div>
             <div class="small">Order #${esc(o.id)} • ${esc(dt)}</div>
             <div class="small">User: ${esc(o.user_id)}</div>
           </div>
@@ -367,11 +387,10 @@ function openReplyModal(orderId){
   replyModal.style.display = "flex";
 }
 
-/* ✅ FIXED: لا تمسح currentReplyOrderId قبل تحديث الكاش */
 rmSave.onclick = ()=>{
   if(!currentReplyOrderId) return;
 
-  const orderId = currentReplyOrderId;                 // ✅ خزّن قبل الإغلاق
+  const orderId = currentReplyOrderId;
   const value = (rmText.value || "").trim();
 
   const hidden = document.getElementById(`reply_${orderId}`);
@@ -422,6 +441,9 @@ async function saveOrder(orderId){
     ordersCache[idx].delivery_status = delivery_status;
     ordersCache[idx].admin_reply = admin_reply;
   }
+  
+  // Re-render to update the light color
+  renderOrders();
 }
 
 document.getElementById("q").addEventListener("input", ()=> renderOrders());
