@@ -23,7 +23,7 @@
     .wrap {
       width: 100%;
       margin: 0 auto;
-      padding: 14px 14px 60px; /* Extra padding bottom for scroll */
+      padding: 14px 14px 60px;
       max-width: 520px;
     }
 
@@ -204,15 +204,25 @@
     .loginCard h2 { margin: 0 0 4px; font-size: 20px; }
     .loginCard p { margin: 0 0 16px; color: rgba(255, 255, 255, 0.6); font-size: 13px; }
 
+    /* Shared Button Style */
     .btn {
       display: block; width: 100%; padding: 12px;
       border-radius: 14px; font-weight: 800; font-size: 14px;
       text-decoration: none; margin-bottom: 10px;
-      transition: transform 0.1s;
+      transition: transform 0.1s; text-align: center;
     }
     .btn:active { transform: scale(0.98); }
     
+    /* Login Button (Green) */
     .loginBtn { background: #21f07a; color: #06162a; }
+
+    /* Signup Button (Blue) - هذا الكود اللي كان ناقصك */
+    .signupBtn { 
+      background: linear-gradient(90deg, #21a0f0, #0f76e0);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(33, 160, 240, 0.3);
+    }
+    .signupBtn:hover { background: linear-gradient(90deg, #0f76e0, #21a0f0); }
 
     /* Menu Items */
     .menu { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 10px; }
@@ -239,7 +249,6 @@
       .grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
       .slide { height: 320px; }
       .tile img { height: 180px; }
-      /* Hide hamburger on PC if you want, or keep it */
       .topbar { margin-bottom: 20px; }
     }
   </style>
@@ -253,11 +262,12 @@
     </div>
 
     <div class="loginCard">
-  <h2>Welcome</h2>
-  <p>Sign in to access premium features.</p>
-  <a class="btn loginBtn" href="login.html">Login</a>
-  <a class="btn signupBtn" href="register.html">Create Account</a>
-</div>
+      <h2>Welcome</h2>
+      <p>Sign in to access premium features.</p>
+      
+      <a class="btn loginBtn" href="login.html">Login</a>
+      <a class="btn signupBtn" href="register.html">Create Account</a>
+    </div>
 
     <div class="menu">
       <div class="mItem" onclick="navTo('index.html')">
