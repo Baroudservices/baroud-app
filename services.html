@@ -2,254 +2,270 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baroud Services - Neon Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Baroud Services - Dashboard</title>
 
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; padding:0;}
-    body{
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:#020b14;
-      color:#fff;
-      min-height:100vh;
-      overflow-x:hidden;
+    /* ===== RESET & BASE ===== */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      /* نفس خلفية الصفحات السابقة */
+      background: linear-gradient(180deg, #06162a, #020b14);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
       padding-bottom: 20px;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .wrap{ width: 100%; margin: 0 auto; padding: 14px; max-width: 520px; }
+    /* Layout Wrapper */
+    .wrap {
+      width: 100%;
+      margin: 0 auto;
+      padding: 14px 14px 60px;
+      max-width: 520px;
+    }
 
     /* ===== TOPBAR ===== */
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
       padding: 10px 0; margin-bottom: 15px;
+      position: sticky; top: 0; z-index: 40;
     }
-    .topbar-left{ display: flex; align-items: center; gap: 12px; }
+    
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
 
-    .menu-trigger{
-      width: 45px; height: 45px; background: rgba(255,255,255,0.06);
-      border-radius: 12px; display: flex; align-items: center;
-      justify-content: center; font-size: 22px; cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.1);
-      user-select:none;
+    .menu-trigger {
+      width: 45px; height: 45px; 
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px; 
+      display: flex; align-items: center; justify-content: center; 
+      font-size: 22px; cursor: pointer; user-select: none;
+      transition: background 0.2s;
+    }
+    .menu-trigger:active { background: rgba(255,255,255,0.15); }
+
+    .brand-title {
+      font-weight: 800; letter-spacing: 1.5px; font-size: 18px;
+      background: linear-gradient(90deg, #fff, #ccc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    /* ===== GRID wide tile ===== */
-    .neon-tile.wide{
-      grid-column: 1 / -1;
-    }
-    .neon-tile.wide img{
-      height: 150px;
-      object-fit: cover;
-    }
-
-    .wallet-pill{
+    /* Wallet Pill */
+    .wallet-pill {
       display: flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.05);
-      padding: 6px 14px; border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 6px 6px 14px; 
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .star-icon{ color: #ffd700; font-size: 18px; }
-    .balance-text{ font-weight: 800; font-size: 15px; }
+    .star-icon { color: #ffd700; font-size: 16px; }
+    .balance-text { font-weight: 800; font-size: 14px; letter-spacing: 0.5px; }
 
-    .add-fund-btn{
-      width: 28px; height: 28px; background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+    .add-fund-btn {
+      width: 32px; height: 32px; 
+      background: linear-gradient(135deg, #00d2ff, #3a7bd5);
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
       color: #fff; font-size: 18px; font-weight: bold; cursor: pointer;
-      box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); border: none; margin-left: 5px;
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.4); 
+      border: none; margin-left: 6px;
     }
-
-    .brand-title{ font-weight: 900; letter-spacing: 1.5px; font-size: 20px; text-transform: uppercase; }
+    .add-fund-btn:active { transform: scale(0.95); }
 
     /* ===== BANNER SLIDER ===== */
     .slider-box {
       width: 100%; border-radius: 20px; overflow: hidden;
-      margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px; 
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #000;
       position: relative; height: 160px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
-    .slides { display: flex; width: 300%; height: 100%; transition: 0.5s; }
-    .slides img { width: 33.333%; object-fit: cover; }
+    .slides { display: flex; width: 300%; height: 100%; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+    .slides img { width: 33.333%; height: 100%; object-fit: cover; display: block; }
 
     /* ===== SUPPORT SLIDER ===== */
     .support-slider {
-      background: rgba(255,255,255,0.05);
-      border-radius: 30px; height: 50px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px; height: 46px;
       overflow: hidden; margin-bottom: 20px;
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       position: relative;
     }
     .support-track {
       display: flex; flex-direction: column;
-      animation: supportSlide 8s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      animation: supportSlide 10s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
     }
     .support-item {
-      height: 50px; display: flex; align-items: center; justify-content: center;
-      gap: 10px; font-weight: 700; font-size: 14px;
+      height: 46px; display: flex; align-items: center; justify-content: center;
+      gap: 10px; font-weight: 600; font-size: 13px; color: #ddd;
     }
     @keyframes supportSlide {
       0%, 20% { transform: translateY(0); }
-      25%, 45% { transform: translateY(-50px); }
-      50%, 70% { transform: translateY(-100px); }
-      75%, 95% { transform: translateY(-150px); }
+      25%, 45% { transform: translateY(-46px); }
+      50%, 70% { transform: translateY(-92px); }
+      75%, 95% { transform: translateY(-138px); }
       100% { transform: translateY(0); }
     }
 
     /* ===== SEARCH ===== */
-    .search-box{
-      background: rgba(255,255,255,0.05);
-      border-radius: 25px; padding: 14px 20px;
-      margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08);
+    .search-box {
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 20px; padding: 4px 16px;
+      margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex; align-items: center;
+      transition: border-color 0.2s;
     }
-    .search-box input{ width: 100%; background: transparent; border: none; outline: none; color: #fff; font-size: 15px; }
+    .search-box:focus-within { border-color: rgba(255,255,255,0.3); }
+    .search-box input { 
+      width: 100%; background: transparent; border: none; outline: none; 
+      color: #fff; font-size: 15px; padding: 12px 0; height: 46px; 
+    }
+    .search-box input::placeholder { color: rgba(255,255,255,0.4); }
 
     /* Search results */
-    #searchResults{
-      display:none;
+    #searchResults {
+      display: none;
       margin-bottom: 20px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(20, 30, 40, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 18px;
       overflow: hidden;
+      backdrop-filter: blur(10px);
     }
-    .sr-item{
-      padding: 12px 14px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      cursor:pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+    .sr-item {
+      padding: 14px;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      cursor: pointer; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .sr-item:last-child{ border-bottom:0; }
-    .sr-title{ font-weight:900; }
-    .sr-cat{ opacity:.65; font-size:12px; }
-    .sr-price{ font-weight:900; color:#38bdf8; font-size:13px; }
+    .sr-item:last-child { border-bottom: 0; }
+    .sr-title { font-weight: 700; color: #fff; }
+    .sr-cat { opacity: 0.6; font-size: 12px; margin-top: 2px; }
+    .sr-price { font-weight: 800; color: #00d2ff; font-size: 14px; }
 
-    /* ===== GRID (smaller tiles) ===== */
-    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .neon-tile{
-      background: #0b141d; border-radius: 18px;
-      overflow: hidden; border: 1px solid rgba(255,255,255,0.05);
-      transition: 0.3s; cursor: pointer;
-      text-decoration:none; color:inherit;
+    /* ===== GRID ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    
+    .neon-tile {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: transform 0.15s ease, background 0.2s;
+      cursor: pointer; text-decoration: none; color: inherit;
+      position: relative;
     }
-    .neon-tile img{ width: 100%; display:block; height: 120px; object-fit: cover; }
-    .tile-label{ padding: 10px; text-align: center; font-weight: 800; font-size: 13px; }
+    .neon-tile:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
+    
+    .neon-tile.wide { grid-column: 1 / -1; }
+    
+    .neon-tile img { 
+      width: 100%; display: block; height: 120px; object-fit: cover; 
+      transition: transform 0.3s;
+    }
+    .neon-tile:hover img { transform: scale(1.03); }
+    .neon-tile.wide img { height: 160px; }
+
+    .tile-label { 
+      padding: 12px; text-align: center; font-weight: 700; font-size: 14px; 
+      color: #eee;
+    }
 
     /* ===== DRAWER (SIDEBAR) ===== */
-    .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.8); opacity:0; pointer-events:none; transition:0.3s; z-index:2000; }
-    .overlay.show{ opacity:1; pointer-events:auto; }
-    .drawer{
-      position:fixed; top:0; left:0; width:290px; height:100vh;
-      background:#06162a; border-right:1px solid rgba(255,255,255,.1);
-      transform:translateX(-100%); transition:0.3s; z-index:2100; padding:25px;
-      display:flex; flex-direction:column;
+    .overlay { 
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
+      backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 2000; 
     }
-    .drawer.show{ transform:translateX(0); }
-    .m-item{
-      display:flex; align-items:center; gap:15px;
-      padding:14px; border-radius:12px; cursor:pointer;
-      text-decoration:none; color:inherit;
-      border:0; background:transparent; width:100%;
-      font: inherit;
-      text-align:left;
-    }
-    .m-item:hover{ background: rgba(255,255,255,0.05); }
-    .m-dot{ width:8px; height:8px; border-radius:50%; background:#00d2ff; box-shadow: 0 0 8px #00d2ff; }
+    .overlay.show { opacity: 1; pointer-events: auto; }
 
-    .drawerTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom: 8px;
+    .drawer {
+      position: fixed; top: 0; left: 0; width: min(300px, 85vw); height: 100vh;
+      background: linear-gradient(170deg, rgba(7, 26, 48, 0.98), rgba(2, 11, 20, 0.99));
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+      z-index: 2100; padding: 20px;
+      display: flex; flex-direction: column;
     }
-    .drawerClose{
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      color:#fff;
-      font-size: 18px;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    .drawer.show { transform: translateX(0); }
+
+    .drawerTop {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+    }
+    .drawerClose {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff; font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    .waDot{
-      background:#25D366 !important;
-      box-shadow:0 0 8px #25D366 !important;
+    /* Menu Items */
+    .m-item {
+      display: flex; align-items: center; gap: 15px;
+      padding: 14px; border-radius: 14px; cursor: pointer;
+      text-decoration: none; color: inherit; border: 0; background: transparent; width: 100%;
+      font: inherit; text-align: left; transition: background 0.1s;
+    }
+    .m-item:active { background: rgba(255, 255, 255, 0.05); }
+    .m-dot { width: 8px; height: 8px; border-radius: 50%; background: #21a0f0; box-shadow: 0 0 10px #21a0f0; }
+
+    /* User Info */
+    .user-card {
+      text-align: center; margin-bottom: 25px; padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .user-avatar {
+      width: 64px; height: 64px; background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid #21a0f0; font-size: 28px;
+    }
+    .userEmail { font-weight: 700; font-size: 14px; opacity: 0.9; word-break: break-word; }
+
+    .logout-item { color: #ff5252; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px; }
+    .logout-dot { background: #ff5252; box-shadow: 0 0 8px #ff5252; }
+
+    .waDot { background: #25D366 !important; box-shadow: 0 0 10px #25D366 !important; }
+
+    /* ===== WhatsApp Modal ===== */
+    .waModal {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+      padding: 16px; z-index: 9999;
+    }
+    .waCard {
+      width: min(400px, 100%);
+      background: linear-gradient(145deg, #0c1018, #05080c);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px; padding: 24px;
+      color: #fff; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .waTitle { font-weight: 800; font-size: 20px; margin-bottom: 10px; }
+    .waText { opacity: 0.7; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+    .waBtns { display: flex; gap: 10px; }
+    .waBtn {
+      flex: 1; border: 0; cursor: pointer; padding: 12px; border-radius: 12px;
+      font-weight: 700; color: #fff; font-size: 14px;
+      background: linear-gradient(90deg, #21a0f0, #0f76e0);
+    }
+    .waBtn.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Logout style */
-    .logout-item{
-      color:#ff4d4d;
-      margin-top: 6px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      padding-top: 15px;
-    }
-    .logout-dot{ background:#ff4d4d; box-shadow:0 0 8px #ff4d4d; }
-
-    /* user email small */
-    .userEmail{
-      font-weight: 900;
-      font-size: 13px;
-      opacity:.9;
-      word-break:break-word;
-    }
-
-    /* WhatsApp Popup */
-    .waModal{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.75);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-      z-index:999999;
-    }
-    .waCard{
-      width:min(520px,100%);
-      background:#0c1018;
-      border:1px solid rgba(255,255,255,.15);
-      border-radius:18px;
-      padding:18px;
-      color:#fff;
-      text-align:center;
-    }
-    .waTitle{
-      font-weight:950;
-      font-size:20px;
-      margin-bottom:8px;
-    }
-    .waText{
-      opacity:.85;
-      font-weight:800;
-      font-size:14px;
-      line-height:1.5;
-    }
-    .waBtns{
-      display:flex;
-      gap:10px;
-      margin-top:16px;
-    }
-    .waBtn{
-      flex:1;
-      border:0;
-      cursor:pointer;
-      padding:12px 14px;
-      border-radius:14px;
-      font-weight:950;
-      color:#fff;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-    }
-    .waBtn.secondary{
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
+    /* Desktop Responsive */
+    @media (min-width: 992px) {
+      .wrap { max-width: 1000px; padding: 40px; }
+      .grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+      .neon-tile.wide { grid-column: span 2; }
+      .slider-box { height: 300px; }
     }
   </style>
 </head>
@@ -259,16 +275,18 @@
 
   <aside class="drawer" id="drawer">
     <div class="drawerTop">
-      <div style="font-weight: 950; opacity:.85;">Menu</div>
+      <div style="font-weight: 800; opacity: 0.9; font-size: 18px;">Menu</div>
       <button class="drawerClose" id="drawerClose" aria-label="Close">✕</button>
     </div>
 
-    <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;">
-      <div style="width:60px; height:60px; background:rgba(255,255,255,0.05); border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; border:2px solid #00d2ff; font-size:25px;">👤</div>
+    <div class="user-card">
+      <div class="user-avatar">👤</div>
       <div class="userEmail" id="userEmail">Loading...</div>
     </div>
 
-    <div class="m-item" id="homeExit"><div class="m-dot"></div><span>Home</span></div>
+    <div class="m-item" id="homeExit">
+      <div class="m-dot"></div><span>Home</span>
+    </div>
 
     <a href="profile.html" class="m-item"><div class="m-dot"></div><span>Account</span></a>
     <a href="add-credit.html" class="m-item"><div class="m-dot"></div><span>Add Credit</span></a>
@@ -290,9 +308,12 @@
   </aside>
 
   <main class="wrap">
+    
     <div class="topbar">
       <div class="topbar-left">
-        <div class="menu-trigger" id="menuBtn">☰</div>
+        <div class="menu-trigger" id="menuBtn">
+          <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
+        </div>
         <div class="wallet-pill">
           <span class="star-icon">★</span>
           <span class="balance-text" id="balanceText">0.00 🇱🇧</span>
@@ -304,9 +325,9 @@
 
     <div class="slider-box">
       <div class="slides" id="mainSlider">
-        <img src="assets/banner1.jpg" alt="1">
-        <img src="assets/banner2.jpg" alt="2">
-        <img src="assets/banner3.jpg" alt="3">
+        <img src="assets/banner1.jpg" alt="1" loading="lazy">
+        <img src="assets/banner2.jpg" alt="2" loading="lazy">
+        <img src="assets/banner3.jpg" alt="3" loading="lazy">
       </div>
     </div>
 
@@ -320,19 +341,17 @@
     </div>
 
     <div class="search-box">
-      <input id="serviceSearch" type="text" placeholder="Search products...">
+      <input id="serviceSearch" type="text" placeholder="Search for accounts, games..." autocomplete="off">
     </div>
 
     <div id="searchResults"></div>
 
-    <!-- WhatsApp Popup -->
     <div class="waModal" id="waModal">
       <div class="waCard">
         <div class="waTitle">Join our WhatsApp Community</div>
         <div class="waText">
-          Get offers, updates and instant support on WhatsApp
+          Get offers, updates and instant support on WhatsApp.
         </div>
-
         <div class="waBtns">
           <button class="waBtn secondary" id="waLater">Later</button>
           <button class="waBtn" id="waJoin">Join</button>
@@ -342,34 +361,34 @@
 
     <section class="grid" id="serviceGrid">
       <a href="accounts.html?category=Accounts" class="neon-tile">
-        <img src="assets/accounts.png" alt="Accounts">
+        <img src="assets/accounts.png" alt="Accounts" loading="lazy">
         <div class="tile-label">Accounts</div>
       </a>
 
       <a href="games.html?category=Games" class="neon-tile">
-        <img src="assets/games.png" alt="Games">
+        <img src="assets/games.png" alt="Games" loading="lazy">
         <div class="tile-label">Games</div>
       </a>
 
       <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile wide">
-        <img src="assets/phone-recharge.png" alt="Phone recharge">
+        <img src="assets/phone-recharge.png" alt="Phone recharge" loading="lazy">
         <div class="tile-label">Phone recharge</div>
       </a>
 
       <a href="giftcards.html?category=Gift%20Cards" class="neon-tile">
-        <img src="assets/giftcards.png" alt="Gift Cards">
+        <img src="assets/giftcards.png" alt="Gift Cards" loading="lazy">
         <div class="tile-label">Gift Cards</div>
       </a>
 
       <a href="apps.html?category=Apps" class="neon-tile">
-        <img src="assets/apps.png" alt="Apps">
+        <img src="assets/apps.png" alt="Apps" loading="lazy">
         <div class="tile-label">Apps</div>
       </a>
     </section>
   </main>
 
   <script>
-    // ===== Drawer =====
+    // ===== Drawer Logic =====
     const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
     const menuBtn = document.getElementById("menuBtn");
@@ -400,18 +419,17 @@
       }, 4000);
     }
 
-    // ===== Supabase =====
+    // ===== Supabase Logic (Preserved) =====
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-    // ✅ Show logged-in user email in sidebar
+    // Load User Email
     async function loadUserEmail(){
       const el = document.getElementById("userEmail");
       if(!el) return;
-
       try{
         const { data: { session } } = await sb.auth.getSession();
         if(!session?.user){
@@ -425,11 +443,10 @@
     }
     loadUserEmail();
 
-    // ===== Balance =====
+    // Load Balance
     async function loadBalance() {
       const el = document.getElementById("balanceText");
       if (!el) return;
-
       try {
         const { data: { session } } = await sb.auth.getSession();
         if (!session) { el.textContent = "0.00 🇱🇧"; return; }
@@ -441,7 +458,6 @@
           .single();
 
         if (error) { el.textContent = "0.00 🇱🇧"; return; }
-
         const b = Number(data?.balance || 0);
         el.textContent = `${b.toFixed(2)} 🇱🇧`;
       } catch (e) {
@@ -450,7 +466,7 @@
     }
     loadBalance();
 
-    // ✅ Logout: signOut + redirect to index.html
+    // Logout
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", async () => {
@@ -459,7 +475,7 @@
       });
     }
 
-    // ===== Product Search (Supabase) =====
+    // ===== Product Search =====
     const searchInput = document.getElementById("serviceSearch");
     const searchResults = document.getElementById("searchResults");
     let tmr = null;
@@ -485,15 +501,13 @@
 
       if(error){
         searchResults.style.display = "block";
-        searchResults.innerHTML =
-          `<div class="sr-item"><div><div class="sr-title">Error</div><div class="sr-cat">${esc(error.message)}</div></div></div>`;
+        searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">Error</div><div class="sr-cat">${esc(error.message)}</div></div></div>`;
         return;
       }
 
       if(!data || data.length === 0){
         searchResults.style.display = "block";
-        searchResults.innerHTML =
-          `<div class="sr-item"><div><div class="sr-title">No results</div><div class="sr-cat">Try another word</div></div></div>`;
+        searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">No results</div><div class="sr-cat">Try another word</div></div></div>`;
         return;
       }
 
@@ -520,7 +534,7 @@
       });
     }
 
-    // ✅ WhatsApp Popup (moved here: OUTSIDE searchProducts)
+    // WhatsApp Popup
     (function(){
       const WA_LINK = "https://chat.whatsapp.com/D7ORsbcGnRpJmHpoIVBbYw";
       const modal = document.getElementById("waModal");
@@ -539,9 +553,7 @@
 
       if(modal){
         modal.addEventListener("click", (e)=>{
-          if(e.target === modal){
-            modal.style.display = "none";
-          }
+          if(e.target === modal) modal.style.display = "none";
         });
       }
     })();
@@ -551,7 +563,6 @@
         clearTimeout(tmr);
         tmr = setTimeout(()=> searchProducts(searchInput.value), 250);
       });
-
       searchInput.addEventListener("blur", ()=>{
         setTimeout(()=>{
           if(!searchInput.value.trim()){
