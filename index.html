@@ -27,13 +27,11 @@
       max-width: 520px;
     }
 
-    /* ===== TOPBAR (Glass Effect) ===== */
+    /* ===== TOPBAR ===== */
     .topbar {
       position: sticky; top: 0; z-index: 40;
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
       padding: 10px 0;
-      /* Glassmorphism hack if you want sticky header background, else keeps transparent */
-      /* background: rgba(6, 22, 42, 0.85); backdrop-filter: blur(8px); padding: 10px 14px; margin: -14px -14px 14px -14px; width: calc(100% + 28px); */
     }
 
     .iconBtn {
@@ -79,7 +77,7 @@
     .slides { display: flex; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); will-change: transform; }
     .slide { min-width: 100%; height: 180px; position: relative; }
     .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    /* Gradient overlay on banner bottom for text readability if needed */
+    
     .slide::after {
         content:''; position:absolute; inset:0;
         background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
@@ -179,7 +177,7 @@
       position: fixed; top: 0; left: 0; bottom: 0;
       width: min(300px, 85vw);
       background: linear-gradient(170deg, rgba(7, 26, 48, 0.95), rgba(2, 11, 20, 0.98));
-      backdrop-filter: blur(12px); /* Blur effect */
+      backdrop-filter: blur(12px);
       border-right: 1px solid rgba(255, 255, 255, 0.08);
       transform: translateX(-105%); transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
       z-index: 60; padding: 20px;
@@ -215,7 +213,6 @@
     .btn:active { transform: scale(0.98); }
     
     .loginBtn { background: #21f07a; color: #06162a; }
-    .signupBtn { background: #21a0f0; color: #fff; }
 
     /* Menu Items */
     .menu { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 10px; }
@@ -236,12 +233,14 @@
       color: #fff; text-decoration: none; font-weight: bold; border: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Desktop Tweaks */
+    /* ===== DESKTOP / PC (Responsive) ===== */
     @media (min-width: 992px){
       .wrap { max-width: 1000px; padding: 40px; }
       .grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
       .slide { height: 320px; }
       .tile img { height: 180px; }
+      /* Hide hamburger on PC if you want, or keep it */
+      .topbar { margin-bottom: 20px; }
     }
   </style>
 </head>
@@ -257,8 +256,7 @@
       <h2>Welcome</h2>
       <p>Sign in to access premium features.</p>
       <a class="btn loginBtn" href="login.html">Login</a>
-      <a class="btn signupBtn" href="register.html">Create Account</a>
-    </div>
+      </div>
 
     <div class="menu">
       <div class="mItem" onclick="navTo('index.html')">
@@ -350,7 +348,7 @@
       window.location.href = url;
     }
     function goLogin(){
-      window.location.href = "login.html"; // Removed Date.now() to fix caching
+      window.location.href = "login.html"; 
     }
 
     // ===== Drawer Logic =====
@@ -363,7 +361,7 @@
       drawer.classList.toggle("show", show);
       overlay.classList.toggle("show", show);
       drawer.setAttribute("aria-hidden", !show);
-      document.body.style.overflow = show ? "hidden" : ""; // Prevent body scroll when drawer is open
+      document.body.style.overflow = show ? "hidden" : "";
     }
 
     menuBtn.addEventListener("click", () => toggleDrawer(true));
@@ -390,7 +388,7 @@
       noResults.style.display = visibleCount === 0 ? "block" : "none";
     });
 
-    // ===== Slider Logic (Optimized) =====
+    // ===== Slider Logic =====
     document.addEventListener("DOMContentLoaded", () => {
       const slider = document.getElementById("slider");
       const slidesEl = document.getElementById("slides");
@@ -401,13 +399,10 @@
       let interval;
       let startX = 0;
       let isDragging = false;
-      let currentTranslate = 0;
-      let prevTranslate = 0;
 
       // Handle missing images
       document.querySelectorAll("img").forEach(img => {
         img.addEventListener("error", function(){
-           // Fallback if image fails (removes broken icon)
            this.style.opacity = "0.5";
         });
       });
@@ -440,19 +435,18 @@
         interval = setInterval(nextSlide, 4000);
       }
 
-      // Touch Events for Swipe
+      // Touch Events
       slider.addEventListener('touchstart', (e) => {
         startX = e.touches[0].clientX;
         isDragging = true;
         clearInterval(interval);
-        slidesEl.style.transition = 'none'; // Remove transition for instant drag
+        slidesEl.style.transition = 'none';
       }, {passive: true});
 
       slider.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
         const currentX = e.touches[0].clientX;
         const diff = currentX - startX;
-        // Basic drag visual
         const move = (-index * 100) + (diff / slider.clientWidth * 100);
         slidesEl.style.transform = `translateX(${move}%)`;
       }, {passive: true});
@@ -461,18 +455,19 @@
         isDragging = false;
         const endX = e.changedTouches[0].clientX;
         const diff = endX - startX;
-        slidesEl.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)'; // Restore transition
+        slidesEl.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
         
         if (Math.abs(diff) > 50) {
           if (diff > 0) setSlide(index - 1);
           else setSlide(index + 1);
         } else {
-          setSlide(index); // Snap back
+          setSlide(index);
         }
       });
 
       resetTimer();
     });
   </script>
+  <script src="app-ui.js?v=4"></script>
 </body>
 </html>
