@@ -14,7 +14,6 @@
     
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      /* نفس خلفية الصفحات السابقة */
       background: linear-gradient(180deg, #06162a, #020b14);
       color: #fff;
       min-height: 100vh;
@@ -27,7 +26,8 @@
     .wrap {
       width: 100%;
       margin: 0 auto;
-      padding: 14px 14px 60px;
+      /* ✅ تعديل 1: زدنا المساحة من فوق لـ 90px عشان الهيدر */
+      padding: 90px 14px 60px;
       max-width: 520px;
     }
 
@@ -36,6 +36,11 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 0; margin-bottom: 15px;
       position: sticky; top: 0; z-index: 40;
+      /* ✅ إضافة: خلفية شفافة للهيدر عشان الكلام يبين فوقه */
+      background: rgba(6, 22, 42, 0.85);
+      backdrop-filter: blur(8px);
+      padding-left: 14px; padding-right: 14px;
+      margin-left: -14px; margin-right: -14px; /* ليمد عالعرض كامل */
     }
     
     .topbar-left { display: flex; align-items: center; gap: 12px; }
@@ -163,14 +168,17 @@
     }
     .neon-tile:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
     
-    .neon-tile.wide { grid-column: 1 / -1; }
+    /* ✅ تعديل 2: حذفنا كلاس الـ wide من الـ css لضمان عدم استخدامه */
+    /* .neon-tile.wide { grid-column: 1 / -1; } */
     
     .neon-tile img { 
       width: 100%; display: block; height: 120px; object-fit: cover; 
       transition: transform 0.3s;
     }
     .neon-tile:hover img { transform: scale(1.03); }
-    .neon-tile.wide img { height: 160px; }
+    
+    /* تعديل: توحيد حجم الصور */
+    /* .neon-tile.wide img { height: 160px; } */
 
     .tile-label { 
       padding: 12px; text-align: center; font-weight: 700; font-size: 14px; 
@@ -264,7 +272,7 @@
     @media (min-width: 992px) {
       .wrap { max-width: 1000px; padding: 40px; }
       .grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
-      .neon-tile.wide { grid-column: span 2; }
+      /* .neon-tile.wide { grid-column: span 2; } */
       .slider-box { height: 300px; }
     }
   </style>
@@ -370,7 +378,7 @@
         <div class="tile-label">Games</div>
       </a>
 
-      <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile wide">
+      <a href="phone-recharge.html?category=Phone%20recharge" class="neon-tile">
         <img src="assets/phone-recharge.png" alt="Phone recharge" loading="lazy">
         <div class="tile-label">Phone recharge</div>
       </a>
@@ -419,7 +427,7 @@
       }, 4000);
     }
 
-    // ===== Supabase Logic (Preserved) =====
+    // ===== Supabase Logic =====
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -475,7 +483,7 @@
       });
     }
 
-    // ===== Product Search =====
+    // ===== Product Search (معدل) =====
     const searchInput = document.getElementById("serviceSearch");
     const searchResults = document.getElementById("searchResults");
     let tmr = null;
@@ -492,16 +500,19 @@
         return;
       }
 
+      // ✅ تعديل 4: غيرنا الجدول من 'products_with_min_price' لـ 'products'
+      // عشان البحث يشتغل دغري بدون الحاجة لـ View
       const { data, error } = await sb
-        .from("products_with_min_price")
-        .select("id,title,category,min_price")
+        .from("products") 
+        .select("id,title,category,price") // price بدل min_price
         .eq("active", true)
         .ilike("title", `%${query}%`)
         .limit(10);
 
       if(error){
+        console.error(error); // Log error for debug
         searchResults.style.display = "block";
-        searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">Error</div><div class="sr-cat">${esc(error.message)}</div></div></div>`;
+        searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">Error</div><div class="sr-cat">Try again</div></div></div>`;
         return;
       }
 
@@ -513,7 +524,8 @@
 
       searchResults.style.display = "block";
       searchResults.innerHTML = data.map(p=>{
-        const pr = Number(p.min_price || 0);
+        // استعملنا السعر العادي
+        const pr = Number(p.price || 0);
         return `
           <div class="sr-item" data-id="${esc(p.id)}">
             <div>
