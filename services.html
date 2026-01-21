@@ -26,8 +26,8 @@
     .wrap {
       width: 100%;
       margin: 0 auto;
-      /* ✅ تعديل 1: زدنا المساحة من فوق لـ 90px عشان الهيدر */
-      padding: 90px 14px 60px;
+      /* ✅ لغينا الـ 90px ورجعناها 20px ليروح الفراغ الفاضي */
+      padding: 20px 14px 60px;
       max-width: 520px;
     }
 
@@ -35,12 +35,12 @@
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 0; margin-bottom: 15px;
+      /* Sticky بخلي الهيدر يلزق فوق بس ننزل، وبنفس الوقت بياخد مساحته */
       position: sticky; top: 0; z-index: 40;
-      /* ✅ إضافة: خلفية شفافة للهيدر عشان الكلام يبين فوقه */
       background: rgba(6, 22, 42, 0.85);
       backdrop-filter: blur(8px);
       padding-left: 14px; padding-right: 14px;
-      margin-left: -14px; margin-right: -14px; /* ليمد عالعرض كامل */
+      margin-left: -14px; margin-right: -14px;
     }
     
     .topbar-left { display: flex; align-items: center; gap: 12px; }
@@ -168,17 +168,11 @@
     }
     .neon-tile:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
     
-    /* ✅ تعديل 2: حذفنا كلاس الـ wide من الـ css لضمان عدم استخدامه */
-    /* .neon-tile.wide { grid-column: 1 / -1; } */
-    
     .neon-tile img { 
       width: 100%; display: block; height: 120px; object-fit: cover; 
       transition: transform 0.3s;
     }
     .neon-tile:hover img { transform: scale(1.03); }
-    
-    /* تعديل: توحيد حجم الصور */
-    /* .neon-tile.wide img { height: 160px; } */
 
     .tile-label { 
       padding: 12px; text-align: center; font-weight: 700; font-size: 14px; 
@@ -272,7 +266,6 @@
     @media (min-width: 992px) {
       .wrap { max-width: 1000px; padding: 40px; }
       .grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
-      /* .neon-tile.wide { grid-column: span 2; } */
       .slider-box { height: 300px; }
     }
   </style>
