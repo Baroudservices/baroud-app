@@ -26,7 +26,6 @@
     .wrap {
       width: 100%;
       margin: 0 auto;
-      /* ✅ لغينا الـ 90px ورجعناها 20px ليروح الفراغ الفاضي */
       padding: 20px 14px 60px;
       max-width: 520px;
     }
@@ -35,7 +34,6 @@
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 0; margin-bottom: 15px;
-      /* Sticky بخلي الهيدر يلزق فوق بس ننزل، وبنفس الوقت بياخد مساحته */
       position: sticky; top: 0; z-index: 40;
       background: rgba(6, 22, 42, 0.85);
       backdrop-filter: blur(8px);
@@ -44,6 +42,9 @@
     }
     
     .topbar-left { display: flex; align-items: center; gap: 12px; }
+    
+    /* New: Group for Right side items */
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
 
     .menu-trigger {
       width: 45px; height: 45px; 
@@ -61,6 +62,27 @@
       background: linear-gradient(90deg, #fff, #ccc);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+
+    /* ===== APP DOWNLOAD BUTTON (New) ===== */
+    .appPill {
+      background: linear-gradient(90deg, #8e2de2, #4a00e0);
+      color: #fff;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex; align-items: center; gap: 4px;
+      box-shadow: 0 0 10px rgba(138, 45, 226, 0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      animation: pulse 2s infinite;
+      white-space: nowrap; /* يمنع نزول النص لسطر ثاني */
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(138, 45, 226, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(138, 45, 226, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(138, 45, 226, 0); }
     }
 
     /* Wallet Pill */
@@ -321,7 +343,14 @@
           <button class="add-fund-btn" onclick="location.href='add-credit.html'">+</button>
         </div>
       </div>
-      <div class="brand-title">BAROUD</div>
+      
+      <div class="topbar-right">
+        <a href="app.apk" class="appPill" download>
+           ⬇ Get App
+        </a>
+        
+        <div class="brand-title">BAROUD</div>
+      </div>
     </div>
 
     <div class="slider-box">
@@ -497,17 +526,15 @@
         return;
       }
 
-      // ✅ تعديل 4: غيرنا الجدول من 'products_with_min_price' لـ 'products'
-      // عشان البحث يشتغل دغري بدون الحاجة لـ View
       const { data, error } = await sb
         .from("products") 
-        .select("id,title,category,price") // price بدل min_price
+        .select("id,title,category,price") 
         .eq("active", true)
         .ilike("title", `%${query}%`)
         .limit(10);
 
       if(error){
-        console.error(error); // Log error for debug
+        console.error(error); 
         searchResults.style.display = "block";
         searchResults.innerHTML = `<div class="sr-item"><div><div class="sr-title">Error</div><div class="sr-cat">Try again</div></div></div>`;
         return;
@@ -521,7 +548,6 @@
 
       searchResults.style.display = "block";
       searchResults.innerHTML = data.map(p=>{
-        // استعملنا السعر العادي
         const pr = Number(p.price || 0);
         return `
           <div class="sr-item" data-id="${esc(p.id)}">
