@@ -296,10 +296,10 @@ function renderOrders(){
 
     const replyPreview = reply ? reply.slice(0, 60) + (reply.length > 60 ? "..." : "") : "No reply yet";
 
-    /* ✅ LOGIC FOR LIGHT COLOR */
-    let dotClass = "st-pending"; // Default Yellow
-    if(delivery === "done") dotClass = "st-done";      // Green
-    if(delivery === "rejected") dotClass = "st-rejected"; // Red
+    /* Logic for Status Dot Color */
+    let dotClass = "st-pending"; 
+    if(delivery === "done") dotClass = "st-done";      
+    if(delivery === "rejected") dotClass = "st-rejected"; 
 
     return `
       <div class="card" id="card_${esc(o.id)}">
@@ -409,6 +409,11 @@ async function saveOrder(orderId){
   const msg = document.getElementById(`msg_${orderId}`);
   msg.textContent = "Saving...";
 
+  // 1. Get the current Order Data BEFORE update to find phone number
+  const orderData = ordersCache.find(o => String(o.id) === String(orderId));
+  // Try to find any phone number field
+  const phone = orderData ? (orderData.phone_number || orderData.number || orderData.transfer_number || orderData.whatsapp || "") : "";
+
   const status = document.getElementById(`status_${orderId}`).value;
   const delivery_status = document.getElementById(`delivery_${orderId}`).value;
   const admin_reply = (document.getElementById(`reply_${orderId}`)?.value || "").trim();
@@ -434,6 +439,27 @@ async function saveOrder(orderId){
   }
 
   msg.textContent = "Saved ✅";
+
+  /* ✅ START WHATSAPP LOGIC */
+  // Only if we have a phone number and the status is Done or Rejected
+  if(phone && (delivery_status === "done" || delivery_status === "rejected")){
+    let message = "";
+    
+    if(delivery_status === "done"){
+      message = "Hello, your order is completed ✅ check it on the site baroudapp.com";
+    } else if(delivery_status === "rejected"){
+      message = "Hello, your order was rejected ❌ check details on baroudapp.com";
+    }
+
+    if(message){
+      // Clean phone number (remove spaces, etc)
+      const cleanPhone = String(phone).replace(/[^\d]/g, "");
+      // Open WhatsApp Web
+      const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+    }
+  }
+  /* ✅ END WHATSAPP LOGIC */
 
   const idx = ordersCache.findIndex(o => String(o.id) === String(orderId));
   if(idx >= 0){
