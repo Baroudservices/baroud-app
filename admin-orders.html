@@ -410,9 +410,32 @@ async function saveOrder(orderId){
   const msg = document.getElementById(`msg_${orderId}`);
   msg.innerHTML = "Saving..."; 
 
-  // 1. Get Phone Number safely from existing data
+  // 1. Get current order data from cache
   const orderData = ordersCache.find(o => String(o.id) === String(orderId));
-  const phone = orderData ? (orderData.phone_number || orderData.number || orderData.transfer_number || orderData.whatsapp || "") : "";
+  if(!orderData){
+    msg.textContent = "Error: Order not found in cache";
+    return;
+  }
+
+  // 2. Try to find phone in Order Data first
+  let phone = orderData.phone_number || orderData.number || orderData.transfer_number || orderData.whatsapp || "";
+
+  // 3. 🔥 If no phone in order, fetch User Profile
+  if(!phone && orderData.user_id){
+    console.log("Searching user profile for phone...");
+    // We select * to cover all possible column names (phone, phone_number, etc.)
+    const { data: profile, error: pErr } = await sb
+      .from("profiles")
+      .select("*")
+      .eq("id", orderData.user_id)
+      .single();
+
+    if(profile){
+      // Check all common phone column names
+      phone = profile.phone || profile.phone_number || profile.mobile || profile.whatsapp || profile.contact_number || "";
+      console.log("Phone found in profile:", phone);
+    }
+  }
 
   const status = document.getElementById(`status_${orderId}`).value;
   const delivery_status = document.getElementById(`delivery_${orderId}`).value;
@@ -447,12 +470,12 @@ async function saveOrder(orderId){
   }
   renderOrders(); 
 
-  // ✅ WhatsApp Logic (with Block Protection)
+  // ✅ WhatsApp Logic
   if(delivery_status === "done" || delivery_status === "rejected"){
     
     if(!phone){
-      alert("⚠️ No phone number found for this order!");
-      msg.textContent = "Saved ✅ (No Phone)";
+      alert("⚠️ انتبه: ما لقينا رقم تلفون لا بالطلب ولا بحساب المستخدم!");
+      msg.textContent = "Saved ✅ (No Phone found)";
       return;
     }
 
