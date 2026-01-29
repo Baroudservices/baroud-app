@@ -410,20 +410,19 @@ async function saveOrder(orderId){
   const msg = document.getElementById(`msg_${orderId}`);
   msg.innerHTML = "Saving..."; 
 
-  // 1. Get current order data from cache
+  // 1. Check Cache
   const orderData = ordersCache.find(o => String(o.id) === String(orderId));
   if(!orderData){
     msg.textContent = "Error: Order not found in cache";
     return;
   }
 
-  // 2. Try to find phone in Order Data first
+  // 2. Try getting phone from order data first
   let phone = orderData.phone_number || orderData.number || orderData.transfer_number || orderData.whatsapp || "";
 
-  // 3. 🔥 If no phone in order, fetch User Profile
+  // 3. 🔥 If no phone, fetch User Profile
   if(!phone && orderData.user_id){
     console.log("Searching user profile for phone...");
-    // We select * to cover all possible column names (phone, phone_number, etc.)
     const { data: profile, error: pErr } = await sb
       .from("profiles")
       .select("*")
@@ -431,7 +430,7 @@ async function saveOrder(orderId){
       .single();
 
     if(profile){
-      // Check all common phone column names
+      // Check common phone columns
       phone = profile.phone || profile.phone_number || profile.mobile || profile.whatsapp || profile.contact_number || "";
       console.log("Phone found in profile:", phone);
     }
@@ -470,7 +469,7 @@ async function saveOrder(orderId){
   }
   renderOrders(); 
 
-  // ✅ WhatsApp Logic
+  // ✅ WhatsApp Logic with Order ID and Link
   if(delivery_status === "done" || delivery_status === "rejected"){
     
     if(!phone){
@@ -480,19 +479,21 @@ async function saveOrder(orderId){
     }
 
     let message = "";
+    const link = "https://baroudapp.com/my-orders.html";
+
     if(delivery_status === "done"){
-      message = "Hello, your order is completed ✅ check it on the site baroudapp.com";
+      message = `Hello, Order #${orderId} is completed ✅\nCheck it here: ${link}`;
     } else {
-      message = "Hello, your order was rejected ❌ check details on baroudapp.com";
+      message = `Hello, Order #${orderId} was rejected ❌\nSee details here: ${link}`;
     }
 
     const cleanPhone = String(phone).replace(/[^\d]/g, "");
     const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 
-    // Try to open immediately
+    // Try opening WA
     const win = window.open(url, '_blank');
 
-    // If blocked, show link
+    // If blocked
     if(!win || win.closed || typeof win.closed=='undefined'){
       msg.innerHTML = `Saved ✅ <a href="${url}" target="_blank" style="color:#4ade80;font-weight:900;text-decoration:underline;margin-left:6px">Open WhatsApp 🟢</a>`;
     } else {
