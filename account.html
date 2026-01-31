@@ -161,7 +161,7 @@
     .danger{color:#ef4444}
     .ok{color:#22c55e}
 
-    /* ✅ Custom Modal (Notice/Confirm) */
+    /* Modal Styles */
     .modal{
       position:fixed; inset:0;
       background: rgba(0,0,0,.72);
@@ -198,7 +198,7 @@
       border:1px solid rgba(255,255,255,0.10);
     }
 
-    /* ✅ Plan Picker Button (بدل select) */
+    /* Plan Picker */
     .planBtn{
       width:100%;
       display:flex;
@@ -216,7 +216,7 @@
     .planBtn small{opacity:.7; font-weight:800}
     .planBtn .chev{opacity:.85}
 
-    /* ✅ Plans Bottom Sheet */
+    /* Plans Bottom Sheet */
     .plansOverlay{
       position:fixed; inset:0;
       background:rgba(0,0,0,.75);
@@ -376,13 +376,11 @@
       <div style="margin-bottom:10px">
         <label>Plan</label>
 
-        <!-- ✅ بدل select (حتى ما يطلع شكل نظام الموبايل البشع) -->
         <button type="button" class="planBtn" id="planBtn">
           <span id="planBtnText">Choose Plan</span>
           <span class="chev">▾</span>
         </button>
 
-        <!-- (مخفي بس إذا بدك تستخدمه لاحقاً) -->
         <input type="hidden" id="planKeyHidden" value="">
       </div>
 
@@ -412,7 +410,6 @@
           <input id="input-email" placeholder="Enter email" />
         </div>
 
-        <!-- ✅ Netflix device type (TV/Mobile) -->
         <div id="field-device-type" style="display:none">
           <label id="device-type-label">TV or Mobile</label>
           <select id="input-device-type">
@@ -458,7 +455,6 @@
     </div>
   </div>
 
-  <!-- ✅ Plans Bottom Sheet -->
   <div class="plansOverlay" id="plansOverlay"></div>
   <div class="plansSheet" id="plansSheet" aria-hidden="true">
     <div class="plansHeader">
@@ -479,7 +475,6 @@
     </div>
   </div>
 
-  <!-- ✅ Custom Modal (Notice/Confirm) -->
   <div class="modal" id="uiModal">
     <div class="modalCard">
       <div class="mTitle" id="uiModalTitle">Notice</div>
@@ -509,7 +504,6 @@
   const myOrdersBtn = document.getElementById("myOrdersBtn");
   const ordersMenu = document.getElementById("ordersMenu");
 
-  // ✅ Plan picker elements
   const planBtn = document.getElementById("planBtn");
   const planBtnText = document.getElementById("planBtnText");
   const planKeyHidden = document.getElementById("planKeyHidden");
@@ -521,7 +515,6 @@
   const plansConfirm = document.getElementById("plansConfirm");
   const plansListEl = document.getElementById("plansList");
 
-  // ✅ modal elements (Notice/Confirm)
   const uiModal = document.getElementById("uiModal");
   const uiModalTitle = document.getElementById("uiModalTitle");
   const uiModalText = document.getElementById("uiModalText");
@@ -534,13 +527,11 @@
   let selectedPlan = null;
   let plansChannel = null;
 
-  // ✅ TikTok helper (حتى يظهر/يختفي Password حسب email)
   let tiktokEmailToggleAttached = false;
 
   function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function getId(){ return new URL(location.href).searchParams.get("id"); }
 
-  // ✅ Notice/Confirm modal API
   function closeUIModal(){ uiModal.style.display = "none"; }
   uiModal.addEventListener("click", (e)=>{ if(e.target === uiModal) closeUIModal(); });
 
@@ -568,7 +559,6 @@
     });
   }
 
-  // ✅ Plans sheet open/close
   function openPlans(){
     plansOverlay.classList.add("show");
     plansSheet.classList.add("show");
@@ -584,9 +574,7 @@
   plansCancel.onclick = closePlans;
 
   planBtn.onclick = ()=>{
-    if(!PLAN_LIST.length){
-      return;
-    }
+    if(!PLAN_LIST.length) return;
     const k = selectedPlan?.key;
     if(k){
       const inp = plansListEl.querySelector(`input[name="planPick"][value="${CSS.escape(k)}"]`);
@@ -624,44 +612,35 @@
   }
 
   async function loadPlans(productId){
-  const { data, error } = await sb
-    .from("product_plan_prices")
-    .select("id, product_id, plan_key, plan_label, plan_name, price, active")
-    .eq("product_id", productId)
-    .eq("active", true);
+    const { data, error } = await sb
+      .from("product_plan_prices")
+      .select("id, product_id, plan_key, plan_label, plan_name, price, active")
+      .eq("product_id", productId)
+      .eq("active", true);
 
-  if(error){
-    console.log("loadPlans error:", error);
-    return [];
+    if(error){ return []; }
+
+    const rows = (data || []).map(r => ({
+      key: String(r.plan_key ?? r.id).trim(),
+      label: (r.plan_label || r.plan_name || r.plan_key || ("Plan " + r.id)).toString(),
+      price: Number(r.price || 0)
+    }));
+
+    rows.sort((a,b)=>{
+      const ak = a.key.toLowerCase();
+      const bk = b.key.toLowerCase();
+      const an = Number(ak);
+      const bn = Number(bk);
+      const aIsNum = ak !== "" && Number.isFinite(an);
+      const bIsNum = bk !== "" && Number.isFinite(bn);
+      if(aIsNum && bIsNum) return an - bn;
+      if(aIsNum && !bIsNum) return -1;
+      if(!aIsNum && bIsNum) return 1;
+      return ak.localeCompare(bk);
+    });
+
+    return rows;
   }
-
-  const rows = (data || []).map(r => ({
-    key: String(r.plan_key ?? r.id).trim(),
-    label: (r.plan_label || r.plan_name || r.plan_key || ("Plan " + r.id)).toString(),
-    price: Number(r.price || 0)
-  }));
-
-  // ✅ ترتيب حسب plan_key (أرقام أول شي 1,2,3,10 وبعدها النصوص)
-  rows.sort((a,b)=>{
-    const ak = a.key.toLowerCase();
-    const bk = b.key.toLowerCase();
-
-    const an = Number(ak);
-    const bn = Number(bk);
-
-    const aIsNum = ak !== "" && Number.isFinite(an);
-    const bIsNum = bk !== "" && Number.isFinite(bn);
-
-    if(aIsNum && bIsNum) return an - bn;   // 1,2,3,10
-    if(aIsNum && !bIsNum) return -1;
-    if(!aIsNum && bIsNum) return 1;
-
-    return ak.localeCompare(bk);           // vip, 1m, 2y...
-  });
-
-  return rows;
-}
-  
 
   function renderFeatures(features){
     featsEl.innerHTML = (features || [])
@@ -709,38 +688,36 @@
     let needWhats= !!currentProduct.require_whatsapp;
     let needBackup = !!currentProduct.require_backup_codes;
     let needAcc = !!currentProduct.require_account_details;
-
-    let needDevice = false; // ✅ Netflix only
+    let needDevice = false;
 
     const planText = ((selectedPlan?.label || selectedPlan?.key || "") + "").toLowerCase();
     const titleText = (currentProduct.title || "").toLowerCase();
 
-    if(titleText.includes("shahid") && planText.includes("direct")){
-      needEmail = true; needPass = true;
+    // ✅✅✅ NEW RULE: If plan has "direct", REQUIRE Email & Password (Overrides defaults) ✅✅✅
+    if(planText.includes("direct")){
+      needEmail = true;
+      needPass = true;
     }
 
+    // Specific Overrides
     if(titleText.includes("chatgpt") && planText.includes("private")){
       needEmail = true; needPass = false;
     }
-
-    // ✅ Netflix: TV/Mobile required
     if(titleText.includes("netflix")){
       needDevice = true;
     }
-
-    // ✅ Tango: ID required (حسب طلبك)
     if(titleText.includes("tango")){
       needId = true;
     }
 
-    // ✅ TikTok: يا اما Phone لوحده (بدون Password) يا اما Email + Password
+    // TikTok Override
     if(titleText.includes("tiktok")){
-      // خليهن ينعرضوا الاثنين، والتحقق النهائي بالـ buyProduct
       needEmail = true;
       needPhone = true;
-
-      // لا تفرض Password من الداتا (لأنو Phone ما بدو Password)
-      needPass = false;
+      // If NOT direct, hide password by default (toggle logic)
+      if(!planText.includes("direct")){
+        needPass = false; 
+      }
     }
 
     if(needId || needZone || needName || needEmail || needDevice || needPhone || needWhats || needUser || needPass || needBackup || needAcc){
@@ -758,36 +735,27 @@
       if(needAcc) fAcc.style.display = "block";
     }
 
-    // ✅ TikTok: إظهار Password فقط إذا المستخدم كتب Email
-    if(titleText.includes("tiktok")){
+    // TikTok Email-Password Toggle logic
+    if(titleText.includes("tiktok") && !planText.includes("direct")){
       const emailInput = document.getElementById("input-email");
       const passWrap = document.getElementById("field-pass");
       const passInput = document.getElementById("input-pass");
 
-      // ابدأ مخفي
-      if(passWrap){
-        passWrap.style.display = "none";
-      }
+      if(passWrap) passWrap.style.display = "none";
 
-      // attach once
       if(emailInput && passWrap && passInput && !tiktokEmailToggleAttached){
         tiktokEmailToggleAttached = true;
         emailInput.addEventListener("input", ()=>{
           const v = (emailInput.value || "").trim();
-          if(v){
-            passWrap.style.display = "block";
-          }else{
+          if(v) passWrap.style.display = "block";
+          else {
             passWrap.style.display = "none";
             passInput.value = "";
           }
         });
       }
-
-      // إذا أصلاً في email موجود (مثلاً رجع المستخدم) خلّي password يطلع
       const v0 = (emailInput?.value || "").trim();
-      if(v0 && passWrap){
-        passWrap.style.display = "block";
-      }
+      if(v0 && passWrap) passWrap.style.display = "block";
     }
   }
 
@@ -893,15 +861,9 @@
       .order("created_at", {ascending:false})
       .limit(8);
 
-    if(error){
-      ordersMenu.innerHTML = `<div style="opacity:.7;padding:10px">Error</div>`;
-      return;
-    }
+    if(error){ ordersMenu.innerHTML = `<div style="opacity:.7;padding:10px">Error</div>`; return; }
 
-    if(!data || !data.length){
-      ordersMenu.innerHTML = `<div style="opacity:.7;padding:10px">No orders</div>`;
-      return;
-    }
+    if(!data || !data.length){ ordersMenu.innerHTML = `<div style="opacity:.7;padding:10px">No orders</div>`; return; }
 
     ordersMenu.innerHTML = data.map(o=>{
       const d = (o.delivery_status || "pending").toLowerCase();
@@ -938,10 +900,7 @@
   }
 
   async function buyProduct(){
-    if(!selectedPlan){
-      await showNotice("Select a plan first", "Notice");
-      return;
-    }
+    if(!selectedPlan){ await showNotice("Select a plan first", "Notice"); return; }
 
     const pId = document.getElementById("input-player-id").value.trim();
     const zId = document.getElementById("input-zone-id").value.trim();
@@ -963,35 +922,26 @@
     if(isVisible("field-device-type") && !pDevice){ await showNotice("Please select TV or Mobile", "Notice"); return; }
     if(isVisible("field-username") && !pUser){ await showNotice("Username is required", "Notice"); return; }
     if(isVisible("field-whatsapp") && !pWhats){ await showNotice("WhatsApp number is required", "Notice"); return; }
-
-    // ✅ لا تعمل check عام على password قبل TikTok logic
-    const titleText = (currentProduct.title || "").toLowerCase();
-    if(!titleText.includes("tiktok")){
-      if(isVisible("field-pass") && !pPass){ await showNotice("Password is required", "Notice"); return; }
-    }
-
     if(isVisible("field-backup") && !pBackup){ await showNotice("Backup codes are required", "Notice"); return; }
     if(isVisible("field-account-details") && !pAcc){ await showNotice("Account details are required", "Notice"); return; }
 
-    // ✅ TikTok: يا اما Phone بدون Password - يا اما Email + Password
+    const titleText = (currentProduct.title || "").toLowerCase();
+    
+    // TikTok special validation
     if(titleText.includes("tiktok")){
       const emailShown = isVisible("field-email");
       const phoneShown = isVisible("field-phone");
-
-      // لازم واحد منهم
       if((emailShown || phoneShown) && (!pEmail && !pPhone)){
-        await showNotice("Enter Email or Phone number", "Notice");
-        return;
+        await showNotice("Enter Email or Phone number", "Notice"); return;
       }
-
-      // إذا اختار Email → لازم Password
-      if(pEmail && !pPass){
-        await showNotice("Password is required when using Email", "Notice");
-        return;
+      if(pEmail && isVisible("field-pass") && !pPass){
+        await showNotice("Password is required when using Email", "Notice"); return;
       }
     } else {
+      // Standard validation
       if(isVisible("field-email") && !pEmail){ await showNotice("Email is required", "Notice"); return; }
       if(isVisible("field-phone") && !pPhone){ await showNotice("Phone number is required", "Notice"); return; }
+      if(isVisible("field-pass") && !pPass){ await showNotice("Password is required", "Notice"); return; }
     }
 
     const ok = await showConfirm("Proceed with purchase? Balance will be deducted.", "Confirm Order");
@@ -1045,28 +995,24 @@
   }
 
   buyBtn.onclick = buyProduct;
+
   async function loadProduct(id){
-  const { data: product, error: e1 } = await sb
-    .from("products")
-    .select("*")
-    .eq("id", id)
-    .single();
+    const { data: product, error: e1 } = await sb
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if(e1) throw e1;
 
-  if(e1) throw e1;
+    const { data: features, error: e2 } = await sb
+      .from("product_features")
+      .select("*")
+      .eq("product_id", id)
+      .order("sort", { ascending: true });
+    if(e2) throw e2;
 
-  const { data: features, error: e2 } = await sb
-    .from("product_features")
-    .select("*")
-    .eq("product_id", id)
-    .order("sort", { ascending: true });
-
-  if(e2) throw e2;
-
-  return {
-    product,
-    features: features || []
-  };
-}
+    return { product, features: features || [] };
+  }
 
   (async function init(){
     const id = getId();
@@ -1074,12 +1020,9 @@
     try{
       const { product, features } = await loadProduct(id);
       renderProduct(product, features);
-
       const plans = await loadPlans(product.id);
       renderPlans(plans);
-
       subscribePlansRealtime(product.id);
-
     }catch(err){
       titleEl.textContent = "Error";
       await showNotice(err?.message || String(err), "Error");
