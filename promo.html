@@ -3,24 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster Maker v5.0 🚀</title>
+    <title>Baroud Poster Maker Final 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
-        /* إعدادات الصفحة */
         body {
             background: #e0e0e0; 
             font-family: 'Poppins', sans-serif;
             margin: 0; padding: 20px; 
             text-align: center;
             display: flex; flex-direction: column; align-items: center;
-        }
-
-        .version-tag {
-            background: #000; color: #00ffea; padding: 5px 10px;
-            border-radius: 20px; font-size: 0.8em; margin-bottom: 10px;
-            border: 1px solid #00ffea; font-weight: bold;
+            /* مهم جداً: إخفاء أي زيادة */
+            overflow-x: hidden; 
         }
 
         /* --- لوحة التحكم --- */
@@ -28,6 +23,7 @@
             background: #fff; padding: 20px; border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             width: 100%; max-width: 350px; margin-bottom: 30px;
+            transition: opacity 0.3s;
         }
         .controls h3 { margin: 0 0 10px 0; color: #333; text-align: center; }
         
@@ -116,9 +112,7 @@
 </head>
 <body>
 
-    <div class="version-tag">Ver 5.0 (Ultimate Fix)</div>
-
-    <div class="controls">
+    <div class="controls" id="control-panel">
         <h3>🎨 Poster Maker</h3>
         <label for="img-upload" class="file-upload-btn">📂 Open Gallery</label>
         <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
@@ -188,68 +182,55 @@
         document.getElementById('p-badge').innerText = badge;
     }
 
-    // 🔥 دالة التحميل الخامسة (عزل تام) 🔥
+    // 🔥 وضع العزل التام (The Final Solution) 🔥
     function downloadPoster() {
         const btn = document.querySelector('.save-btn');
+        const controls = document.getElementById('control-panel');
+        const card = document.getElementById('capture-area');
+        
         const originalText = btn.innerText;
-        btn.innerText = "⏳ Saving..."; 
-
-        const original = document.getElementById('capture-area');
+        btn.innerText = "Processing...";
         
-        // 1. إنشاء حاوية عزل (Isolation Container)
-        // بنحطها بأعلى الصفحة عاليسار (0,0) وبنعطيها حجم ثابت
-        const container = document.createElement('div');
-        container.style.position = 'absolute';
-        container.style.top = '0';
-        container.style.left = '0';
-        container.style.width = '360px';
-        container.style.height = '640px';
-        container.style.zIndex = '-9999'; // تحت كل شي
-        container.style.overflow = 'hidden';
-        container.style.padding = '0';
-        container.style.margin = '0';
+        // 1. اخفاء لوحة التحكم وتغيير خلفية الجسم للسواد
+        controls.style.display = 'none';
+        document.body.style.background = '#000'; // خلفية سوداء بدل الأزرق
         
-        document.body.appendChild(container);
-
-        // 2. نسخ الكرت
-        const clone = original.cloneNode(true);
-        // تصفير كل المسافات للنسخة
-        clone.style.margin = '0';
-        clone.style.transform = 'none';
-        clone.style.borderRadius = '0'; 
-        clone.style.width = '100%';
-        clone.style.height = '100%';
-        clone.style.boxShadow = 'none'; // عشان ما يطلع خيال مقصوص
-
-        container.appendChild(clone);
-
-        // 3. التصوير
-        html2canvas(container, {
-            scale: 2, 
-            useCORS: true,
-            backgroundColor: null,
-            // هول الإعدادات هنن السر:
-            width: 360,
-            height: 640,
-            windowWidth: 360,
-            windowHeight: 640,
-            x: 0,
-            y: 0,
-            scrollX: 0,
-            scrollY: 0
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'baroud-poster.png';
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-            
-            document.body.removeChild(container);
-            btn.innerText = originalText;
-        }).catch(err => {
-            alert("Error: " + err);
-            if(document.body.contains(container)) document.body.removeChild(container);
-            btn.innerText = originalText;
-        });
+        // 2. تجميد الكرت بأعلى الصفحة (منع السكرول)
+        window.scrollTo(0, 0);
+        card.style.transform = 'scale(1)'; // رجعه للحجم الطبيعي اذا كان مصغر
+        card.style.margin = '0';
+        
+        // انتظار بسيط ليتأكد المتصفح من التغييرات
+        setTimeout(() => {
+            html2canvas(card, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#000000', // اجبار خلفية سوداء
+                width: 360,
+                height: 640,
+                scrollY: 0,
+                scrollX: 0
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'baroud-poster.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                
+                // 3. إعادة كل شيء كما كان
+                controls.style.display = 'block';
+                document.body.style.background = '#e0e0e0';
+                card.style.margin = 'auto'; // توسيط
+                // اعادة ستايل الموبايل
+                if(window.innerWidth <= 380) card.style.transform = 'scale(0.85)';
+                
+                btn.innerText = originalText;
+            }).catch(err => {
+                alert("Error: " + err);
+                controls.style.display = 'block';
+                document.body.style.background = '#e0e0e0';
+                btn.innerText = originalText;
+            });
+        }, 100);
     }
 </script>
 
