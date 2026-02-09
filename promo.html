@@ -3,161 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Promo Generator 🛒</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Tajawal:wght@500;800&display=swap" rel="stylesheet">
+    <title>Baroud Pro Generator 💎</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;700;900&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #111;
+            background: #050505;
             color: #fff;
-            font-family: 'Tajawal', sans-serif;
+            font-family: 'Cairo', sans-serif;
             margin: 0; padding: 10px;
             text-align: center;
         }
 
-        /* --- لوحة التحكم (لتكتب المعلومات) --- */
+        /* --- لوحة التحكم --- */
         .controls {
-            background: #222; padding: 15px; border-radius: 15px;
-            margin-bottom: 20px; border: 1px solid #444; text-align: right;
+            background: #111; padding: 15px; border-radius: 12px;
+            margin-bottom: 25px; border: 1px solid #333; text-align: right;
+            max-width: 400px; margin-left: auto; margin-right: auto;
         }
-        .controls h3 { text-align: center; color: #00ffea; margin-top: 0; }
+        .controls h3 { text-align: center; color: #00f3ff; margin-top: 0; font-size: 1em; text-transform: uppercase; letter-spacing: 2px; }
         input, select {
-            width: 100%; padding: 10px; margin: 5px 0;
-            background: #000; border: 1px solid #555;
+            width: 100%; padding: 12px; margin: 6px 0;
+            background: #000; border: 1px solid #444;
             color: #fff; text-align: center; border-radius: 8px;
-            box-sizing: border-box; font-size: 1em;
+            font-family: 'Cairo'; font-size: 0.9em; outline: none;
+        }
+        input:focus { border-color: #00f3ff; }
+
+        /* --- الكرت الاحترافي (النتيجة) --- */
+        .promo-container {
+            width: 100%;
+            display: flex; justify-content: center;
         }
 
-        /* --- كرت الدعاية (النتيجة) --- */
         .promo-card {
-            width: 100%;
-            max-width: 360px;   /* عرض الموبايل */
-            height: 640px;      /* طول الستوري (9:16) */
-            background: linear-gradient(160deg, #0a0a0a 0%, #1a1a1a 100%);
+            width: 360px;
+            height: 640px; /* حجم ستوري 9:16 */
+            background: radial-gradient(circle at top, #1a1a2e 0%, #000000 100%);
             border: 2px solid #333;
-            border-radius: 20px;
-            margin: auto;
+            border-radius: 25px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
             padding: 30px 20px; box-sizing: border-box;
+            text-align: center;
         }
 
-        /* خلفية نيون خفيفة */
-        .glow-bg {
-            position: absolute; top: -10%; left: -10%; width: 120%; height: 60%;
-            background: radial-gradient(circle, rgba(0,255,234,0.15) 0%, transparent 70%);
+        /* خلفية الشبكة (Grid Effect) */
+        .grid-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
             z-index: 0;
+            opacity: 0.5;
         }
 
-        /* رأس الصفحة */
-        .header { z-index: 2; text-align: center; width: 100%; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .app-name { font-family: 'Orbitron'; font-size: 1.8em; color: #fff; letter-spacing: 2px; margin: 0; }
-        .sub-text { font-size: 0.8em; color: #888; letter-spacing: 4px; text-transform: uppercase; }
+        /* الهيدر */
+        .header { z-index: 2; margin-bottom: 10px; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .brand { 
+            font-family: 'Rajdhani', sans-serif; font-size: 2.2em; 
+            color: #fff; text-transform: uppercase; margin: 0; 
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.5); letter-spacing: 2px;
+        }
+        .tagline { color: #888; font-size: 0.75em; letter-spacing: 4px; text-transform: uppercase; font-weight: bold; margin-top: -5px; }
 
-        /* صورة الخدمة */
-        .img-box {
+        /* صورة المنتج */
+        .img-wrapper {
             z-index: 2;
-            width: 220px; height: 220px;
-            background: #000;
-            border-radius: 30px;
-            border: 3px solid #00ffea;
-            box-shadow: 0 0 25px rgba(0, 255, 234, 0.3);
+            width: 240px; height: 240px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-top: 10px;
+        }
+        .img-box {
+            width: 100%; height: 100%;
+            border-radius: 15px;
             overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
             position: relative;
         }
         #p-img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* العلامة المميزة (التاج) */
+        /* شارة التميز (Badge) */
         .badge {
-            position: absolute; bottom: -15px; background: #00ffea; color: #000;
-            padding: 5px 20px; border-radius: 20px; font-weight: bold; font-family: 'Orbitron';
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 0.9em;
+            position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(90deg, #00f3ff, #0066ff);
+            color: #000; padding: 6px 20px; border-radius: 50px;
+            font-weight: 900; font-size: 0.85em; z-index: 3;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+            white-space: nowrap; font-family: 'Rajdhani', 'Cairo'; text-transform: uppercase;
         }
 
-        /* تفاصيل العرض */
-        .info { z-index: 2; text-align: center; margin-top: 10px; }
-        #p-title { font-size: 2em; font-weight: 800; margin: 0; color: #fff; line-height: 1.2; }
-        #p-desc { color: #aaa; margin: 5px 0; font-size: 1em; }
+        /* المعلومات */
+        .info { z-index: 2; width: 100%; margin-top: 20px; }
+        #p-title {
+            font-size: 2em; font-weight: 900; color: #fff; margin: 0;
+            line-height: 1.2; text-shadow: 0 5px 10px rgba(0,0,0,0.8);
+        }
+        #p-desc {
+            color: #aaa; font-size: 0.95em; margin: 8px 0 0 0; font-weight: 300;
+        }
 
         /* السعر */
-        .price-tag {
+        .price-container {
             z-index: 2;
-            font-family: 'Orbitron'; font-size: 3.5em; color: #00ffea;
-            text-shadow: 0 0 20px rgba(0, 255, 234, 0.6);
-            margin: 10px 0; font-weight: bold;
+            background: rgba(0, 243, 255, 0.05);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 10px 40px; border-radius: 15px;
+            margin: 15px 0;
+        }
+        #p-price {
+            font-family: 'Rajdhani', sans-serif; font-size: 3.5em; font-weight: 700;
+            color: #00f3ff; margin: 0; line-height: 1;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
         }
 
-        /* الفوتر (رقمك) */
+        /* الفوتر */
         .footer {
             z-index: 2; width: 100%;
-            background: #222; padding: 12px; border-radius: 15px;
-            display: flex; justify-content: center; align-items: center; gap: 10px;
-            border: 1px solid #444;
+            background: #111; padding: 12px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #333;
         }
-        .whatsapp-btn { background: #25d366; color: #fff; padding: 5px 12px; border-radius: 50px; font-weight: bold; font-size: 0.9em; }
-        .number { font-family: 'Orbitron'; font-size: 1.2em; letter-spacing: 1px; color: #fff; }
+        .whatsapp {
+            background: #25d366; color: #fff; padding: 6px 15px; border-radius: 6px;
+            font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;
+        }
+        .number {
+            font-family: 'Rajdhani', sans-serif; font-size: 1.4em; color: #fff; font-weight: bold; letter-spacing: 1px;
+        }
 
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h3>🛠️ مصنع إعلانات الخدمات</h3>
-        
-        <input type="text" id="in-img" placeholder="رابط صورة الخدمة (Netflix, PUBG...)" oninput="update()">
-        
-        <input type="text" id="in-title" placeholder="اسم الخدمة (مثلاً: Netflix 4K)" oninput="update()">
-        
-        <input type="text" id="in-desc" placeholder="وصف صغير (مثلاً: اشتراك شهر كامل - ضمان)" oninput="update()">
-        
-        <input type="text" id="in-price" placeholder="السعر ($)" oninput="update()">
-        
+        <h3>⚡ التحكم بالتصميم</h3>
+        <input type="text" id="in-img" placeholder="رابط الصورة" oninput="update()">
+        <input type="text" id="in-title" placeholder="اسم الخدمة (Netflix 4K)" oninput="update()">
+        <input type="text" id="in-desc" placeholder="الوصف (تسليم فوري - كفالة)" oninput="update()">
+        <input type="text" id="in-price" placeholder="السعر (مثلاً: 5)" oninput="update()">
         <select id="in-badge" onchange="update()">
-            <option value="PREMIUM">PREMIUM ⭐</option>
-            <option value="BEST SELLER">BEST SELLER 🔥</option>
-            <option value="INSTANT DELIVERY">تسليم فوري ⚡</option>
-            <option value="WARRANTY">كفالة كاملة 🛡️</option>
+            <option value="PREMIUM QUALITY">⭐ PREMIUM QUALITY</option>
+            <option value="BEST SELLER">🔥 BEST SELLER</option>
+            <option value="INSTANT DELIVERY">⚡ تسليم فوري</option>
+            <option value="WARRANTY INCLUDED">🛡️ كفالة كاملة</option>
         </select>
     </div>
 
-    <div class="promo-card">
-        <div class="glow-bg"></div>
+    <div class="promo-container">
+        <div class="promo-card">
+            <div class="grid-bg"></div>
 
-        <div class="header">
-            <h1 class="app-name">BAROUD <span style="color:#00ffea">APP</span></h1>
-            <div class="sub-text">DIGITAL STORE SERVICES</div>
-        </div>
+            <div class="header">
+                <h1 class="brand">BAROUD <span style="color:#00f3ff">APP</span></h1>
+                <div class="tagline">Digital Store Services 🇱🇧</div>
+            </div>
 
-        <div class="img-box">
-            <img id="p-img" src="https://via.placeholder.com/300?text=Service" alt="Service">
-            <div class="badge" id="p-badge">PREMIUM ⭐</div>
-        </div>
+            <div class="img-wrapper">
+                <div class="img-box">
+                    <img id="p-img" src="https://cdn-icons-png.flaticon.com/512/808/808439.png" alt="Service">
+                </div>
+                <div class="badge" id="p-badge">PREMIUM QUALITY</div>
+            </div>
 
-        <div class="info">
-            <h2 id="p-title">اسم الخدمة</h2>
-            <p id="p-desc">وصف الخدمة هنا</p>
-        </div>
+            <div class="info">
+                <h2 id="p-title">اسم الخدمة</h2>
+                <p id="p-desc">اكتب وصف الخدمة في الخانة أعلاه</p>
+            </div>
 
-        <div class="price-tag" id="p-price">$0</div>
+            <div class="price-container">
+                <div id="p-price">$0</div>
+            </div>
 
-        <div class="footer">
-            <div class="whatsapp-btn">ORDER NOW</div>
-            <div class="number">70 385 398</div>
+            <div class="footer">
+                <div class="whatsapp">🟢 ORDER NOW</div>
+                <div class="number">70 385 398</div>
+            </div>
         </div>
     </div>
 
 <script>
     function update() {
-        // جيب المعلومات
         const img = document.getElementById('in-img').value;
         const title = document.getElementById('in-title').value;
         const desc = document.getElementById('in-desc').value;
         const price = document.getElementById('in-price').value;
         const badge = document.getElementById('in-badge').value;
 
-        // عبيهم بالكرت
         if(img) document.getElementById('p-img').src = img;
         if(title) document.getElementById('p-title').innerText = title;
         if(desc) document.getElementById('p-desc').innerText = desc;
