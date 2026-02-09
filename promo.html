@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster Maker V7 🚀</title>
+    <title>Baroud Poster Maker V8 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
         /* إعدادات الصفحة */
         body {
-            background: #121212; /* خلفية داكنة لراحة العين */
+            background: #121212; 
             font-family: 'Poppins', sans-serif;
             margin: 0; padding: 20px; 
             display: flex; flex-direction: column; align-items: center;
             color: #fff;
+            overflow-x: hidden;
         }
 
         .version-tag {
-            background: #00ffea; color: #000; padding: 5px 15px;
+            background: #00d26a; color: #fff; padding: 5px 15px;
             border-radius: 20px; font-size: 0.8em; margin-bottom: 15px;
-            font-weight: bold;
+            font-weight: bold; border: 1px solid #fff;
         }
 
         /* --- لوحة التحكم --- */
@@ -34,11 +35,9 @@
             width: 100%; padding: 12px; margin: 8px 0;
             background: #2a2a2a; border: 1px solid #444;
             color: #fff; text-align: center; border-radius: 10px;
-            font-family: 'Poppins'; outline: none; font-weight: bold;
-            font-size: 0.9em;
+            font-family: 'Poppins'; outline: none; font-weight: bold; font-size: 0.9em;
         }
-        
-        /* عناوين الحقول */
+
         .input-label { font-size: 0.8em; color: #aaa; margin-bottom: -5px; display: block; text-align: left; margin-left: 5px; }
 
         .file-upload-btn {
@@ -57,7 +56,8 @@
 
         input[type="file"] { display: none; }
 
-        /* --- ستايل الكرت --- */
+        /* --- تصميم الكرت --- */
+        /* ملاحظة: هيدا الستايل رح يستعمله الكود ليبني الكرت الجديد */
         .poster-card {
             width: 360px; height: 640px;
             background: #000; border-radius: 30px;
@@ -70,14 +70,16 @@
             user-select: none;
         }
 
-        /* تصغير للمعاينة فقط */
+        /* تنسيق خاص للمعينة فقط (عشان تبين صح عالموبايل) */
         #preview-wrapper .poster-card {
+            /* تصغير للمعاينة فقط */
             transform: scale(0.85);
             transform-origin: top center;
             margin-bottom: -80px;
             border: 1px solid #333;
         }
 
+        /* --- باقي تفاصيل التصميم (مشتركة) --- */
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
         .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.15); filter: blur(80px); z-index: 1; }
 
@@ -121,11 +123,27 @@
         .footer-number { color: #666; font-size: 0.9em; letter-spacing: 2px; font-weight: 600; }
         .footer-link { color: #00ffea; font-size: 0.7em; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; text-decoration: none; }
 
+        /* ستايل خاص لمنطقة التصدير المخفية */
+        #render-zone {
+            position: fixed; top: 0; left: 0;
+            width: 360px; height: 640px;
+            z-index: -9999;
+            opacity: 0; /* مخفي عن العين */
+            pointer-events: none;
+        }
+        /* إجبار الكرت بداخل منطقة التصدير على الحجم الكامل */
+        #render-zone .poster-card {
+            transform: none !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="version-tag">Ver 7.0 (Full Screen Fix)</div>
+    <div class="version-tag">Ver 8.0 (No-Crop Guarantee)</div>
 
     <div class="controls">
         <label for="img-upload" class="file-upload-btn">📂 اختر صورة من الاستديو</label>
@@ -230,62 +248,78 @@
         document.getElementById('view-badge').innerText = currentData.badge;
     }
 
-    // 🔥 دالة التحميل النهائية (Overlay Mode) 🔥
+    // 🔥 دالة التحميل النهائية (Re-Build Strategy) 🔥
     function downloadPoster() {
         const btn = document.querySelector('.save-btn');
-        btn.innerText = "⏳ يرجى الانتظار...";
+        btn.innerText = "⏳ Generating...";
 
-        // 1. إنشاء شاشة سوداء كاملة تغطي الموقع (Overlay)
-        const overlay = document.createElement('div');
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100vw'; // عرض الشاشة كامل
-        overlay.style.height = '100vh'; // طول الشاشة كامل
-        overlay.style.backgroundColor = '#000'; // خلفية سوداء
-        overlay.style.zIndex = '99999'; // فوق كل شي
-        overlay.style.display = 'flex';
-        overlay.style.justifyContent = 'center';
-        overlay.style.alignItems = 'center'; // توسيط الكرت
-        
-        document.body.appendChild(overlay);
+        // 1. إنشاء منطقة تصدير مخفية
+        const renderZone = document.createElement('div');
+        renderZone.id = 'render-zone';
+        document.body.appendChild(renderZone);
 
-        // 2. إنشاء نسخة عن الكرت
-        const original = document.querySelector('#preview-wrapper .poster-card');
-        const clone = original.cloneNode(true);
-        
-        // إعادة ضبط ستايل النسخة لتكون بحجمها الطبيعي
-        clone.style.transform = 'none';
-        clone.style.margin = '0';
-        clone.style.width = '360px';
-        clone.style.height = '640px';
-        clone.style.borderRadius = '0'; // إلغاء التدوير لضمان الحواف
-        
-        overlay.appendChild(clone);
+        // 2. بناء كرت جديد بداخلها (HTML نقي)
+        // بنحط القيم مباشرة بالكود عشان نضمن انها صح
+        renderZone.innerHTML = `
+            <div class="poster-card">
+                <div class="bg-gradient"></div>
+                <div class="bg-glow"></div>
+                <div class="header">
+                    <div class="brand-title">BAROUD <span style="color:#00ffea">APP</span></div>
+                    <div class="brand-subtitle">Digital Store Services</div>
+                </div>
+                <div class="image-area">
+                    <div class="status-badge">${currentData.badge}</div>
+                    <img class="p-img" src="${currentData.img}" style="object-fit:cover;">
+                </div>
+                <div class="content">
+                    <div class="p-title">${currentData.title}</div>
+                    <div class="p-desc">${currentData.desc}</div>
+                </div>
+                <div class="bottom-section">
+                    <div class="action-btn"><span class="whatsapp-icon"></span> ORDER</div>
+                    <div class="price-box">
+                        <span class="price-label">PRICE</span>
+                        <div class="p-price">${currentData.price}</div>
+                    </div>
+                </div>
+                <div class="footer-area">
+                    <div class="footer-number">+961 70 385 398</div>
+                    <div class="footer-link">WWW.BAROUDAPP.COM</div>
+                </div>
+            </div>
+        `;
 
-        // 3. الانتظار قليلاً ليقوم المتصفح برسم الكرت، ثم التصوير
+        // 3. التصوير
+        // تأخير بسيط جداً للتأكد من تحميل الصورة بقلب الكود الجديد
         setTimeout(() => {
-            html2canvas(clone, {
-                scale: 2, // دقة عالية
+            html2canvas(renderZone, {
+                scale: 3, // دقة عالية جداً
                 useCORS: true,
                 backgroundColor: '#000000',
                 width: 360,
-                height: 640
+                height: 640,
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: 360,
+                windowHeight: 640,
+                x: 0,
+                y: 0
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Baroud-${currentData.title}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
 
-                // تنظيف وإغلاق
-                document.body.removeChild(overlay);
+                // تنظيف
+                document.body.removeChild(renderZone);
                 btn.innerText = "SAVE IMAGE 📥";
             }).catch(err => {
                 alert("Error: " + err);
-                if(document.body.contains(overlay)) document.body.removeChild(overlay);
+                if(document.body.contains(renderZone)) document.body.removeChild(renderZone);
                 btn.innerText = "SAVE IMAGE 📥";
             });
-        }, 500); // انتظار نصف ثانية (مهم جداً للموبايل)
+        }, 100);
     }
 </script>
 
