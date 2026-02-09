@@ -32,16 +32,12 @@
             font-family: 'Poppins'; outline: none; font-weight: bold;
         }
 
-        /* أزرار التحكم */
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        
         .file-upload-btn {
             background: #333; color: #fff; padding: 12px; border-radius: 8px;
             text-align: center; cursor: pointer; display: block; margin: 5px 0;
             font-weight: bold; font-size: 0.9em; width: 100%;
         }
         
-        /* زر التحميل الجديد */
         .save-btn {
             background: #00d26a; color: #fff; padding: 15px; border-radius: 8px;
             text-align: center; cursor: pointer; display: block; margin-top: 15px;
@@ -60,14 +56,13 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             display: flex; flex-direction: column;
             text-align: center; color: #fff;
-            /* مهم جداً للتحميل */
-            transform: translateZ(0);
+            /* هيدا السطر كان يعمل المشكلة، شلناه */
+            /* transform: translateZ(0); */
         }
 
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
         .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.25); filter: blur(80px); z-index: 1; }
 
-        /* الهيدر */
         .header { z-index: 5; margin-top: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .brand-title { 
             font-family: 'Poppins'; font-weight: 900; font-size: 1.8em; 
@@ -75,7 +70,6 @@
         }
         .brand-subtitle { font-size: 0.7em; color: #888; letter-spacing: 3px; margin-top: 5px; text-transform: uppercase; }
 
-        /* الصورة */
         .image-area {
             z-index: 5; margin: 20px auto; width: 300px; height: 300px;
             border-radius: 25px; background: rgba(255,255,255,0.05);
@@ -93,7 +87,6 @@
             text-transform: uppercase;
         }
 
-        /* المحتوى */
         .content { z-index: 5; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
         #p-title { 
             font-family: 'Poppins'; font-weight: 800; font-size: 2em; margin: 0; line-height: 1.2; 
@@ -101,7 +94,6 @@
         }
         #p-desc { color: #888; font-size: 0.9em; margin-top: 8px; font-weight: 400; }
 
-        /* الشريط السفلي */
         .bottom-section {
             z-index: 5; background: #1a1a1a; margin: 15px; padding: 12px 20px;
             border-radius: 18px; display: flex; justify-content: space-between; align-items: center;
@@ -114,7 +106,6 @@
         .action-btn { background: #fff; color: #000; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
         .whatsapp-icon { width: 8px; height: 8px; background: #00d26a; border-radius: 50%; display: inline-block; }
 
-        /* الفوتر */
         .footer-area { z-index: 5; margin-bottom: 25px; display: flex; flex-direction: column; gap: 5px; }
         .footer-number { color: #888; font-size: 0.9em; letter-spacing: 1px; font-weight: 600; }
         .footer-link { color: #00ffea; font-size: 0.8em; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; text-decoration: none; }
@@ -206,28 +197,54 @@
         document.getElementById('p-badge').innerText = badge;
     }
 
-    // دالة التحميل السحرية
+    // 🔥 دالة التحميل الجديدة والمحسنة 🔥
     function downloadPoster() {
         const btn = document.querySelector('.save-btn');
-        btn.innerText = "Processing..."; // تغيير النص ليعرف المستخدم إنو عم يحمل
-        
-        const element = document.getElementById('capture-area');
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ Processing..."; 
 
-        html2canvas(element, {
-            scale: 3, // دقة عالية جداً
-            useCORS: true, // عشان الصور الخارجية
-            backgroundColor: null
+        const original = document.getElementById('capture-area');
+        
+        // 1. نعمل نسخة طبق الأصل (Clone)
+        const clone = original.cloneNode(true);
+        
+        // 2. بنحط النسخة بمكان ثابت ومخفي عالشاشة
+        clone.style.position = "absolute";
+        clone.style.top = "0";
+        clone.style.left = "0";
+        clone.style.zIndex = "-9999";
+        // بنجبر النسخة تكون بالحجم الصحيح
+        clone.style.width = "360px";
+        clone.style.height = "640px";
+        clone.style.transform = "none"; // لغاء أي تأثيرات
+        
+        document.body.appendChild(clone);
+
+        // 3. بنصور النسخة المثالية
+        html2canvas(clone, {
+            scale: 3, // دقة عالية
+            useCORS: true, 
+            backgroundColor: null,
+            width: 360,
+            height: 640,
+            windowWidth: 360,
+            windowHeight: 640,
+            scrollX: 0,
+            scrollY: 0
         }).then(canvas => {
-            // تحويل الكانفس لرابط صورة
+            // تحميل الصورة
             const link = document.createElement('a');
             link.download = 'baroud-poster.png';
             link.href = canvas.toDataURL("image/png");
             link.click();
             
-            btn.innerText = "SAVE IMAGE 📥"; // رجع النص
+            // تنظيف
+            document.body.removeChild(clone);
+            btn.innerText = originalText;
         }).catch(err => {
-            alert("Error saving image. Try uploading the image instead of pasting a URL.");
-            btn.innerText = "SAVE IMAGE 📥";
+            alert("Error: " + err);
+            if(document.body.contains(clone)) document.body.removeChild(clone);
+            btn.innerText = originalText;
         });
     }
 </script>
