@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Ad Generator 📸</title>
+    <title>Baroud Promo Generator 🛒</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Tajawal:wght@500;800&display=swap" rel="stylesheet">
     <style>
         body {
@@ -14,152 +14,155 @@
             text-align: center;
         }
 
-        /* --- 1. قسم التحكم (فوق) --- */
+        /* --- لوحة التحكم (لتكتب المعلومات) --- */
         .controls {
-            background: #222;
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #444;
+            background: #222; padding: 15px; border-radius: 15px;
+            margin-bottom: 20px; border: 1px solid #444; text-align: right;
         }
-        input {
+        .controls h3 { text-align: center; color: #00ffea; margin-top: 0; }
+        input, select {
             width: 100%; padding: 10px; margin: 5px 0;
             background: #000; border: 1px solid #555;
-            color: #fff; text-align: center; border-radius: 5px;
-            box-sizing: border-box;
+            color: #fff; text-align: center; border-radius: 8px;
+            box-sizing: border-box; font-size: 1em;
         }
-        h3 { margin: 0 0 10px 0; color: #aaa; font-size: 0.9em; }
 
-        /* --- 2. قسم البوستر (النتيجة) --- */
-        /* هيدا المربع اللي رح تعملو سكرين شوت */
-        .ad-card {
+        /* --- كرت الدعاية (النتيجة) --- */
+        .promo-card {
             width: 100%;
-            max-width: 380px; /* حجم مناسب للموبايل */
-            height: 600px;    /* طول مناسب للستوري */
-            background: linear-gradient(180deg, #050505 0%, #1a1a1a 100%);
-            border: 4px solid #00ffea;
+            max-width: 360px;   /* عرض الموبايل */
+            height: 640px;      /* طول الستوري (9:16) */
+            background: linear-gradient(160deg, #0a0a0a 0%, #1a1a1a 100%);
+            border: 2px solid #333;
             border-radius: 20px;
             margin: auto;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(0, 255, 234, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 0;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 30px 20px; box-sizing: border-box;
         }
 
-        /* تأثيرات الخلفية */
-        .ad-bg-effect {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(circle at 50% 20%, rgba(0, 255, 234, 0.1) 0%, transparent 60%);
+        /* خلفية نيون خفيفة */
+        .glow-bg {
+            position: absolute; top: -10%; left: -10%; width: 120%; height: 60%;
+            background: radial-gradient(circle, rgba(0,255,234,0.15) 0%, transparent 70%);
             z-index: 0;
         }
 
-        /* الهيدر */
-        .ad-header { z-index: 1; margin-top: 10px; }
-        .brand-name { font-family: 'Orbitron'; font-size: 1.8em; color: #fff; text-shadow: 0 0 10px #00ffea; margin: 0; }
-        .tagline { color: #888; font-size: 0.8em; letter-spacing: 2px; }
+        /* رأس الصفحة */
+        .header { z-index: 2; text-align: center; width: 100%; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .app-name { font-family: 'Orbitron'; font-size: 1.8em; color: #fff; letter-spacing: 2px; margin: 0; }
+        .sub-text { font-size: 0.8em; color: #888; letter-spacing: 4px; text-transform: uppercase; }
 
-        /* الصورة */
-        .img-container {
-            width: 90%;
-            height: 280px;
-            border: 2px solid #ff0055;
-            border-radius: 15px;
-            overflow: hidden;
-            z-index: 1;
+        /* صورة الخدمة */
+        .img-box {
+            z-index: 2;
+            width: 220px; height: 220px;
             background: #000;
+            border-radius: 30px;
+            border: 3px solid #00ffea;
+            box-shadow: 0 0 25px rgba(0, 255, 234, 0.3);
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
             position: relative;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
         }
-        #preview-img { width: 100%; height: 100%; object-fit: cover; }
+        #p-img { width: 100%; height: 100%; object-fit: cover; }
         
-        .live-tag {
-            position: absolute; top: 10px; left: 10px;
-            background: red; color: white; padding: 5px 10px;
-            border-radius: 5px; font-weight: bold; font-size: 0.8em;
+        /* العلامة المميزة (التاج) */
+        .badge {
+            position: absolute; bottom: -15px; background: #00ffea; color: #000;
+            padding: 5px 20px; border-radius: 20px; font-weight: bold; font-family: 'Orbitron';
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 0.9em;
         }
 
-        /* التفاصيل */
-        .details { z-index: 1; width: 100%; }
-        .prod-title {
-            font-family: 'Tajawal'; font-weight: 800; font-size: 1.8em;
-            color: #fff; margin: 10px 0 5px 0; padding: 0 10px;
-            line-height: 1.2;
-        }
-        
+        /* تفاصيل العرض */
+        .info { z-index: 2; text-align: center; margin-top: 10px; }
+        #p-title { font-size: 2em; font-weight: 800; margin: 0; color: #fff; line-height: 1.2; }
+        #p-desc { color: #aaa; margin: 5px 0; font-size: 1em; }
+
+        /* السعر */
         .price-tag {
+            z-index: 2;
             font-family: 'Orbitron'; font-size: 3.5em; color: #00ffea;
-            text-shadow: 0 0 15px rgba(0, 255, 234, 0.5);
-            margin: 0; font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 234, 0.6);
+            margin: 10px 0; font-weight: bold;
         }
 
-        /* الفوتر (معلومات التواصل) */
-        .ad-footer {
-            z-index: 1;
-            background: #222;
-            width: 90%;
-            padding: 10px;
-            border-radius: 50px;
+        /* الفوتر (رقمك) */
+        .footer {
+            z-index: 2; width: 100%;
+            background: #222; padding: 12px; border-radius: 15px;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
             border: 1px solid #444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 10px;
         }
-        .whatsapp-icon { background: #25d366; color: #fff; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 0.8em; }
-        .phone-number { font-family: 'Orbitron'; color: #fff; font-size: 1.1em; letter-spacing: 1px; }
+        .whatsapp-btn { background: #25d366; color: #fff; padding: 5px 12px; border-radius: 50px; font-weight: bold; font-size: 0.9em; }
+        .number { font-family: 'Orbitron'; font-size: 1.2em; letter-spacing: 1px; color: #fff; }
 
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h3>🎛️ مولد الإعلانات (للواتساب والفيسبوك)</h3>
-        <input type="text" id="inp-img" placeholder="رابط الصورة (URL)" oninput="updateAd()">
-        <input type="text" id="inp-title" placeholder="اسم الغرض (مثلاً: حساب تيك توك)" oninput="updateAd()">
-        <input type="text" id="inp-price" placeholder="السعر ($)" oninput="updateAd()">
-        <p style="color:#666; font-size:0.8em; margin-top:5px;">بس تخلص، خد Screenshot للكرت اللي تحت 👇</p>
+        <h3>🛠️ مصنع إعلانات الخدمات</h3>
+        
+        <input type="text" id="in-img" placeholder="رابط صورة الخدمة (Netflix, PUBG...)" oninput="update()">
+        
+        <input type="text" id="in-title" placeholder="اسم الخدمة (مثلاً: Netflix 4K)" oninput="update()">
+        
+        <input type="text" id="in-desc" placeholder="وصف صغير (مثلاً: اشتراك شهر كامل - ضمان)" oninput="update()">
+        
+        <input type="text" id="in-price" placeholder="السعر ($)" oninput="update()">
+        
+        <select id="in-badge" onchange="update()">
+            <option value="PREMIUM">PREMIUM ⭐</option>
+            <option value="BEST SELLER">BEST SELLER 🔥</option>
+            <option value="INSTANT DELIVERY">تسليم فوري ⚡</option>
+            <option value="WARRANTY">كفالة كاملة 🛡️</option>
+        </select>
     </div>
 
-    <div class="ad-card" id="capture-area">
-        <div class="ad-bg-effect"></div>
+    <div class="promo-card">
+        <div class="glow-bg"></div>
 
-        <div class="ad-header">
-            <h1 class="brand-name">BAROUD <span style="color:#00ffea">APP</span></h1>
-            <div class="tagline">PREMIUM AUCTIONS 🇱🇧</div>
+        <div class="header">
+            <h1 class="app-name">BAROUD <span style="color:#00ffea">APP</span></h1>
+            <div class="sub-text">DIGITAL STORE SERVICES</div>
         </div>
 
-        <div class="img-container">
-            <div class="live-tag">AVAILABLE NOW</div>
-            <img id="preview-img" src="https://via.placeholder.com/400x400?text=Baroud+App" alt="Product">
+        <div class="img-box">
+            <img id="p-img" src="https://via.placeholder.com/300?text=Service" alt="Service">
+            <div class="badge" id="p-badge">PREMIUM ⭐</div>
         </div>
 
-        <div class="details">
-            <h2 class="prod-title" id="preview-title">اسم العرض هنا</h2>
-            <div class="price-tag" id="preview-price">$0</div>
+        <div class="info">
+            <h2 id="p-title">اسم الخدمة</h2>
+            <p id="p-desc">وصف الخدمة هنا</p>
         </div>
 
-        <div class="ad-footer">
-            <div class="whatsapp-icon">WhatsApp</div>
-            <div class="phone-number">70 385 398</div>
+        <div class="price-tag" id="p-price">$0</div>
+
+        <div class="footer">
+            <div class="whatsapp-btn">ORDER NOW</div>
+            <div class="number">70 385 398</div>
         </div>
     </div>
 
 <script>
-    function updateAd() {
-        // جيب المعلومات من الخانات
-        const img = document.getElementById('inp-img').value;
-        const title = document.getElementById('inp-title').value;
-        const price = document.getElementById('inp-price').value;
+    function update() {
+        // جيب المعلومات
+        const img = document.getElementById('in-img').value;
+        const title = document.getElementById('in-title').value;
+        const desc = document.getElementById('in-desc').value;
+        const price = document.getElementById('in-price').value;
+        const badge = document.getElementById('in-badge').value;
 
-        // حطهم بالكرت
-        if(img) document.getElementById('preview-img').src = img;
-        if(title) document.getElementById('preview-title').innerText = title;
-        if(price) document.getElementById('preview-price').innerText = '$' + price;
+        // عبيهم بالكرت
+        if(img) document.getElementById('p-img').src = img;
+        if(title) document.getElementById('p-title').innerText = title;
+        if(desc) document.getElementById('p-desc').innerText = desc;
+        if(price) document.getElementById('p-price').innerText = '$' + price;
+        document.getElementById('p-badge').innerText = badge;
     }
 </script>
 
