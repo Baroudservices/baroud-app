@@ -3,138 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Pro Generator 💎</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;700;900&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <title>Baroud Poster Maker 🚀</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        /* إعدادات الصفحة */
         body {
-            background: #050505;
-            color: #fff;
-            font-family: 'Cairo', sans-serif;
-            margin: 0; padding: 10px;
+            background: #e0e0e0; /* خلفية فاتحة عشان تميز الكرت */
+            font-family: 'Tajawal', sans-serif;
+            margin: 0; padding: 20px;
             text-align: center;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         /* --- لوحة التحكم --- */
         .controls {
-            background: #111; padding: 15px; border-radius: 12px;
-            margin-bottom: 25px; border: 1px solid #333; text-align: right;
-            max-width: 400px; margin-left: auto; margin-right: auto;
+            background: #fff; padding: 20px; border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 100%; max-width: 350px; margin-bottom: 30px;
+            text-align: right;
         }
-        .controls h3 { text-align: center; color: #00f3ff; margin-top: 0; font-size: 1em; text-transform: uppercase; letter-spacing: 2px; }
+        .controls h3 { margin: 0 0 10px 0; color: #333; font-family: 'Poppins'; font-size: 1em; text-align: center; }
         input, select {
-            width: 100%; padding: 12px; margin: 6px 0;
-            background: #000; border: 1px solid #444;
-            color: #fff; text-align: center; border-radius: 8px;
-            font-family: 'Cairo'; font-size: 0.9em; outline: none;
-        }
-        input:focus { border-color: #00f3ff; }
-
-        /* --- الكرت الاحترافي (النتيجة) --- */
-        .promo-container {
-            width: 100%;
-            display: flex; justify-content: center;
+            width: 100%; padding: 12px; margin: 5px 0;
+            background: #f4f4f4; border: 1px solid #ddd;
+            color: #333; text-align: center; border-radius: 8px;
+            font-family: 'Tajawal'; outline: none; font-weight: bold;
         }
 
-        .promo-card {
+        /* --- الكرت الجديد (Modern Poster) --- */
+        .poster-card {
             width: 360px;
-            height: 640px; /* حجم ستوري 9:16 */
-            background: radial-gradient(circle at top, #1a1a2e 0%, #000000 100%);
-            border: 2px solid #333;
-            border-radius: 25px;
+            height: 640px;
+            background: #000;
+            border-radius: 30px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.15);
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 30px 20px; box-sizing: border-box;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column;
             text-align: center;
+            color: #fff;
         }
 
-        /* خلفية الشبكة (Grid Effect) */
-        .grid-bg {
+        /* 1. الخلفية الجذابة */
+        .bg-gradient {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
-            z-index: 0;
-            opacity: 0.5;
+            background: linear-gradient(180deg, #111 0%, #000 100%);
+            z-index: 1;
+        }
+        .bg-glow {
+            position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 300px;
+            background: rgba(0, 140, 255, 0.25); /* لون أزرق راقي */
+            filter: blur(80px);
+            z-index: 1;
         }
 
-        /* الهيدر */
-        .header { z-index: 2; margin-bottom: 10px; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
-        .brand { 
-            font-family: 'Rajdhani', sans-serif; font-size: 2.2em; 
-            color: #fff; text-transform: uppercase; margin: 0; 
-            text-shadow: 0 0 15px rgba(0, 243, 255, 0.5); letter-spacing: 2px;
+        /* 2. الهيدر (شعار التطبيق) */
+        .header {
+            z-index: 5; margin-top: 25px;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
         }
-        .tagline { color: #888; font-size: 0.75em; letter-spacing: 4px; text-transform: uppercase; font-weight: bold; margin-top: -5px; }
+        .logo-box {
+            background: #fff; color: #000; font-weight: 900;
+            padding: 2px 8px; border-radius: 4px; font-family: 'Poppins';
+            font-size: 0.9em; letter-spacing: 1px;
+        }
+        .app-title { font-family: 'Poppins'; font-weight: 600; font-size: 1em; letter-spacing: 1px; color: #fff; }
 
-        /* صورة المنتج */
-        .img-wrapper {
-            z-index: 2;
-            width: 240px; height: 240px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 20px;
+        /* 3. منطقة الصورة (Hero Section) */
+        .image-area {
+            z-index: 5;
+            margin: 20px auto;
+            width: 300px; height: 300px;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 10px;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-top: 10px;
-        }
-        .img-box {
-            width: 100%; height: 100%;
-            border-radius: 15px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             overflow: hidden;
-            position: relative;
         }
         #p-img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* شارة التميز (Badge) */
-        .badge {
-            position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(90deg, #00f3ff, #0066ff);
-            color: #000; padding: 6px 20px; border-radius: 50px;
-            font-weight: 900; font-size: 0.85em; z-index: 3;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
-            white-space: nowrap; font-family: 'Rajdhani', 'Cairo'; text-transform: uppercase;
+        /* شارة الحالة (فوق الصورة) */
+        .status-badge {
+            position: absolute; top: 15px; left: 15px;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            color: #fff; padding: 5px 12px; border-radius: 20px;
+            font-size: 0.75em; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);
+            font-family: 'Poppins';
         }
 
-        /* المعلومات */
-        .info { z-index: 2; width: 100%; margin-top: 20px; }
+        /* 4. النصوص والتفاصيل */
+        .content { z-index: 5; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        
         #p-title {
-            font-size: 2em; font-weight: 900; color: #fff; margin: 0;
-            line-height: 1.2; text-shadow: 0 5px 10px rgba(0,0,0,0.8);
+            font-family: 'Tajawal'; font-weight: 900; font-size: 2.2em;
+            margin: 0; line-height: 1.2;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
+        
         #p-desc {
-            color: #aaa; font-size: 0.95em; margin: 8px 0 0 0; font-weight: 300;
+            color: #888; font-size: 0.95em; margin-top: 10px; font-weight: 500;
         }
 
-        /* السعر */
-        .price-container {
-            z-index: 2;
-            background: rgba(0, 243, 255, 0.05);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            padding: 10px 40px; border-radius: 15px;
-            margin: 15px 0;
-        }
-        #p-price {
-            font-family: 'Rajdhani', sans-serif; font-size: 3.5em; font-weight: 700;
-            color: #00f3ff; margin: 0; line-height: 1;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
-        }
-
-        /* الفوتر */
-        .footer {
-            z-index: 2; width: 100%;
-            background: #111; padding: 12px; border-radius: 12px;
+        /* 5. السعر والطلب */
+        .bottom-section {
+            z-index: 5;
+            background: #1a1a1a;
+            margin: 15px; padding: 15px 20px;
+            border-radius: 20px;
             display: flex; justify-content: space-between; align-items: center;
             border: 1px solid #333;
         }
-        .whatsapp {
-            background: #25d366; color: #fff; padding: 6px 15px; border-radius: 6px;
-            font-weight: bold; font-size: 0.9em; display: flex; align-items: center; gap: 5px;
+
+        .price-box { text-align: right; }
+        .price-label { color: #666; font-size: 0.7em; font-family: 'Poppins'; display: block; }
+        #p-price {
+            font-family: 'Poppins'; font-weight: 700; font-size: 1.8em; color: #fff;
+            line-height: 1;
         }
-        .number {
-            font-family: 'Rajdhani', sans-serif; font-size: 1.4em; color: #fff; font-weight: bold; letter-spacing: 1px;
+
+        .action-btn {
+            background: #fff; color: #000;
+            padding: 10px 20px; border-radius: 12px;
+            font-weight: 800; font-family: 'Poppins'; font-size: 0.9em;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .whatsapp-icon { width: 8px; height: 8px; background: #00d26a; border-radius: 50%; display: inline-block; }
+
+        /* رقم الهاتف */
+        .footer-number {
+            z-index: 5; margin-bottom: 20px; font-family: 'Poppins';
+            color: #555; font-size: 0.8em; letter-spacing: 2px;
         }
 
     </style>
@@ -142,48 +144,49 @@
 <body>
 
     <div class="controls">
-        <h3>⚡ التحكم بالتصميم</h3>
+        <h3>🎨 تصميم البوستر</h3>
         <input type="text" id="in-img" placeholder="رابط الصورة" oninput="update()">
-        <input type="text" id="in-title" placeholder="اسم الخدمة (Netflix 4K)" oninput="update()">
-        <input type="text" id="in-desc" placeholder="الوصف (تسليم فوري - كفالة)" oninput="update()">
-        <input type="text" id="in-price" placeholder="السعر (مثلاً: 5)" oninput="update()">
+        <input type="text" id="in-title" placeholder="العنوان (مثلاً: شدات ببجي)" oninput="update()">
+        <input type="text" id="in-desc" placeholder="الوصف (تسليم فوري - رسمي)" oninput="update()">
+        <input type="text" id="in-price" placeholder="السعر (مثلاً: $10)" oninput="update()">
         <select id="in-badge" onchange="update()">
-            <option value="PREMIUM QUALITY">⭐ PREMIUM QUALITY</option>
-            <option value="BEST SELLER">🔥 BEST SELLER</option>
-            <option value="INSTANT DELIVERY">⚡ تسليم فوري</option>
-            <option value="WARRANTY INCLUDED">🛡️ كفالة كاملة</option>
+            <option value="AVAILABLE NOW">AVAILABLE NOW</option>
+            <option value="BEST SELLER">BEST SELLER 🔥</option>
+            <option value="LIMITED OFFER">LIMITED OFFER ⏳</option>
         </select>
     </div>
 
-    <div class="promo-container">
-        <div class="promo-card">
-            <div class="grid-bg"></div>
+    <div class="poster-card">
+        <div class="bg-gradient"></div>
+        <div class="bg-glow"></div>
 
-            <div class="header">
-                <h1 class="brand">BAROUD <span style="color:#00f3ff">APP</span></h1>
-                <div class="tagline">Digital Store Services 🇱🇧</div>
-            </div>
+        <div class="header">
+            <div class="logo-box">BAROUD</div>
+            <div class="app-title">APP STORE</div>
+        </div>
 
-            <div class="img-wrapper">
-                <div class="img-box">
-                    <img id="p-img" src="https://cdn-icons-png.flaticon.com/512/808/808439.png" alt="Service">
-                </div>
-                <div class="badge" id="p-badge">PREMIUM QUALITY</div>
-            </div>
+        <div class="image-area">
+            <div class="status-badge" id="p-badge">AVAILABLE NOW</div>
+            <img id="p-img" src="https://via.placeholder.com/300" alt="Product">
+        </div>
 
-            <div class="info">
-                <h2 id="p-title">اسم الخدمة</h2>
-                <p id="p-desc">اكتب وصف الخدمة في الخانة أعلاه</p>
-            </div>
+        <div class="content">
+            <div id="p-title">عنوان الخدمة</div>
+            <div id="p-desc">وصف الخدمة يظهر هنا بشكل مرتب</div>
+        </div>
 
-            <div class="price-container">
-                <div id="p-price">$0</div>
+        <div class="bottom-section">
+            <div class="action-btn">
+                <span class="whatsapp-icon"></span> ORDER
             </div>
+            <div class="price-box">
+                <span class="price-label">PRICE</span>
+                <span id="p-price">$0</span>
+            </div>
+        </div>
 
-            <div class="footer">
-                <div class="whatsapp">🟢 ORDER NOW</div>
-                <div class="number">70 385 398</div>
-            </div>
+        <div class="footer-number">
+            +961 70 385 398
         </div>
     </div>
 
@@ -198,7 +201,7 @@
         if(img) document.getElementById('p-img').src = img;
         if(title) document.getElementById('p-title').innerText = title;
         if(desc) document.getElementById('p-desc').innerText = desc;
-        if(price) document.getElementById('p-price').innerText = '$' + price;
+        if(price) document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
         document.getElementById('p-badge').innerText = badge;
     }
 </script>
