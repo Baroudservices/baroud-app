@@ -3,234 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster Maker Final 🚀</title>
+    <title>Baroud Poster Maker V7 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
+        /* إعدادات الصفحة */
         body {
-            background: #e0e0e0; 
+            background: #121212; /* خلفية داكنة لراحة العين */
             font-family: 'Poppins', sans-serif;
             margin: 0; padding: 20px; 
-            text-align: center;
             display: flex; flex-direction: column; align-items: center;
-            /* مهم جداً: إخفاء أي زيادة */
-            overflow-x: hidden; 
+            color: #fff;
+        }
+
+        .version-tag {
+            background: #00ffea; color: #000; padding: 5px 15px;
+            border-radius: 20px; font-size: 0.8em; margin-bottom: 15px;
+            font-weight: bold;
         }
 
         /* --- لوحة التحكم --- */
         .controls {
-            background: #fff; padding: 20px; border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: #1e1e1e; padding: 20px; border-radius: 20px;
+            border: 1px solid #333;
             width: 100%; max-width: 350px; margin-bottom: 30px;
-            transition: opacity 0.3s;
         }
-        .controls h3 { margin: 0 0 10px 0; color: #333; text-align: center; }
         
         input, select {
-            width: 100%; padding: 12px; margin: 5px 0;
-            background: #f4f4f4; border: 1px solid #ddd;
-            color: #333; text-align: center; border-radius: 8px;
+            width: 100%; padding: 12px; margin: 8px 0;
+            background: #2a2a2a; border: 1px solid #444;
+            color: #fff; text-align: center; border-radius: 10px;
             font-family: 'Poppins'; outline: none; font-weight: bold;
+            font-size: 0.9em;
         }
+        
+        /* عناوين الحقول */
+        .input-label { font-size: 0.8em; color: #aaa; margin-bottom: -5px; display: block; text-align: left; margin-left: 5px; }
 
         .file-upload-btn {
-            background: #333; color: #fff; padding: 12px; border-radius: 8px;
+            background: linear-gradient(45deg, #00ffea, #0099ff); 
+            color: #000; padding: 12px; border-radius: 10px;
             text-align: center; cursor: pointer; display: block; margin: 5px 0;
-            font-weight: bold; font-size: 0.9em; width: 100%;
+            font-weight: bold; font-size: 0.9em;
         }
         
         .save-btn {
-            background: #00d26a; color: #fff; padding: 15px; border-radius: 8px;
-            text-align: center; cursor: pointer; display: block; margin-top: 15px;
+            background: #00d26a; color: #fff; padding: 15px; border-radius: 10px;
+            text-align: center; cursor: pointer; display: block; margin-top: 20px;
             font-weight: 900; font-size: 1.1em; border: none; width: 100%;
-            box-shadow: 0 5px 15px rgba(0, 210, 106, 0.4);
+            box-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
         }
 
         input[type="file"] { display: none; }
 
-        /* --- الكرت --- */
+        /* --- ستايل الكرت --- */
         .poster-card {
             width: 360px; height: 640px;
             background: #000; border-radius: 30px;
             position: relative; overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
             display: flex; flex-direction: column;
             text-align: center; color: #fff;
             margin: auto;
-            transform-origin: top center;
+            /* منع تحديد النصوص */
+            user-select: none;
         }
-        
-        @media (max-width: 380px) {
-            .poster-card { transform: scale(0.85); margin-bottom: -60px; }
+
+        /* تصغير للمعاينة فقط */
+        #preview-wrapper .poster-card {
+            transform: scale(0.85);
+            transform-origin: top center;
+            margin-bottom: -80px;
+            border: 1px solid #333;
         }
 
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
-        .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.25); filter: blur(80px); z-index: 1; }
+        .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.15); filter: blur(80px); z-index: 1; }
 
-        .header { z-index: 5; margin-top: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .brand-title { font-family: 'Poppins'; font-weight: 900; font-size: 1.8em; letter-spacing: 2px; color: #fff; text-transform: uppercase; line-height: 1; }
-        .brand-subtitle { font-size: 0.7em; color: #888; letter-spacing: 3px; margin-top: 5px; text-transform: uppercase; }
+        .header { z-index: 5; margin-top: 40px; display: flex; flex-direction: column; align-items: center; }
+        .brand-title { font-family: 'Poppins'; font-weight: 900; font-size: 2em; letter-spacing: 2px; color: #fff; text-transform: uppercase; line-height: 1; }
+        .brand-subtitle { font-size: 0.7em; color: #888; letter-spacing: 4px; margin-top: 5px; text-transform: uppercase; }
 
         .image-area {
-            z-index: 5; margin: 20px auto; width: 300px; height: 300px;
-            border-radius: 25px; background: rgba(255,255,255,0.05);
+            z-index: 5; margin: 30px auto; width: 280px; height: 280px;
+            border-radius: 25px; background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.1); position: relative;
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow: hidden;
         }
-        #p-img { width: 100%; height: 100%; object-fit: cover; }
+        .p-img { width: 100%; height: 100%; object-fit: cover; }
         
         .status-badge {
             position: absolute; top: 15px; left: 15px;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
             color: #fff; padding: 5px 12px; border-radius: 20px;
-            font-size: 0.75em; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); text-transform: uppercase;
+            font-size: 0.7em; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); text-transform: uppercase;
         }
 
         .content { z-index: 5; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        #p-title { font-family: 'Poppins'; font-weight: 800; font-size: 2em; margin: 0; line-height: 1.2; background: linear-gradient(90deg, #fff, #ddd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        #p-desc { color: #888; font-size: 0.9em; margin-top: 8px; font-weight: 400; }
+        .p-title { font-family: 'Poppins'; font-weight: 800; font-size: 1.8em; margin: 0; line-height: 1.2; background: linear-gradient(90deg, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .p-desc { color: #888; font-size: 0.9em; margin-top: 8px; font-weight: 400; }
 
         .bottom-section {
-            z-index: 5; background: #1a1a1a; margin: 15px; padding: 12px 20px;
-            border-radius: 18px; display: flex; justify-content: space-between; align-items: center;
+            z-index: 5; background: #1a1a1a; margin: 20px; padding: 15px 25px;
+            border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
             border: 1px solid #333;
         }
         .price-box { text-align: right; }
-        .price-label { color: #666; font-size: 0.6em; display: block; letter-spacing: 1px; }
-        #p-price { font-weight: 700; font-size: 1.6em; color: #fff; line-height: 1; }
+        .price-label { color: #555; font-size: 0.6em; display: block; letter-spacing: 1px; font-weight: bold; }
+        .p-price { font-weight: 700; font-size: 1.8em; color: #fff; line-height: 1; }
 
         .action-btn { background: #fff; color: #000; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
-        .whatsapp-icon { width: 8px; height: 8px; background: #00d26a; border-radius: 50%; display: inline-block; }
+        .whatsapp-icon { width: 10px; height: 10px; background: #00d26a; border-radius: 50%; display: inline-block; }
 
-        .footer-area { z-index: 5; margin-bottom: 25px; display: flex; flex-direction: column; gap: 5px; }
-        .footer-number { color: #888; font-size: 0.9em; letter-spacing: 1px; font-weight: 600; }
-        .footer-link { color: #00ffea; font-size: 0.8em; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; text-decoration: none; }
+        .footer-area { z-index: 5; margin-bottom: 30px; display: flex; flex-direction: column; gap: 5px; }
+        .footer-number { color: #666; font-size: 0.9em; letter-spacing: 2px; font-weight: 600; }
+        .footer-link { color: #00ffea; font-size: 0.7em; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; text-decoration: none; }
 
     </style>
 </head>
 <body>
 
-    <div class="controls" id="control-panel">
-        <h3>🎨 Poster Maker</h3>
-        <label for="img-upload" class="file-upload-btn">📂 Open Gallery</label>
+    <div class="version-tag">Ver 7.0 (Full Screen Fix)</div>
+
+    <div class="controls">
+        <label for="img-upload" class="file-upload-btn">📂 اختر صورة من الاستديو</label>
         <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
-        <input type="text" id="in-img" placeholder="Or Paste Image URL" oninput="update()">
-        <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
-        <input type="text" id="in-title" placeholder="Title (e.g. Netflix)" oninput="update()">
-        <input type="text" id="in-desc" placeholder="Desc (e.g. Full Warranty)" oninput="update()">
-        <input type="text" id="in-price" placeholder="Price (e.g. $10)" oninput="update()">
+        
+        <span class="input-label">رابط صورة (اختياري)</span>
+        <input type="text" id="in-img" placeholder="Paste Image URL" oninput="update()">
+        
+        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+        
+        <span class="input-label">العنوان</span>
+        <input type="text" id="in-title" placeholder="e.g. Netflix 1 Month" oninput="update()">
+        
+        <span class="input-label">الوصف</span>
+        <input type="text" id="in-desc" placeholder="e.g. 4K UHD - Private" oninput="update()">
+        
+        <span class="input-label">السعر</span>
+        <input type="text" id="in-price" placeholder="e.g. $5" oninput="update()">
+        
+        <span class="input-label">الشارة</span>
         <select id="in-badge" onchange="update()">
             <option value="AVAILABLE NOW">AVAILABLE NOW</option>
             <option value="BEST SELLER">BEST SELLER 🔥</option>
             <option value="LIMITED OFFER">LIMITED OFFER ⏳</option>
         </select>
+        
         <button onclick="downloadPoster()" class="save-btn">SAVE IMAGE 📥</button>
     </div>
 
-    <div class="poster-card" id="capture-area">
-        <div class="bg-gradient"></div>
-        <div class="bg-glow"></div>
-        <div class="header">
-            <div class="brand-title">BAROUD <span style="color:#00ffea">APP</span></div>
-            <div class="brand-subtitle">Digital Store Services</div>
-        </div>
-        <div class="image-area">
-            <div class="status-badge" id="p-badge">AVAILABLE NOW</div>
-            <img id="p-img" src="https://via.placeholder.com/300" alt="Product" crossorigin="anonymous">
-        </div>
-        <div class="content">
-            <div id="p-title">Service Name</div>
-            <div id="p-desc">Description goes here</div>
-        </div>
-        <div class="bottom-section">
-            <div class="action-btn"><span class="whatsapp-icon"></span> ORDER</div>
-            <div class="price-box">
-                <span class="price-label">PRICE</span>
-                <span id="p-price">$0</span>
+    <div id="preview-wrapper">
+        <div class="poster-card">
+            <div class="bg-gradient"></div>
+            <div class="bg-glow"></div>
+            <div class="header">
+                <div class="brand-title">BAROUD <span style="color:#00ffea">APP</span></div>
+                <div class="brand-subtitle">Digital Store Services</div>
             </div>
-        </div>
-        <div class="footer-area">
-            <div class="footer-number">+961 70 385 398</div>
-            <div class="footer-link">WWW.BAROUDAPP.COM</div>
+            <div class="image-area">
+                <div class="status-badge" id="view-badge">AVAILABLE NOW</div>
+                <img class="p-img" id="view-img" src="https://via.placeholder.com/300" alt="Product" crossorigin="anonymous">
+            </div>
+            <div class="content">
+                <div class="p-title" id="view-title">Service Name</div>
+                <div class="p-desc" id="view-desc">Description goes here</div>
+            </div>
+            <div class="bottom-section">
+                <div class="action-btn"><span class="whatsapp-icon"></span> ORDER</div>
+                <div class="price-box">
+                    <span class="price-label">PRICE</span>
+                    <span class="p-price" id="view-price">$0</span>
+                </div>
+            </div>
+            <div class="footer-area">
+                <div class="footer-number">+961 70 385 398</div>
+                <div class="footer-link">WWW.BAROUDAPP.COM</div>
+            </div>
         </div>
     </div>
 
 <script>
+    // تخزين البيانات
+    let currentData = {
+        img: 'https://via.placeholder.com/300',
+        title: 'Service Name',
+        desc: 'Description goes here',
+        price: '$0',
+        badge: 'AVAILABLE NOW'
+    };
+
     function uploadImage() {
-        const fileInput = document.getElementById('img-upload');
-        const file = fileInput.files[0];
+        const file = document.getElementById('img-upload').files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) { document.getElementById('p-img').src = e.target.result; }
+            reader.onload = function(e) { 
+                currentData.img = e.target.result;
+                updateView();
+            }
             reader.readAsDataURL(file);
         }
     }
 
     function update() {
         const imgUrl = document.getElementById('in-img').value;
-        const title = document.getElementById('in-title').value;
-        const desc = document.getElementById('in-desc').value;
-        const price = document.getElementById('in-price').value;
-        const badge = document.getElementById('in-badge').value;
+        if(imgUrl) currentData.img = imgUrl;
 
-        if(imgUrl) document.getElementById('p-img').src = imgUrl;
-        if(title) document.getElementById('p-title').innerText = title;
-        if(desc) document.getElementById('p-desc').innerText = desc;
-        if(price) document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
-        document.getElementById('p-badge').innerText = badge;
+        currentData.title = document.getElementById('in-title').value || 'Service Name';
+        currentData.desc = document.getElementById('in-desc').value || 'Description goes here';
+        
+        const p = document.getElementById('in-price').value;
+        currentData.price = p ? (p.includes('$') ? p : '$' + p) : '$0';
+        
+        currentData.badge = document.getElementById('in-badge').value;
+
+        updateView();
     }
 
-    // 🔥 وضع العزل التام (The Final Solution) 🔥
+    function updateView() {
+        document.getElementById('view-img').src = currentData.img;
+        document.getElementById('view-title').innerText = currentData.title;
+        document.getElementById('view-desc').innerText = currentData.desc;
+        document.getElementById('view-price').innerText = currentData.price;
+        document.getElementById('view-badge').innerText = currentData.badge;
+    }
+
+    // 🔥 دالة التحميل النهائية (Overlay Mode) 🔥
     function downloadPoster() {
         const btn = document.querySelector('.save-btn');
-        const controls = document.getElementById('control-panel');
-        const card = document.getElementById('capture-area');
+        btn.innerText = "⏳ يرجى الانتظار...";
+
+        // 1. إنشاء شاشة سوداء كاملة تغطي الموقع (Overlay)
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw'; // عرض الشاشة كامل
+        overlay.style.height = '100vh'; // طول الشاشة كامل
+        overlay.style.backgroundColor = '#000'; // خلفية سوداء
+        overlay.style.zIndex = '99999'; // فوق كل شي
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center'; // توسيط الكرت
         
-        const originalText = btn.innerText;
-        btn.innerText = "Processing...";
+        document.body.appendChild(overlay);
+
+        // 2. إنشاء نسخة عن الكرت
+        const original = document.querySelector('#preview-wrapper .poster-card');
+        const clone = original.cloneNode(true);
         
-        // 1. اخفاء لوحة التحكم وتغيير خلفية الجسم للسواد
-        controls.style.display = 'none';
-        document.body.style.background = '#000'; // خلفية سوداء بدل الأزرق
+        // إعادة ضبط ستايل النسخة لتكون بحجمها الطبيعي
+        clone.style.transform = 'none';
+        clone.style.margin = '0';
+        clone.style.width = '360px';
+        clone.style.height = '640px';
+        clone.style.borderRadius = '0'; // إلغاء التدوير لضمان الحواف
         
-        // 2. تجميد الكرت بأعلى الصفحة (منع السكرول)
-        window.scrollTo(0, 0);
-        card.style.transform = 'scale(1)'; // رجعه للحجم الطبيعي اذا كان مصغر
-        card.style.margin = '0';
-        
-        // انتظار بسيط ليتأكد المتصفح من التغييرات
+        overlay.appendChild(clone);
+
+        // 3. الانتظار قليلاً ليقوم المتصفح برسم الكرت، ثم التصوير
         setTimeout(() => {
-            html2canvas(card, {
-                scale: 2,
+            html2canvas(clone, {
+                scale: 2, // دقة عالية
                 useCORS: true,
-                backgroundColor: '#000000', // اجبار خلفية سوداء
+                backgroundColor: '#000000',
                 width: 360,
-                height: 640,
-                scrollY: 0,
-                scrollX: 0
+                height: 640
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'baroud-poster.png';
+                link.download = `Baroud-${currentData.title}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
-                
-                // 3. إعادة كل شيء كما كان
-                controls.style.display = 'block';
-                document.body.style.background = '#e0e0e0';
-                card.style.margin = 'auto'; // توسيط
-                // اعادة ستايل الموبايل
-                if(window.innerWidth <= 380) card.style.transform = 'scale(0.85)';
-                
-                btn.innerText = originalText;
+
+                // تنظيف وإغلاق
+                document.body.removeChild(overlay);
+                btn.innerText = "SAVE IMAGE 📥";
             }).catch(err => {
                 alert("Error: " + err);
-                controls.style.display = 'block';
-                document.body.style.background = '#e0e0e0';
-                btn.innerText = originalText;
+                if(document.body.contains(overlay)) document.body.removeChild(overlay);
+                btn.innerText = "SAVE IMAGE 📥";
             });
-        }, 100);
+        }, 500); // انتظار نصف ثانية (مهم جداً للموبايل)
     }
 </script>
 
