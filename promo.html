@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baroud Poster Maker 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
     <style>
         body {
             background: #e0e0e0; 
-            font-family: 'Poppins', sans-serif; /* غيرنا الخط الأساسي للانكليزي */
+            font-family: 'Poppins', sans-serif;
             margin: 0; padding: 20px; 
             text-align: center;
             display: flex; flex-direction: column; align-items: center;
@@ -29,12 +32,24 @@
             font-family: 'Poppins'; outline: none; font-weight: bold;
         }
 
-        /* زر رفع الصورة */
+        /* أزرار التحكم */
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        
         .file-upload-btn {
-            background: #000; color: #fff; padding: 10px; border-radius: 8px;
+            background: #333; color: #fff; padding: 12px; border-radius: 8px;
             text-align: center; cursor: pointer; display: block; margin: 5px 0;
-            font-weight: bold; font-size: 0.9em;
+            font-weight: bold; font-size: 0.9em; width: 100%;
         }
+        
+        /* زر التحميل الجديد */
+        .save-btn {
+            background: #00d26a; color: #fff; padding: 15px; border-radius: 8px;
+            text-align: center; cursor: pointer; display: block; margin-top: 15px;
+            font-weight: 900; font-size: 1.1em; border: none; width: 100%;
+            box-shadow: 0 5px 15px rgba(0, 210, 106, 0.4);
+        }
+        .save-btn:active { transform: scale(0.98); }
+
         input[type="file"] { display: none; }
 
         /* --- الكرت --- */
@@ -45,23 +60,22 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             display: flex; flex-direction: column;
             text-align: center; color: #fff;
+            /* مهم جداً للتحميل */
+            transform: translateZ(0);
         }
 
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
         .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.25); filter: blur(80px); z-index: 1; }
 
-        /* الهيدر الجديد */
+        /* الهيدر */
         .header { z-index: 5; margin-top: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .brand-title { 
             font-family: 'Poppins'; font-weight: 900; font-size: 1.8em; 
-            letter-spacing: 2px; color: #fff; text-transform: uppercase;
-            line-height: 1;
+            letter-spacing: 2px; color: #fff; text-transform: uppercase; line-height: 1;
         }
-        .brand-subtitle {
-            font-size: 0.7em; color: #888; letter-spacing: 3px; margin-top: 5px; text-transform: uppercase;
-        }
+        .brand-subtitle { font-size: 0.7em; color: #888; letter-spacing: 3px; margin-top: 5px; text-transform: uppercase; }
 
-        /* منطقة الصورة */
+        /* الصورة */
         .image-area {
             z-index: 5; margin: 20px auto; width: 300px; height: 300px;
             border-radius: 25px; background: rgba(255,255,255,0.05);
@@ -79,7 +93,7 @@
             text-transform: uppercase;
         }
 
-        /* النصوص */
+        /* المحتوى */
         .content { z-index: 5; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
         #p-title { 
             font-family: 'Poppins'; font-weight: 800; font-size: 2em; margin: 0; line-height: 1.2; 
@@ -87,7 +101,7 @@
         }
         #p-desc { color: #888; font-size: 0.9em; margin-top: 8px; font-weight: 400; }
 
-        /* السعر والزر */
+        /* الشريط السفلي */
         .bottom-section {
             z-index: 5; background: #1a1a1a; margin: 15px; padding: 12px 20px;
             border-radius: 18px; display: flex; justify-content: space-between; align-items: center;
@@ -100,13 +114,10 @@
         .action-btn { background: #fff; color: #000; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
         .whatsapp-icon { width: 8px; height: 8px; background: #00d26a; border-radius: 50%; display: inline-block; }
 
-        /* الفوتر والرابط */
+        /* الفوتر */
         .footer-area { z-index: 5; margin-bottom: 25px; display: flex; flex-direction: column; gap: 5px; }
         .footer-number { color: #888; font-size: 0.9em; letter-spacing: 1px; font-weight: 600; }
-        .footer-link { 
-            color: #00ffea; font-size: 0.8em; letter-spacing: 2px; 
-            text-transform: uppercase; font-weight: bold; text-decoration: none;
-        }
+        .footer-link { color: #00ffea; font-size: 0.8em; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; text-decoration: none; }
 
     </style>
 </head>
@@ -115,25 +126,25 @@
     <div class="controls">
         <h3>🎨 Poster Maker</h3>
         
-        <label for="img-upload" class="file-upload-btn">📂 Choose Image from Gallery</label>
+        <label for="img-upload" class="file-upload-btn">📂 Open Gallery</label>
         <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
 
-        <p style="margin:5px 0; font-size:0.8em; color:#888;">Or paste URL:</p>
-        <input type="text" id="in-img" placeholder="Image URL" oninput="update()">
-        
+        <input type="text" id="in-img" placeholder="Or Paste Image URL" oninput="update()">
         <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
 
-        <input type="text" id="in-title" placeholder="Title (e.g. Netflix 1 Year)" oninput="update()">
-        <input type="text" id="in-desc" placeholder="Description (e.g. Full Warranty)" oninput="update()">
-        <input type="text" id="in-price" placeholder="Price (e.g. $38.26)" oninput="update()">
+        <input type="text" id="in-title" placeholder="Title (e.g. Netflix)" oninput="update()">
+        <input type="text" id="in-desc" placeholder="Desc (e.g. Full Warranty)" oninput="update()">
+        <input type="text" id="in-price" placeholder="Price (e.g. $10)" oninput="update()">
         <select id="in-badge" onchange="update()">
             <option value="AVAILABLE NOW">AVAILABLE NOW</option>
             <option value="BEST SELLER">BEST SELLER 🔥</option>
             <option value="LIMITED OFFER">LIMITED OFFER ⏳</option>
         </select>
+
+        <button onclick="downloadPoster()" class="save-btn">SAVE IMAGE 📥</button>
     </div>
 
-    <div class="poster-card">
+    <div class="poster-card" id="capture-area">
         <div class="bg-gradient"></div>
         <div class="bg-glow"></div>
 
@@ -144,7 +155,7 @@
 
         <div class="image-area">
             <div class="status-badge" id="p-badge">AVAILABLE NOW</div>
-            <img id="p-img" src="https://via.placeholder.com/300" alt="Product">
+            <img id="p-img" src="https://via.placeholder.com/300" alt="Product" crossorigin="anonymous">
         </div>
 
         <div class="content">
@@ -191,13 +202,33 @@
         if(imgUrl) document.getElementById('p-img').src = imgUrl;
         if(title) document.getElementById('p-title').innerText = title;
         if(desc) document.getElementById('p-desc').innerText = desc;
-        
-        // تصليح ظهور السعر
-        if(price) {
-            document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
-        }
-        
+        if(price) document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
         document.getElementById('p-badge').innerText = badge;
+    }
+
+    // دالة التحميل السحرية
+    function downloadPoster() {
+        const btn = document.querySelector('.save-btn');
+        btn.innerText = "Processing..."; // تغيير النص ليعرف المستخدم إنو عم يحمل
+        
+        const element = document.getElementById('capture-area');
+
+        html2canvas(element, {
+            scale: 3, // دقة عالية جداً
+            useCORS: true, // عشان الصور الخارجية
+            backgroundColor: null
+        }).then(canvas => {
+            // تحويل الكانفس لرابط صورة
+            const link = document.createElement('a');
+            link.download = 'baroud-poster.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            
+            btn.innerText = "SAVE IMAGE 📥"; // رجع النص
+        }).catch(err => {
+            alert("Error saving image. Try uploading the image instead of pasting a URL.");
+            btn.innerText = "SAVE IMAGE 📥";
+        });
     }
 </script>
 
