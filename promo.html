@@ -3,15 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster Maker 🚀</title>
+    <title>Baroud Poster Maker v3.0 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
         body {
-            background: #e0e0e0; font-family: 'Poppins', sans-serif;
-            margin: 0; padding: 20px; text-align: center;
+            background: #e0e0e0; 
+            font-family: 'Poppins', sans-serif;
+            margin: 0; padding: 20px; 
+            text-align: center;
             display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* علامة الإصدار (عشان تتأكد إنو الكود جديد) */
+        .version-tag {
+            background: #000; color: #00ffea; padding: 5px 10px;
+            border-radius: 20px; font-size: 0.8em; margin-bottom: 10px;
+            border: 1px solid #00ffea;
         }
 
         /* --- لوحة التحكم --- */
@@ -34,8 +43,7 @@
             text-align: center; cursor: pointer; display: block; margin: 5px 0;
             font-weight: bold; font-size: 0.9em; width: 100%;
         }
-        input[type="file"] { display: none; }
-
+        
         .save-btn {
             background: #00d26a; color: #fff; padding: 15px; border-radius: 8px;
             text-align: center; cursor: pointer; display: block; margin-top: 15px;
@@ -43,8 +51,9 @@
             box-shadow: 0 5px 15px rgba(0, 210, 106, 0.4);
         }
 
-        /* --- تصميم الكرت --- */
-        /* ملاحظة: ضفنا margin:0 للكرت عشان ما يصير مشاكل بالنسخ */
+        input[type="file"] { display: none; }
+
+        /* --- الكرت --- */
         .poster-card {
             width: 360px; height: 640px;
             background: #000; border-radius: 30px;
@@ -52,7 +61,14 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             display: flex; flex-direction: column;
             text-align: center; color: #fff;
-            margin: auto; /* توسيط للشاشة */
+            margin: auto;
+            /* هيدا السطر بيخلي الكرت يصغر شوي اذا الشاشة صغيرة عشان تشوفه، بس التحميل بضل كبير */
+            transform-origin: top center;
+        }
+        
+        /* ميديا كويري: اذا الشاشة صغيرة، صغر العرض بس (Preview) */
+        @media (max-width: 380px) {
+            .poster-card { transform: scale(0.9); margin-bottom: -50px; }
         }
 
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
@@ -101,6 +117,8 @@
     </style>
 </head>
 <body>
+
+    <div class="version-tag">Ver 3.0 (New Update)</div>
 
     <div class="controls">
         <h3>🎨 Poster Maker</h3>
@@ -172,60 +190,58 @@
         document.getElementById('p-badge').innerText = badge;
     }
 
-    // 🔥 دالة التحميل "النووية" 🔥
+    // 🔥 دالة التحميل النهائية (ضد القص) 🔥
     function downloadPoster() {
         const btn = document.querySelector('.save-btn');
         const originalText = btn.innerText;
-        btn.innerText = "⏳ Saving..."; 
+        btn.innerText = "⏳ Processing..."; 
+
+        // 1. أهم خطوة: نطلع لفوق الصفحة (عشان الاحداثيات تكون صح)
+        window.scrollTo(0,0);
 
         const original = document.getElementById('capture-area');
         
-        // 1. إنشاء حاوية مخفية بحجم ثابت ومحدد
-        // هيدا هو السر: بنجبر المتصفح يصور 360x640 بكسل بالزبط
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'fixed';
-        wrapper.style.top = '0';
-        wrapper.style.left = '0';
-        wrapper.style.width = '360px';
-        wrapper.style.height = '640px';
-        wrapper.style.zIndex = '-9999';
-        wrapper.style.overflow = 'hidden'; // قص الزوايد
-        document.body.appendChild(wrapper);
-
-        // 2. نسخ الكرت
+        // 2. إنشاء نسخة طبق الأصل
         const clone = original.cloneNode(true);
-        // تصفير المارجن للنسخة عشان تلزق بالزاوية
-        clone.style.margin = '0';
-        clone.style.transform = 'none';
-        clone.style.width = '360px';
-        clone.style.height = '640px';
-        clone.style.borderRadius = '0'; // إلغاء التدوير مؤقتاً لضمان عدم وجود حواف بيضاء
+        
+        // 3. ضبط النسخة لتكون بحجم ثابت ومكان ثابت
+        clone.style.position = "fixed"; 
+        clone.style.top = "0";
+        clone.style.left = "0";
+        clone.style.width = "360px";
+        clone.style.height = "640px";
+        clone.style.margin = "0";
+        clone.style.transform = "none"; 
+        clone.style.zIndex = "-9999"; // نخبيها ورا
+        clone.style.borderRadius = "0"; // عشان ما يطلع حواف بيضا
 
-        wrapper.appendChild(clone);
+        // إضافة النسخة للصفحة
+        document.body.appendChild(clone);
 
-        // 3. التصوير
+        // 4. التصوير
         html2canvas(clone, {
-            scale: 2, // دقة عالية
+            scale: 3, // دقة عالية جداً
             useCORS: true,
-            width: 360,
-            height: 640,
-            windowWidth: 360,
-            windowHeight: 640,
-            scrollX: 0,
-            scrollY: 0,
-            backgroundColor: null
+            allowTaint: true,
+            backgroundColor: null,
+            width: 360,     // إجبار العرض
+            height: 640,    // إجبار الطول
+            x: 0,           // إجبار مكان البدء X
+            y: 0,           // إجبار مكان البدء Y
+            scrollX: 0,     // تصفير السكرول
+            scrollY: 0
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'baroud-app-poster.png';
+            link.download = 'baroud-poster.png';
             link.href = canvas.toDataURL("image/png");
             link.click();
             
             // تنظيف
-            document.body.removeChild(wrapper);
+            document.body.removeChild(clone);
             btn.innerText = originalText;
         }).catch(err => {
             alert("Error: " + err);
-            document.body.removeChild(wrapper);
+            if(document.body.contains(clone)) document.body.removeChild(clone);
             btn.innerText = originalText;
         });
     }
