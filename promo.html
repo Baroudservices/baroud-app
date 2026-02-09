@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster Maker v4.0 🚀</title>
+    <title>Baroud Poster Maker v5.0 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
+        /* إعدادات الصفحة */
         body {
             background: #e0e0e0; 
             font-family: 'Poppins', sans-serif;
@@ -16,7 +17,6 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* علامة الإصدار */
         .version-tag {
             background: #000; color: #00ffea; padding: 5px 10px;
             border-radius: 20px; font-size: 0.8em; margin-bottom: 10px;
@@ -65,7 +65,6 @@
             transform-origin: top center;
         }
         
-        /* تصغير للمعاينة فقط */
         @media (max-width: 380px) {
             .poster-card { transform: scale(0.85); margin-bottom: -60px; }
         }
@@ -117,7 +116,7 @@
 </head>
 <body>
 
-    <div class="version-tag">Ver 4.0 (FIXED)</div>
+    <div class="version-tag">Ver 5.0 (Ultimate Fix)</div>
 
     <div class="controls">
         <h3>🎨 Poster Maker</h3>
@@ -189,59 +188,66 @@
         document.getElementById('p-badge').innerText = badge;
     }
 
-    // 🔥 دالة التحميل النهائية (الاستديو المخفي) 🔥
+    // 🔥 دالة التحميل الخامسة (عزل تام) 🔥
     function downloadPoster() {
         const btn = document.querySelector('.save-btn');
         const originalText = btn.innerText;
         btn.innerText = "⏳ Saving..."; 
 
-        // 1. أهم خطوة: اطلع لفوق فوراً (لتصحيح الاحداثيات)
-        window.scrollTo(0, 0);
-
         const original = document.getElementById('capture-area');
         
-        // 2. إنشاء "استديو" مخفي فيه الكرت بس
-        const studio = document.createElement('div');
-        studio.style.position = 'fixed'; // ثابت بالنسبة للشاشة
-        studio.style.top = '0';
-        studio.style.left = '0';
-        studio.style.width = '360px'; // حجم الكرت الحقيقي
-        studio.style.height = '640px';
-        studio.style.zIndex = '-9999'; // مخفي ورا
-        studio.style.backgroundColor = '#000'; // خلفية سوداء احتياط
-        studio.style.overflow = 'hidden';
+        // 1. إنشاء حاوية عزل (Isolation Container)
+        // بنحطها بأعلى الصفحة عاليسار (0,0) وبنعطيها حجم ثابت
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.width = '360px';
+        container.style.height = '640px';
+        container.style.zIndex = '-9999'; // تحت كل شي
+        container.style.overflow = 'hidden';
+        container.style.padding = '0';
+        container.style.margin = '0';
         
-        document.body.appendChild(studio);
+        document.body.appendChild(container);
 
-        // 3. نسخ الكرت وحشره بالاستديو
+        // 2. نسخ الكرت
         const clone = original.cloneNode(true);
+        // تصفير كل المسافات للنسخة
         clone.style.margin = '0';
-        clone.style.transform = 'none'; // إلغاء أي تكبير/تصغير
+        clone.style.transform = 'none';
         clone.style.borderRadius = '0'; 
         clone.style.width = '100%';
         clone.style.height = '100%';
-        
-        studio.appendChild(clone);
+        clone.style.boxShadow = 'none'; // عشان ما يطلع خيال مقصوص
 
-        // 4. تصوير الاستديو
-        html2canvas(studio, {
-            scale: 2,
+        container.appendChild(clone);
+
+        // 3. التصوير
+        html2canvas(container, {
+            scale: 2, 
             useCORS: true,
+            backgroundColor: null,
+            // هول الإعدادات هنن السر:
             width: 360,
             height: 640,
-            backgroundColor: '#000000' // تأكيد الخلفية السوداء
+            windowWidth: 360,
+            windowHeight: 640,
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0
         }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'baroud-poster.png';
             link.href = canvas.toDataURL("image/png");
             link.click();
             
-            // تنظيف
-            document.body.removeChild(studio);
+            document.body.removeChild(container);
             btn.innerText = originalText;
         }).catch(err => {
             alert("Error: " + err);
-            if(document.body.contains(studio)) document.body.removeChild(studio);
+            if(document.body.contains(container)) document.body.removeChild(container);
             btn.innerText = originalText;
         });
     }
