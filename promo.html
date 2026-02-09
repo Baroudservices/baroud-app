@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baroud Poster Maker 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
-    
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
     <style>
         body {
-            background: #e0e0e0; 
-            font-family: 'Poppins', sans-serif;
-            margin: 0; padding: 20px; 
-            text-align: center;
+            background: #e0e0e0; font-family: 'Poppins', sans-serif;
+            margin: 0; padding: 20px; text-align: center;
             display: flex; flex-direction: column; align-items: center;
         }
 
@@ -37,18 +34,17 @@
             text-align: center; cursor: pointer; display: block; margin: 5px 0;
             font-weight: bold; font-size: 0.9em; width: 100%;
         }
-        
+        input[type="file"] { display: none; }
+
         .save-btn {
             background: #00d26a; color: #fff; padding: 15px; border-radius: 8px;
             text-align: center; cursor: pointer; display: block; margin-top: 15px;
             font-weight: 900; font-size: 1.1em; border: none; width: 100%;
             box-shadow: 0 5px 15px rgba(0, 210, 106, 0.4);
         }
-        .save-btn:active { transform: scale(0.98); }
 
-        input[type="file"] { display: none; }
-
-        /* --- الكرت --- */
+        /* --- تصميم الكرت --- */
+        /* ملاحظة: ضفنا margin:0 للكرت عشان ما يصير مشاكل بالنسخ */
         .poster-card {
             width: 360px; height: 640px;
             background: #000; border-radius: 30px;
@@ -56,18 +52,14 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             display: flex; flex-direction: column;
             text-align: center; color: #fff;
-            /* هيدا السطر كان يعمل المشكلة، شلناه */
-            /* transform: translateZ(0); */
+            margin: auto; /* توسيط للشاشة */
         }
 
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
         .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.25); filter: blur(80px); z-index: 1; }
 
         .header { z-index: 5; margin-top: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .brand-title { 
-            font-family: 'Poppins'; font-weight: 900; font-size: 1.8em; 
-            letter-spacing: 2px; color: #fff; text-transform: uppercase; line-height: 1;
-        }
+        .brand-title { font-family: 'Poppins'; font-weight: 900; font-size: 1.8em; letter-spacing: 2px; color: #fff; text-transform: uppercase; line-height: 1; }
         .brand-subtitle { font-size: 0.7em; color: #888; letter-spacing: 3px; margin-top: 5px; text-transform: uppercase; }
 
         .image-area {
@@ -83,15 +75,11 @@
             position: absolute; top: 15px; left: 15px;
             background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
             color: #fff; padding: 5px 12px; border-radius: 20px;
-            font-size: 0.75em; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);
-            text-transform: uppercase;
+            font-size: 0.75em; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); text-transform: uppercase;
         }
 
         .content { z-index: 5; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        #p-title { 
-            font-family: 'Poppins'; font-weight: 800; font-size: 2em; margin: 0; line-height: 1.2; 
-            background: linear-gradient(90deg, #fff, #ddd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-        }
+        #p-title { font-family: 'Poppins'; font-weight: 800; font-size: 2em; margin: 0; line-height: 1.2; background: linear-gradient(90deg, #fff, #ddd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         #p-desc { color: #888; font-size: 0.9em; margin-top: 8px; font-weight: 400; }
 
         .bottom-section {
@@ -116,13 +104,10 @@
 
     <div class="controls">
         <h3>🎨 Poster Maker</h3>
-        
         <label for="img-upload" class="file-upload-btn">📂 Open Gallery</label>
         <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
-
         <input type="text" id="in-img" placeholder="Or Paste Image URL" oninput="update()">
         <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
-
         <input type="text" id="in-title" placeholder="Title (e.g. Netflix)" oninput="update()">
         <input type="text" id="in-desc" placeholder="Desc (e.g. Full Warranty)" oninput="update()">
         <input type="text" id="in-price" placeholder="Price (e.g. $10)" oninput="update()">
@@ -131,39 +116,31 @@
             <option value="BEST SELLER">BEST SELLER 🔥</option>
             <option value="LIMITED OFFER">LIMITED OFFER ⏳</option>
         </select>
-
         <button onclick="downloadPoster()" class="save-btn">SAVE IMAGE 📥</button>
     </div>
 
     <div class="poster-card" id="capture-area">
         <div class="bg-gradient"></div>
         <div class="bg-glow"></div>
-
         <div class="header">
             <div class="brand-title">BAROUD <span style="color:#00ffea">APP</span></div>
             <div class="brand-subtitle">Digital Store Services</div>
         </div>
-
         <div class="image-area">
             <div class="status-badge" id="p-badge">AVAILABLE NOW</div>
             <img id="p-img" src="https://via.placeholder.com/300" alt="Product" crossorigin="anonymous">
         </div>
-
         <div class="content">
             <div id="p-title">Service Name</div>
             <div id="p-desc">Description goes here</div>
         </div>
-
         <div class="bottom-section">
-            <div class="action-btn">
-                <span class="whatsapp-icon"></span> ORDER
-            </div>
+            <div class="action-btn"><span class="whatsapp-icon"></span> ORDER</div>
             <div class="price-box">
                 <span class="price-label">PRICE</span>
                 <span id="p-price">$0</span>
             </div>
         </div>
-
         <div class="footer-area">
             <div class="footer-number">+961 70 385 398</div>
             <div class="footer-link">WWW.BAROUDAPP.COM</div>
@@ -176,9 +153,7 @@
         const file = fileInput.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('p-img').src = e.target.result;
-            }
+            reader.onload = function(e) { document.getElementById('p-img').src = e.target.result; }
             reader.readAsDataURL(file);
         }
     }
@@ -197,53 +172,60 @@
         document.getElementById('p-badge').innerText = badge;
     }
 
-    // 🔥 دالة التحميل الجديدة والمحسنة 🔥
+    // 🔥 دالة التحميل "النووية" 🔥
     function downloadPoster() {
         const btn = document.querySelector('.save-btn');
         const originalText = btn.innerText;
-        btn.innerText = "⏳ Processing..."; 
+        btn.innerText = "⏳ Saving..."; 
 
         const original = document.getElementById('capture-area');
         
-        // 1. نعمل نسخة طبق الأصل (Clone)
-        const clone = original.cloneNode(true);
-        
-        // 2. بنحط النسخة بمكان ثابت ومخفي عالشاشة
-        clone.style.position = "absolute";
-        clone.style.top = "0";
-        clone.style.left = "0";
-        clone.style.zIndex = "-9999";
-        // بنجبر النسخة تكون بالحجم الصحيح
-        clone.style.width = "360px";
-        clone.style.height = "640px";
-        clone.style.transform = "none"; // لغاء أي تأثيرات
-        
-        document.body.appendChild(clone);
+        // 1. إنشاء حاوية مخفية بحجم ثابت ومحدد
+        // هيدا هو السر: بنجبر المتصفح يصور 360x640 بكسل بالزبط
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'fixed';
+        wrapper.style.top = '0';
+        wrapper.style.left = '0';
+        wrapper.style.width = '360px';
+        wrapper.style.height = '640px';
+        wrapper.style.zIndex = '-9999';
+        wrapper.style.overflow = 'hidden'; // قص الزوايد
+        document.body.appendChild(wrapper);
 
-        // 3. بنصور النسخة المثالية
+        // 2. نسخ الكرت
+        const clone = original.cloneNode(true);
+        // تصفير المارجن للنسخة عشان تلزق بالزاوية
+        clone.style.margin = '0';
+        clone.style.transform = 'none';
+        clone.style.width = '360px';
+        clone.style.height = '640px';
+        clone.style.borderRadius = '0'; // إلغاء التدوير مؤقتاً لضمان عدم وجود حواف بيضاء
+
+        wrapper.appendChild(clone);
+
+        // 3. التصوير
         html2canvas(clone, {
-            scale: 3, // دقة عالية
-            useCORS: true, 
-            backgroundColor: null,
+            scale: 2, // دقة عالية
+            useCORS: true,
             width: 360,
             height: 640,
             windowWidth: 360,
             windowHeight: 640,
             scrollX: 0,
-            scrollY: 0
+            scrollY: 0,
+            backgroundColor: null
         }).then(canvas => {
-            // تحميل الصورة
             const link = document.createElement('a');
-            link.download = 'baroud-poster.png';
+            link.download = 'baroud-app-poster.png';
             link.href = canvas.toDataURL("image/png");
             link.click();
             
             // تنظيف
-            document.body.removeChild(clone);
+            document.body.removeChild(wrapper);
             btn.innerText = originalText;
         }).catch(err => {
             alert("Error: " + err);
-            if(document.body.contains(clone)) document.body.removeChild(clone);
+            document.body.removeChild(wrapper);
             btn.innerText = originalText;
         });
     }
