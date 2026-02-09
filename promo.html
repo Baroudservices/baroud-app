@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,8 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #e0e0e0; font-family: 'Tajawal', sans-serif;
-            margin: 0; padding: 20px; text-align: center;
+            background: #e0e0e0; 
+            font-family: 'Poppins', sans-serif; /* غيرنا الخط الأساسي للانكليزي */
+            margin: 0; padding: 20px; 
+            text-align: center;
             display: flex; flex-direction: column; align-items: center;
         }
 
@@ -17,15 +19,14 @@
             background: #fff; padding: 20px; border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             width: 100%; max-width: 350px; margin-bottom: 30px;
-            text-align: right;
         }
-        .controls h3 { margin: 0 0 10px 0; color: #333; font-family: 'Poppins'; font-size: 1em; text-align: center; }
+        .controls h3 { margin: 0 0 10px 0; color: #333; text-align: center; }
         
         input, select {
             width: 100%; padding: 12px; margin: 5px 0;
             background: #f4f4f4; border: 1px solid #ddd;
             color: #333; text-align: center; border-radius: 8px;
-            font-family: 'Tajawal'; outline: none; font-weight: bold;
+            font-family: 'Poppins'; outline: none; font-weight: bold;
         }
 
         /* زر رفع الصورة */
@@ -49,10 +50,18 @@
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
         .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.25); filter: blur(80px); z-index: 1; }
 
-        .header { z-index: 5; margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .logo-box { background: #fff; color: #000; font-weight: 900; padding: 2px 8px; border-radius: 4px; font-family: 'Poppins'; font-size: 0.9em; letter-spacing: 1px; }
-        .app-title { font-family: 'Poppins'; font-weight: 600; font-size: 1em; letter-spacing: 1px; color: #fff; }
+        /* الهيدر الجديد */
+        .header { z-index: 5; margin-top: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .brand-title { 
+            font-family: 'Poppins'; font-weight: 900; font-size: 1.8em; 
+            letter-spacing: 2px; color: #fff; text-transform: uppercase;
+            line-height: 1;
+        }
+        .brand-subtitle {
+            font-size: 0.7em; color: #888; letter-spacing: 3px; margin-top: 5px; text-transform: uppercase;
+        }
 
+        /* منطقة الصورة */
         .image-area {
             z-index: 5; margin: 20px auto; width: 300px; height: 300px;
             border-radius: 25px; background: rgba(255,255,255,0.05);
@@ -67,45 +76,56 @@
             background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
             color: #fff; padding: 5px 12px; border-radius: 20px;
             font-size: 0.75em; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);
-            font-family: 'Poppins';
+            text-transform: uppercase;
         }
 
+        /* النصوص */
         .content { z-index: 5; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        #p-title { font-family: 'Tajawal'; font-weight: 900; font-size: 2.2em; margin: 0; line-height: 1.2; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        #p-desc { color: #888; font-size: 0.95em; margin-top: 10px; font-weight: 500; }
+        #p-title { 
+            font-family: 'Poppins'; font-weight: 800; font-size: 2em; margin: 0; line-height: 1.2; 
+            background: linear-gradient(90deg, #fff, #ddd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
+        #p-desc { color: #888; font-size: 0.9em; margin-top: 8px; font-weight: 400; }
 
+        /* السعر والزر */
         .bottom-section {
-            z-index: 5; background: #1a1a1a; margin: 15px; padding: 15px 20px;
-            border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
+            z-index: 5; background: #1a1a1a; margin: 15px; padding: 12px 20px;
+            border-radius: 18px; display: flex; justify-content: space-between; align-items: center;
             border: 1px solid #333;
         }
         .price-box { text-align: right; }
-        .price-label { color: #666; font-size: 0.7em; font-family: 'Poppins'; display: block; }
-        #p-price { font-family: 'Poppins'; font-weight: 700; font-size: 1.8em; color: #fff; line-height: 1; }
+        .price-label { color: #666; font-size: 0.6em; display: block; letter-spacing: 1px; }
+        #p-price { font-weight: 700; font-size: 1.6em; color: #fff; line-height: 1; }
 
-        .action-btn { background: #fff; color: #000; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-family: 'Poppins'; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
+        .action-btn { background: #fff; color: #000; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
         .whatsapp-icon { width: 8px; height: 8px; background: #00d26a; border-radius: 50%; display: inline-block; }
 
-        .footer-number { z-index: 5; margin-bottom: 20px; font-family: 'Poppins'; color: #555; font-size: 0.8em; letter-spacing: 2px; }
+        /* الفوتر والرابط */
+        .footer-area { z-index: 5; margin-bottom: 25px; display: flex; flex-direction: column; gap: 5px; }
+        .footer-number { color: #888; font-size: 0.9em; letter-spacing: 1px; font-weight: 600; }
+        .footer-link { 
+            color: #00ffea; font-size: 0.8em; letter-spacing: 2px; 
+            text-transform: uppercase; font-weight: bold; text-decoration: none;
+        }
 
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h3>🎨 صانع البوسترات</h3>
+        <h3>🎨 Poster Maker</h3>
         
-        <label for="img-upload" class="file-upload-btn">📂 اضغط هنا لاختيار صورة من الاستديو</label>
+        <label for="img-upload" class="file-upload-btn">📂 Choose Image from Gallery</label>
         <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
 
-        <p style="margin:5px 0; font-size:0.8em; color:#888;">أو الصق رابط صورة:</p>
-        <input type="text" id="in-img" placeholder="رابط صورة (اختياري)" oninput="update()">
+        <p style="margin:5px 0; font-size:0.8em; color:#888;">Or paste URL:</p>
+        <input type="text" id="in-img" placeholder="Image URL" oninput="update()">
         
         <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
 
-        <input type="text" id="in-title" placeholder="العنوان (مثلاً: شدات ببجي)" oninput="update()">
-        <input type="text" id="in-desc" placeholder="الوصف (تسليم فوري - رسمي)" oninput="update()">
-        <input type="text" id="in-price" placeholder="السعر (مثلاً: $10)" oninput="update()">
+        <input type="text" id="in-title" placeholder="Title (e.g. Netflix 1 Year)" oninput="update()">
+        <input type="text" id="in-desc" placeholder="Description (e.g. Full Warranty)" oninput="update()">
+        <input type="text" id="in-price" placeholder="Price (e.g. $38.26)" oninput="update()">
         <select id="in-badge" onchange="update()">
             <option value="AVAILABLE NOW">AVAILABLE NOW</option>
             <option value="BEST SELLER">BEST SELLER 🔥</option>
@@ -118,8 +138,8 @@
         <div class="bg-glow"></div>
 
         <div class="header">
-            <div class="logo-box">BAROUD</div>
-            <div class="app-title">APP STORE</div>
+            <div class="brand-title">BAROUD <span style="color:#00ffea">APP</span></div>
+            <div class="brand-subtitle">Digital Store Services</div>
         </div>
 
         <div class="image-area">
@@ -128,8 +148,8 @@
         </div>
 
         <div class="content">
-            <div id="p-title">اسم الخدمة</div>
-            <div id="p-desc">الوصف يظهر هنا</div>
+            <div id="p-title">Service Name</div>
+            <div id="p-desc">Description goes here</div>
         </div>
 
         <div class="bottom-section">
@@ -142,13 +162,13 @@
             </div>
         </div>
 
-        <div class="footer-number">
-            +961 70 385 398
+        <div class="footer-area">
+            <div class="footer-number">+961 70 385 398</div>
+            <div class="footer-link">WWW.BAROUDAPP.COM</div>
         </div>
     </div>
 
 <script>
-    // كود رفع الصورة من التلفون
     function uploadImage() {
         const fileInput = document.getElementById('img-upload');
         const file = fileInput.files[0];
@@ -161,7 +181,6 @@
         }
     }
 
-    // كود تحديث النصوص
     function update() {
         const imgUrl = document.getElementById('in-img').value;
         const title = document.getElementById('in-title').value;
@@ -169,12 +188,15 @@
         const price = document.getElementById('in-price').value;
         const badge = document.getElementById('in-badge').value;
 
-        // اذا حط رابط، استعمل الرابط. اذا ما حط، خلي الصورة المرفوعة
         if(imgUrl) document.getElementById('p-img').src = imgUrl;
-        
         if(title) document.getElementById('p-title').innerText = title;
         if(desc) document.getElementById('p-desc').innerText = desc;
-        if(price) document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
+        
+        // تصليح ظهور السعر
+        if(price) {
+            document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
+        }
+        
         document.getElementById('p-badge').innerText = badge;
     }
 </script>
