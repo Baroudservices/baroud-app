@@ -6,12 +6,9 @@
     <title>Baroud Poster Maker 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* إعدادات الصفحة */
         body {
-            background: #e0e0e0; /* خلفية فاتحة عشان تميز الكرت */
-            font-family: 'Tajawal', sans-serif;
-            margin: 0; padding: 20px;
-            text-align: center;
+            background: #e0e0e0; font-family: 'Tajawal', sans-serif;
+            margin: 0; padding: 20px; text-align: center;
             display: flex; flex-direction: column; align-items: center;
         }
 
@@ -23,6 +20,7 @@
             text-align: right;
         }
         .controls h3 { margin: 0 0 10px 0; color: #333; font-family: 'Poppins'; font-size: 1em; text-align: center; }
+        
         input, select {
             width: 100%; padding: 12px; margin: 5px 0;
             background: #f4f4f4; border: 1px solid #ddd;
@@ -30,62 +28,40 @@
             font-family: 'Tajawal'; outline: none; font-weight: bold;
         }
 
-        /* --- الكرت الجديد (Modern Poster) --- */
+        /* زر رفع الصورة */
+        .file-upload-btn {
+            background: #000; color: #fff; padding: 10px; border-radius: 8px;
+            text-align: center; cursor: pointer; display: block; margin: 5px 0;
+            font-weight: bold; font-size: 0.9em;
+        }
+        input[type="file"] { display: none; }
+
+        /* --- الكرت --- */
         .poster-card {
-            width: 360px;
-            height: 640px;
-            background: #000;
-            border-radius: 30px;
-            position: relative;
-            overflow: hidden;
+            width: 360px; height: 640px;
+            background: #000; border-radius: 30px;
+            position: relative; overflow: hidden;
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             display: flex; flex-direction: column;
-            text-align: center;
-            color: #fff;
+            text-align: center; color: #fff;
         }
 
-        /* 1. الخلفية الجذابة */
-        .bg-gradient {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, #111 0%, #000 100%);
-            z-index: 1;
-        }
-        .bg-glow {
-            position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
-            width: 300px; height: 300px;
-            background: rgba(0, 140, 255, 0.25); /* لون أزرق راقي */
-            filter: blur(80px);
-            z-index: 1;
-        }
+        .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
+        .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.25); filter: blur(80px); z-index: 1; }
 
-        /* 2. الهيدر (شعار التطبيق) */
-        .header {
-            z-index: 5; margin-top: 25px;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-        }
-        .logo-box {
-            background: #fff; color: #000; font-weight: 900;
-            padding: 2px 8px; border-radius: 4px; font-family: 'Poppins';
-            font-size: 0.9em; letter-spacing: 1px;
-        }
+        .header { z-index: 5; margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .logo-box { background: #fff; color: #000; font-weight: 900; padding: 2px 8px; border-radius: 4px; font-family: 'Poppins'; font-size: 0.9em; letter-spacing: 1px; }
         .app-title { font-family: 'Poppins'; font-weight: 600; font-size: 1em; letter-spacing: 1px; color: #fff; }
 
-        /* 3. منطقة الصورة (Hero Section) */
         .image-area {
-            z-index: 5;
-            margin: 20px auto;
-            width: 300px; height: 300px;
-            border-radius: 25px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
+            z-index: 5; margin: 20px auto; width: 300px; height: 300px;
+            border-radius: 25px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); position: relative;
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); overflow: hidden;
         }
         #p-img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* شارة الحالة (فوق الصورة) */
         .status-badge {
             position: absolute; top: 15px; left: 15px;
             background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
@@ -94,58 +70,39 @@
             font-family: 'Poppins';
         }
 
-        /* 4. النصوص والتفاصيل */
         .content { z-index: 5; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        
-        #p-title {
-            font-family: 'Tajawal'; font-weight: 900; font-size: 2.2em;
-            margin: 0; line-height: 1.2;
-            background: linear-gradient(90deg, #fff, #aaa);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        
-        #p-desc {
-            color: #888; font-size: 0.95em; margin-top: 10px; font-weight: 500;
-        }
+        #p-title { font-family: 'Tajawal'; font-weight: 900; font-size: 2.2em; margin: 0; line-height: 1.2; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #p-desc { color: #888; font-size: 0.95em; margin-top: 10px; font-weight: 500; }
 
-        /* 5. السعر والطلب */
         .bottom-section {
-            z-index: 5;
-            background: #1a1a1a;
-            margin: 15px; padding: 15px 20px;
-            border-radius: 20px;
-            display: flex; justify-content: space-between; align-items: center;
+            z-index: 5; background: #1a1a1a; margin: 15px; padding: 15px 20px;
+            border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
             border: 1px solid #333;
         }
-
         .price-box { text-align: right; }
         .price-label { color: #666; font-size: 0.7em; font-family: 'Poppins'; display: block; }
-        #p-price {
-            font-family: 'Poppins'; font-weight: 700; font-size: 1.8em; color: #fff;
-            line-height: 1;
-        }
+        #p-price { font-family: 'Poppins'; font-weight: 700; font-size: 1.8em; color: #fff; line-height: 1; }
 
-        .action-btn {
-            background: #fff; color: #000;
-            padding: 10px 20px; border-radius: 12px;
-            font-weight: 800; font-family: 'Poppins'; font-size: 0.9em;
-            display: flex; align-items: center; gap: 5px;
-        }
+        .action-btn { background: #fff; color: #000; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-family: 'Poppins'; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
         .whatsapp-icon { width: 8px; height: 8px; background: #00d26a; border-radius: 50%; display: inline-block; }
 
-        /* رقم الهاتف */
-        .footer-number {
-            z-index: 5; margin-bottom: 20px; font-family: 'Poppins';
-            color: #555; font-size: 0.8em; letter-spacing: 2px;
-        }
+        .footer-number { z-index: 5; margin-bottom: 20px; font-family: 'Poppins'; color: #555; font-size: 0.8em; letter-spacing: 2px; }
 
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <h3>🎨 تصميم البوستر</h3>
-        <input type="text" id="in-img" placeholder="رابط الصورة" oninput="update()">
+        <h3>🎨 صانع البوسترات</h3>
+        
+        <label for="img-upload" class="file-upload-btn">📂 اضغط هنا لاختيار صورة من الاستديو</label>
+        <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
+
+        <p style="margin:5px 0; font-size:0.8em; color:#888;">أو الصق رابط صورة:</p>
+        <input type="text" id="in-img" placeholder="رابط صورة (اختياري)" oninput="update()">
+        
+        <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+
         <input type="text" id="in-title" placeholder="العنوان (مثلاً: شدات ببجي)" oninput="update()">
         <input type="text" id="in-desc" placeholder="الوصف (تسليم فوري - رسمي)" oninput="update()">
         <input type="text" id="in-price" placeholder="السعر (مثلاً: $10)" oninput="update()">
@@ -171,8 +128,8 @@
         </div>
 
         <div class="content">
-            <div id="p-title">عنوان الخدمة</div>
-            <div id="p-desc">وصف الخدمة يظهر هنا بشكل مرتب</div>
+            <div id="p-title">اسم الخدمة</div>
+            <div id="p-desc">الوصف يظهر هنا</div>
         </div>
 
         <div class="bottom-section">
@@ -191,14 +148,30 @@
     </div>
 
 <script>
+    // كود رفع الصورة من التلفون
+    function uploadImage() {
+        const fileInput = document.getElementById('img-upload');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('p-img').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // كود تحديث النصوص
     function update() {
-        const img = document.getElementById('in-img').value;
+        const imgUrl = document.getElementById('in-img').value;
         const title = document.getElementById('in-title').value;
         const desc = document.getElementById('in-desc').value;
         const price = document.getElementById('in-price').value;
         const badge = document.getElementById('in-badge').value;
 
-        if(img) document.getElementById('p-img').src = img;
+        // اذا حط رابط، استعمل الرابط. اذا ما حط، خلي الصورة المرفوعة
+        if(imgUrl) document.getElementById('p-img').src = imgUrl;
+        
         if(title) document.getElementById('p-title').innerText = title;
         if(desc) document.getElementById('p-desc').innerText = desc;
         if(price) document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
