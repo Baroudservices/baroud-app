@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster Maker V8 🚀</title>
+    <title>Baroud Poster V9 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
@@ -15,11 +15,11 @@
             margin: 0; padding: 20px; 
             display: flex; flex-direction: column; align-items: center;
             color: #fff;
-            overflow-x: hidden;
+            padding-bottom: 100px; /* مساحة للكرت */
         }
 
         .version-tag {
-            background: #00d26a; color: #fff; padding: 5px 15px;
+            background: #ff0055; color: #fff; padding: 5px 15px;
             border-radius: 20px; font-size: 0.8em; margin-bottom: 15px;
             font-weight: bold; border: 1px solid #fff;
         }
@@ -38,8 +38,6 @@
             font-family: 'Poppins'; outline: none; font-weight: bold; font-size: 0.9em;
         }
 
-        .input-label { font-size: 0.8em; color: #aaa; margin-bottom: -5px; display: block; text-align: left; margin-left: 5px; }
-
         .file-upload-btn {
             background: linear-gradient(45deg, #00ffea, #0099ff); 
             color: #000; padding: 12px; border-radius: 10px;
@@ -56,8 +54,7 @@
 
         input[type="file"] { display: none; }
 
-        /* --- تصميم الكرت --- */
-        /* ملاحظة: هيدا الستايل رح يستعمله الكود ليبني الكرت الجديد */
+        /* --- الكرت --- */
         .poster-card {
             width: 360px; height: 640px;
             background: #000; border-radius: 30px;
@@ -66,20 +63,12 @@
             display: flex; flex-direction: column;
             text-align: center; color: #fff;
             margin: auto;
-            /* منع تحديد النصوص */
             user-select: none;
-        }
-
-        /* تنسيق خاص للمعينة فقط (عشان تبين صح عالموبايل) */
-        #preview-wrapper .poster-card {
-            /* تصغير للمعاينة فقط */
-            transform: scale(0.85);
+            /* تصغير بسيط للمعاينة فقط */
+            transform: scale(0.9);
             transform-origin: top center;
-            margin-bottom: -80px;
-            border: 1px solid #333;
         }
 
-        /* --- باقي تفاصيل التصميم (مشتركة) --- */
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
         .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.15); filter: blur(80px); z-index: 1; }
 
@@ -123,58 +112,49 @@
         .footer-number { color: #666; font-size: 0.9em; letter-spacing: 2px; font-weight: 600; }
         .footer-link { color: #00ffea; font-size: 0.7em; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; text-decoration: none; }
 
-        /* ستايل خاص لمنطقة التصدير المخفية */
-        #render-zone {
-            position: fixed; top: 0; left: 0;
-            width: 360px; height: 640px;
-            z-index: -9999;
-            opacity: 0; /* مخفي عن العين */
-            pointer-events: none;
+        /* --- نافذة النتيجة (Result Modal) --- */
+        #result-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 99999;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            overflow-y: auto;
         }
-        /* إجبار الكرت بداخل منطقة التصدير على الحجم الكامل */
-        #render-zone .poster-card {
-            transform: none !important;
-            margin: 0 !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
+        #result-img {
+            max-width: 90%; max-height: 80vh;
+            border: 2px solid #00ffea; border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 234, 0.3);
         }
+        .close-btn {
+            margin-top: 20px; background: #ff0055; color: #fff;
+            padding: 10px 30px; border-radius: 50px; border: none; font-weight: bold;
+            font-size: 1.1em; cursor: pointer;
+        }
+        .hint-text { color: #aaa; margin-bottom: 10px; font-size: 0.9em; }
 
     </style>
 </head>
 <body>
 
-    <div class="version-tag">Ver 8.0 (No-Crop Guarantee)</div>
+    <div class="version-tag">Ver 9.0 (Show & Save)</div>
 
     <div class="controls">
         <label for="img-upload" class="file-upload-btn">📂 اختر صورة من الاستديو</label>
         <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
-        
-        <span class="input-label">رابط صورة (اختياري)</span>
         <input type="text" id="in-img" placeholder="Paste Image URL" oninput="update()">
-        
         <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
-        
-        <span class="input-label">العنوان</span>
-        <input type="text" id="in-title" placeholder="e.g. Netflix 1 Month" oninput="update()">
-        
-        <span class="input-label">الوصف</span>
-        <input type="text" id="in-desc" placeholder="e.g. 4K UHD - Private" oninput="update()">
-        
-        <span class="input-label">السعر</span>
-        <input type="text" id="in-price" placeholder="e.g. $5" oninput="update()">
-        
-        <span class="input-label">الشارة</span>
+        <input type="text" id="in-title" placeholder="Title (e.g. Netflix 1 Month)" oninput="update()">
+        <input type="text" id="in-desc" placeholder="Desc (e.g. 4K UHD - Private)" oninput="update()">
+        <input type="text" id="in-price" placeholder="Price (e.g. $5)" oninput="update()">
         <select id="in-badge" onchange="update()">
             <option value="AVAILABLE NOW">AVAILABLE NOW</option>
             <option value="BEST SELLER">BEST SELLER 🔥</option>
             <option value="LIMITED OFFER">LIMITED OFFER ⏳</option>
         </select>
-        
-        <button onclick="downloadPoster()" class="save-btn">SAVE IMAGE 📥</button>
+        <button onclick="generatePoster()" class="save-btn">✨ GENERATE IMAGE</button>
     </div>
 
-    <div id="preview-wrapper">
-        <div class="poster-card">
+    <div id="card-wrapper">
+        <div class="poster-card" id="capture-area">
             <div class="bg-gradient"></div>
             <div class="bg-glow"></div>
             <div class="header">
@@ -182,18 +162,18 @@
                 <div class="brand-subtitle">Digital Store Services</div>
             </div>
             <div class="image-area">
-                <div class="status-badge" id="view-badge">AVAILABLE NOW</div>
-                <img class="p-img" id="view-img" src="https://via.placeholder.com/300" alt="Product" crossorigin="anonymous">
+                <div class="status-badge" id="p-badge">AVAILABLE NOW</div>
+                <img class="p-img" id="p-img" src="https://via.placeholder.com/300" alt="Product" crossorigin="anonymous">
             </div>
             <div class="content">
-                <div class="p-title" id="view-title">Service Name</div>
-                <div class="p-desc" id="view-desc">Description goes here</div>
+                <div class="p-title" id="p-title">Service Name</div>
+                <div class="p-desc" id="p-desc">Description goes here</div>
             </div>
             <div class="bottom-section">
                 <div class="action-btn"><span class="whatsapp-icon"></span> ORDER</div>
                 <div class="price-box">
                     <span class="price-label">PRICE</span>
-                    <span class="p-price" id="view-price">$0</span>
+                    <span class="p-price" id="p-price">$0</span>
                 </div>
             </div>
             <div class="footer-area">
@@ -203,123 +183,75 @@
         </div>
     </div>
 
-<script>
-    // تخزين البيانات
-    let currentData = {
-        img: 'https://via.placeholder.com/300',
-        title: 'Service Name',
-        desc: 'Description goes here',
-        price: '$0',
-        badge: 'AVAILABLE NOW'
-    };
+    <div id="result-modal">
+        <p class="hint-text">👇 إضغط مطولاً على الصورة لحفظها 👇</p>
+        <img id="result-img" src="" alt="Generated Poster">
+        <button class="close-btn" onclick="closeModal()">إغلاق X</button>
+    </div>
 
+<script>
     function uploadImage() {
         const file = document.getElementById('img-upload').files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) { 
-                currentData.img = e.target.result;
-                updateView();
-            }
+            reader.onload = function(e) { document.getElementById('p-img').src = e.target.result; }
             reader.readAsDataURL(file);
         }
     }
 
     function update() {
         const imgUrl = document.getElementById('in-img').value;
-        if(imgUrl) currentData.img = imgUrl;
+        const title = document.getElementById('in-title').value;
+        const desc = document.getElementById('in-desc').value;
+        const price = document.getElementById('in-price').value;
+        const badge = document.getElementById('in-badge').value;
 
-        currentData.title = document.getElementById('in-title').value || 'Service Name';
-        currentData.desc = document.getElementById('in-desc').value || 'Description goes here';
-        
-        const p = document.getElementById('in-price').value;
-        currentData.price = p ? (p.includes('$') ? p : '$' + p) : '$0';
-        
-        currentData.badge = document.getElementById('in-badge').value;
-
-        updateView();
+        if(imgUrl) document.getElementById('p-img').src = imgUrl;
+        if(title) document.getElementById('p-title').innerText = title;
+        if(desc) document.getElementById('p-desc').innerText = desc;
+        if(price) document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
+        document.getElementById('p-badge').innerText = badge;
     }
 
-    function updateView() {
-        document.getElementById('view-img').src = currentData.img;
-        document.getElementById('view-title').innerText = currentData.title;
-        document.getElementById('view-desc').innerText = currentData.desc;
-        document.getElementById('view-price').innerText = currentData.price;
-        document.getElementById('view-badge').innerText = currentData.badge;
+    function closeModal() {
+        document.getElementById('result-modal').style.display = 'none';
     }
 
-    // 🔥 دالة التحميل النهائية (Re-Build Strategy) 🔥
-    function downloadPoster() {
+    // 🔥 الطريقة الجديدة: عرض الصورة للمستخدم ليحفظها بنفسه 🔥
+    function generatePoster() {
         const btn = document.querySelector('.save-btn');
+        const element = document.getElementById('capture-area');
+        
         btn.innerText = "⏳ Generating...";
 
-        // 1. إنشاء منطقة تصدير مخفية
-        const renderZone = document.createElement('div');
-        renderZone.id = 'render-zone';
-        document.body.appendChild(renderZone);
+        // نلغي التصغير مؤقتاً للتصوير
+        element.style.transform = "scale(1)";
+        window.scrollTo(0, document.body.scrollHeight); // ننزل لتحت عند الكرت
 
-        // 2. بناء كرت جديد بداخلها (HTML نقي)
-        // بنحط القيم مباشرة بالكود عشان نضمن انها صح
-        renderZone.innerHTML = `
-            <div class="poster-card">
-                <div class="bg-gradient"></div>
-                <div class="bg-glow"></div>
-                <div class="header">
-                    <div class="brand-title">BAROUD <span style="color:#00ffea">APP</span></div>
-                    <div class="brand-subtitle">Digital Store Services</div>
-                </div>
-                <div class="image-area">
-                    <div class="status-badge">${currentData.badge}</div>
-                    <img class="p-img" src="${currentData.img}" style="object-fit:cover;">
-                </div>
-                <div class="content">
-                    <div class="p-title">${currentData.title}</div>
-                    <div class="p-desc">${currentData.desc}</div>
-                </div>
-                <div class="bottom-section">
-                    <div class="action-btn"><span class="whatsapp-icon"></span> ORDER</div>
-                    <div class="price-box">
-                        <span class="price-label">PRICE</span>
-                        <div class="p-price">${currentData.price}</div>
-                    </div>
-                </div>
-                <div class="footer-area">
-                    <div class="footer-number">+961 70 385 398</div>
-                    <div class="footer-link">WWW.BAROUDAPP.COM</div>
-                </div>
-            </div>
-        `;
+        html2canvas(element, {
+            scale: 2, // جودة عالية
+            useCORS: true,
+            backgroundColor: null,
+            scrollX: 0,
+            scrollY: -window.scrollY // تصليح مكان السكرول
+        }).then(canvas => {
+            // نرجع الستايل
+            element.style.transform = "scale(0.9)";
+            btn.innerText = "✨ GENERATE IMAGE";
 
-        // 3. التصوير
-        // تأخير بسيط جداً للتأكد من تحميل الصورة بقلب الكود الجديد
-        setTimeout(() => {
-            html2canvas(renderZone, {
-                scale: 3, // دقة عالية جداً
-                useCORS: true,
-                backgroundColor: '#000000',
-                width: 360,
-                height: 640,
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: 360,
-                windowHeight: 640,
-                x: 0,
-                y: 0
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Baroud-${currentData.title}.png`;
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-
-                // تنظيف
-                document.body.removeChild(renderZone);
-                btn.innerText = "SAVE IMAGE 📥";
-            }).catch(err => {
-                alert("Error: " + err);
-                if(document.body.contains(renderZone)) document.body.removeChild(renderZone);
-                btn.innerText = "SAVE IMAGE 📥";
-            });
-        }, 100);
+            // عرض الصورة
+            const imgData = canvas.toDataURL("image/png");
+            const modal = document.getElementById('result-modal');
+            const resultImg = document.getElementById('result-img');
+            
+            resultImg.src = imgData;
+            modal.style.display = 'flex';
+            
+        }).catch(err => {
+            alert("Error: " + err);
+            element.style.transform = "scale(0.9)";
+            btn.innerText = "✨ GENERATE IMAGE";
+        });
     }
 </script>
 
