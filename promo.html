@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster V11 🚀</title>
+    <title>Baroud Poster V12 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
@@ -118,7 +118,7 @@
         .footer-number { color: #666; font-size: 0.9em; letter-spacing: 2px; font-weight: 600; }
         .footer-link { color: #00ffea; font-size: 0.7em; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; text-decoration: none; }
 
-        /* --- نافذة النتيجة (Result Modal) --- */
+        /* --- نافذة النتيجة --- */
         #result-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 999999;
@@ -126,8 +126,6 @@
             overflow-y: auto; padding: 20px; box-sizing: border-box;
         }
         #result-img {
-            /* عرض الصورة بالكامل دون قص */
-            width: auto; height: auto; 
             max-width: 90%; max-height: 80vh;
             border: 2px solid #00ffea; border-radius: 15px;
             box-shadow: 0 0 30px rgba(0, 255, 234, 0.3);
@@ -144,7 +142,7 @@
 </head>
 <body>
 
-    <div class="version-tag">Ver 11.0 (Zero Position)</div>
+    <div class="version-tag">Ver 12.0 (The Final Fix)</div>
 
     <div class="controls">
         <label for="img-upload" class="file-upload-btn">📂 اختر صورة من الاستديو</label>
@@ -226,21 +224,21 @@
         document.getElementById('result-modal').style.display = 'none';
     }
 
-    // 🔥 V11.0: تثبيت الكرت بالزاوية (Zero Position) 🔥
+    // 🔥 V12.0: الإجبار على الالتصاق بالزاوية 🔥
     function generatePoster() {
         const btn = document.querySelector('.save-btn');
         btn.innerText = "⏳ جاري المعالجة...";
 
-        // 1. إنشاء "غرفة تصوير" (Container)
-        // الفرق هون: لغينا الـ Flex واستعملنا absolute positioning
+        // 1. إنشاء علبة بحجم الكرت بالضبط، في الزاوية 0,0
         const studio = document.createElement('div');
         studio.style.position = 'fixed';
         studio.style.top = '0';
         studio.style.left = '0';
-        studio.style.width = '100%';
-        studio.style.height = '100%';
-        studio.style.zIndex = '-9999'; // مخفي بالخلف
-        studio.style.background = '#000'; // لضمان الخلفية
+        studio.style.width = '360px'; // حجم الكرت
+        studio.style.height = '640px'; // حجم الكرت
+        studio.style.zIndex = '-9999'; 
+        studio.style.background = '#000'; // خلفية سوداء احتياط
+        studio.style.overflow = 'hidden'; // ممنوع أي شي يطلع برا
         
         document.body.appendChild(studio);
 
@@ -248,26 +246,32 @@
         const original = document.getElementById('card-source');
         const clone = original.cloneNode(true);
         
-        // 3. إجبار النسخة تكون بالزاوية (0,0) وبحجمها الطبيعي
+        // 3. إجبار النسخة تكون ملزقة بالزاوية (بدون هوامش)
+        // هذا هو السطر السحري اللي كان ناقص
         clone.style.position = 'absolute';
         clone.style.top = '0';
         clone.style.left = '0';
-        clone.style.transform = 'none'; 
-        clone.style.margin = '0';
-        clone.style.boxShadow = 'none';
+        clone.style.margin = '0'; 
+        clone.style.transform = 'none';
+        clone.style.borderRadius = '0'; // إلغاء التدوير عشان ما يبين زوايا الخلفية
         
         studio.appendChild(clone);
 
-        // 4. التصوير
-        // شلنا خصائص width/height/x/y وخلينا الكود يصور العنصر نفسه
+        // 4. التصوير (تصوير العلبة نفسها)
         setTimeout(() => {
-            html2canvas(clone, {
-                scale: 2, // دقة عالية
+            html2canvas(studio, { // نصور الاستديو مش الكرت
+                scale: 2, 
                 useCORS: true,
                 backgroundColor: null,
-                scrollY: 0
+                width: 360,     
+                height: 640,
+                x: 0,
+                y: 0,
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: 360, // خدعة للمتصفح
+                windowHeight: 640 // خدعة للمتصفح
             }).then(canvas => {
-                // عرض النتيجة
                 const imgData = canvas.toDataURL("image/png");
                 const modal = document.getElementById('result-modal');
                 const resultImg = document.getElementById('result-img');
@@ -275,7 +279,6 @@
                 resultImg.src = imgData;
                 modal.style.display = 'flex';
                 
-                // تنظيف
                 document.body.removeChild(studio);
                 btn.innerText = "✨ GENERATE IMAGE";
                 
