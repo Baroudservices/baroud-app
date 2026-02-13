@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster V12 🚀</title>
+    <title>Baroud Poster V13 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
@@ -30,6 +30,7 @@
             background: #1e1e1e; padding: 20px; border-radius: 20px;
             border: 1px solid #333;
             width: 100%; max-width: 350px; margin-bottom: 30px;
+            transition: opacity 0.3s;
         }
         
         input, select {
@@ -56,6 +57,7 @@
         input[type="file"] { display: none; }
 
         /* --- الكرت --- */
+        /* تعديل مهم: الكرت له حجم ثابت ونسبة عرض لارتفاع ثابتة */
         .poster-card {
             width: 360px; height: 640px;
             background: #000; border-radius: 30px;
@@ -65,14 +67,42 @@
             text-align: center; color: #fff;
             margin: auto;
             user-select: none;
+            flex-shrink: 0; /* منع الانكماش */
         }
 
         /* تصغير للمعاينة فقط (عشان يبين بالشاشة) */
-        #preview-wrapper .poster-card {
-            transform: scale(0.9);
+        #preview-wrapper {
+            margin-bottom: 20px;
             transform-origin: top center;
-            margin-bottom: -60px; /* تعويض الفراغ */
-            border: 1px solid #333;
+            transition: transform 0.3s;
+        }
+        
+        /* كلاس خاص لوضع التصوير */
+        body.shooting-mode {
+            padding: 0;
+            margin: 0;
+            background: #000;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        body.shooting-mode .controls, 
+        body.shooting-mode .version-tag,
+        body.shooting-mode #result-modal {
+            display: none !important;
+        }
+
+        body.shooting-mode #preview-wrapper {
+            transform: scale(1) !important; /* استرجاع الحجم الطبيعي */
+            margin: 0;
+        }
+        
+        body.shooting-mode .poster-card {
+            border-radius: 0; /* إزالة الحواف الدائرية أثناء التصوير لملء الصورة */
+            box-shadow: none;
         }
 
         .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
@@ -142,7 +172,7 @@
 </head>
 <body>
 
-    <div class="version-tag">Ver 12.0 (The Final Fix)</div>
+    <div class="version-tag">Ver 13.0 (WYSIWYG)</div>
 
     <div class="controls">
         <label for="img-upload" class="file-upload-btn">📂 اختر صورة من الاستديو</label>
@@ -160,7 +190,7 @@
         <button onclick="generatePoster()" class="save-btn">✨ GENERATE IMAGE</button>
     </div>
 
-    <div id="preview-wrapper">
+    <div id="preview-wrapper" style="transform: scale(0.9);">
         <div class="poster-card" id="card-source">
             <div class="bg-gradient"></div>
             <div class="bg-glow"></div>
@@ -222,56 +252,41 @@
 
     function closeModal() {
         document.getElementById('result-modal').style.display = 'none';
+        // إزالة وضع التصوير عند الإغلاق احتياطاً
+        document.body.classList.remove('shooting-mode');
+        window.scrollTo(0,0);
     }
 
-    // 🔥 V12.0: الإجبار على الالتصاق بالزاوية 🔥
+    // 🔥 V13.0: وضع التصوير المباشر 🔥
     function generatePoster() {
         const btn = document.querySelector('.save-btn');
-        btn.innerText = "⏳ جاري المعالجة...";
-
-        // 1. إنشاء علبة بحجم الكرت بالضبط، في الزاوية 0,0
-        const studio = document.createElement('div');
-        studio.style.position = 'fixed';
-        studio.style.top = '0';
-        studio.style.left = '0';
-        studio.style.width = '360px'; // حجم الكرت
-        studio.style.height = '640px'; // حجم الكرت
-        studio.style.zIndex = '-9999'; 
-        studio.style.background = '#000'; // خلفية سوداء احتياط
-        studio.style.overflow = 'hidden'; // ممنوع أي شي يطلع برا
+        const card = document.getElementById('card-source');
         
-        document.body.appendChild(studio);
+        btn.innerText = "⏳ جاري التحضير...";
 
-        // 2. نسخ الكرت
-        const original = document.getElementById('card-source');
-        const clone = original.cloneNode(true);
+        // 1. تفعيل "وضع التصوير" (يخفي كل شيء ما عدا الكرت ويضبط الصفحة)
+        document.body.classList.add('shooting-mode');
         
-        // 3. إجبار النسخة تكون ملزقة بالزاوية (بدون هوامش)
-        // هذا هو السطر السحري اللي كان ناقص
-        clone.style.position = 'absolute';
-        clone.style.top = '0';
-        clone.style.left = '0';
-        clone.style.margin = '0'; 
-        clone.style.transform = 'none';
-        clone.style.borderRadius = '0'; // إلغاء التدوير عشان ما يبين زوايا الخلفية
-        
-        studio.appendChild(clone);
+        // 2. التمرير إلى أعلى الصفحة لضمان ظهور الكرت
+        window.scrollTo(0, 0);
 
-        // 4. التصوير (تصوير العلبة نفسها)
+        // انتظار قصير ليأخذ المتصفح التعديلات البصرية
         setTimeout(() => {
-            html2canvas(studio, { // نصور الاستديو مش الكرت
-                scale: 2, 
-                useCORS: true,
-                backgroundColor: null,
-                width: 360,     
-                height: 640,
-                x: 0,
-                y: 0,
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: 360, // خدعة للمتصفح
-                windowHeight: 640 // خدعة للمتصفح
+            // 3. تصوير الكرت الظاهر مباشرة
+            html2canvas(card, {
+                scale: 2, // جودة عالية
+                useCORS: true, // السماح بالصور الخارجية
+                backgroundColor: null, // خلفية شفافة
+                allowTaint: true,
+                // إجبار الكرت على أن يكون كاملاً
+                windowWidth: document.body.scrollWidth,
+                windowHeight: document.body.scrollHeight
             }).then(canvas => {
+                // 4. استرجاع الوضع الطبيعي فوراً
+                document.body.classList.remove('shooting-mode');
+                btn.innerText = "✨ GENERATE IMAGE";
+
+                // 5. عرض النتيجة
                 const imgData = canvas.toDataURL("image/png");
                 const modal = document.getElementById('result-modal');
                 const resultImg = document.getElementById('result-img');
@@ -279,15 +294,12 @@
                 resultImg.src = imgData;
                 modal.style.display = 'flex';
                 
-                document.body.removeChild(studio);
-                btn.innerText = "✨ GENERATE IMAGE";
-                
             }).catch(err => {
                 alert("Error: " + err);
-                if(document.body.contains(studio)) document.body.removeChild(studio);
+                document.body.classList.remove('shooting-mode');
                 btn.innerText = "✨ GENERATE IMAGE";
             });
-        }, 200);
+        }, 500); // زدنا الانتظار قليلاً (نصف ثانية) للتأكد من استقرار التصميم
     }
 </script>
 
