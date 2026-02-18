@@ -1,306 +1,452 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud Poster V13 🚀</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Baroud Poster V14 🌙</title>
 
-    <style>
-        /* إعدادات الصفحة */
-        body {
-            background: #121212; 
-            font-family: 'Poppins', sans-serif;
-            margin: 0; padding: 20px; 
-            display: flex; flex-direction: column; align-items: center;
-            color: #fff;
-            overflow-x: hidden;
-            padding-bottom: 100px;
-        }
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 
-        .version-tag {
-            background: #ff0055; color: #fff; padding: 5px 15px;
-            border-radius: 20px; font-size: 0.8em; margin-bottom: 15px;
-            font-weight: bold; border: 1px solid #fff;
-        }
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-        /* --- لوحة التحكم --- */
-        .controls {
-            background: #1e1e1e; padding: 20px; border-radius: 20px;
-            border: 1px solid #333;
-            width: 100%; max-width: 350px; margin-bottom: 30px;
-            transition: opacity 0.3s;
-        }
-        
-        input, select {
-            width: 100%; padding: 12px; margin: 8px 0;
-            background: #2a2a2a; border: 1px solid #444;
-            color: #fff; text-align: center; border-radius: 10px;
-            font-family: 'Poppins'; outline: none; font-weight: bold; font-size: 0.9em;
-        }
+  <style>
+    body {
+      background: #121212;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
 
-        .file-upload-btn {
-            background: linear-gradient(45deg, #00ffea, #0099ff); 
-            color: #000; padding: 12px; border-radius: 10px;
-            text-align: center; cursor: pointer; display: block; margin: 5px 0;
-            font-weight: bold; font-size: 0.9em;
-        }
-        
-        .save-btn {
-            background: #00d26a; color: #fff; padding: 15px; border-radius: 10px;
-            text-align: center; cursor: pointer; display: block; margin-top: 20px;
-            font-weight: 900; font-size: 1.1em; border: none; width: 100%;
-            box-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
-        }
+    .version-tag {
+      background: #ff0055;
+      color: #fff;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      margin-bottom: 15px;
+      font-weight: bold;
+      border: 1px solid #fff;
+    }
 
-        input[type="file"] { display: none; }
+    .controls {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid #333;
+      width: 100%;
+      max-width: 350px;
+      margin-bottom: 30px;
+    }
 
-        /* --- الكرت --- */
-        /* تعديل مهم: الكرت له حجم ثابت ونسبة عرض لارتفاع ثابتة */
-        .poster-card {
-            width: 360px; height: 640px;
-            background: #000; border-radius: 30px;
-            position: relative; overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
-            text-align: center; color: #fff;
-            margin: auto;
-            user-select: none;
-            flex-shrink: 0; /* منع الانكماش */
-        }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #fff;
+      text-align: center;
+      border-radius: 10px;
+      font-family: 'Poppins';
+      outline: none;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
 
-        /* تصغير للمعاينة فقط (عشان يبين بالشاشة) */
-        #preview-wrapper {
-            margin-bottom: 20px;
-            transform-origin: top center;
-            transition: transform 0.3s;
-        }
-        
-        /* كلاس خاص لوضع التصوير */
-        body.shooting-mode {
-            padding: 0;
-            margin: 0;
-            background: #000;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        body.shooting-mode .controls, 
-        body.shooting-mode .version-tag,
-        body.shooting-mode #result-modal {
-            display: none !important;
-        }
+    .file-upload-btn {
+      background: linear-gradient(45deg, #00ffea, #0099ff);
+      color: #000;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      display: block;
+      margin: 5px 0;
+      font-weight: bold;
+    }
 
-        body.shooting-mode #preview-wrapper {
-            transform: scale(1) !important; /* استرجاع الحجم الطبيعي */
-            margin: 0;
-        }
-        
-        body.shooting-mode .poster-card {
-            border-radius: 0; /* إزالة الحواف الدائرية أثناء التصوير لملء الصورة */
-            box-shadow: none;
-        }
+    .save-btn {
+      background: #00d26a;
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-weight: 900;
+      font-size: 1.1em;
+      border: none;
+      width: 100%;
+      box-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
+    }
 
-        .bg-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #111 0%, #000 100%); z-index: 1; }
-        .bg-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: rgba(0, 140, 255, 0.15); filter: blur(80px); z-index: 1; }
+    .download-btn {
+      background: #00ffea;
+      color: #000;
+      padding: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-weight: 900;
+      font-size: 1em;
+      border: none;
+      width: 100%;
+    }
 
-        .header { z-index: 5; margin-top: 40px; display: flex; flex-direction: column; align-items: center; }
-        .brand-title { font-family: 'Poppins'; font-weight: 900; font-size: 2em; letter-spacing: 2px; color: #fff; text-transform: uppercase; line-height: 1; }
-        .brand-subtitle { font-size: 0.7em; color: #888; letter-spacing: 4px; margin-top: 5px; text-transform: uppercase; }
+    input[type="file"] { display: none; }
 
-        .image-area {
-            z-index: 5; margin: 30px auto; width: 280px; height: 280px;
-            border-radius: 25px; background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1); position: relative;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow: hidden;
-        }
-        .p-img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .status-badge {
-            position: absolute; top: 15px; left: 15px;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
-            color: #fff; padding: 5px 12px; border-radius: 20px;
-            font-size: 0.7em; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); text-transform: uppercase;
-        }
+    /* Poster Card */
+    .poster-card {
+      width: 360px;
+      height: 640px;
+      background: #000;
+      border-radius: 30px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
 
-        .content { z-index: 5; padding: 0 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .p-title { font-family: 'Poppins'; font-weight: 800; font-size: 1.8em; margin: 0; line-height: 1.2; background: linear-gradient(90deg, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .p-desc { color: #888; font-size: 0.9em; margin-top: 8px; font-weight: 400; }
+    #preview-wrapper {
+      transform: scale(0.9);
+      transform-origin: top center;
+    }
 
-        .bottom-section {
-            z-index: 5; background: #1a1a1a; margin: 20px; padding: 15px 25px;
-            border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid #333;
-        }
-        .price-box { text-align: right; }
-        .price-label { color: #555; font-size: 0.6em; display: block; letter-spacing: 1px; font-weight: bold; }
-        .p-price { font-weight: 700; font-size: 1.8em; color: #fff; line-height: 1; }
+    body.shooting-mode {
+      padding: 0;
+      margin: 0;
+      background: #000;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .action-btn { background: #fff; color: #000; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
-        .whatsapp-icon { width: 10px; height: 10px; background: #00d26a; border-radius: 50%; display: inline-block; }
+    body.shooting-mode .controls,
+    body.shooting-mode .version-tag,
+    body.shooting-mode #result-modal {
+      display: none !important;
+    }
 
-        .footer-area { z-index: 5; margin-bottom: 30px; display: flex; flex-direction: column; gap: 5px; }
-        .footer-number { color: #666; font-size: 0.9em; letter-spacing: 2px; font-weight: 600; }
-        .footer-link { color: #00ffea; font-size: 0.7em; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; text-decoration: none; }
+    body.shooting-mode #preview-wrapper {
+      transform: none !important;
+    }
 
-        /* --- نافذة النتيجة --- */
-        #result-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 999999;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            overflow-y: auto; padding: 20px; box-sizing: border-box;
-        }
-        #result-img {
-            max-width: 90%; max-height: 80vh;
-            border: 2px solid #00ffea; border-radius: 15px;
-            box-shadow: 0 0 30px rgba(0, 255, 234, 0.3);
-            margin-bottom: 20px;
-        }
-        .close-btn {
-            background: #ff0055; color: #fff; width: 100%;
-            padding: 15px; border-radius: 50px; border: none; font-weight: bold;
-            font-size: 1.1em; cursor: pointer; max-width: 300px;
-        }
-        .hint-text { color: #00ffea; margin-bottom: 15px; font-size: 1em; font-weight: bold; text-align: center; }
+    body.shooting-mode .poster-card {
+      border-radius: 0;
+      box-shadow: none;
+    }
 
-    </style>
+    .bg-gradient {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #111 0%, #000 100%);
+      z-index: 1;
+    }
+
+    .bg-glow {
+      position: absolute;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 300px;
+      background: rgba(0, 140, 255, 0.15);
+      filter: blur(80px);
+      z-index: 1;
+    }
+
+    .header {
+      z-index: 5;
+      margin-top: 40px;
+    }
+
+    .brand-title {
+      font-weight: 900;
+      font-size: 2em;
+      letter-spacing: 2px;
+    }
+
+    .brand-subtitle {
+      font-size: 0.7em;
+      color: #888;
+      letter-spacing: 4px;
+      margin-top: 5px;
+    }
+
+    .image-area {
+      z-index: 5;
+      margin: 30px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 25px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .p-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.7em;
+      font-weight: bold;
+    }
+
+    .content {
+      z-index: 5;
+      padding: 0 20px;
+      flex-grow: 1;
+    }
+
+    .p-title {
+      font-weight: 800;
+      font-size: 1.8em;
+      margin: 0;
+    }
+
+    .p-desc {
+      color: #888;
+      font-size: 0.9em;
+      margin-top: 8px;
+    }
+
+    .bottom-section {
+      z-index: 5;
+      background: #1a1a1a;
+      margin: 20px;
+      padding: 15px 25px;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .p-price {
+      font-weight: 700;
+      font-size: 1.8em;
+    }
+
+    /* Ramadan Style */
+    .ramadan-ribbon {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(0,255,234,0.4);
+      display: none;
+      gap: 8px;
+      align-items: center;
+      font-weight: 800;
+      font-size: 0.8em;
+    }
+
+    .ramadan-lantern {
+      position: absolute;
+      bottom: 120px;
+      left: 25px;
+      z-index: 10;
+      font-size: 34px;
+      display: none;
+    }
+
+    /* Modal */
+    #result-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 999999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #result-img {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 15px;
+      border: 2px solid #00ffea;
+    }
+
+    .close-btn {
+      margin-top: 15px;
+      padding: 15px;
+      border: none;
+      border-radius: 50px;
+      background: #ff0055;
+      color: white;
+      font-size: 1.1em;
+      width: 250px;
+      cursor: pointer;
+    }
+  </style>
 </head>
+
 <body>
 
-    <div class="version-tag">Ver 13.0 (WYSIWYG)</div>
+  <div class="version-tag">Ver 14.0 رمضان 🌙</div>
 
-    <div class="controls">
-        <label for="img-upload" class="file-upload-btn">📂 اختر صورة من الاستديو</label>
-        <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
-        <input type="text" id="in-img" placeholder="Paste Image URL" oninput="update()">
-        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
-        <input type="text" id="in-title" placeholder="Title (e.g. Netflix 1 Month)" oninput="update()">
-        <input type="text" id="in-desc" placeholder="Desc (e.g. 4K UHD - Private)" oninput="update()">
-        <input type="text" id="in-price" placeholder="Price (e.g. $5)" oninput="update()">
-        <select id="in-badge" onchange="update()">
-            <option value="AVAILABLE NOW">AVAILABLE NOW</option>
-            <option value="BEST SELLER">BEST SELLER 🔥</option>
-            <option value="LIMITED OFFER">LIMITED OFFER ⏳</option>
-        </select>
-        <button onclick="generatePoster()" class="save-btn">✨ GENERATE IMAGE</button>
-    </div>
+  <div class="controls">
 
-    <div id="preview-wrapper" style="transform: scale(0.9);">
-        <div class="poster-card" id="card-source">
-            <div class="bg-gradient"></div>
-            <div class="bg-glow"></div>
-            <div class="header">
-                <div class="brand-title">BAROUD <span style="color:#00ffea">APP</span></div>
-                <div class="brand-subtitle">Digital Store Services</div>
-            </div>
-            <div class="image-area">
-                <div class="status-badge" id="p-badge">AVAILABLE NOW</div>
-                <img class="p-img" id="p-img" src="https://via.placeholder.com/300" alt="Product" crossorigin="anonymous">
-            </div>
-            <div class="content">
-                <div class="p-title" id="p-title">Service Name</div>
-                <div class="p-desc" id="p-desc">Description goes here</div>
-            </div>
-            <div class="bottom-section">
-                <div class="action-btn"><span class="whatsapp-icon"></span> ORDER</div>
-                <div class="price-box">
-                    <span class="price-label">PRICE</span>
-                    <span class="p-price" id="p-price">$0</span>
-                </div>
-            </div>
-            <div class="footer-area">
-                <div class="footer-number">+961 70 385 398</div>
-                <div class="footer-link">WWW.BAROUDAPP.COM</div>
-            </div>
-        </div>
-    </div>
+    <label for="img-upload" class="file-upload-btn">📂 Upload Image</label>
+    <input type="file" id="img-upload" accept="image/*" onchange="uploadImage()">
 
-    <div id="result-modal">
-        <p class="hint-text">✅ تم! اضغط مطولاً على الصورة لحفظها</p>
-        <img id="result-img" src="" alt="Generated Poster">
-        <button class="close-btn" onclick="closeModal()">إغلاق / خروج</button>
+    <input type="text" id="in-title" placeholder="Title" oninput="update()">
+    <input type="text" id="in-desc" placeholder="Description" oninput="update()">
+    <input type="text" id="in-price" placeholder="Price" oninput="update()">
+
+    <select id="in-theme" onchange="update()">
+      <option value="normal">Normal</option>
+      <option value="ramadan">Ramadan 🌙</option>
+    </select>
+
+    <button onclick="generatePoster()" class="save-btn">✨ GENERATE IMAGE</button>
+    <button onclick="downloadLast()" class="download-btn">⬇️ DOWNLOAD LAST</button>
+  </div>
+
+  <div id="preview-wrapper">
+    <div class="poster-card" id="card-source">
+
+      <div class="bg-gradient"></div>
+      <div class="bg-glow"></div>
+
+      <!-- Ramadan -->
+      <div class="ramadan-ribbon" id="ramadan-ribbon">🌙 RAMADAN OFFER</div>
+      <div class="ramadan-lantern" id="ramadan-lantern">🏮</div>
+
+      <div class="header">
+        <div class="brand-title">BAROUD <span style="color:#00ffea;">APP</span></div>
+        <div class="brand-subtitle">Digital Store Services</div>
+      </div>
+
+      <div class="image-area">
+        <div class="status-badge" id="p-badge">AVAILABLE</div>
+        <img class="p-img" id="p-img" src="https://via.placeholder.com/300">
+      </div>
+
+      <div class="content">
+        <h2 class="p-title" id="p-title">Service Name</h2>
+        <p class="p-desc" id="p-desc">Description here</p>
+      </div>
+
+      <div class="bottom-section">
+        <div>ORDER</div>
+        <div class="p-price" id="p-price">$0</div>
+      </div>
+
     </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="result-modal">
+    <img id="result-img">
+    <button class="close-btn" onclick="closeModal()">Close</button>
+  </div>
 
 <script>
-    function uploadImage() {
-        const file = document.getElementById('img-upload').files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) { document.getElementById('p-img').src = e.target.result; }
-            reader.readAsDataURL(file);
-        }
+  let LAST_IMG_DATA = null;
+
+  function uploadImage(){
+    const file = document.getElementById("img-upload").files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById("p-img").src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
+  }
 
-    function update() {
-        const imgUrl = document.getElementById('in-img').value;
-        const title = document.getElementById('in-title').value;
-        const desc = document.getElementById('in-desc').value;
-        const price = document.getElementById('in-price').value;
-        const badge = document.getElementById('in-badge').value;
+  function update(){
+    document.getElementById("p-title").innerText =
+      document.getElementById("in-title").value;
 
-        if(imgUrl) document.getElementById('p-img').src = imgUrl;
-        if(title) document.getElementById('p-title').innerText = title;
-        if(desc) document.getElementById('p-desc').innerText = desc;
-        if(price) document.getElementById('p-price').innerText = price.includes('$') ? price : '$' + price;
-        document.getElementById('p-badge').innerText = badge;
+    document.getElementById("p-desc").innerText =
+      document.getElementById("in-desc").value;
+
+    let price = document.getElementById("in-price").value;
+    document.getElementById("p-price").innerText =
+      price.includes("$") ? price : "$" + price;
+
+    let theme = document.getElementById("in-theme").value;
+
+    if(theme === "ramadan"){
+      document.getElementById("ramadan-ribbon").style.display = "flex";
+      document.getElementById("ramadan-lantern").style.display = "block";
+      document.getElementById("p-badge").innerText = "RAMADAN 🌙";
+    } else {
+      document.getElementById("ramadan-ribbon").style.display = "none";
+      document.getElementById("ramadan-lantern").style.display = "none";
+      document.getElementById("p-badge").innerText = "AVAILABLE";
     }
+  }
 
-    function closeModal() {
-        document.getElementById('result-modal').style.display = 'none';
-        // إزالة وضع التصوير عند الإغلاق احتياطاً
-        document.body.classList.remove('shooting-mode');
-        window.scrollTo(0,0);
+  function closeModal(){
+    document.getElementById("result-modal").style.display = "none";
+  }
+
+  function downloadLast(){
+    if(!LAST_IMG_DATA){
+      alert("Generate first!");
+      return;
     }
+    const a = document.createElement("a");
+    a.href = LAST_IMG_DATA;
+    a.download = "poster.png";
+    a.click();
+  }
 
-    // 🔥 V13.0: وضع التصوير المباشر 🔥
-    function generatePoster() {
-        const btn = document.querySelector('.save-btn');
-        const card = document.getElementById('card-source');
-        
-        btn.innerText = "⏳ جاري التحضير...";
+  async function generatePoster(){
+    const card = document.getElementById("card-source");
 
-        // 1. تفعيل "وضع التصوير" (يخفي كل شيء ما عدا الكرت ويضبط الصفحة)
-        document.body.classList.add('shooting-mode');
-        
-        // 2. التمرير إلى أعلى الصفحة لضمان ظهور الكرت
-        window.scrollTo(0, 0);
+    document.body.classList.add("shooting-mode");
 
-        // انتظار قصير ليأخذ المتصفح التعديلات البصرية
-        setTimeout(() => {
-            // 3. تصوير الكرت الظاهر مباشرة
-            html2canvas(card, {
-                scale: 2, // جودة عالية
-                useCORS: true, // السماح بالصور الخارجية
-                backgroundColor: null, // خلفية شفافة
-                allowTaint: true,
-                // إجبار الكرت على أن يكون كاملاً
-                windowWidth: document.body.scrollWidth,
-                windowHeight: document.body.scrollHeight
-            }).then(canvas => {
-                // 4. استرجاع الوضع الطبيعي فوراً
-                document.body.classList.remove('shooting-mode');
-                btn.innerText = "✨ GENERATE IMAGE";
+    setTimeout(async () => {
 
-                // 5. عرض النتيجة
-                const imgData = canvas.toDataURL("image/png");
-                const modal = document.getElementById('result-modal');
-                const resultImg = document.getElementById('result-img');
-                
-                resultImg.src = imgData;
-                modal.style.display = 'flex';
-                
-            }).catch(err => {
-                alert("Error: " + err);
-                document.body.classList.remove('shooting-mode');
-                btn.innerText = "✨ GENERATE IMAGE";
-            });
-        }, 500); // زدنا الانتظار قليلاً (نصف ثانية) للتأكد من استقرار التصميم
-    }
+      const canvas = await html2canvas(card, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: "#000"
+      });
+
+      LAST_IMG_DATA = canvas.toDataURL("image/png");
+
+      document.body.classList.remove("shooting-mode");
+
+      document.getElementById("result-img").src = LAST_IMG_DATA;
+      document.getElementById("result-modal").style.display = "flex";
+
+      downloadLast();
+
+    }, 400);
+  }
 </script>
 
 </body>
