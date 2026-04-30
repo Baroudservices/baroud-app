@@ -4,116 +4,83 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Baroud Services</title>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    /* ===== التصميم العام (Layout) ===== */
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-    html, body { height: 100%; margin: 0; padding: 0; background: #020b14; }
+    html, body { height: 100%; margin: 0; padding: 0; background: #020b14; color: #fff; font-family: system-ui, sans-serif; }
     
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      color: #fff;
-      overflow-x: hidden;
-      padding-bottom: 30px;
-    }
+    .wrap { width: 100%; max-width: 500px; margin: 0 auto; padding: 12px; }
 
-    .wrap { width: 100%; max-width: 500px; margin: 0 auto; padding: 15px; }
-
-    /* ===== الشريط العلوي (Topbar) ===== */
+    /* Topbar */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 15px; background: rgba(6, 22, 42, 0.95);
-      backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-    
-    .menu-trigger {
-      width: 40px; height: 40px; background: rgba(255,255,255,0.08);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      font-size: 20px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
-    }
-
     .wallet-pill {
       display: flex; align-items: center; gap: 8px;
       background: rgba(33, 160, 240, 0.15); padding: 4px 4px 4px 12px;
       border-radius: 20px; border: 1px solid rgba(33, 160, 240, 0.3);
     }
     .balance-text { font-weight: 800; font-size: 13px; color: #21a0f0; }
-    .add-btn {
-      width: 26px; height: 26px; background: #21a0f0; border-radius: 50%;
-      color: #fff; border: none; font-weight: bold; cursor: pointer;
-    }
+    .add-btn { width: 26px; height: 26px; background: #21a0f0; border-radius: 50%; color: #fff; border: none; font-weight: bold; cursor: pointer; }
+    .menu-trigger { font-size: 20px; cursor: pointer; padding: 5px; }
 
-    .brand-title { font-weight: 900; font-size: 17px; color: #fff; letter-spacing: 0.5px; }
-
-    /* ===== السلايدر (Slider) - تم تصغيره ===== */
-    .slider-box {
-      width: 100%; height: 130px; border-radius: 15px; overflow: hidden;
-      margin: 15px 0; border: 1px solid rgba(255,255,255,0.1);
-    }
-    .slides { display: flex; width: 300%; height: 100%; transition: 0.6s ease-in-out; }
+    /* Banner */
+    .slider-box { width: 100%; height: 140px; border-radius: 12px; overflow: hidden; margin: 10px 0; border: 1px solid rgba(255,255,255,0.1); }
+    .slides { display: flex; width: 300%; height: 100%; transition: 0.6s; }
     .slides img { width: 33.333%; height: 100%; object-fit: cover; }
 
-    /* ===== البحث (Search) ===== */
-    .search-box {
-      background: rgba(255,255,255,0.06); border-radius: 12px;
-      padding: 0 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);
-    }
-    .search-box input { width: 100%; background: none; border: none; color: #fff; height: 42px; font-size: 14px; }
+    /* Search */
+    .search-box { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 0 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+    .search-box input { width: 100%; background: none; border: none; color: #fff; height: 40px; font-size: 14px; }
 
-    /* ===== الشبكة (Grid) - ترتيب مرتب وحجم مدروس ===== */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    /* Grid - تظبيط الصور لتبين كبيرة وواضحة */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     
     .neon-tile {
-      background: rgba(255,255,255,0.03); border-radius: 15px;
-      border: 1px solid rgba(255,255,255,0.06); overflow: hidden;
+      background: #06101d; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08); overflow: hidden;
       text-decoration: none; display: flex; flex-direction: column;
-      height: 145px; transition: 0.2s;
+      height: 160px; /* طول مناسب للمربع */
+      transition: 0.2s;
     }
-    .neon-tile:active { transform: scale(0.95); background: rgba(33, 160, 240, 0.1); }
+    .neon-tile:active { transform: scale(0.96); }
     
     .tile-img-container {
-      flex: 1; display: flex; align-items: center; justify-content: center;
-      padding: 10px; background: radial-gradient(circle, rgba(33,160,240,0.05) 0%, transparent 70%);
+      width: 100%; height: 120px; /* مساحة أكبر للصورة */
+      overflow: hidden;
     }
-    .neon-tile img { max-width: 80%; max-height: 80px; object-fit: contain; }
+    .neon-tile img { 
+      width: 100%; height: 100%; 
+      object-fit: cover; /* هيدي بتخلي الصورة تعبي المربع وتطلع كبيرة */
+    }
     
     .tile-label {
-      background: rgba(0,0,0,0.3); padding: 8px;
-      text-align: center; font-size: 12px; font-weight: 700; color: #eee;
+      background: rgba(0,0,0,0.4); padding: 8px;
+      text-align: center; font-size: 12px; font-weight: 700; color: #fff;
     }
 
-    /* ===== القائمة الجانبية (Drawer) ===== */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(3px); display: none; z-index: 2000; }
-    .drawer {
-      position: fixed; top: 0; left: 0; width: 270px; height: 100%;
-      background: #06101d; z-index: 2100; transform: translateX(-100%);
-      transition: 0.3s; padding: 25px 15px; border-right: 1px solid rgba(255,255,255,0.1);
-    }
+    /* Overlay & Drawer */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2000; }
+    .drawer { position: fixed; top: 0; left: 0; width: 260px; height: 100%; background: #06101d; z-index: 2100; transform: translateX(-100%); transition: 0.3s; padding: 20px; }
     .drawer.active { transform: translateX(0); }
-    .m-item {
-      display: flex; align-items: center; gap: 12px; padding: 13px;
-      color: #ccc; text-decoration: none; font-weight: 600; border-radius: 10px;
-    }
-    .m-item:active { background: rgba(33,160,240,0.15); color: #fff; }
+    .m-item { display: block; padding: 12px; color: #ccc; text-decoration: none; font-weight: 600; }
   </style>
 </head>
 
 <body>
   <div class="overlay" id="overlay"></div>
-  
   <aside class="drawer" id="drawer">
-    <div style="text-align: center; margin-bottom: 30px;">
-      <div style="width: 60px; height: 60px; background: #21a0f0; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 24px;">👤</div>
-      <div id="userEmail" style="font-size: 12px; opacity: 0.7;">Loading...</div>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <div style="width: 50px; height: 50px; background: #21a0f0; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">👤</div>
+        <div id="userEmail" style="font-size: 12px; opacity: 0.6;">Loading...</div>
     </div>
     <a href="index.html" class="m-item">🏠 Dashboard</a>
-    <a href="profile.html" class="m-item">👤 My Account</a>
     <a href="my-orders.html" class="m-item">📦 My Orders</a>
-    <a href="add-credit.html" class="m-item">💰 Refill Balance</a>
-    <button onclick="handleLogout()" class="m-item" style="width:100%; background:none; border:none; color:#ff5252; cursor:pointer; font:inherit;">🚪 Logout</button>
+    <a href="add-credit.html" class="m-item">💰 Add Credit</a>
+    <button onclick="sb.auth.signOut().then(()=>location.reload())" style="background:none; border:none; color:red; padding:12px; font:inherit; cursor:pointer;">🚪 Logout</button>
   </aside>
 
   <header class="topbar">
@@ -122,70 +89,57 @@
       <span class="balance-text" id="balanceText">0.00 🇱🇧</span>
       <button class="add-btn" onclick="location.href='add-credit.html'">+</button>
     </div>
-    <div class="brand-title">BAROUD</div>
+    <div style="font-weight: 900; color: #fff;">BAROUD</div>
   </header>
 
   <main class="wrap">
     <div class="slider-box">
       <div class="slides" id="mainSlider">
-        <img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x200/06162a/21a0f0?text=Welcome+to+Baroud'">
-        <img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x200/06162a/21a0f0?text=Best+Prices'">
-        <img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x200/06162a/21a0f0?text=Fast+Delivery'">
+        <img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x300/06162a/21a0f0?text=Baroud+App'">
+        <img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x300/06162a/21a0f0?text=Fast+Service'">
       </div>
     </div>
 
     <div class="search-box">
-      <input type="text" id="serviceSearch" placeholder="Search services...">
+      <input type="text" placeholder="Search services...">
     </div>
 
     <section class="grid">
       <a href="accounts.html" class="neon-tile">
-        <div class="tile-img-container"><img src="assets/accounts.png" onerror="this.src='https://img.icons8.com/neon/96/user-shield.png'"></div>
+        <div class="tile-img-container"><img src="assets/accounts.png"></div>
         <div class="tile-label">Accounts</div>
       </a>
       <a href="games.html" class="neon-tile">
-        <div class="tile-img-container"><img src="assets/games.png" onerror="this.src='https://img.icons8.com/neon/96/controller.png'"></div>
+        <div class="tile-img-container"><img src="assets/games.png"></div>
         <div class="tile-label">Games</div>
       </a>
-      <a href="phone-recharge.html" class="neon-tile">
-        <div class="tile-img-container"><img src="assets/phone-recharge.png" onerror="this.src='https://img.icons8.com/neon/96/sim-card-chip.png'"></div>
+      <a href="mobile.html" class="neon-tile">
+        <div class="tile-img-container"><img src="assets/mobile.png"></div>
         <div class="tile-label">Mobile</div>
       </a>
       <a href="giftcards.html" class="neon-tile">
-        <div class="tile-img-container"><img src="assets/giftcards.png" onerror="this.src='https://img.icons8.com/neon/96/gift-card.png'"></div>
+        <div class="tile-img-container"><img src="assets/giftcards.png"></div>
         <div class="tile-label">Gift Cards</div>
       </a>
       <a href="social.html" class="neon-tile">
-        <div class="tile-img-container"><img src="assets/social.png" onerror="this.src='https://img.icons8.com/neon/96/share.png'"></div>
+        <div class="tile-img-container"><img src="assets/social.png"></div>
         <div class="tile-label">Social Media</div>
       </a>
       <a href="apps.html" class="neon-tile">
-        <div class="tile-img-container"><img src="assets/apps.png" onerror="this.src='https://img.icons8.com/neon/96/grid.png'"></div>
+        <div class="tile-img-container"><img src="assets/apps.png"></div>
         <div class="tile-label">Premium Apps</div>
       </a>
     </section>
   </main>
 
   <script>
-    // Config
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Sidebar
-    const drawer = document.getElementById("drawer");
-    const overlay = document.getElementById("overlay");
-    document.getElementById("menuBtn").onclick = () => { drawer.classList.add("active"); overlay.style.display = "block"; };
-    overlay.onclick = () => { drawer.classList.remove("active"); overlay.style.display = "none"; };
+    document.getElementById("menuBtn").onclick = () => { document.getElementById("drawer").classList.add("active"); document.getElementById("overlay").style.display = "block"; };
+    document.getElementById("overlay").onclick = () => { document.getElementById("drawer").classList.remove("active"); document.getElementById("overlay").style.display = "none"; };
 
-    // Slider
-    let idx = 0;
-    setInterval(() => {
-      idx = (idx + 1) % 3;
-      document.getElementById("mainSlider").style.transform = `translateX(-${idx * 33.333}%)`;
-    }, 4000);
-
-    // Load Data
     async function init() {
       const { data: { session } } = await sb.auth.getSession();
       if(session) {
@@ -194,13 +148,10 @@
         if(data) document.getElementById("balanceText").textContent = data.balance.toFixed(2) + " 🇱🇧";
       }
     }
-
-    async function handleLogout() {
-      await sb.auth.signOut();
-      location.reload();
-    }
-
     init();
+
+    let idx = 0;
+    setInterval(() => { idx = (idx + 1) % 2; document.getElementById("mainSlider").style.transform = `translateX(-${idx * 50}%)`; }, 4000);
   </script>
 </body>
 </html>
