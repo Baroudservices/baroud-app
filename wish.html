@@ -1,36 +1,153 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Whish Money - Baroud</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { background: #060b16; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); max-width: 400px; margin: auto; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; }
-        button { width: 100%; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Whish Money - Baroud</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --neon-blue: #38bdf8;
+      --bg-dark: #020b14;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+      background-color: var(--bg-dark);
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* الخلفية المتوهجة مثل الصفحة الرئيسية */
+    body {
+      background: 
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), transparent 40%),
+        radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.1), transparent 40%),
+        var(--bg-dark);
+    }
+
+    .wrap {
+      max-width: 480px; margin: 0 auto; padding: 20px;
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+    .back-btn { 
+      padding: 10px 15px; border-radius: 12px; background: var(--glass); 
+      border: 1px solid var(--glass-border); cursor: pointer; text-decoration: none; color: #fff;
+    }
+
+    .main-card {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo-area { text-align: center; margin-bottom: 25px; }
+    .logo-area img { height: 50px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); }
+
+    .id-box {
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px dashed var(--neon-blue);
+      border-radius: 18px;
+      padding: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .id-number { display: block; font-size: 20px; font-weight: 900; color: var(--neon-blue); letter-spacing: 1px; margin-top: 5px; }
+
+    .input-group { margin-bottom: 15px; }
+    .label { display: block; font-size: 12px; opacity: 0.6; margin-bottom: 8px; margin-left: 5px; }
+    
+    input {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      padding: 16px; border-radius: 16px; color: #fff;
+      font-size: 15px; outline: none; transition: 0.3s;
+    }
+    input:focus { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.05); }
+
+    .file-upload {
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      padding: 15px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; cursor: pointer; margin-top: 10px;
+    }
+
+    .btn-submit {
+      width: 100%; padding: 18px; margin-top: 25px;
+      border-radius: 18px; border: none;
+      background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+      color: #fff; font-weight: 900; font-size: 16px;
+      cursor: pointer; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+    }
+    .btn-submit:active { transform: scale(0.98); }
+  </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>Whish Money $</h2>
-        <p>ارسل المبلغ إلى الرقم: 70385398</p>
-        <input type="number" id="amount" placeholder="المبلغ بالدولار $">
-        <input type="number" id="transferNumber" placeholder="رقم الهاتف المحول منه">
-        <p style="font-size: 10px; opacity: 0.6;">أو ارفع صورة الإيصال</p>
-        <input type="file" id="receipt">
-        <button id="btnReq">إرسال الطلب</button>
+  <div class="wrap">
+    <div class="header">
+      <a href="add-credit.html" class="back-btn">←</a>
+      <div style="font-weight: 900; letter-spacing: 2px;">BAROUD</div>
     </div>
 
-    <script>
-        const sb = supabase.createClient("https://pqrwitolonhfbfwtsnde.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."); // تأكد من الكي هون
+    <div class="main-card">
+      <div class="logo-area">
+        <img src="assets/wish.png" alt="Whish Money">
+        <h2 style="margin: 10px 0 0; font-size: 20px;">Deposit Credit</h2>
+      </div>
 
-        document.getElementById("btnReq").onclick = async () => {
-            alert("جاري التجربة...");
-            // كود الـ Insert هون
-        };
-    </script>
+      <div class="id-box">
+        <span style="font-size: 11px; opacity: 0.7;">Send amount to Whish ID:</span>
+        <span class="id-number">70385398</span>
+      </div>
+
+      <div class="input-group">
+        <span class="label">Amount ($)</span>
+        <input type="number" id="amount" placeholder="Min. 4$" inputmode="decimal">
+      </div>
+
+      <div class="input-group">
+        <span class="label">Transfer Number</span>
+        <input type="tel" id="transferNumber" placeholder="Number sent from">
+      </div>
+
+      <div style="text-align: center; margin: 15px 0; opacity: 0.4; font-size: 12px;">— OR —</div>
+
+      <input type="file" id="receipt" style="display: none;" accept="image/*">
+      <div class="file-upload" onclick="document.getElementById('receipt').click()">
+        <span>📎</span>
+        <span id="fileName">Upload Receipt Image</span>
+      </div>
+
+      <button class="btn-submit" id="btnReq">SEND REQUEST</button>
+    </div>
+
+    <p style="text-align: center; font-size: 11px; opacity: 0.4; margin-top: auto; padding: 20px 0;">
+      © 2026 Baroud Services. All rights reserved.
+    </p>
+  </div>
+
+  <script>
+    // ربط السكربت السابق هنا مع التأكد من الـ IDs
+    const receipt = document.getElementById("receipt");
+    const fileName = document.getElementById("fileName");
+    
+    receipt.onchange = () => {
+      fileName.textContent = receipt.files[0] ? receipt.files[0].name : "Upload Receipt Image";
+    };
+  </script>
 </body>
 </html>
