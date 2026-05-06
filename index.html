@@ -3,252 +3,205 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baroud Services | أرخص شدات ببجي، نتفليكس، وشاهد في لبنان</title>
-  <meta name="description" content="المتجر الأول في لبنان لشراء خدمات رقمية بأرخص الأسعار.">
-
+  <title>Baroud App | المتجر الأول في لبنان</title>
+  
   <style>
-    /* ===== RESET & MODERN BASE ===== */
+    /* ===== MODERN SYSTEM & THEME ===== */
     :root {
-      --primary: #21a0f0;
-      --accent: #21f07a;
-      --glass-bg: rgba(255, 255, 255, 0.07);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --bg: #020b14;
+      --card-bg: #06101d;
+      --accent: #21a0f0; /* اللون الأزرق الأساسي لبارود */
+      --green-fix: #21f07a;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; margin: 0; }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: radial-gradient(circle at top, #0b2447, #020b14);
-      color: #fff; min-height: 100vh; overflow-x: hidden;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: #fff; margin: 0; overflow-x: hidden; min-height: 100vh; }
 
-    .wrap { width: 100%; margin: 0 auto; padding: 14px 14px 80px; max-width: 550px; }
+    .wrap { width: 100%; max-width: 500px; margin: 0 auto; padding: 0 16px 100px; }
 
-    /* ===== TOPBAR ===== */
+    /* ===== TOPBAR (MODERN & CLEAN) ===== */
     .topbar {
-      position: sticky; top: 0; z-index: 100;
+      position: sticky; top: 0; z-index: 1000;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 0; background: rgba(6, 22, 42, 0.85);
-      backdrop-filter: blur(15px);
+      padding: 15px 16px; background: rgba(2, 11, 20, 0.85);
+      backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
+    }
+    .brand-title { font-weight: 900; font-size: 20px; letter-spacing: 1.5px; color: #fff; }
+    .icon-btn { 
+      width: 42px; height: 42px; border-radius: 12px; 
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
     }
 
-    .iconBtn {
-      width: 48px; height: 48px; border-radius: 14px;
-      background: var(--glass-bg); border: 1px solid var(--glass-border);
-      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    /* ===== HERO BANNER (PREMIUM LOOK) ===== */
+    .banner-container { 
+      width: 100%; height: 175px; border-radius: 24px; 
+      overflow: hidden; margin-top: 15px; position: relative;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      border: 1px solid var(--glass-border);
     }
-
-    .brandRow { display: flex; align-items: center; gap: 12px; }
-    .logo { width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 1px solid var(--glass-border); }
-    .brandText { font-weight: 900; font-size: 19px; letter-spacing: 1px; color: #fff; }
-
-    /* ===== MODERN SLIDER ===== */
-    .banner { border-radius: 24px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.4); margin-top: 5px; }
-    .slides { display: flex; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
-    .slide { min-width: 100%; height: 190px; position: relative; }
+    .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.2, 1, 0.2, 1); }
+    .slide { width: 33.333%; height: 100%; position: relative; }
     .slide img { width: 100%; height: 100%; object-fit: cover; }
-    .slide::after { content:''; position:absolute; inset:0; background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); }
+    .slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); }
 
-    .dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 5; }
-    .dotBtn { width: 7px; height: 7px; border-radius: 4px; background: rgba(255,255,255,0.3); border: none; transition: all 0.3s; }
-    .dotBtn.active { width: 22px; background: var(--primary); }
+    .dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+    .dot { width: 6px; height: 6px; border-radius: 10px; background: rgba(255,255,255,0.3); transition: 0.4s; }
+    .dot.active { width: 20px; background: var(--accent); }
 
-    /* ===== TICKER ===== */
-    .support {
-      margin-top: 16px; padding: 10px 14px; border-radius: 16px;
-      background: rgba(33, 160, 240, 0.1); border: 1px solid rgba(33, 160, 240, 0.1);
-      overflow: hidden; font-size: 13px; font-weight: 600; color: #ddd;
+    /* ===== TICKER (FAST DELIVERY) ===== */
+    .ticker {
+      margin: 15px 0; background: rgba(33, 160, 240, 0.1); 
+      border: 1px solid rgba(33, 160, 240, 0.15);
+      border-radius: 12px; padding: 8px; overflow: hidden; white-space: nowrap;
     }
-    .support-track { display: flex; gap: 40px; width: max-content; animation: scrollSupport 20s linear infinite; }
-    @keyframes scrollSupport { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .ticker-content { display: inline-block; animation: scroll 20s linear infinite; font-size: 12px; font-weight: 600; color: #cbd5e0; }
+    @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
 
-    /* ===== SEARCH ===== */
-    .searchBox {
-      margin-top: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border);
-      border-radius: 18px; padding: 4px 16px; display: flex; align-items: center;
+    /* ===== SEARCH (NEW STYLE) ===== */
+    .search-box {
+      background: var(--card-bg); border: 1px solid var(--glass-border);
+      border-radius: 15px; padding: 2px 15px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px; transition: 0.3s;
     }
-    .searchBox input { width: 100%; background: transparent; border: none; outline: none; color: #fff; font-size: 16px; height: 44px; }
+    .search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 15px rgba(33, 160, 240, 0.2); }
+    .search-box input { width: 100%; background: none; border: none; color: #fff; height: 48px; font-size: 15px; }
 
-    /* ===== PREMIUM GRID ===== */
-    .grid { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    /* ===== GRID (HIGH QUALITY IMAGES) ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .tile {
-      background: var(--glass-bg); border: 1px solid var(--glass-border);
-      border-radius: 22px; overflow: hidden; position: relative; transition: transform 0.2s ease; cursor: pointer;
+      background: var(--card-bg); border: 1px solid var(--glass-border);
+      border-radius: 20px; overflow: hidden; position: relative;
+      transition: 0.3s; text-decoration: none; display: flex; flex-direction: column;
+      height: 180px; /* طول متناسق للموبايل */
     }
     .tile:active { transform: scale(0.96); }
-    .tile img { width: 100%; height: 135px; object-fit: cover; transition: transform 0.3s; }
     
-    .label { padding: 12px; text-align: center; font-weight: 800; font-size: 14px; color: #eee; }
+    .img-wrap { width: 100%; height: 135px; overflow: hidden; }
+    .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
     
+    .label { 
+      padding: 10px; text-align: center; font-weight: 700; font-size: 13px; 
+      color: #fff; background: rgba(0,0,0,0.3); flex-grow: 1;
+      display: flex; align-items: center; justify-content: center;
+    }
+
     .badge {
-      position: absolute; top: 10px; right: 10px; background: var(--accent); color: #06162a;
-      font-size: 9px; font-weight: 900; padding: 3px 8px; border-radius: 8px; z-index: 2;
+      position: absolute; top: 10px; right: 10px; background: var(--green-fix);
+      color: #020b14; font-size: 9px; font-weight: 900; padding: 4px 10px;
+      border-radius: 8px; z-index: 5;
     }
 
-    /* ===== DRAWER (Median Style) ===== */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 150; }
-    .overlay.show { opacity: 1; pointer-events: auto; }
+    /* ===== DRAWER ===== */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 2000; }
+    .overlay.active { opacity: 1; pointer-events: auto; }
     .drawer {
-      position: fixed; top: 0; left: -290px; bottom: 0; width: 280px;
-      background: #06162a; border-right: 1px solid var(--glass-border);
-      transition: 0.3s cubic-bezier(0.19, 1, 0.22, 1); z-index: 160; padding: 25px;
+      position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
+      background: var(--bg); border-right: 1px solid var(--glass-border);
+      transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); z-index: 2100; padding: 30px 20px;
     }
-    .drawer.show { left: 0; }
+    .drawer.active { left: 0; }
+    .menu-item { display: block; padding: 15px; color: #a0aec0; text-decoration: none; font-weight: 600; border-radius: 12px; margin-bottom: 5px; }
+    .menu-item:active { background: var(--glass); color: #fff; }
 
-    .btn { display: block; width: 100%; padding: 12px; border-radius: 14px; font-weight: 800; text-decoration: none; text-align: center; margin-bottom: 10px; }
-    .loginBtn { background: var(--accent); color: #06162a; }
-    .signupBtn { background: linear-gradient(90deg, #21a0f0, #0f76e0); color: #fff; }
-
-    .no-results { display: none; text-align: center; margin-top: 30px; color: rgba(255,255,255,0.4); }
-    .hint { margin-top: 40px; text-align: center; opacity: 0.3; font-size: 11px; }
-
-    @media (min-width: 992px){
-      .wrap { max-width: 1000px; padding: 40px; }
-      .grid { grid-template-columns: repeat(4, 1fr); }
-      .slide { height: 300px; }
-    }
+    .hint { text-align: center; opacity: 0.2; font-size: 11px; margin-top: 50px; letter-spacing: 2px; }
   </style>
 </head>
 
 <body>
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="drawer">
-    <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
-      <button id="closeBtn" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">✕</button>
+    <div style="text-align: center; margin-bottom: 40px;">
+        <div style="width: 70px; height: 70px; background: var(--accent); border-radius: 20px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 10px 20px rgba(33, 160, 240, 0.3);">👤</div>
+        <div style="font-weight: 700;">Welcome Back</div>
     </div>
-
-    <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:20px; text-align:center; margin-bottom:20px; border:1px solid var(--glass-border);">
-      <h2 style="margin:0;">Baroud App</h2>
-      <p style="font-size:13px; color:#aaa; margin-bottom:15px;">Best rates in Lebanon</p>
-      <a class="btn loginBtn" href="login.html">Login</a>
-      <a class="btn signupBtn" href="register.html">Sign Up</a>
-    </div>
-
-    <div style="border-top:1px solid var(--glass-border); padding-top:10px;">
-      <div style="padding:12px; cursor:pointer;" onclick="location.reload()">🏠 Home</div>
-      <div style="padding:12px; cursor:pointer;" onclick="window.open('https://wa.me/96170385398')">💬 Support</div>
-    </div>
+    <a href="index.html" class="menu-item">🏠 Home</a>
+    <a href="login.html" class="menu-item">🔑 Login</a>
+    <a href="register.html" class="menu-item">📝 Register</a>
+    <a href="https://wa.me/96170385398" class="menu-item">💬 Support</a>
   </aside>
 
-  <main class="wrap">
-    <header class="topbar">
-      <div class="iconBtn" id="menuBtn">☰</div>
-      <div class="brandRow">
-        <div class="brandText">BAROUD</div>
-        <img class="logo" src="assets/logo.png" onerror="this.src='https://placehold.co/100x100/111/FFF?text=B'">
-      </div>
-      <div class="iconBtn" onclick="goLogin()">👤</div>
-    </header>
+  <header class="topbar">
+    <div class="icon-btn" id="menuBtn">☰</div>
+    <div class="brand-title">BAROUD</div>
+    <div class="icon-btn" onclick="location.href='login.html'">👤</div>
+  </header>
 
-    <div class="banner slider" id="slider">
+  <main class="wrap">
+    <div class="banner-container">
       <div class="slides" id="slides">
-        <div class="slide"><img src="assets/banner1.jpg" alt="Slide 1"></div>
-        <div class="slide"><img src="assets/banner2.jpg" alt="Slide 2"></div>
-        <div class="slide"><img src="assets/banner3.jpg" alt="Slide 3"></div>
+        <div class="slide"><img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x300/06101d/21a0f0?text=Premium+Services'"></div>
+        <div class="slide"><img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x300/06101d/21a0f0?text=Instant+Delivery'"></div>
+        <div class="slide"><img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x300/06101d/21a0f0?text=Best+Prices'"></div>
       </div>
       <div class="dots" id="dots"></div>
     </div>
 
-    <div class="support">
-      <div class="support-track" id="supportTrack">
-        <span>🔥 Best Prices in Lebanon &nbsp;&nbsp; • &nbsp;&nbsp; 📞 Support: +961 70385398 &nbsp;&nbsp; • &nbsp;&nbsp; ⚡ Instant Delivery &nbsp;&nbsp; • &nbsp;&nbsp; </span>
-        <span>🔥 Best Prices in Lebanon &nbsp;&nbsp; • &nbsp;&nbsp; 📞 Support: +961 70385398 &nbsp;&nbsp; • &nbsp;&nbsp; ⚡ Instant Delivery &nbsp;&nbsp; • &nbsp;&nbsp; </span>
-      </div>
+    <div class="ticker">
+      <div class="ticker-content">⚡ Fast Delivery • 🔥 Best Rates in Lebanon • 📞 Support +961 70385398 • ✅ Secure Payments</div>
     </div>
 
-    <div class="searchBox">
-      <form onsubmit="return false;" style="width:100%;">
-        <input id="search" type="search" placeholder="Search for games, cards..." autocomplete="off">
-      </form>
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" id="mainSearch" placeholder="Search for items..." autocomplete="off">
     </div>
 
-    <section class="grid" id="grid">
-      <div class="tile" data-name="accounts netflix pubg" onclick="goLogin()">
+    <section class="grid">
+      <a href="login.html" class="tile">
         <span class="badge">POPULAR</span>
-        <img src="assets/accounts.png" onerror="this.src='https://placehold.co/400x300/1a1a1a/FFF?text=Accounts'">
+        <div class="img-wrap"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=500'"></div>
         <div class="label">Accounts</div>
-      </div>
-
-      <div class="tile" data-name="games steam psn uc" onclick="goLogin()">
-        <span class="badge" style="background:#f0a021">HOT</span>
-        <img src="assets/games.png" onerror="this.src='https://placehold.co/400x300/1a1a1a/FFF?text=Games'">
+      </a>
+      <a href="login.html" class="tile">
+        <span class="badge" style="background: #f0a021;">HOT</span>
+        <div class="img-wrap"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500'"></div>
         <div class="label">Games</div>
-      </div>
-
-      <div class="tile" data-name="gift cards itunes google" onclick="goLogin()">
-        <img src="assets/giftcards.png" onerror="this.src='https://placehold.co/400x300/1a1a1a/FFF?text=Cards'">
+      </a>
+      <a href="login.html" class="tile">
+        <div class="img-wrap"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=500'"></div>
         <div class="label">Gift Cards</div>
-      </div>
-
-      <div class="tile" data-name="apps spotify premium" onclick="goLogin()">
-        <img src="assets/apps.png" onerror="this.src='https://placehold.co/400x300/1a1a1a/FFF?text=Apps'">
+      </a>
+      <a href="login.html" class="tile">
+        <div class="img-wrap"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1614332287897-cdc485fa562d?q=80&w=500'"></div>
         <div class="label">Apps</div>
-      </div>
+      </a>
     </section>
 
-    <div id="noResults" class="no-results">
-      <p>😕 No items found matching your search.</p>
-    </div>
-
-    <div class="hint">baroudapp.com</div>
+    <div class="hint">BAROUDAPP.COM</div>
   </main>
 
   <script>
-    // Navigation Logic
-    function goLogin(){ window.location.href = "login.html"; }
+    // Drawer
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    document.getElementById('menuBtn').onclick = () => { drawer.classList.add('active'); overlay.classList.add('active'); };
+    overlay.onclick = () => { drawer.classList.remove('active'); overlay.classList.remove('active'); };
 
-    // Drawer Logic
-    const drawer = document.getElementById("drawer");
-    const overlay = document.getElementById("overlay");
-    const menuBtn = document.getElementById("menuBtn");
-    const closeBtn = document.getElementById("closeBtn");
-
-    function toggleDrawer(show) {
-      drawer.classList.toggle("show", show);
-      overlay.classList.toggle("show", show);
-      document.body.style.overflow = show ? "hidden" : "";
-    }
-
-    menuBtn.addEventListener("click", () => toggleDrawer(true));
-    closeBtn.addEventListener("click", () => toggleDrawer(false));
-    overlay.addEventListener("click", () => toggleDrawer(false));
-
-    // Search Logic (ضلت متل ما هي لضمان الـ Speed)
-    document.getElementById("search").addEventListener("input", (e) => {
-      const q = e.target.value.toLowerCase();
-      let visibleCount = 0;
-      document.querySelectorAll(".tile").forEach(tile => {
-        const match = tile.getAttribute("data-name").includes(q) || tile.innerText.toLowerCase().includes(q);
-        tile.style.display = match ? "" : "none";
-        if(match) visibleCount++;
-      });
-      document.getElementById("noResults").style.display = visibleCount === 0 ? "block" : "none";
-    });
-
-    // Slider Logic (انميشن أنعم للـ Median)
-    let index = 0;
-    const slidesEl = document.getElementById("slides");
-    const slideCount = document.querySelectorAll('.slide').length;
+    // Auto Slider
+    let step = 0;
+    const slides = document.getElementById('slides');
     const dotsContainer = document.getElementById('dots');
-
-    for(let i=0; i<slideCount; i++) {
-      const d = document.createElement("button");
-      d.className = `dotBtn ${i === 0 ? 'active' : ''}`;
-      d.onclick = () => setSlide(i);
-      dotsContainer.appendChild(d);
+    for(let i=0; i<3; i++) {
+        const d = document.createElement('div');
+        d.className = `dot ${i===0?'active':''}`;
+        dotsContainer.appendChild(d);
     }
-
-    function setSlide(i) {
-      index = i;
-      slidesEl.style.transform = `translateX(-${index * 100}%)`;
-      document.querySelectorAll('.dotBtn').forEach((d, idx) => d.classList.toggle('active', idx === i));
-    }
-
     setInterval(() => {
-      index = (index + 1) % slideCount;
-      setSlide(index);
+        step = (step + 1) % 3;
+        slides.style.transform = `translateX(-${step * 33.333}%)`;
+        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === step));
     }, 4500);
+
+    // Search Mockup
+    document.getElementById('mainSearch').oninput = (e) => {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('.tile').forEach(t => {
+            const text = t.innerText.toLowerCase();
+            t.style.display = text.includes(val) ? 'flex' : 'none';
+        });
+    };
   </script>
 </body>
 </html>
