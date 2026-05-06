@@ -2,486 +2,167 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Baroud | Account Details</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    :root{
-      --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --shadow:0 16px 60px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:system-ui, Arial;
-      background:linear-gradient(180deg,#0b1424,#050a14);
-      color:#fff; min-height:100vh;
-      padding:16px;
-    }
-    .wrap{max-width:860px;margin:auto}
-    .top{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px; margin-bottom:14px;
-    }
-    .leftTop{display:flex; align-items:center; gap:10px}
-    .back{
-      padding:10px 14px; border-radius:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      cursor:pointer; text-decoration:none; color:#fff;
-    }
-    h2{margin:0;font-size:22px}
-
-    .smallBtn{
-      padding:10px 12px; border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.05);
-      color:#fff; font-weight:900;
-      cursor:pointer;
+    :root {
+      --neon-cyan: #00f2ff;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
 
-    .ordersDD{position:relative;display:inline-block;z-index:99999}
-    .ordersMenu{
-      position:absolute; right:0; top:44px;
-      width:220px;
-      background:rgba(10,14,22,.98);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:8px;
-      display:none;
-      box-shadow:var(--shadow);
-      max-height:260px;
-      overflow:auto;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    body { 
+      margin: 0; padding: 0; background: var(--bg-dark); color: #fff; 
+      font-family: 'Orbitron', 'Cairo', sans-serif; 
     }
-    .ordersItem{
-      display:flex; justify-content:space-between; align-items:center;
-      gap:10px;
-      padding:10px 10px;
-      border-radius:12px;
-      cursor:pointer;
-      user-select:none;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.03);
-      margin-bottom:8px;
-      font-weight:900;
-      font-size:13px;
-    }
-    .ordersItem:hover{background:rgba(255,255,255,.06)}
-    .badge{
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:950;
-      border:1px solid rgba(255,255,255,.10);
-      opacity:.9;
+    
+    .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 20px 15px 120px; }
+
+    /* ===== HEADER ===== */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .back-circle { 
+      width: 40px; height: 40px; background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff; text-decoration: none; font-size: 20px;
     }
 
-    .hero{
-      background:var(--card);
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-      margin-bottom:12px;
+    /* ===== HERO SECTION ===== */
+    .hero-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 30px; overflow: hidden; box-shadow: var(--shadow);
+      margin-bottom: 20px;
     }
-    .heroImg{
-      width:100%;
-      height:200px;
-      object-fit:cover;
-      display:block;
-      background:rgba(255,255,255,.04);
-    }
-    .heroBody{padding:14px}
-    .row{
-      display:flex; justify-content:space-between; align-items:center;
-      gap:10px; flex-wrap:wrap;
-    }
-    .title{font-weight:950; font-size:20px}
-    .muted{opacity:.7}
-    .pills{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
-    .pill{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      font-weight:800;
-      font-size:12px;
-      opacity:.9;
-    }
-    .section{
-      background:var(--card);
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      box-shadow:var(--shadow);
-      padding:14px;
-      margin-bottom:12px;
-    }
-    .section h3{margin:0 0 10px; font-size:16px}
-    .features{display:grid; gap:8px}
-    .feature{
-      display:flex; justify-content:space-between; gap:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);
-    }
-    .fKey{font-weight:900}
-    .fValue{opacity:.8}
-    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    @media (max-width:700px){ .grid2{grid-template-columns:1fr} }
-    label{display:block; font-size:12px; opacity:.7; margin-bottom:6px}
+    .hero-img { width: 100%; height: 220px; object-fit: cover; background: #000; }
+    .hero-info { padding: 20px; }
+    .title-row { display: flex; justify-content: space-between; align-items: flex-start; }
+    .product-title { font-weight: 900; font-size: 22px; text-transform: uppercase; margin-bottom: 5px; }
+    .price-tag { color: var(--neon-cyan); font-weight: 900; font-size: 20px; }
 
-    input, textarea, select{
-      width:100%;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.25);
-      color:#fff;
-      outline:none;
-      font-size:14px;
+    /* ===== SECTION STYLE ===== */
+    .section-box {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 24px; padding: 20px; margin-bottom: 15px;
     }
-    textarea{min-height:90px; resize:vertical}
+    .section-box h3 { margin: 0 0 15px; font-size: 14px; letter-spacing: 2px; opacity: 0.6; }
 
-    .btn{
-      width:100%;
-      padding:12px 14px;
-      border-radius:14px;
-      border:0;
-      cursor:pointer;
-      color:#fff;
-      font-weight:950;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+    /* ===== DYNAMIC FORM ===== */
+    .input-group { margin-bottom: 15px; }
+    label { display: block; font-family: 'Cairo'; font-size: 12px; margin-bottom: 8px; opacity: 0.8; font-weight: 700; }
+    input, textarea, select {
+      width: 100%; padding: 14px 18px; border-radius: 14px;
+      background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+      color: #fff; font-family: 'Cairo'; font-size: 14px; transition: 0.3s;
     }
-    .btn:disabled{opacity:.6; cursor:not-allowed}
-    .priceRow{display:flex; justify-content:space-between; align-items:center; gap:10px}
-    .price{font-weight:950; color:#38bdf8; font-size:18px}
-    .msg{margin-top:10px; opacity:.85; font-size:13px}
-    .danger{color:#ef4444}
-    .ok{color:#22c55e}
+    input:focus { border-color: var(--neon-cyan); }
 
-    /* Modal Styles */
-    .modal{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.72);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-      z-index:999999;
-    }
-    .modalCard{
-      width:min(520px, 100%);
-      background: rgba(12, 16, 24, 0.98);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:18px;
-      padding:16px;
-      box-shadow: 0 18px 70px rgba(0,0,0,.45);
-      backdrop-filter: blur(8px);
-    }
-    .mTitle{ font-weight:950; font-size:18px; margin-bottom:10px; text-align:center; }
-    .mText{ opacity:.85; font-weight:800; font-size:14px; text-align:center; line-height:1.5; }
-    .mBtns{ display:flex; gap:10px; margin-top: 14px; }
-    .mBtn{
-      flex:1;
-      border:0;
-      cursor:pointer;
-      padding:12px 14px;
-      border-radius:14px;
-      font-weight:950;
-      color:#fff;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-    }
-    .mBtn.secondary{
-      background: rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
+    /* ===== PLAN PICKER ===== */
+    .plan-selector {
+      width: 100%; padding: 15px 20px; border-radius: 14px;
+      background: var(--neon-cyan); color: #000; border: none;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; font-weight: 900; font-family: 'Orbitron'; margin-bottom: 15px;
     }
 
-    /* Plan Picker */
-    .planBtn{
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.25);
-      color:#fff;
-      cursor:pointer;
-      font-weight:950;
+    /* ===== BUTTONS ===== */
+    .buy-btn {
+      width: 100%; padding: 18px; border-radius: 20px; border: none;
+      background: linear-gradient(90deg, #00f2ff, #0072ff);
+      color: #fff; font-weight: 900; font-size: 16px; cursor: pointer;
+      box-shadow: 0 10px 20px rgba(0, 242, 255, 0.2);
     }
-    .planBtn small{opacity:.7; font-weight:800}
-    .planBtn .chev{opacity:.85}
+    .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Plans Bottom Sheet */
-    .plansOverlay{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.75);
-      opacity:0; pointer-events:none;
-      transition:.25s;
-      z-index:999998;
+    /* ===== BOTTOM SHEET (PLANS) ===== */
+    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2000; }
+    .bottom-sheet {
+      position: fixed; bottom: -100%; left: 0; width: 100%;
+      background: #060a0f; border-radius: 30px 30px 0 0;
+      z-index: 2100; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 30px 20px; border-top: 1px solid var(--glass-border);
     }
-    .plansOverlay.show{opacity:1; pointer-events:auto;}
+    .bottom-sheet.active { bottom: 0; }
+    .plan-option {
+      padding: 18px; border-radius: 15px; background: var(--glass);
+      border: 1px solid var(--glass-border); margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+    .plan-option.selected { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.05); }
 
-    .plansSheet{
-      position:fixed; left:50%; bottom:-120%;
-      transform:translateX(-50%);
-      width:min(520px, 94vw);
-      background:linear-gradient(180deg, rgba(12,16,24,.98), rgba(8,12,18,.98));
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:22px;
-      box-shadow:0 20px 60px rgba(0,0,0,.60);
-      z-index:999999;
-      transition:.28s;
-      overflow:hidden;
+    /* ===== MODALS ===== */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+      display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px;
     }
-    .plansSheet.show{bottom:16px;}
-
-    .plansHeader{
-      padding:14px 14px 10px;
-      display:flex; align-items:flex-start; justify-content:space-between;
-      border-bottom:1px solid rgba(255,255,255,.06);
-    }
-    .plansTitle{font-weight:950; font-size:18px;}
-    .plansSub{opacity:.7; font-size:12px; margin-top:2px;}
-    .plansClose{
-      width:38px; height:38px;
-      border-radius:12px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      color:#fff; cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      font-size:18px;
-    }
-
-    .plansList{
-      max-height:55vh;
-      overflow:auto;
-      padding:10px 10px 6px;
-    }
-
-    .planRow{
-      display:flex; align-items:center; gap:12px;
-      padding:12px 12px;
-      border-radius:16px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.06);
-      margin:8px 6px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .planRow:hover{background:rgba(255,255,255,.06);}
-
-    .planRow input{
-      position:absolute;
-      opacity:0;
-      pointer-events:none;
-    }
-
-    .planDot{
-      width:18px; height:18px;
-      border-radius:50%;
-      border:2px solid rgba(10,160,255,.75);
-      box-shadow:0 0 10px rgba(10,160,255,.25);
-      flex:0 0 auto;
-      position:relative;
-    }
-    .planRow input:checked + .planDot{
-      border-color:#0aa0ff;
-      box-shadow:0 0 14px rgba(10,160,255,.55);
-    }
-    .planRow input:checked + .planDot::after{
-      content:"";
-      position:absolute; inset:4px;
-      border-radius:50%;
-      background:linear-gradient(135deg,#0aa0ff,#2a74ff);
-    }
-
-    .planInfo{flex:1; min-width:0;}
-    .planName{font-weight:950; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .planDesc{opacity:.65; font-size:11px; margin-top:2px;}
-
-    .planPrice{
-      font-weight:950;
-      color:#38bdf8;
-      font-size:14px;
-      flex:0 0 auto;
-    }
-
-    .plansFooter{
-      display:flex; gap:10px;
-      padding:12px 14px 14px;
-      border-top:1px solid rgba(255,255,255,.06);
-    }
-    .plansBtn{
-      flex:1;
-      height:44px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      font-weight:950;
-      cursor:pointer;
-    }
-    .plansBtn.primary{
-      border:none;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      box-shadow:0 0 16px rgba(10,160,255,.35);
+    .modal-content {
+      background: #0a0f14; border: 1px solid var(--glass-border);
+      border-radius: 25px; padding: 30px; text-align: center; width: 100%; max-width: 350px;
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="top">
-      <div class="leftTop">
-        <a href="javascript:history.back()" class="back">←</a>
-        <h2>Account</h2>
-      </div>
-
-      <div class="ordersDD" id="ordersDD">
-        <button class="smallBtn" id="myOrdersBtn">My Orders</button>
-        <div class="ordersMenu" id="ordersMenu"></div>
-      </div>
+    <div class="header">
+      <a href="javascript:history.back()" class="back-circle">←</a>
+      <div style="font-weight: 900; opacity: 0.5; font-size: 12px;">PRODUCT DETAILS</div>
+      <div id="quickOrders" style="cursor:pointer; font-size: 20px;">📦</div>
     </div>
 
-    <div class="hero">
-      <img id="heroImg" class="heroImg" src="assets/products/default.png" alt="product">
-      <div class="heroBody">
-        <div class="row">
+    <div class="hero-card">
+      <img id="heroImg" class="hero-img" src="assets/products/default.png">
+      <div class="hero-info">
+        <div class="title-row">
           <div>
-            <div id="title" class="title">Loading...</div>
-            <div id="cat" class="muted">Category:</div>
+            <div id="pTitle" class="product-title">Loading...</div>
+            <div id="pCat" style="font-size: 11px; opacity: 0.5;">Category: -</div>
           </div>
-          <div class="priceRow">
-            <div class="muted" style="font-size:12px">Price</div>
-            <div id="price" class="price">$0.00</div>
-          </div>
+          <div id="pPrice" class="price-tag">$0.00</div>
         </div>
-        <div id="pills" class="pills"></div>
       </div>
     </div>
 
-    <div class="section">
-      <h3>Features</h3>
-      <div id="features" class="features"></div>
-    </div>
+    <div class="section-box">
+      <h3>ORDER CONFIGURATION</h3>
+      <label>SELECT PLAN</label>
+      <button class="plan-selector" id="planBtn">
+        <span id="planLabel">Choose a plan</span>
+        <span>▼</span>
+      </button>
 
-    <div class="section">
-      <h3>Order Details</h3>
+      <div id="dynamicFields" style="display:none; margin-top: 20px;">
+        </div>
 
-      <div style="margin-bottom:10px">
-        <label>Plan</label>
-
-        <button type="button" class="planBtn" id="planBtn">
-          <span id="planBtnText">Choose Plan</span>
-          <span class="chev">▾</span>
-        </button>
-
-        <input type="hidden" id="planKeyHidden" value="">
+      <div class="input-group" style="margin-top: 15px;">
+        <label>CUSTOMER NOTE (OPTIONAL)</label>
+        <textarea id="customerNote" placeholder="Anything else we should know?"></textarea>
       </div>
 
-      <div style="margin-bottom:10px">
-        <label>Customer Note (optional)</label>
-        <textarea id="customerNote" placeholder="Write any extra details..."></textarea>
-      </div>
-
-      <div id="dynamic-fields" class="grid2" style="display:none; margin-top:8px">
-        <div id="field-player-id" style="display:none">
-          <label id="id-label">PLAYER ID</label>
-          <input id="input-player-id" placeholder="Enter id" />
-        </div>
-
-        <div id="field-zone-id" style="display:none">
-          <label id="zone-label">ZONE ID</label>
-          <input id="input-zone-id" placeholder="Enter zone id" />
-        </div>
-
-        <div id="field-player-name" style="display:none">
-          <label id="name-label">PLAYER NAME</label>
-          <input id="input-player-name" placeholder="Enter name" />
-        </div>
-
-        <div id="field-email" style="display:none">
-          <label id="email-label">EMAIL</label>
-          <input id="input-email" placeholder="Enter email" />
-        </div>
-
-        <div id="field-device-type" style="display:none">
-          <label id="device-type-label">TV or Mobile</label>
-          <select id="input-device-type">
-            <option value="">Select...</option>
-            <option value="TV">TV</option>
-            <option value="Mobile">Mobile</option>
-          </select>
-        </div>
-
-        <div id="field-phone" style="display:none">
-          <label id="phone-label">PHONE NUMBER</label>
-          <input id="input-phone" placeholder="Enter phone number" />
-        </div>
-
-        <div id="field-whatsapp" style="display:none">
-          <label id="whatsapp-label">WHATSAPP NUMBER</label>
-          <input id="input-whatsapp" placeholder="Enter WhatsApp number" />
-        </div>
-
-        <div id="field-username" style="display:none">
-          <label id="username-label">USERNAME</label>
-          <input id="input-username" placeholder="Enter username" />
-        </div>
-
-        <div id="field-pass" style="display:none">
-          <label id="pass-label">PASSWORD</label>
-          <input id="input-pass" placeholder="Enter password" />
-        </div>
-
-        <div id="field-backup" style="display:none; grid-column:1 / -1">
-          <label id="backup-label">BACKUP CODES</label>
-          <textarea id="input-backup" placeholder="Enter backup codes..."></textarea>
-        </div>
-
-        <div id="field-account-details" style="display:none; grid-column:1 / -1">
-          <label id="account-details-label">ACCOUNT DETAILS</label>
-          <textarea id="input-account-details" placeholder="Enter account details..."></textarea>
-        </div>
-      </div>
-
-      <button id="buyBtn" class="btn" style="margin-top:12px">Buy Now</button>
-      <div id="msg" class="msg"></div>
+      <button id="buyBtn" class="buy-btn" style="margin-top: 10px;">BUY NOW</button>
     </div>
   </div>
 
-  <div class="plansOverlay" id="plansOverlay"></div>
-  <div class="plansSheet" id="plansSheet" aria-hidden="true">
-    <div class="plansHeader">
-      <div>
-        <div class="plansTitle">Choose Plan</div>
-        <div class="plansSub">Select one plan then confirm</div>
-      </div>
-      <button class="plansClose" id="plansClose" type="button">✕</button>
+  <div class="sheet-overlay" id="sheetOverlay"></div>
+  <div class="bottom-sheet" id="planSheet">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+      <h2 style="margin:0; font-size: 18px;">SELECT PLAN</h2>
+      <button onclick="closeSheet()" style="background:none; border:none; color:#fff; font-size: 20px;">✕</button>
     </div>
-
-    <div class="plansList" id="plansList">
-      <div style="opacity:.75;padding:12px 10px">Loading...</div>
-    </div>
-
-    <div class="plansFooter">
-      <button class="plansBtn" id="plansCancel" type="button">Cancel</button>
-      <button class="plansBtn primary" id="plansConfirm" type="button">Confirm</button>
-    </div>
+    <div id="plansContainer"></div>
+    <button class="buy-btn" onclick="confirmPlanSelection()" style="margin-top: 15px;">CONFIRM</button>
   </div>
 
-  <div class="modal" id="uiModal">
-    <div class="modalCard">
-      <div class="mTitle" id="uiModalTitle">Notice</div>
-      <div class="mText" id="uiModalText">...</div>
-      <div class="mBtns" id="uiModalBtns">
-        <button class="mBtn" id="uiModalOk">OK</button>
-      </div>
+  <div class="modal" id="globalModal">
+    <div class="modal-content">
+      <h2 id="modalTitle" style="margin-top:0;">Notice</h2>
+      <p id="modalText" style="font-family:'Cairo'; opacity:0.8;"></p>
+      <button class="buy-btn" onclick="closeModal()">OK</button>
     </div>
   </div>
 
@@ -490,546 +171,177 @@
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const titleEl = document.getElementById("title");
-  const catEl = document.getElementById("cat");
-  const heroImgEl = document.getElementById("heroImg");
-  const pillsEl = document.getElementById("pills");
-  const featsEl = document.getElementById("features");
-  const priceEl = document.getElementById("price");
-  const buyBtn = document.getElementById("buyBtn");
-  const msgEl = document.getElementById("msg");
-  const customerNoteEl = document.getElementById("customerNote");
-
-  const ordersDD = document.getElementById("ordersDD");
-  const myOrdersBtn = document.getElementById("myOrdersBtn");
-  const ordersMenu = document.getElementById("ordersMenu");
-
-  const planBtn = document.getElementById("planBtn");
-  const planBtnText = document.getElementById("planBtnText");
-  const planKeyHidden = document.getElementById("planKeyHidden");
-
-  const plansOverlay = document.getElementById("plansOverlay");
-  const plansSheet = document.getElementById("plansSheet");
-  const plansClose = document.getElementById("plansClose");
-  const plansCancel = document.getElementById("plansCancel");
-  const plansConfirm = document.getElementById("plansConfirm");
-  const plansListEl = document.getElementById("plansList");
-
-  const uiModal = document.getElementById("uiModal");
-  const uiModalTitle = document.getElementById("uiModalTitle");
-  const uiModalText = document.getElementById("uiModalText");
-  const uiModalBtns = document.getElementById("uiModalBtns");
-  const uiModalOk = document.getElementById("uiModalOk");
-
-  let PLAN_LIST = [];
-  let currentProductId = null;
+  const productId = new URLSearchParams(window.location.search).get("id");
   let currentProduct = null;
+  let allPlans = [];
   let selectedPlan = null;
-  let plansChannel = null;
+  let tempSelectedPlanId = null;
 
-  let tiktokEmailToggleAttached = false;
+  async function init() {
+    if(!productId) return;
+    
+    // 1. Get Product Details
+    const { data: product, error } = await sb.from("products").select("*").eq("id", productId).single();
+    if(error) return showModal("Error", "Product not found");
+    currentProduct = product;
+    
+    // Render Static Info
+    document.getElementById("pTitle").textContent = product.title;
+    document.getElementById("pCat").textContent = "Category: " + (product.category || "General");
+    document.getElementById("heroImg").src = `assets/products/${product.id}.jpg`;
+    document.getElementById("heroImg").onerror = function() { this.src = 'assets/products/default.png'; };
 
-  function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-  function getId(){ return new URL(location.href).searchParams.get("id"); }
-
-  function closeUIModal(){ uiModal.style.display = "none"; }
-  uiModal.addEventListener("click", (e)=>{ if(e.target === uiModal) closeUIModal(); });
-
-  function showNotice(message, title="Notice"){
-    return new Promise((resolve)=>{
-      uiModalTitle.textContent = title;
-      uiModalText.textContent = message;
-      uiModalBtns.innerHTML = `<button class="mBtn" id="uiModalOk2">OK</button>`;
-      uiModal.style.display = "flex";
-      document.getElementById("uiModalOk2").onclick = ()=>{ closeUIModal(); resolve(true); };
-    });
-  }
-
-  function showConfirm(message, title="Confirm"){
-    return new Promise((resolve)=>{
-      uiModalTitle.textContent = title;
-      uiModalText.textContent = message;
-      uiModalBtns.innerHTML = `
-        <button class="mBtn secondary" id="uiModalCancel">Cancel</button>
-        <button class="mBtn" id="uiModalYes">Confirm</button>
-      `;
-      uiModal.style.display = "flex";
-      document.getElementById("uiModalCancel").onclick = ()=>{ closeUIModal(); resolve(false); };
-      document.getElementById("uiModalYes").onclick = ()=>{ closeUIModal(); resolve(true); };
-    });
-  }
-
-  function openPlans(){
-    plansOverlay.classList.add("show");
-    plansSheet.classList.add("show");
-    plansSheet.setAttribute("aria-hidden","false");
-  }
-  function closePlans(){
-    plansOverlay.classList.remove("show");
-    plansSheet.classList.remove("show");
-    plansSheet.setAttribute("aria-hidden","true");
-  }
-  plansOverlay.onclick = closePlans;
-  plansClose.onclick = closePlans;
-  plansCancel.onclick = closePlans;
-
-  planBtn.onclick = ()=>{
-    if(!PLAN_LIST.length) return;
-    const k = selectedPlan?.key;
-    if(k){
-      const inp = plansListEl.querySelector(`input[name="planPick"][value="${CSS.escape(k)}"]`);
-      if(inp) inp.checked = true;
-    }
-    openPlans();
-  };
-
-  plansConfirm.onclick = ()=>{
-    const chosen = plansListEl.querySelector('input[name="planPick"]:checked');
-    if(!chosen){ showNotice("Choose a plan", "Notice"); return; }
-    const k = chosen.value;
-    const plan = PLAN_LIST.find(x=>x.key === k);
-    if(plan){
-      selectedPlan = plan;
-      planKeyHidden.value = plan.key;
-      planBtnText.textContent = `${plan.label} - $${Number(plan.price||0).toFixed(2)}`;
-      priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
-      applyDynamicFields();
-    }
-    closePlans();
-  };
-
-  function clearAllInputs(){
-    const ids = [
-      "customerNote",
-      "input-player-id","input-zone-id","input-player-name",
-      "input-email","input-device-type","input-phone","input-whatsapp","input-username",
-      "input-pass","input-backup","input-account-details"
-    ];
-    ids.forEach(id=>{
-      const el = document.getElementById(id);
-      if(el) el.value = "";
-    });
-  }
-
-  async function loadPlans(productId){
-    const { data, error } = await sb
-      .from("product_plan_prices")
-      .select("id, product_id, plan_key, plan_label, plan_name, price, active")
-      .eq("product_id", productId)
-      .eq("active", true);
-
-    if(error){ return []; }
-
-    const rows = (data || []).map(r => ({
-      key: String(r.plan_key ?? r.id).trim(),
-      label: (r.plan_label || r.plan_name || r.plan_key || ("Plan " + r.id)).toString(),
-      price: Number(r.price || 0)
-    }));
-
-    rows.sort((a,b)=>{
-      const ak = a.key.toLowerCase();
-      const bk = b.key.toLowerCase();
-      const an = Number(ak);
-      const bn = Number(bk);
-      const aIsNum = ak !== "" && Number.isFinite(an);
-      const bIsNum = bk !== "" && Number.isFinite(bn);
-      if(aIsNum && bIsNum) return an - bn;
-      if(aIsNum && !bIsNum) return -1;
-      if(!aIsNum && bIsNum) return 1;
-      return ak.localeCompare(bk);
-    });
-
-    return rows;
-  }
-
-  function renderFeatures(features){
-    featsEl.innerHTML = (features || [])
-      .map(f => `<div class="feature"><div class="fKey">${esc(f.label || f.key)}</div><div class="fValue">${esc(f.value)}</div></div>`)
-      .join("");
-  }
-
-  function applyDynamicFields(){
-    const df = document.getElementById("dynamic-fields");
-
-    const fId = document.getElementById("field-player-id");
-    const fZone = document.getElementById("field-zone-id");
-    const fName = document.getElementById("field-player-name");
-    const fEmail = document.getElementById("field-email");
-    const fDevice = document.getElementById("field-device-type");
-    const fPhone = document.getElementById("field-phone");
-    const fWhats = document.getElementById("field-whatsapp");
-    const fUser = document.getElementById("field-username");
-    const fPass = document.getElementById("field-pass");
-    const fBackup = document.getElementById("field-backup");
-    const fAcc = document.getElementById("field-account-details");
-
-    df.style.display = "none";
-    [fId,fZone,fName,fEmail,fDevice,fPhone,fWhats,fUser,fPass,fBackup,fAcc].forEach(el=>el.style.display="none");
-
-    document.getElementById("id-label").textContent = currentProduct.player_id_label || "PLAYER ID";
-    document.getElementById("zone-label").textContent = currentProduct.zone_id_label || "ZONE ID";
-    document.getElementById("name-label").textContent = currentProduct.player_name_label || "PLAYER NAME";
-    document.getElementById("email-label").textContent = currentProduct.email_label || "EMAIL";
-    document.getElementById("device-type-label").textContent = "TV or Mobile";
-    document.getElementById("phone-label").textContent = currentProduct.phone_label || "PHONE NUMBER";
-    document.getElementById("whatsapp-label").textContent = currentProduct.whatsapp_label || "WHATSAPP NUMBER";
-    document.getElementById("username-label").textContent = currentProduct.username_label || "USERNAME";
-    document.getElementById("pass-label").textContent = currentProduct.password_label || "PASSWORD";
-    document.getElementById("backup-label").textContent = currentProduct.backup_codes_label || "BACKUP CODES";
-    document.getElementById("account-details-label").textContent = currentProduct.account_details_label || "ACCOUNT DETAILS";
-
-    let needId   = !!currentProduct.require_player_id;
-    let needZone = !!currentProduct.require_zone_id;
-    let needName = !!currentProduct.require_player_name;
-    let needEmail= !!currentProduct.require_email;
-    let needPass = !!currentProduct.require_password;
-    let needUser = !!currentProduct.require_username;
-    let needPhone= !!currentProduct.require_phone;
-    let needWhats= !!currentProduct.require_whatsapp;
-    let needBackup = !!currentProduct.require_backup_codes;
-    let needAcc = !!currentProduct.require_account_details;
-    let needDevice = false;
-
-    const planText = ((selectedPlan?.label || selectedPlan?.key || "") + "").toLowerCase();
-    const titleText = (currentProduct.title || "").toLowerCase();
-
-    // ✅✅✅ NEW RULE: If plan has "direct", REQUIRE Email & Password (Overrides defaults) ✅✅✅
-    if(planText.includes("direct")){
-      needEmail = true;
-      needPass = true;
-    }
-
-    // Specific Overrides
-    if(titleText.includes("chatgpt") && planText.includes("private")){
-      needEmail = true; needPass = false;
-    }
-    if(titleText.includes("netflix")){
-      needDevice = true;
-    }
-    if(titleText.includes("tango")){
-      needId = true;
-    }
-
-    // TikTok Override
-    if(titleText.includes("tiktok")){
-      needEmail = true;
-      needPhone = true;
-      // If NOT direct, hide password by default (toggle logic)
-      if(!planText.includes("direct")){
-        needPass = false; 
-      }
-    }
-
-    if(needId || needZone || needName || needEmail || needDevice || needPhone || needWhats || needUser || needPass || needBackup || needAcc){
-      df.style.display = "grid";
-      if(needId) fId.style.display = "block";
-      if(needZone) fZone.style.display = "block";
-      if(needName) fName.style.display = "block";
-      if(needEmail) fEmail.style.display = "block";
-      if(needDevice) fDevice.style.display = "block";
-      if(needPhone) fPhone.style.display = "block";
-      if(needWhats) fWhats.style.display = "block";
-      if(needUser) fUser.style.display = "block";
-      if(needPass) fPass.style.display = "block";
-      if(needBackup) fBackup.style.display = "block";
-      if(needAcc) fAcc.style.display = "block";
-    }
-
-    // TikTok Email-Password Toggle logic
-    if(titleText.includes("tiktok") && !planText.includes("direct")){
-      const emailInput = document.getElementById("input-email");
-      const passWrap = document.getElementById("field-pass");
-      const passInput = document.getElementById("input-pass");
-
-      if(passWrap) passWrap.style.display = "none";
-
-      if(emailInput && passWrap && passInput && !tiktokEmailToggleAttached){
-        tiktokEmailToggleAttached = true;
-        emailInput.addEventListener("input", ()=>{
-          const v = (emailInput.value || "").trim();
-          if(v) passWrap.style.display = "block";
-          else {
-            passWrap.style.display = "none";
-            passInput.value = "";
-          }
-        });
-      }
-      const v0 = (emailInput?.value || "").trim();
-      if(v0 && passWrap) passWrap.style.display = "block";
-    }
-  }
-
-  function renderProduct(p, features){
-    currentProduct = p;
-    currentProductId = p.id;
-
-    titleEl.textContent = p.title || "Product";
-    catEl.textContent = "Category: " + (p.category || "-");
-
-    heroImgEl.src = `assets/products/${p.id}.jpg`;
-    heroImgEl.onerror = () => heroImgEl.src = "assets/products/default.png";
-
-    pillsEl.innerHTML = `
-      <span class="pill">${p.active ? "Available" : "Unavailable"}</span>
-      <span class="pill">${esc(p.category || "")}</span>
-    `;
-
-    renderFeatures(features);
-  }
-
-  function renderPlans(plans){
-    PLAN_LIST = plans || [];
-
-    if(!PLAN_LIST.length){
-      selectedPlan = { key:"default", label:"default", price:Number(currentProduct?.price || 0) };
-      planKeyHidden.value = selectedPlan.key;
-      planBtnText.textContent = "Default - $" + Number(selectedPlan.price||0).toFixed(2);
-      priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
-      plansListEl.innerHTML = `<div style="opacity:.75;padding:12px 10px">No plans</div>`;
-      applyDynamicFields();
-      return;
-    }
-
-    selectedPlan = PLAN_LIST[0];
-    planKeyHidden.value = selectedPlan.key;
-    planBtnText.textContent = `${selectedPlan.label} - $${Number(selectedPlan.price||0).toFixed(2)}`;
-    priceEl.textContent = "$" + Number(selectedPlan.price || 0).toFixed(2);
-
-    plansListEl.innerHTML = PLAN_LIST.map((pl)=>{
-      const pr = Number(pl.price||0);
-      return `
-        <label class="planRow">
-          <input type="radio" name="planPick" value="${esc(pl.key)}" ${pl.key===selectedPlan.key ? "checked":""}>
-          <span class="planDot"></span>
-          <div class="planInfo">
-            <div class="planName">${esc(pl.label)}</div>
-            <div class="planDesc">Tap to select</div>
-          </div>
-          <div class="planPrice">$${pr.toFixed(2)}</div>
-        </label>
-      `;
-    }).join("");
-
-    applyDynamicFields();
-  }
-
-  function subscribePlansRealtime(productId){
-    try{
-      if(plansChannel) sb.removeChannel(plansChannel);
-    }catch(e){}
-
-    plansChannel = sb
-      .channel("plans_" + productId)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "product_plan_prices", filter: `product_id=eq.${productId}` },
-        async () => {
-          const prevKey = selectedPlan?.key;
-          const plans = await loadPlans(productId);
-          renderPlans(plans);
-
-          if(prevKey){
-            const still = PLAN_LIST.find(x => x.key === prevKey);
-            if(still){
-              selectedPlan = still;
-              planKeyHidden.value = prevKey;
-              planBtnText.textContent = `${still.label} - $${Number(still.price||0).toFixed(2)}`;
-              priceEl.textContent = "$" + Number(still.price || 0).toFixed(2);
-              applyDynamicFields();
-
-              const inp = plansListEl.querySelector(`input[name="planPick"][value="${CSS.escape(prevKey)}"]`);
-              if(inp) inp.checked = true;
-            }
-          }
-        }
-      )
+    // 2. Get Plans
+    await refreshPlans();
+    
+    // 3. Listen for changes in plans (Real-time)
+    sb.channel('plan-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_plan_prices', filter: `product_id=eq.${productId}` }, refreshPlans)
       .subscribe();
   }
 
-  async function loadMyOrdersMenu(){
-    ordersMenu.innerHTML = `<div style="opacity:.7;padding:10px">Loading...</div>`;
-    const { data: { session } } = await sb.auth.getSession();
-    if(!session){
-      ordersMenu.innerHTML = `<div style="opacity:.7;padding:10px">Login first</div>`;
-      return;
-    }
-
-    const { data, error } = await sb
-      .from("orders")
-      .select("id,status,delivery_status,created_at")
-      .eq("user_id", session.user.id)
-      .order("created_at", {ascending:false})
-      .limit(8);
-
-    if(error){ ordersMenu.innerHTML = `<div style="opacity:.7;padding:10px">Error</div>`; return; }
-
-    if(!data || !data.length){ ordersMenu.innerHTML = `<div style="opacity:.7;padding:10px">No orders</div>`; return; }
-
-    ordersMenu.innerHTML = data.map(o=>{
-      const d = (o.delivery_status || "pending").toLowerCase();
-      const pay = (o.status || "pending").toLowerCase();
-      const show = (d === "rejected") ? "rejected" : pay;
-      return `
-        <div class="ordersItem" onclick="location.href='my-orders.html'">
-          <span>#${o.id}</span>
-          <span class="badge">${esc(show)}</span>
-        </div>
-      `;
-    }).join("");
-  }
-
-  myOrdersBtn.onclick = async ()=>{
-    const open = ordersMenu.style.display === "block";
-    ordersMenu.style.display = open ? "none" : "block";
-    if(!open) await loadMyOrdersMenu();
-  };
-  document.addEventListener("click", (e)=>{
-    if(!ordersDD.contains(e.target)){
-      ordersMenu.style.display = "none";
-    }
-  });
-
-  function buildExtraNote(extra){
-    const lines = [];
-    for(const [k,v] of Object.entries(extra)){
-      const val = (v || "").toString().trim();
-      if(val) lines.push(`${k}: ${val}`);
-    }
-    if(!lines.length) return "";
-    return "\n\n---\n" + lines.join("\n");
-  }
-
-  async function buyProduct(){
-    if(!selectedPlan){ await showNotice("Select a plan first", "Notice"); return; }
-
-    const pId = document.getElementById("input-player-id").value.trim();
-    const zId = document.getElementById("input-zone-id").value.trim();
-    const pName = document.getElementById("input-player-name").value.trim();
-    const pEmail = document.getElementById("input-email").value.trim();
-    const pDevice = document.getElementById("input-device-type")?.value?.trim() || "";
-    const pPhone = document.getElementById("input-phone").value.trim();
-    const pWhats = document.getElementById("input-whatsapp").value.trim();
-    const pUser = document.getElementById("input-username").value.trim();
-    const pPass = document.getElementById("input-pass").value.trim();
-    const pBackup = document.getElementById("input-backup").value.trim();
-    const pAcc = document.getElementById("input-account-details").value.trim();
-
-    const isVisible = (id)=> document.getElementById(id)?.style.display === "block";
-
-    if(isVisible("field-player-id") && !pId){ await showNotice("ID is required", "Notice"); return; }
-    if(isVisible("field-zone-id") && !zId){ await showNotice("Zone ID is required", "Notice"); return; }
-    if(isVisible("field-player-name") && !pName){ await showNotice("Name is required", "Notice"); return; }
-    if(isVisible("field-device-type") && !pDevice){ await showNotice("Please select TV or Mobile", "Notice"); return; }
-    if(isVisible("field-username") && !pUser){ await showNotice("Username is required", "Notice"); return; }
-    if(isVisible("field-whatsapp") && !pWhats){ await showNotice("WhatsApp number is required", "Notice"); return; }
-    if(isVisible("field-backup") && !pBackup){ await showNotice("Backup codes are required", "Notice"); return; }
-    if(isVisible("field-account-details") && !pAcc){ await showNotice("Account details are required", "Notice"); return; }
-
-    const titleText = (currentProduct.title || "").toLowerCase();
+  async function refreshPlans() {
+    const { data: plans } = await sb.from("product_plan_prices").select("*").eq("product_id", productId).eq("active", true);
+    allPlans = plans || [];
+    renderPlansInSheet();
     
-    // TikTok special validation
-    if(titleText.includes("tiktok")){
-      const emailShown = isVisible("field-email");
-      const phoneShown = isVisible("field-phone");
-      if((emailShown || phoneShown) && (!pEmail && !pPhone)){
-        await showNotice("Enter Email or Phone number", "Notice"); return;
-      }
-      if(pEmail && isVisible("field-pass") && !pPass){
-        await showNotice("Password is required when using Email", "Notice"); return;
-      }
-    } else {
-      // Standard validation
-      if(isVisible("field-email") && !pEmail){ await showNotice("Email is required", "Notice"); return; }
-      if(isVisible("field-phone") && !pPhone){ await showNotice("Phone number is required", "Notice"); return; }
-      if(isVisible("field-pass") && !pPass){ await showNotice("Password is required", "Notice"); return; }
+    if(allPlans.length > 0 && !selectedPlan) {
+      setPlan(allPlans[0]);
+    }
+  }
+
+  function renderPlansInSheet() {
+    const container = document.getElementById("plansContainer");
+    container.innerHTML = allPlans.map(p => `
+      <div class="plan-option ${tempSelectedPlanId == p.id ? 'selected' : ''}" onclick="tempSelectPlan('${p.id}')">
+        <div style="font-weight:900;">${p.plan_label}</div>
+        <div style="color:var(--neon-cyan); font-weight:900;">$${Number(p.price).toFixed(2)}</div>
+      </div>
+    `).join('');
+  }
+
+  function tempSelectPlan(id) {
+    tempSelectedPlanId = id;
+    renderPlansInSheet();
+  }
+
+  function confirmPlanSelection() {
+    const plan = allPlans.find(p => p.id == tempSelectedPlanId);
+    if(plan) setPlan(plan);
+    closeSheet();
+  }
+
+  function setPlan(plan) {
+    selectedPlan = plan;
+    document.getElementById("planLabel").textContent = `${plan.plan_label} - $${Number(plan.price).toFixed(2)}`;
+    document.getElementById("pPrice").textContent = `$${Number(plan.price).toFixed(2)}`;
+    updateDynamicFields();
+  }
+
+  function updateDynamicFields() {
+    const container = document.getElementById("dynamicFields");
+    container.style.display = "block";
+    container.innerHTML = "";
+
+    const titleLower = currentProduct.title.toLowerCase();
+    const planLower = selectedPlan.plan_label.toLowerCase();
+
+    // Logic for required fields
+    let fields = [];
+
+    // Rule: Direct plans always need Email/Pass
+    if(planLower.includes("direct") || currentProduct.require_email) {
+      fields.push({ id: "acc_email", label: currentProduct.email_label || "EMAIL / PHONE", type: "text" });
+      fields.push({ id: "acc_pass", label: currentProduct.password_label || "PASSWORD", type: "password" });
     }
 
-    const ok = await showConfirm("Proceed with purchase? Balance will be deducted.", "Confirm Order");
-    if(!ok) return;
+    if(currentProduct.require_player_id) fields.push({ id: "player_id", label: currentProduct.player_id_label || "PLAYER ID", type: "text" });
+    if(currentProduct.require_player_name) fields.push({ id: "player_name", label: currentProduct.player_name_label || "INGAME NAME", type: "text" });
+    
+    // Custom logic for Netflix/Tiktok etc.
+    if(titleLower.includes("netflix")) {
+      fields.push({ id: "device", label: "DEVICE TYPE", type: "select", options: ["TV", "Mobile/Tablet", "Laptop"] });
+    }
 
-    buyBtn.disabled = true;
-    buyBtn.textContent = "Processing...";
+    container.innerHTML = fields.map(f => `
+      <div class="input-group">
+        <label>${f.label}</label>
+        ${f.type === 'select' ? 
+          `<select id="${f.id}">${f.options.map(o => `<option value="${o}">${o}</option>`).join('')}</select>` : 
+          `<input type="${f.type}" id="${f.id}" placeholder="Enter ${f.label.toLowerCase()}">`
+        }
+      </div>
+    `).join('');
+  }
 
-    try{
+  // --- ACTIONS ---
+  document.getElementById("planBtn").onclick = () => {
+    document.getElementById("sheetOverlay").style.display = "block";
+    setTimeout(() => document.getElementById("planSheet").classList.add("active"), 10);
+  };
+
+  function closeSheet() {
+    document.getElementById("planSheet").classList.remove("active");
+    setTimeout(() => document.getElementById("sheetOverlay").style.display = "none", 400);
+  }
+
+  document.getElementById("buyBtn").onclick = async () => {
+    const btn = document.getElementById("buyBtn");
+    btn.disabled = true;
+    btn.textContent = "PROCESSING...";
+
+    try {
       const { data: { session } } = await sb.auth.getSession();
-      if(!session){ location.href="login.html"; return; }
+      if(!session) return window.location.href = "login.html";
 
-      const baseNote = (customerNoteEl.value || "").trim();
-      const extraNote = buildExtraNote({
-        "Plan": selectedPlan.label || selectedPlan.key,
-        "Device Type": pDevice,
-        "ID": pId,
-        "Zone ID": zId,
-        "Name": pName,
-        "Email": pEmail,
-        "Phone": pPhone,
-        "WhatsApp": pWhats,
-        "Username": pUser,
-        "Backup Codes": pBackup,
-        "Account Details": pAcc
-      });
-      const finalNote = (baseNote + extraNote).trim();
+      // Basic Validation
+      const inputs = document.querySelectorAll("#dynamicFields input");
+      for(let input of inputs) {
+        if(!input.value.trim()) {
+          showModal("Missing Info", `Please fill in ${input.previousElementSibling.textContent}`);
+          btn.disabled = false;
+          btn.textContent = "BUY NOW";
+          return;
+        }
+      }
 
-      const { data: orderId, error } = await sb.rpc("place_order", {
-        p_product_id: currentProductId,
+      // Collect Data
+      const orderData = {
+        p_product_id: productId,
         p_price: selectedPlan.price,
-        p_duration: selectedPlan.label,
-        p_note: finalNote || null,
-        p_player_id: pId || null,
-        p_player_name: pName || null,
-        p_acc_email: (pEmail || pPhone) || null,
-        p_acc_pass: pPass || null
-      });
+        p_duration: selectedPlan.plan_label,
+        p_note: document.getElementById("customerNote").value,
+        p_player_id: document.getElementById("player_id")?.value || null,
+        p_player_name: document.getElementById("player_name")?.value || null,
+        p_acc_email: document.getElementById("acc_email")?.value || null,
+        p_acc_pass: document.getElementById("acc_pass")?.value || null
+      };
 
+      const { data, error } = await sb.rpc("place_order", orderData);
+      
       if(error) throw error;
 
-      clearAllInputs();
-      await showNotice("✅ Order Placed Successfully! ID: " + orderId, "Success");
-      location.href = "my-orders.html";
-    }catch(e){
-      await showNotice(e.message || "Purchase failed", "Error");
-    }finally{
-      buyBtn.disabled = false;
-      buyBtn.textContent = "Buy Now";
+      showModal("Success!", "Your order has been placed. Redirecting...");
+      setTimeout(() => window.location.href = "my-orders.html", 2000);
+
+    } catch(err) {
+      showModal("Error", err.message);
+      btn.disabled = false;
+      btn.textContent = "BUY NOW";
     }
+  };
+
+  function showModal(title, text) {
+    document.getElementById("modalTitle").textContent = title;
+    document.getElementById("modalText").textContent = text;
+    document.getElementById("globalModal").style.display = "flex";
   }
 
-  buyBtn.onclick = buyProduct;
-
-  async function loadProduct(id){
-    const { data: product, error: e1 } = await sb
-      .from("products")
-      .select("*")
-      .eq("id", id)
-      .single();
-    if(e1) throw e1;
-
-    const { data: features, error: e2 } = await sb
-      .from("product_features")
-      .select("*")
-      .eq("product_id", id)
-      .order("sort", { ascending: true });
-    if(e2) throw e2;
-
-    return { product, features: features || [] };
+  function closeModal() {
+    document.getElementById("globalModal").style.display = "none";
   }
 
-  (async function init(){
-    const id = getId();
-    if(!id){ titleEl.textContent = "Missing id"; return; }
-    try{
-      const { product, features } = await loadProduct(id);
-      renderProduct(product, features);
-      const plans = await loadPlans(product.id);
-      renderPlans(plans);
-      subscribePlansRealtime(product.id);
-    }catch(err){
-      titleEl.textContent = "Error";
-      await showNotice(err?.message || String(err), "Error");
-    }
-  })();
+  init();
 </script>
-
-  <script src="app-ui.js?v=3"></script>
 </body>
 </html>
