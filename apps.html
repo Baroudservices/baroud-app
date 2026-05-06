@@ -2,216 +2,154 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Apps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Baroud | Apps</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    :root{
-      --glass:rgba(255,255,255,.07);
-      --stroke:rgba(255,255,255,.10);
-      --shadow:0 18px 60px rgba(0,0,0,.35);
+    :root {
+      --neon-cyan: #00f2ff;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.08);
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#0b1424,#050a14);
-      color:#fff;
-      min-height:100vh;
-      padding:14px;
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Orbitron', 'Cairo', sans-serif;
+      background: var(--bg-dark); color: #fff;
+      min-height: 100vh;
     }
-    .wrap{max-width:520px;margin:0 auto;padding-bottom:28px}
-    .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
-    .btn{
-      border:1px solid var(--stroke);
-      background:var(--glass);
-      color:#fff;
-      padding:12px 14px;
-      border-radius:16px;
-      cursor:pointer;
-      user-select:none;
-      -webkit-tap-highlight-color:transparent;
+
+    .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
+
+    /* ===== HEADER ===== */
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .btn-circle {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff; text-decoration: none;
     }
-    .title{font-weight:950;font-size:20px}
-    .searchBox{
-      margin-top:12px;
-      background:var(--glass);
-      border:1px solid var(--stroke);
-      border-radius:26px;
-      padding:14px 16px;
-      box-shadow:0 18px 60px rgba(0,0,0,.18);
+
+    /* ===== SEARCH ===== */
+    .search-container {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 12px 20px; margin-bottom: 20px;
+      display: flex; align-items: center;
     }
-    .searchBox input{
-      width:100%;
-      background:transparent;border:none;outline:none;
-      color:#fff;font-size:16px;opacity:.9;
+    .search-container input {
+      background: none; border: none; color: #fff; width: 100%;
+      font-family: 'Cairo'; font-size: 15px; outline: none;
     }
-    .grid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .card{
-      background:var(--glass);
-      border:1px solid var(--stroke);
-      border-radius:22px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-      cursor:pointer;
-      display:flex;flex-direction:column;
-      -webkit-tap-highlight-color:transparent;
+
+    /* ===== GRID ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    .card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 25px; overflow: hidden; position: relative;
+      transition: 0.3s; cursor: pointer;
     }
-    .img{height:120px;background:rgba(0,0,0,.25);overflow:hidden}
-    .pImg{width:100%;height:100%;object-fit:cover;display:block}
-    .body{padding:12px 12px 14px;display:flex;flex-direction:column;gap:8px}
-    .name{font-weight:950;font-size:16px;line-height:1.1}
-    .meta{display:flex;gap:8px;flex-wrap:wrap;opacity:.9;font-weight:800;font-size:12px}
-    .pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06)}
-    .priceRow{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
-    .price{font-weight:950;font-size:16px;color:#1bc7ff}
-    .buy{
-      padding:10px 12px;border-radius:14px;border:none;cursor:pointer;
-      font-weight:950;color:#fff;
-      background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-      box-shadow:0 14px 40px rgba(0,0,0,.25);
+    .card:active { transform: scale(0.96); border-color: var(--neon-cyan); }
+
+    .card-img { width: 100%; height: 130px; object-fit: cover; background: #000; }
+    
+    .card-body { padding: 12px; }
+    .card-name { font-weight: 900; font-size: 15px; margin-bottom: 8px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .card-price { color: var(--neon-cyan); font-weight: 900; font-size: 14px; }
+    
+    .open-btn {
+      padding: 6px 12px; border-radius: 10px; background: var(--neon-cyan);
+      color: #000; font-weight: 900; font-size: 11px; border: none;
     }
-    .skeleton{position:relative;overflow:hidden;background:rgba(255,255,255,.05)}
-    .skeleton::after{
-      content:"";position:absolute;inset:0;transform:translateX(-100%);
-      background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.10) 45%,rgba(255,255,255,0) 100%);
-      animation:shimmer 1.05s infinite;
+
+    /* ===== LOADING SHIMMER ===== */
+    .shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+      background-size: 200% 100%; animation: loading 1.5s infinite;
     }
-    @keyframes shimmer{to{transform:translateX(100%)}}
-    .sk-img{height:120px}
-    .sk-line{height:14px;border-radius:10px}
-    .sk-line.big{height:18px}
-    .sk-row{display:flex;gap:10px;align-items:center}
-    .mt10{margin-top:10px}
+    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   </style>
 </head>
 <body>
-  <main class="wrap">
+
+  <div class="wrap">
     <div class="top">
-      <button class="btn" onclick="history.back()">← Back</button>
-      <div class="title">Apps</div>
-      <button class="btn" onclick="location.href='services.html'">Home</button>
+      <div class="btn-circle" onclick="history.back()">←</div>
+      <div style="font-weight: 900; letter-spacing: 2px;">APPS</div>
+      <div class="btn-circle" onclick="location.href='services.html'">🏠</div>
     </div>
 
-    <div class="searchBox">
-      <input id="q" placeholder="Search apps (TikTok, Soulchat, Bigo...)">
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search Apps...">
     </div>
 
-    <section class="grid" id="grid"></section>
-  </main>
+    <div class="grid" id="productGrid">
+      <div class="card shimmer" style="height: 200px;"></div>
+      <div class="card shimmer" style="height: 200px;"></div>
+    </div>
+  </div>
 
 <script>
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const grid = document.getElementById("grid");
-  const q = document.getElementById("q");
+  let allProducts = [];
 
-  function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+  async function loadProducts() {
+    try {
+      // جلب البيانات من الـ View لضمان أفضل سعر
+      const { data, error } = await sb
+        .from("products_with_min_price")
+        .select("id, title, category, min_price")
+        .eq("active", true)
+        .eq("category", "Apps")
+        .order('title', { ascending: true });
 
-  function showLoading(n=6){
-    grid.innerHTML = "";
-    for(let i=0;i<n;i++){
-      const el = document.createElement("div");
-      el.className = "card";
-      el.innerHTML = `
-        <div class="img"><div class="skeleton sk-img" style="width:100%;height:100%"></div></div>
-        <div class="body">
-          <div class="skeleton sk-line big" style="width:75%"></div>
-          <div class="sk-row mt10">
-            <div class="skeleton sk-line" style="width:38%"></div>
-            <div class="skeleton sk-line" style="width:30%"></div>
-          </div>
-          <div class="sk-row mt10" style="justify-content:space-between">
-            <div class="skeleton sk-line" style="width:35%"></div>
-            <div class="skeleton sk-line" style="width:30%; height:36px; border-radius:14px;"></div>
-          </div>
-        </div>
-      `;
-      grid.appendChild(el);
+      if (error) throw error;
+      allProducts = data;
+      render(allProducts);
+    } catch (e) {
+      document.getElementById("productGrid").innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Error loading apps.</div>`;
     }
   }
 
-  function openProduct(rawId){
-    const n = Number(String(rawId ?? "").trim());
-    if(!Number.isFinite(n) || n <= 0){ alert("Invalid product id"); return; }
-    location.href = `account.html?id=${n}`;
-  }
-
-  function render(list){
-    grid.innerHTML = "";
-    if(!list || !list.length){
-      grid.innerHTML = `<div style="opacity:.8;padding:14px">No apps available.</div>`;
+  function render(list) {
+    const grid = document.getElementById("productGrid");
+    if (list.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5; padding: 40px;">No matches found.</div>`;
       return;
     }
 
-    list.forEach(it=>{
-      const el = document.createElement("div");
-      el.className = "card";
-      const priceNum = Number(it.price);
-      const priceTxt = Number.isFinite(priceNum) ? priceNum.toFixed(2) : "0.00";
-
-      el.innerHTML = `
-        <div class="img">
-          <img class="pImg" src="assets/products/${it.id}.jpg" onerror="this.src='assets/products/default.png'">
-        </div>
-        <div class="body">
-          <div class="name">${esc(it.title)}</div>
-          <div class="meta">
-            <span class="pill">${esc(it.category || 'App')}</span>
-            <span class="pill">Available</span>
-          </div>
-          <div class="priceRow">
-            <div class="price">$${priceTxt}</div>
-            <button class="buy">Open</button>
+    grid.innerHTML = list.map(item => `
+      <div class="card" onclick="location.href='account.html?id=${item.id}'">
+        <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='assets/products/default.png'">
+        <div class="card-body">
+          <div class="card-name">${item.title}</div>
+          <div class="card-footer">
+            <div class="card-price">$${Number(item.min_price || 0).toFixed(2)}</div>
+            <button class="open-btn">OPEN</button>
           </div>
         </div>
-      `;
-      el.onclick = () => openProduct(it.id);
-      grid.appendChild(el);
-    });
+      </div>
+    `).join('');
   }
 
-  async function loadApps(){
-    // ✅ جلب التطبيقات فقط + عرض أرخص سعر (min_price) مباشرة
-    const { data, error } = await sb
-      .from("products_with_min_price")
-      .select("id,title,category,min_price")
-      .eq("active", true)
-      .eq("category", "Apps");
+  // Search Logic
+  document.getElementById("searchInput").oninput = (e) => {
+    const term = e.target.value.toLowerCase();
+    const filtered = allProducts.filter(p => p.title.toLowerCase().includes(term));
+    render(filtered);
+  };
 
-    if(error) throw error;
-
-    return (data || []).map(p => ({
-      id: p.id,
-      title: p.title,
-      category: p.category,
-      price: Number(p.min_price || 0)
-    }));
-  }
-
-  let all = [];
-  (async ()=>{
-    showLoading(6);
-    try{
-      all = await loadApps();
-      render(all);
-      q.addEventListener("input", ()=>{
-        const v = q.value.toLowerCase().trim();
-        render(all.filter(x => x.title.toLowerCase().includes(v)));
-      });
-    }catch(e){
-      grid.innerHTML = `<div style="padding:14px">Error: ${esc(e.message)}</div>`;
-    }
-  })();
+  loadProducts();
 </script>
 </body>
 </html>
