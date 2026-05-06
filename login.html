@@ -5,113 +5,121 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Login - Baroud Services</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
-    /* ===== RESET & BASE ===== */
-    * { box-sizing: border-box; }
+    :root {
+      --neon-cyan: #00f2ff;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(180deg, #06162a, #020b14);
+      font-family: 'Orbitron', 'Cairo', sans-serif;
+      background-color: var(--bg-dark);
       color: #fff;
       min-height: 100vh;
       display: flex; align-items: center; justify-content: center;
       padding: 20px;
     }
 
-    /* ===== CARD ===== */
+    /* تأثير الشبكة الرقمية بالخلفية لزيادة الفخامة */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), 
+                        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px; z-index: -1;
+    }
+
+    /* ===== MODERN GLASS CARD ===== */
     .card {
-      width: 100%; max-width: 420px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px); /* Glass Effect */
-      border-radius: 24px;
-      padding: 30px 24px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      width: 100%; max-width: 400px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(25px);
+      border-radius: 32px;
+      padding: 40px 28px;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
       position: relative;
-      animation: fadeIn 0.4s ease-out;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ===== HEADER ===== */
+    /* Back Button */
     .backBtn {
-      position: absolute; left: 20px; top: 20px;
-      background: none; border: none; color: rgba(255,255,255,0.6);
-      font-size: 24px; cursor: pointer; transition: color 0.2s;
-      padding: 0; line-height: 1;
-    }
-    .backBtn:hover { color: #fff; }
-
-    .header { text-align: center; margin-bottom: 30px; }
-    .header h1 { margin: 0 0 8px; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
-    .header p { margin: 0; color: rgba(255,255,255,0.5); font-size: 14px; }
-
-    /* ===== FORM ===== */
-    .field {
-      position: relative; margin-bottom: 16px;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      display: flex; align-items: center;
-      transition: border-color 0.2s;
-    }
-    .field:focus-within { border-color: #2a74ff; }
-
-    .icon {
-      padding: 0 14px; color: rgba(255,255,255,0.4);
+      position: absolute; left: 25px; top: 25px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      color: #fff; border-radius: 10px; width: 35px; height: 35px;
       display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.3s;
     }
+    .backBtn:hover { background: var(--neon-cyan); color: #000; border-color: var(--neon-cyan); }
+
+    .header { text-align: center; margin-bottom: 40px; }
+    .header h1 { margin: 0 0 10px; font-size: 26px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+    .header p { margin: 0; color: rgba(255,255,255,0.4); font-size: 13px; font-family: 'Cairo'; }
+
+    /* ===== INPUT FIELDS ===== */
+    .field {
+      position: relative; margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      display: flex; align-items: center;
+      transition: 0.3s;
+    }
+    .field:focus-within { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.05); }
+
+    .icon { padding: 0 16px; color: rgba(255,255,255,0.3); display: flex; }
+    
     .field input {
       width: 100%; background: transparent; border: none; outline: none;
-      color: #fff; font-size: 16px; padding: 14px 14px 14px 0;
-      height: 50px;
+      color: #fff; font-size: 15px; padding: 15px 15px 15px 0;
+      font-family: 'Cairo', sans-serif;
     }
-    .field input::placeholder { color: rgba(255,255,255,0.3); }
+    .field input::placeholder { color: rgba(255,255,255,0.2); }
 
-    /* Show/Hide Password Eye */
-    .toggle-pass {
-      padding: 0 14px; cursor: pointer; color: rgba(255,255,255,0.4);
-      background: none; border: none; display: flex;
-    }
-    .toggle-pass:hover { color: #fff; }
+    .toggle-pass { padding: 0 16px; cursor: pointer; color: rgba(255,255,255,0.3); background: none; border: none; }
 
-    /* ===== BUTTONS ===== */
+    /* ===== BUTTONS (NEON STYLE) ===== */
     .btn {
-      width: 100%; border: none; border-radius: 14px;
-      padding: 14px; font-size: 16px; font-weight: 700;
-      cursor: pointer; transition: transform 0.1s, opacity 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; border: none; border-radius: 16px;
+      padding: 16px; font-size: 15px; font-weight: 900;
+      cursor: pointer; transition: 0.4s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-family: 'Orbitron', sans-serif;
+      text-transform: uppercase;
     }
-    .btn:active { transform: scale(0.98); }
-    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
     .btn-primary {
-      background: linear-gradient(90deg, #0aa0ff, #2a74ff);
-      color: #fff; margin-top: 10px;
-      box-shadow: 0 4px 15px rgba(42, 116, 255, 0.3);
+      background: var(--neon-cyan); color: #000;
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+      margin-top: 15px;
     }
-    
-    .actions { margin-top: 12px; } /* Removed Grid since only one button remains */
+    .btn-primary:active { transform: scale(0.95); }
     
     .btn-secondary {
-      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9);
+      background: transparent; color: rgba(255,255,255,0.5);
+      font-size: 12px; margin-top: 15px; border: 1px solid transparent;
     }
-    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+    .btn-secondary:hover { color: #fff; }
 
-    /* ===== MESSAGES ===== */
+    /* Error/Success Messages */
     .msg {
       margin-bottom: 20px; padding: 12px; border-radius: 12px;
-      font-size: 14px; font-weight: 600; text-align: center;
-      display: none; line-height: 1.4;
+      font-size: 13px; text-align: center; display: none;
+      font-family: 'Cairo';
     }
-    .msg.err { background: rgba(255, 82, 82, 0.15); color: #ff5252; border: 1px solid rgba(255, 82, 82, 0.2); }
-    .msg.ok { background: rgba(33, 240, 122, 0.15); color: #21f07a; border: 1px solid rgba(33, 240, 122, 0.2); }
+    .msg.err { background: rgba(255, 82, 82, 0.1); color: #ff5252; border: 1px solid rgba(255, 82, 82, 0.2); }
+    .msg.ok { background: rgba(33, 240, 122, 0.1); color: #21f07a; border: 1px solid rgba(33, 240, 122, 0.2); }
 
-    /* Spinner */
     .spinner {
-      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff; border-radius: 50%;
+      width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.1);
+      border-top-color: #000; border-radius: 50%;
       animation: spin 0.8s linear infinite; display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -121,11 +129,11 @@
 <body>
 
   <div class="card">
-    <button class="backBtn" onclick="location.href='index.html'" aria-label="Back">✕</button>
+    <button class="backBtn" onclick="location.href='index.html'">✕</button>
 
     <div class="header">
-      <h1>Welcome Back</h1>
-      <p>Sign in to Baroud Services</p>
+      <h1>Baroud App</h1>
+      <p>Secure Login to Your Realm</p>
     </div>
 
     <div id="msg" class="msg"></div>
@@ -133,140 +141,78 @@
     <form onsubmit="return false;">
       <div class="field">
         <div class="icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         </div>
-        <input id="email" type="email" placeholder="Email Address" autocomplete="username" required>
+        <input id="email" type="email" placeholder="Email Address" required>
       </div>
 
       <div class="field">
         <div class="icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
-        <input id="pass" type="password" placeholder="Password" autocomplete="current-password" required>
-        <button type="button" class="toggle-pass" id="togglePass" tabindex="-1">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <input id="pass" type="password" placeholder="Password" required>
+        <button type="button" class="toggle-pass" id="togglePass">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
         </button>
       </div>
 
       <button class="btn btn-primary" id="loginBtn">
         <span class="spinner" id="loadingSpn"></span>
-        <span id="btnText">Login</span>
+        <span id="btnText">Access Portal</span>
       </button>
 
-      <div class="actions">
-        <button class="btn btn-secondary" id="resetBtn" type="button">Forgot Pass?</button>
-      </div>
+      <button class="btn btn-secondary" id="resetBtn" type="button">Forgot Password?</button>
     </form>
-
-    </div>
+  </div>
 
   <script>
-    // ✅ Supabase Config
+    // Supabase Config
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_"; 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Elements
     const msg = document.getElementById("msg");
     const loginBtn = document.getElementById("loginBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const btnText = document.getElementById("btnText");
-    const loadingSpn = document.getElementById("loadingSpn");
     const emailInput = document.getElementById("email");
     const passInput = document.getElementById("pass");
 
-    // ===== UI Helpers =====
     function showMsg(text, isOk=false){
       msg.style.display = "block";
       msg.className = "msg " + (isOk ? "ok" : "err");
       msg.textContent = text;
     }
-    function hideMsg(){ msg.style.display = "none"; }
 
-    function setLoading(isLoading){
-      loginBtn.disabled = isLoading;
-      resetBtn.disabled = isLoading;
-      
-      if(isLoading) {
-        loadingSpn.style.display = "block";
-        btnText.textContent = "Processing...";
-      } else {
-        loadingSpn.style.display = "none";
-        btnText.textContent = "Login";
-      }
-    }
-
-    // Toggle Password Visibility
-    const togglePassBtn = document.getElementById("togglePass");
-    togglePassBtn.addEventListener("click", () => {
-      const type = passInput.getAttribute("type") === "password" ? "text" : "password";
-      passInput.setAttribute("type", type);
-      togglePassBtn.style.opacity = type === "text" ? "1" : "0.5";
-    });
-
-    // ===== Auth Logic =====
-
-    // Check Session
-    (async ()=>{
-      try {
-        const { data: { session } } = await sb.auth.getSession();
-        if(session?.user){
-          window.location.replace("services.html");
-        }
-      } catch(e){}
-    })();
-
-    // Login Function
     async function doLogin(){
-      hideMsg();
-      const email = emailInput.value.trim().toLowerCase();
+      const email = emailInput.value.trim();
       const password = passInput.value;
 
-      if(!email || !password){
-        showMsg("Please enter both email and password.");
-        return;
-      }
+      if(!email || !password) return showMsg("Missing Credentials.");
 
-      setLoading(true);
+      loginBtn.disabled = true;
+      document.getElementById("loadingSpn").style.display = "block";
+      document.getElementById("btnText").textContent = "Verifying...";
 
       try {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        
         if(error) throw error;
-
-        const user = data?.user;
         
-        showMsg("Success! Redirecting...", true);
-        setTimeout(() => window.location.replace("services.html"), 500);
-
+        showMsg("Identity Verified. Entering...", true);
+        setTimeout(() => window.location.replace("index.html"), 800);
       } catch(e) {
-        showMsg(e.message || "Login failed. Check your credentials.");
-      } finally {
-        setLoading(false);
+        showMsg(e.message || "Access Denied.");
+        loginBtn.disabled = false;
+        document.getElementById("loadingSpn").style.display = "none";
+        document.getElementById("btnText").textContent = "Access Portal";
       }
     }
 
-    // Events
-    loginBtn.addEventListener("click", (e) => {
-      e.preventDefault(); 
-      doLogin();
-    });
-
-    resetBtn.addEventListener("click", () => {
-      const email = emailInput.value.trim();
-      if(email){
-        window.location.href = "reset.html?email=" + encodeURIComponent(email);
-      } else {
-        window.location.href = "send-email-request.html";
-      }
-    });
-
-    // Enter Key Support
-    passInput.addEventListener("keydown", (e) => {
-      if(e.key === "Enter") doLogin();
-    });
-
+    loginBtn.addEventListener("click", doLogin);
+    
+    // Toggle Pass
+    document.getElementById("togglePass").onclick = () => {
+      const isPass = passInput.type === "password";
+      passInput.type = isPass ? "text" : "password";
+    };
   </script>
-  <script src="app-ui.js?v=3"></script>
 </body>
 </html>
