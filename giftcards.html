@@ -2,374 +2,171 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gift Cards - Baroud Services</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Baroud | Gift Cards</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    :root{
-      --bg1:#0b1424; --bg2:#050a14;
-      --text:#ffffff;
-      --glass:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --shadow:0 18px 60px rgba(0,0,0,.38);
-      --blue1:#0aa0ff; --blue2:#2a74ff;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background:linear-gradient(180deg,var(--bg1),var(--bg2));
-      color:var(--text);
-      min-height:100vh;
-      padding:14px;
-    }
-    .wrap{max-width:520px; margin:0 auto; padding-bottom:28px}
-
-    /* Top Bar (مثل صفحاتك) */
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px; margin-top:6px;
-    }
-    .btn{
-      border:1px solid var(--stroke);
-      background:var(--glass);
-      color:#fff;
-      padding:12px 14px;
-      border-radius:16px;
-      cursor:pointer;
-      font-weight:900;
-      user-select:none;
-      -webkit-tap-highlight-color:transparent;
-    }
-    .btn:active{transform:scale(.98)}
-    .title{
-      font-weight:950;
-      font-size:20px;
-      letter-spacing:.2px;
-      opacity:.95;
+    :root {
+      --neon-purple: #a855f7;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
     }
 
-    /* Hero */
-    .hero{
-      margin-top:12px;
-      background:var(--glass);
-      border:1px solid var(--stroke);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      padding:14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .hero h1{margin:0; font-size:18px; font-weight:950}
-    .hero small{opacity:.65; font-weight:800}
-
-    /* Search */
-    .searchBox{
-      margin-top:12px;
-      background:var(--glass);
-      border:1px solid var(--stroke);
-      border-radius:26px;
-      padding:14px 16px;
-      box-shadow:0 18px 60px rgba(0,0,0,.18);
-    }
-    .searchBox input{
-      width:100%;
-      background:transparent;
-      border:none;
-      outline:none;
-      color:#fff;
-      font-size:16px;
-      font-weight:800;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Orbitron', 'Cairo', sans-serif;
+      background: var(--bg-dark); color: #fff;
+      min-height: 100vh;
     }
 
-    /* Grid & Cards */
-    .grid{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
-    .card{
-      background:var(--glass);
-      border:1px solid var(--stroke);
-      border-radius:22px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-      cursor:pointer;
-      transition:.18s;
-      display:flex;
-      flex-direction:column;
-      -webkit-tap-highlight-color:transparent;
-    }
-    .card:active{ transform:scale(.97); }
+    .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
 
-    .img{
-      height:120px;
-      background:rgba(0,0,0,.25);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-    }
-    .pImg{ width:100%; height:100%; object-fit:cover; display:block; }
-
-    .body{
-      padding:12px 12px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .name{
-      font-weight:950;
-      font-size:16px;
-      line-height:1.1;
-      min-height:35px;
-    }
-    .meta{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      opacity:.9;
-      font-weight:900;
-      font-size:12px;
-    }
-    .pill{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      white-space:nowrap;
+    /* ===== TOP BAR ===== */
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .btn-circle {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff; text-decoration: none;
     }
 
-    .priceRow{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-top:4px;
-      gap:10px;
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(0,0,0,0) 100%);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 24px; padding: 20px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .price{
-      font-weight:950;
-      font-size:16px;
-      color:#38bdf8;
-    }
-    .buy{
-      padding:10px 12px;
-      border-radius:14px;
-      border:none;
-      font-weight:950;
-      color:#fff;
-      background:linear-gradient(90deg,var(--blue1),var(--blue2));
-      cursor:pointer;
-    }
-    .buy:active{transform:scale(.98)}
+    .hero h1 { margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--neon-purple); }
+    .hero p { margin: 5px 0 0; font-size: 11px; opacity: 0.6; font-family: 'Cairo'; }
 
-    .empty{
-      grid-column:1/-1;
-      text-align:center;
-      opacity:.55;
-      padding:40px 10px;
-      font-weight:900;
+    /* ===== SEARCH ===== */
+    .search-container {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 14px 20px; margin-bottom: 20px;
+      display: flex; align-items: center;
+    }
+    .search-container input {
+      background: none; border: none; color: #fff; width: 100%;
+      font-family: 'Cairo'; font-size: 15px; outline: none;
     }
 
-    .footer{
-      margin-top:25px;
-      text-align:center;
-      opacity:.35;
-      font-size:13px;
-      font-weight:800;
+    /* ===== GRID ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    .card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 22px; overflow: hidden; transition: 0.3s; cursor: pointer;
+    }
+    .card:active { transform: scale(0.96); border-color: var(--neon-purple); }
+
+    .card-img { width: 100%; height: 125px; object-fit: cover; filter: brightness(0.9); }
+    
+    .card-body { padding: 12px; }
+    .card-name { font-weight: 900; font-size: 14px; margin-bottom: 8px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .pill { font-size: 9px; padding: 4px 10px; border-radius: 8px; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); color: var(--neon-purple); font-weight: 700; margin-bottom: 10px; display: inline-block; }
+
+    .card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .card-price { color: #fff; font-weight: 900; font-size: 16px; }
+    
+    .open-btn {
+      padding: 6px 12px; border-radius: 10px; background: var(--neon-purple);
+      color: #fff; font-weight: 900; font-size: 11px; border: none;
     }
 
-    /* Loading Skeleton */
-    .skeleton{ position:relative; overflow:hidden; background:rgba(255,255,255,.05); }
-    .skeleton::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      transform:translateX(-100%);
-      background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
-      animation:shimmer 1.2s infinite;
+    .shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%; animation: load 1.5s infinite;
     }
-    @keyframes shimmer{ to{ transform:translateX(100%); } }
-    .sk-img{ height:120px; }
-    .sk-line{ height:14px; border-radius:10px; margin-bottom:10px; }
+    @keyframes load { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   </style>
 </head>
-
 <body>
-  <main class="wrap">
-    <div class="topbar">
-      <button class="btn" onclick="history.back()">← Back</button>
-      <div class="title">Gift Cards</div>
-      <button class="btn" onclick="location.href='services.html'">Home</button>
+
+  <div class="wrap">
+    <div class="top">
+      <div class="btn-circle" onclick="history.back()">←</div>
+      <div style="font-weight: 900; letter-spacing: 2px;">GIFT CARDS</div>
+      <div class="btn-circle" onclick="location.href='services.html'">🏠</div>
     </div>
 
     <div class="hero">
       <div>
-        <h1>Gift Cards</h1>
-        <small>iTunes • Steam • Razer • Xbox • Windows</small>
+        <h1>Digital Cards</h1>
+        <p>iTunes, Razer, Steam & more</p>
       </div>
-      <div style="opacity:.9;font-weight:950">🎁</div>
+      <div style="font-size: 24px;">🎁</div>
     </div>
 
-    <div class="searchBox">
-      <input id="q" placeholder="Search (Itunes, Razer, Steam...)">
+    <div class="search-container">
+      <input type="text" id="q" placeholder="Search cards...">
     </div>
 
-    <section class="grid" id="grid"></section>
-    <div class="footer">BAROUD SERVICES © 2025</div>
-  </main>
+    <div class="grid" id="grid">
+      <div class="card shimmer" style="height: 210px;"></div>
+      <div class="card shimmer" style="height: 210px;"></div>
+    </div>
+  </div>
 
 <script>
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const grid = document.getElementById("grid");
-  const q = document.getElementById("q");
+  let allGifts = [];
 
-  function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+  async function loadData() {
+    try {
+      // محاولة الجلب حسب الـ View الموحد لضمان أفضل أداء
+      const { data, error } = await sb
+        .from("products_with_min_price")
+        .select("id, title, category, min_price")
+        .eq("active", true)
+        .ilike("category", "%gift%")
+        .order('title', { ascending: true });
 
-  function showLoading(n=6){
-    grid.innerHTML = "";
-    for(let i=0;i<n;i++){
-      const el = document.createElement("div");
-      el.className = "card";
-      el.innerHTML = `
-        <div class="img"><div class="skeleton sk-img" style="width:100%"></div></div>
-        <div class="body">
-          <div class="skeleton sk-line" style="width:80%"></div>
-          <div class="skeleton sk-line" style="width:55%"></div>
-          <div class="skeleton sk-line" style="width:65%"></div>
-        </div>
-      `;
-      grid.appendChild(el);
+      if (error) throw error;
+      allGifts = data;
+      render(allGifts);
+    } catch (e) {
+      document.getElementById("grid").innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Error loading cards.</div>`;
     }
   }
 
-  function openProduct(id){
-    location.href = `account.html?id=${id}`;
-  }
-
-  function calcMinPriceFromPlans(plans){
-    const prices = (plans || [])
-      .filter(x => x && (x.active === true || x.active === null || x.active === undefined))
-      .map(x => Number(x.price))
-      .filter(n => Number.isFinite(n) && n > 0);
-
-    if(prices.length) return Math.min(...prices);
-    return null;
-  }
-
-  function render(list){
-    grid.innerHTML = "";
-    if(!list.length){
-      grid.innerHTML = `<div class="empty">No Gift Cards found.</div>`;
+  function render(list) {
+    const grid = document.getElementById("grid");
+    if (list.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5; padding: 40px;">No cards found.</div>`;
       return;
     }
 
-    list.forEach(it => {
-      const el = document.createElement("div");
-      el.className = "card";
-
-      const priceTxt = Number(it.min_price || 0).toFixed(2);
-
-      el.innerHTML = `
-        <div class="img">
-          <img class="pImg" src="assets/products/${it.id}.jpg" onerror="this.src='assets/products/default.png'">
-        </div>
-        <div class="body">
-          <div class="name">${esc(it.title)}</div>
-          <div class="meta">
-            <span class="pill">${esc(it.category || "Gift Cards")}</span>
-            <span class="pill">Instant</span>
-          </div>
-          <div class="priceRow">
-            <div class="price">$${priceTxt}</div>
-            <button class="buy" type="button">Open</button>
+    grid.innerHTML = list.map(item => `
+      <div class="card" onclick="location.href='account.html?id=${item.id}'">
+        <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='assets/products/default.png'">
+        <div class="card-body">
+          <div class="card-name">${item.title}</div>
+          <span class="pill">INSTANT</span>
+          <div class="card-footer">
+            <div class="card-price">$${Number(item.min_price || 0).toFixed(2)}</div>
+            <button class="open-btn">OPEN</button>
           </div>
         </div>
-      `;
-
-      el.onclick = () => openProduct(it.id);
-      grid.appendChild(el);
-    });
+      </div>
+    `).join('');
   }
 
-  async function fetchGiftProducts_tryByPage(){
-    // ✅ إذا عندك column اسمها page
-    const { data, error } = await sb
-      .from("products")
-      .select("id,title,category,price,product_plan_prices(price,active)")
-      .eq("active", true)
-      .eq("page", "gift")
-      .order("id", { ascending: false });
+  document.getElementById("q").oninput = (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    render(allGifts.filter(g => g.title.toLowerCase().includes(term)));
+  };
 
-    if(error) throw error;
-    return data || [];
-  }
-
-  async function fetchGiftProducts_fallbackByCategory(){
-    // ✅ fallback إذا ما عندك page column
-    const { data, error } = await sb
-      .from("products")
-      .select("id,title,category,price,product_plan_prices(price,active)")
-      .eq("active", true)
-      .ilike("category", "%gift%")
-      .order("id", { ascending: false });
-
-    if(error) throw error;
-    return data || [];
-  }
-
-  async function loadData(){
-    let rows = [];
-    try{
-      rows = await fetchGiftProducts_tryByPage();
-    }catch(e){
-      // إذا المشكلة إنو page مش موجودة، منعمل fallback
-      rows = await fetchGiftProducts_fallbackByCategory();
-    }
-
-    return rows.map(p => {
-      const minFromPlans = calcMinPriceFromPlans(p.product_plan_prices || []);
-      const fallback = Number(p.price || 0);
-      return {
-        id: p.id,
-        title: p.title,
-        category: p.category,
-        min_price: (minFromPlans !== null) ? minFromPlans : fallback
-      };
-    });
-  }
-
-  let all = [];
-
-  (async ()=>{
-    showLoading();
-    try{
-      all = await loadData();
-      render(all);
-
-      q.oninput = () => {
-        const v = (q.value || "").toLowerCase().trim();
-        render(all.filter(x => (x.title || "").toLowerCase().includes(v)));
-      };
-    }catch(e){
-      grid.innerHTML = `<div class="empty">Error: ${esc(e.message || e)}</div>`;
-    }
-  })();
+  loadData();
 </script>
 </body>
 </html>
