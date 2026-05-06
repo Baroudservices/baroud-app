@@ -1,308 +1,185 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>My Orders</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  body{ margin:0; font-family:system-ui,Arial; background:linear-gradient(180deg,#0b1424,#050a14); color:#fff; min-height:100vh; padding:16px; }
-  .wrap{max-width:720px;margin:auto}
-  .top{ display:flex;align-items:center;gap:10px; margin-bottom:14px; }
-  .back{ width:46px;height:46px; display:flex;align-items:center;justify-content:center; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); cursor:pointer; text-decoration:none; color:#fff; font-weight:900;}
-  h2{margin:0;font-size:22px}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Baroud | My Orders</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
-  .row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
-  .name{font-weight:900; font-size:20px}
-  .small{opacity:.65;font-size:12px; line-height:1.35}
-  .price{font-weight:900;color:#38bdf8; font-size:22px}
+  <style>
+    :root {
+      --neon-blue: #38bdf8;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
 
-  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  .chip{
-    padding:8px 10px; border-radius:999px; font-weight:900; font-size:12px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.10);
-  }
-  .chip.green{ color:#22c55e; border-color:rgba(34,197,94,.25); background:rgba(34,197,94,.08); }
-  .chip.yellow{ color:#fbbf24; border-color:rgba(251,191,36,.25); background:rgba(251,191,36,.08); }
-  .chip.red{ color:#ef4444; border-color:rgba(239,68,68,.25); background:rgba(239,68,68,.08); }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Orbitron', 'Cairo', sans-serif;
+      background: var(--bg-dark); color: #fff;
+      min-height: 100vh;
+    }
 
-  .details{
-    margin-top:12px;
-    background:rgba(0,0,0,.18);
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:14px;
-    padding:12px;
-  }
-  .kv{ display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.06); }
-  .kv:last-child{ border-bottom:0; }
-  .k{ opacity:.7; font-size:12px; font-weight:800; }
-  .v{ font-size:12px; font-weight:900; text-align:right; max-width:65%; word-break:break-word; }
+    .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
 
-  .replyBox{ margin-top:10px; padding:12px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); }
-  .replyHeader{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
-  .replyStatus{font-weight:900}
-  .replyStatus.done{color:#22c55e}
-  .replyStatus.pending{color:#fbbf24}
-  .replyStatus.rejected{color:#ef4444}
+    /* ===== HEADER ===== */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+    .back-btn {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
 
-  .replyBtn{
-    border:0;
-    cursor:pointer;
-    padding:10px 12px;
-    border-radius:12px;
-    font-weight:950;
-    color:#fff;
-    background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-    white-space:nowrap;
-  }
-  .replyBtn:disabled{ opacity:.55; cursor:not-allowed; }
+    /* ===== ORDER CARD ===== */
+    .card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 24px; padding: 18px; margin-bottom: 15px;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .empty{ opacity:.7; text-align:center; margin-top:40px; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+    .order-title { font-weight: 900; font-size: 16px; color: var(--neon-blue); text-transform: uppercase; }
+    .order-date { font-size: 11px; opacity: 0.5; font-family: 'Cairo'; margin-top: 4px; }
+    .order-price { font-weight: 900; font-size: 18px; }
 
-  /* Modal */
-  .modal{
-    position:fixed; inset:0;
-    background:rgba(0,0,0,.72);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-    z-index:99999;
-  }
-  .modalCard{
-    width:min(520px,100%);
-    background: rgba(12, 16, 24, 0.98);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:18px;
-    padding:16px;
-  }
-  .mTitle{ font-weight:950; font-size:16px; margin-bottom:10px; }
-  .mText{
-    background: rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:14px;
-    padding:12px;
-    font-weight:900;
-    font-size:13px;
-    white-space:pre-wrap;
-    word-break:break-word;
-    max-height:50vh;
-    overflow:auto;
-  }
-  .mBtns{ display:flex; gap:10px; margin-top: 12px; }
-  .mBtn{
-    flex:1;
-    border:0;
-    cursor:pointer;
-    padding:12px 14px;
-    border-radius:14px;
-    font-weight:950;
-    color:#fff;
-    background:linear-gradient(90deg,#0aa0ff,#2a74ff);
-  }
-  .mBtn.secondary{
-    background: rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.10);
-  }
-</style>
+    .status-row { display: flex; gap: 8px; margin-bottom: 15px; }
+    .status-badge {
+      font-size: 10px; font-weight: 900; padding: 5px 10px; border-radius: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+    }
+    .status-badge.done { color: #22c55e; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.1); }
+    .status-badge.pending { color: #fbbf24; border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.1); }
+    .status-badge.fail { color: #ef4444; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.1); }
+
+    /* ===== DETAILS BOX ===== */
+    .details-box {
+      background: rgba(0,0,0,0.3); border-radius: 15px; padding: 12px;
+      margin-bottom: 15px; border: 1px solid var(--glass-border);
+    }
+    .detail-item { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; font-family: 'Cairo'; }
+    .detail-item:last-child { margin-bottom: 0; }
+    .detail-label { opacity: 0.6; }
+    .detail-value { font-weight: 700; color: #fff; text-align: right; }
+
+    /* ===== REPLY SECTION ===== */
+    .reply-area {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 12px; border-top: 1px solid var(--glass-border);
+    }
+    .reply-btn {
+      background: var(--neon-blue); color: #000; border: none;
+      padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 11px; cursor: pointer;
+    }
+    .no-reply { font-size: 11px; opacity: 0.4; font-family: 'Cairo'; }
+
+    /* ===== MODAL ===== */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+    }
+    .modal-content {
+      background: #0f172a; border: 1px solid var(--neon-blue);
+      border-radius: 24px; padding: 25px; width: 100%; max-width: 350px; text-align: center;
+    }
+    .modal-text { font-family: 'Cairo'; font-size: 14px; line-height: 1.6; margin: 20px 0; word-break: break-all; }
+    .close-btn { background: var(--glass); border: 1px solid var(--glass-border); color: #fff; padding: 10px 30px; border-radius: 12px; cursor: pointer; }
+
+    .empty-state { text-align: center; padding: 50px 20px; opacity: 0.5; font-family: 'Cairo'; }
+  </style>
 </head>
-
 <body>
-<div class="wrap">
-  <div class="top">
-    <a class="back" href="services.html">←</a>
-    <h2>My Orders</h2>
+
+  <div class="wrap">
+    <div class="header">
+      <div class="back-btn" onclick="location.href='services.html'">←</div>
+      <div style="font-weight: 900; letter-spacing: 2px;">MY ORDERS</div>
+      <div style="width: 42px;"></div>
+    </div>
+
+    <div id="ordersList">
+      </div>
   </div>
 
-  <div id="list"></div>
-  <div id="empty" class="empty" style="display:none">No orders</div>
-</div>
-
-<!-- Reply Modal -->
-<div class="modal" id="replyModal">
-  <div class="modalCard">
-    <div class="mTitle">Admin Reply</div>
-    <div class="mText" id="replyModalText"></div>
-    <div class="mBtns">
-      <button class="mBtn secondary" id="replyModalClose">Close</button>
+  <div class="modal" id="replyModal">
+    <div class="modal-content">
+      <div style="font-weight: 900; color: var(--neon-blue);">ADMIN MESSAGE</div>
+      <div class="modal-text" id="modalText"></div>
+      <button class="close-btn" onclick="closeModal()">Close</button>
     </div>
   </div>
-</div>
 
 <script>
-const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// keep admin replies in-memory to safely show them in a popup
-const replyById = new Map();
+  async function loadOrders() {
+    const list = document.getElementById("ordersList");
+    const { data: { session } } = await sb.auth.getSession();
+    
+    if (!session) { location.replace('login.html'); return; }
 
-function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function toArr(x){ return Array.isArray(x) ? x : []; }
+    const { data: orders, error } = await sb
+      .from('orders')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
 
-function chipClassStatus(s){
-  s = (s || "pending").toLowerCase();
-  if(s === "paid" || s === "done") return "green";
-  if(s === "cancelled" || s === "rejected") return "red";
-  return "yellow";
-}
-
-function pickDetails(o){
-  const candidates = [
-    ["transfer_number","Phone"],
-    ["phone_number","Phone"],
-    ["number","Phone"],
-    ["player_id","Player ID"],
-    ["player_name","Player Name"],
-    ["plan_label","Plan"],
-    ["product_title","Product"],
-    ["note","Note"],
-    ["duration","Duration"],
-    ["account_email","Email"],
-    ["account_password","Password"],
-  ];
-
-  const out = [];
-  candidates.forEach(([key,label])=>{
-    if(o && o[key] !== null && o[key] !== undefined && String(o[key]).trim() !== ""){
-      out.push([label, String(o[key])]);
+    if (error || !orders.length) {
+      list.innerHTML = `<div class="empty-state">ما في طلبات حالياً.. بلّش تسوّق! 🛒</div>`;
+      return;
     }
-  });
 
-  // fallback any extra fields (if needed)
-  if(out.length === 0 && o){
-    const skip = new Set(["id","user_id","product_id","price","status","delivery_status","admin_reply","created_at","admin_reply_at","refunded_at","refunded_amount","refunded_txn"]);
-    Object.keys(o).forEach(k=>{
-      if(skip.has(k)) return;
-      const val = o[k];
-      if(val === null || val === undefined) return;
-      const s = String(val).trim();
-      if(!s) return;
-      out.push([k, s]);
-    });
-  }
-  return out;
-}
+    list.innerHTML = orders.map(o => {
+      const statusClass = (o.delivery_status === 'done') ? 'done' : (o.delivery_status === 'rejected' ? 'fail' : 'pending');
+      const payClass = (o.status === 'paid') ? 'done' : 'pending';
+      const hasReply = o.admin_reply && o.admin_reply.trim() !== "";
 
-async function loadOrders() {
-  const listEl = document.getElementById("list");
-  const emptyEl = document.getElementById("empty");
-  replyById.clear();
-
-  listEl.innerHTML = "";
-  emptyEl.style.display = "none";
-
-  const { data: { session } } = await sb.auth.getSession();
-  if(!session) { location.replace("login.html"); return; }
-
-  const { data: orders, error } = await sb
-    .from("orders")
-    .select("*")
-    .eq("user_id", session.user.id)
-    .order("created_at", { ascending:false });
-
-  if(error){
-    listEl.innerHTML = `<div class="empty">Error: ${esc(error.message)}</div>`;
-    return;
-  }
-
-  if(!orders || orders.length === 0){
-    emptyEl.style.display = "block";
-    return;
-  }
-
-  // product title lookup
-  const ids = [...new Set(toArr(orders).map(o => o.product_id).filter(Boolean))];
-  let titleById = {};
-  if(ids.length){
-    const { data: prods } = await sb.from("products").select("id,title").in("id", ids);
-    toArr(prods).forEach(p => titleById[p.id] = p.title);
-  }
-
-  listEl.innerHTML = orders.map(o => {
-    const delivery = (o.delivery_status || "pending").toLowerCase();
-    const hasReply = (o.admin_reply && String(o.admin_reply).trim().length);
-    replyById.set(String(o.id), String(o.admin_reply || ""));
-
-    const title = titleById[o.product_id] || o.product_title || o.title || "Order";
-    const dt = o.created_at ? new Date(o.created_at).toLocaleString() : "";
-
-    const details = pickDetails(o);
-    const detailsHtml = details.length ? `
-      <div class="details">
-        ${details.map(([k,v])=>`
-          <div class="kv">
-            <div class="k">${esc(k)}</div>
-            <div class="v">${esc(v)}</div>
+      return `
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="order-title">${o.product_title || 'Service Order'}</div>
+              <div class="order-date">${new Date(o.created_at).toLocaleString('en-GB')}</div>
+            </div>
+            <div class="order-price">$${Number(o.price || 0).toFixed(2)}</div>
           </div>
-        `).join("")}
-      </div>
-    ` : "";
 
-    return `
-      <div class="card">
-        <div class="row">
-          <div>
-            <div class="name">${esc(title)}</div>
-            <div class="small">${esc(dt)}</div>
-            <div class="small">Order #${esc(o.id)}</div>
+          <div class="status-row">
+            <div class="status-badge ${payClass}">PAY: ${o.status.toUpperCase()}</div>
+            <div class="status-badge ${statusClass}">DELIVERY: ${o.delivery_status.toUpperCase()}</div>
           </div>
-          <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
-        </div>
 
-        <div class="chips">
-          <div class="chip ${chipClassStatus(o.status)}">Payment: ${(o.status || "pending").toUpperCase()}</div>
-          <div class="chip ${chipClassStatus(o.delivery_status)}">Delivery: ${(o.delivery_status || "pending").toUpperCase()}</div>
-        </div>
+          <div class="details-box">
+             ${o.player_id ? `<div class="detail-item"><span class="detail-label">ID:</span><span class="detail-value">${o.player_id}</span></div>` : ''}
+             ${o.account_email ? `<div class="detail-item"><span class="detail-label">Email:</span><span class="detail-value">${o.account_email}</span></div>` : ''}
+             ${o.plan_label ? `<div class="detail-item"><span class="detail-label">Plan:</span><span class="detail-value">${o.plan_label}</span></div>` : ''}
+          </div>
 
-        ${detailsHtml}
-
-        <div class="replyBox">
-          <div class="replyHeader">
-            <div class="replyStatus ${hasReply ? 'done' : 'pending'}">Admin Reply</div>
-            ${
-              hasReply
-              ? `<button class="replyBtn" data-reply-id="${esc(o.id)}">View</button>`
-              : `<div class="small">No details yet</div>`
-            }
+          <div class="reply-area">
+            <span class="no-reply">${hasReply ? 'وصلك رد من الإدارة' : 'قيد المراجعة...'}</span>
+            ${hasReply ? `<button class="reply-btn" onclick="openModal('${o.admin_reply.replace(/'/g, "\\'")}')">VIEW REPLY</button>` : ''}
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  }
 
-  // bind reply buttons (popup full text)
-  Array.from(document.querySelectorAll('[data-reply-id]')).forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      showReplyById(btn.getAttribute('data-reply-id'));
-    });
-  });
-}
+  function openModal(text) {
+    document.getElementById('modalText').innerText = text;
+    document.getElementById('replyModal').style.display = 'flex';
+  }
 
-function showReplyById(orderId){
-  const text = replyById.get(String(orderId)) || "";
-  if(!text.trim()) return;
-  document.getElementById("replyModalText").textContent = text;
-  document.getElementById("replyModal").style.display = "flex";
-}
+  function closeModal() {
+    document.getElementById('replyModal').style.display = 'none';
+  }
 
-function closeReplyModal(){
-  document.getElementById("replyModal").style.display = "none";
-}
-
-// close handlers
-document.getElementById("replyModalClose").addEventListener("click", closeReplyModal);
-document.getElementById("replyModal").addEventListener("click", (e)=>{
-  if(e.target.id === "replyModal") closeReplyModal();
-});
-document.addEventListener("keydown", (e)=>{
-  if(e.key === "Escape") closeReplyModal();
-});
-
-loadOrders();
+  loadOrders();
 </script>
 </body>
 </html>
