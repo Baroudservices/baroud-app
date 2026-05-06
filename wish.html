@@ -1,99 +1,36 @@
-<style>
-  /* إضافة تأثير عند اختيار وسيلة معينة */
-  .active-input { border-color: var(--neon-blue) !important; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
-  .dimmed { opacity: 0.3; pointer-events: none; }
-</style>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whish Money - Baroud</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #060b16; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); max-width: 400px; margin: auto; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; }
+        button { width: 100%; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
 
-<script>
-    // ... (نفس إعدادات Supabase)
+    <div class="card">
+        <h2>Whish Money $</h2>
+        <p>ارسل المبلغ إلى الرقم: 70385398</p>
+        <input type="number" id="amount" placeholder="المبلغ بالدولار $">
+        <input type="number" id="transferNumber" placeholder="رقم الهاتف المحول منه">
+        <p style="font-size: 10px; opacity: 0.6;">أو ارفع صورة الإيصال</p>
+        <input type="file" id="receipt">
+        <button id="btnReq">إرسال الطلب</button>
+    </div>
 
-    // تحسين تجربة المستخدم: التبديل بين الصورة والرقم
-    receipt.addEventListener("change", () => {
-      const f = receipt.files?.[0];
-      if(f) {
-        fileNameEl.textContent = f.name;
-        transferNumberEl.parentElement.classList.add("dimmed");
-        fileBtn.classList.add("active-input");
-      }
-    });
+    <script>
+        const sb = supabase.createClient("https://pqrwitolonhfbfwtsnde.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."); // تأكد من الكي هون
 
-    transferNumberEl.addEventListener("input", () => {
-      const v = transferNumberEl.value.trim();
-      if(v) {
-        fileBtn.classList.add("dimmed");
-        transferNumberEl.classList.add("active-input");
-        receipt.value = "";
-        fileNameEl.textContent = "No file";
-      } else {
-        fileBtn.classList.remove("dimmed");
-        transferNumberEl.classList.remove("active-input");
-      }
-    });
-
-    btnReq.addEventListener("click", async () => {
-      if(sending) return;
-      
-      const amount = Number(document.getElementById("amount").value);
-      const transferNumber = transferNumberEl.value.trim();
-      const file = receipt.files?.[0];
-
-      // 1. فحص المبلغ
-      if(!amount || amount < 4) {
-        return showOverlay("خطأ ❌", "أقل مبلغ للشحن هو 4$");
-      }
-
-      // 2. فحص رقم التلفون (إذا تم اختياره)
-      if(transferNumber && transferNumber.length < 8) {
-        return showOverlay("خطأ ❌", "الرجاء إدخال رقم هاتف صحيح");
-      }
-
-      sending = true;
-      btnReq.disabled = true;
-      btnReq.textContent = "جاري الإرسال...";
-
-      try {
-        const { data: { session } } = await sb.auth.getSession();
-        const user = session?.user;
-        if(!user) throw new Error("يرجى تسجيل الدخول أولاً");
-
-        let receipt_url = null;
-        if(file) {
-          const filePath = `${user.id}/${Date.now()}_${file.name}`;
-          const { error: upErr } = await sb.storage.from("receipts").upload(filePath, file);
-          if(upErr) throw upErr;
-          
-          const { data } = sb.storage.from("receipts").getPublicUrl(filePath);
-          receipt_url = data.publicUrl;
-        }
-
-        // إرسال الطلب لجدول الـ deposits
-        const { error: insErr } = await sb.from("deposits").insert([{
-          user_id: user.id,
-          method: "Whish Money",
-          amount: amount,
-          receipt_url: receipt_url,
-          transfer_number: transferNumber || null,
-          status: "pending"
-        }]);
-
-        if(insErr) throw insErr;
-
-        showOverlay("تم الإرسال ✅", "سيتم إضافة الرصيد بعد التأكد من التحويل (خلال 1-15 دقيقة)");
-        
-        // تنظيف الفورم
-        document.getElementById("amount").value = "";
-        transferNumberEl.value = "";
-        receipt.value = "";
-        fileNameEl.textContent = "No file";
-        fileBtn.classList.remove("dimmed", "active-input");
-        transferNumberEl.classList.remove("active-input", "dimmed");
-
-      } catch(err) {
-        showOverlay("فشل الطلب ❌", err.message);
-      } finally {
-        sending = false;
-        btnReq.disabled = false;
-        btnReq.textContent = "REQUEST";
-      }
-    });
-</script>
+        document.getElementById("btnReq").onclick = async () => {
+            alert("جاري التجربة...");
+            // كود الـ Insert هون
+        };
+    </script>
+</body>
+</html>
