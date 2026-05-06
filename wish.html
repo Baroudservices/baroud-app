@@ -1,442 +1,99 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Whish Money</title>
+<style>
+  /* إضافة تأثير عند اختيار وسيلة معينة */
+  .active-input { border-color: var(--neon-blue) !important; box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+  .dimmed { opacity: 0.3; pointer-events: none; }
+</style>
 
-  <style>
-    :root{
-      --bg1:#060b16; --bg2:#0a1330;
-      --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --text:#eaf2ff;
-      --muted:rgba(234,242,255,.65);
-      --shadow:0 20px 60px rgba(0,0,0,.55);
-      --r:26px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(900px 600px at 30% 10%, rgba(64,120,255,.22), transparent 60%),
-        radial-gradient(800px 500px at 80% 40%, rgba(0,255,209,.12), transparent 55%),
-        linear-gradient(160deg,var(--bg1),var(--bg2));
-      padding:18px;
-    }
+<script>
+    // ... (نفس إعدادات Supabase)
 
-    #dbg{
-      max-width:460px;margin:0 auto 10px;
-      padding:10px 12px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:#fff;font-weight:900;
-      white-space:pre-wrap;
-      position:relative;
-      z-index:999999;
-      display:none;
-    }
-
-    .topbar{max-width:460px;margin:6px auto 10px;display:flex;gap:12px;}
-    .back{
-      display:inline-flex;align-items:center;gap:10px;
-      text-decoration:none;color:var(--text);
-      user-select:none;opacity:.95;
-      padding:10px 12px;border-radius:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    .wrap{max-width:460px;margin:0 auto;}
-    .wishLogo{display:flex;justify-content:center;margin:10px 0 6px;}
-    .wishLogo img{height:60px;display:block;}
-    .title{font-size:42px;font-weight:900;margin:14px 0 18px;text-align:center;}
-
-    .glass{
-      border:1px solid var(--stroke);
-      background:var(--card);
-      backdrop-filter:blur(14px);
-      border-radius:var(--r);
-      padding:18px;
-      box-shadow:var(--shadow);
-      position:relative;
-    }
-
-    .box{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:22px;
-      padding:14px;
-      margin-bottom:14px;
-    }
-
-    .id{
-      width:100%;
-      text-align:center;
-      padding:14px;
-      border-radius:18px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      font-weight:900;
-      letter-spacing:.4px;
-      margin:10px 0 4px;
-    }
-
-    input[type="number"]{
-      width:100%;
-      padding:16px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.22);
-      color:var(--text);
-      outline:none;
-      margin-top:10px;
-      font-size:16px;
-      display:block;
-    }
-
-    /* ✅ input رقم التحويل */
-    .tInput{
-      width:100%;
-      padding:16px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.22);
-      color:var(--text);
-      outline:none;
-      margin-top:10px;
-      font-size:16px;
-      display:block;
-    }
-
-    /* file input مخفي */
-    #receipt{
-      position:fixed;
-      left:-9999px;
-      top:-9999px;
-      width:1px;height:1px;
-      opacity:0;
-    }
-
-    .fileBtn{
-      width:100%;
-      margin-top:10px;
-      padding:14px 16px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:rgba(234,242,255,.95);
-      font-weight:900;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      -webkit-tap-highlight-color:transparent;
-      user-select:none;
-    }
-    .fileName{
-      opacity:.75;
-      font-weight:800;
-      font-size:12px;
-      max-width:55%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    /* ✅ OR line */
-    .orLine{
-      margin:14px 0 10px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      opacity:.9;
-      font-weight:950;
-    }
-    .orLine::before,
-    .orLine::after{
-      content:"";
-      flex:1;
-      height:1px;
-      background:rgba(255,255,255,.14);
-    }
-    .orLine span{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.06);
-      font-size:12px;
-      letter-spacing:.4px;
-    }
-
-    /* ✅ label فوق input الرقم */
-    .lbl{
-      margin-top:8px;
-      color:var(--muted);
-      font-weight:800;
-      font-size:13px;
-      letter-spacing:.2px;
-    }
-
-    .btn{
-      width:100%;
-      border:none;
-      padding:18px;
-      border-radius:18px;
-      margin-top:14px;
-      cursor:pointer;
-      color:white;
-      font-weight:900;
-      font-size:16px;
-      background:linear-gradient(90deg, rgba(14,165,233,.95), rgba(37,99,235,.95));
-      box-shadow:0 18px 45px rgba(37,99,235,.25);
-      -webkit-tap-highlight-color:transparent;
-    }
-    .btn:disabled{opacity:.6; cursor:not-allowed}
-
-    .foot{text-align:center;color:var(--muted);margin-top:16px;opacity:.8;}
-
-    .overlay{
-      position:fixed; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,.55);
-      z-index:99999; padding:18px;
-      opacity:0;
-      pointer-events:none;
-      transition:.15s opacity;
-    }
-    .overlay.show{opacity:1; pointer-events:auto;}
-    .modal{
-      max-width:420px; width:100%;
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(15,23,42,.92);
-      backdrop-filter:blur(12px);
-      padding:16px;
-      box-shadow:0 30px 80px rgba(0,0,0,.55);
-    }
-    .modal h3{margin:0 0 8px;font-size:18px}
-    .modal p{margin:0;color:rgba(234,242,255,.8);line-height:1.4}
-    .modal .ok{
-      margin-top:14px;width:100%;
-      padding:12px;border-radius:14px;border:0;
-      font-weight:900;cursor:pointer;
-      background:rgba(255,255,255,.10);color:#fff;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="dbg"></div>
-
-  <div class="topbar">
-    <a class="back" href="add-credit.html?v=1">← رجوع</a>
-  </div>
-
-  <div class="wrap">
-    <div class="wishLogo">
-      <img src="assets/wish.png" alt="Wish Money">
-    </div>
-
-    <div class="title">Whish Money $</div>
-
-    <div class="glass">
-      <div class="box">
-        <div style="color:var(--muted);font-weight:700;">
-          Please send the amount to this number ID:
-        </div>
-
-        <div class="id">+961 70385398</div>
-
-        <div style="margin-top:10px;color:var(--muted);font-weight:700;">
-          The minimum deposit is <b style="color:var(--text)">4$</b><br/>
-          It takes between <b style="color:var(--text)">1 & 15</b> minutes
-        </div>
-      </div>
-
-      <input id="amount" type="number" placeholder="Enter amount $" inputmode="numeric" />
-
-      <!-- Upload -->
-      <input id="receipt" type="file" accept="image/*" />
-
-      <div class="fileBtn" id="fileBtn">
-        <span>📎 Upload receipt</span>
-        <span class="fileName" id="fileName">No file</span>
-      </div>
-
-      <!-- OR -->
-      <div class="orLine"><span>OR</span></div>
-
-      <!-- Transfer number -->
-      <div class="lbl">The number from which the transfer was made</div>
-      <input
-        id="transferNumber"
-        class="tInput"
-        type="tel"
-        inputmode="numeric"
-        placeholder="Write the number..."
-        autocomplete="tel"
-      />
-
-      <button id="btnReq" class="btn" type="button">REQUEST</button>
-
-      <div class="foot">© 2024 Baroud Services</div>
-    </div>
-  </div>
-
-  <div class="overlay" id="overlay" aria-hidden="true">
-    <div class="modal">
-      <h3 id="ovTitle">Done</h3>
-      <p id="ovMsg">...</p>
-      <button id="ovOk" class="ok" type="button">OK</button>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script>
-    const dbgEl = document.getElementById("dbg");
-    const dbg = (m)=> { dbgEl.textContent = "DEBUG: " + m; };
-
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const receipt = document.getElementById("receipt");
-    const fileBtn = document.getElementById("fileBtn");
-    const fileNameEl = document.getElementById("fileName");
-    const btnReq = document.getElementById("btnReq");
-    const transferNumberEl = document.getElementById("transferNumber");
-
-    function showOverlay(title, msg){
-      document.getElementById("ovTitle").textContent = title;
-      document.getElementById("ovMsg").textContent = msg;
-      document.getElementById("overlay").classList.add("show");
-    }
-    function hideOverlay(){
-      document.getElementById("overlay").classList.remove("show");
-    }
-    document.getElementById("ovOk").addEventListener("click", hideOverlay);
-
-    // ✅ picker
-    fileBtn.addEventListener("click", ()=>{
-      receipt.click();
-    });
-
-    receipt.addEventListener("change", ()=>{
+    // تحسين تجربة المستخدم: التبديل بين الصورة والرقم
+    receipt.addEventListener("change", () => {
       const f = receipt.files?.[0];
-      fileNameEl.textContent = f?.name || "No file";
-      // ✅ إذا اختار صورة، فضّي رقم التحويل (حتى ما يصير الاثنين سوا)
-      if(f) transferNumberEl.value = "";
+      if(f) {
+        fileNameEl.textContent = f.name;
+        transferNumberEl.parentElement.classList.add("dimmed");
+        fileBtn.classList.add("active-input");
+      }
     });
 
-    // ✅ إذا كتب رقم تحويل، فضّي الصورة
-    transferNumberEl.addEventListener("input", ()=>{
-      const v = (transferNumberEl.value || "").trim();
-      if(v){
+    transferNumberEl.addEventListener("input", () => {
+      const v = transferNumberEl.value.trim();
+      if(v) {
+        fileBtn.classList.add("dimmed");
+        transferNumberEl.classList.add("active-input");
         receipt.value = "";
         fileNameEl.textContent = "No file";
+      } else {
+        fileBtn.classList.remove("dimmed");
+        transferNumberEl.classList.remove("active-input");
       }
     });
 
-    // ✅ helper: get public url from storage path
-    function publicReceiptUrl(path){
-      const { data } = sb.storage.from("receipts").getPublicUrl(path);
-      return data?.publicUrl || "";
-    }
-
-    let sending = false;
-
-    btnReq.addEventListener("click", async ()=>{
+    btnReq.addEventListener("click", async () => {
       if(sending) return;
-      sending = true;
-
+      
       const amount = Number(document.getElementById("amount").value);
+      const transferNumber = transferNumberEl.value.trim();
       const file = receipt.files?.[0];
-      const transferNumber = (transferNumberEl.value || "").trim();
 
-      if(!amount || amount < 4){
-        sending = false;
-        return showOverlay("Error ❌","Minimum deposit is 4$");
+      // 1. فحص المبلغ
+      if(!amount || amount < 4) {
+        return showOverlay("خطأ ❌", "أقل مبلغ للشحن هو 4$");
       }
 
-      const hasImg = !!file;
-      const hasNum = !!transferNumber;
-
-      if(!hasImg && !hasNum){
-        sending = false;
-        return showOverlay("Error ❌","Upload receipt OR enter transfer number.");
-      }
-      if(hasImg && hasNum){
-        sending = false;
-        return showOverlay("Error ❌","Choose only one: receipt image OR transfer number.");
+      // 2. فحص رقم التلفون (إذا تم اختياره)
+      if(transferNumber && transferNumber.length < 8) {
+        return showOverlay("خطأ ❌", "الرجاء إدخال رقم هاتف صحيح");
       }
 
+      sending = true;
       btnReq.disabled = true;
-      btnReq.textContent = "SENDING...";
+      btnReq.textContent = "جاري الإرسال...";
 
-      try{
-        const { data: s, error: sErr } = await sb.auth.getSession();
-        if(sErr) throw sErr;
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        const user = session?.user;
+        if(!user) throw new Error("يرجى تسجيل الدخول أولاً");
 
-        const user = s?.session?.user;
-        if(!user){
-          location.replace("login.html?v=" + Date.now());
-          return;
-        }
-
-        let receipt_path = null;
-        let receipt_url  = null;
-
-        // ✅ إذا في صورة: ارفعها
-        if(hasImg){
-          const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-          const safeExt = ["jpg","jpeg","png","webp"].includes(ext) ? ext : "jpg";
-          const filePath = `${user.id}/${Date.now()}_${Math.random().toString(16).slice(2)}.${safeExt}`;
-
-          const { error: upErr } = await sb.storage
-            .from("receipts")
-            .upload(filePath, file, { upsert:false });
+        let receipt_url = null;
+        if(file) {
+          const filePath = `${user.id}/${Date.now()}_${file.name}`;
+          const { error: upErr } = await sb.storage.from("receipts").upload(filePath, file);
           if(upErr) throw upErr;
-
-          receipt_path = filePath;
-          receipt_url = publicReceiptUrl(filePath); // bucket لازم يكون public
+          
+          const { data } = sb.storage.from("receipts").getPublicUrl(filePath);
+          receipt_url = data.publicUrl;
         }
 
-        // ✅ Insert: نخزن يا صورة يا رقم
+        // إرسال الطلب لجدول الـ deposits
         const { error: insErr } = await sb.from("deposits").insert([{
           user_id: user.id,
           method: "Whish Money",
-          amount,
-          receipt_path,
-          receipt_url,
-          transfer_number: hasNum ? transferNumber : null,  // ✅ الجديد
+          amount: amount,
+          receipt_url: receipt_url,
+          transfer_number: transferNumber || null,
           status: "pending"
         }]);
+
         if(insErr) throw insErr;
 
-        showOverlay("Request sent ✅","Your deposit request is pending.");
-
-        // reset
+        showOverlay("تم الإرسال ✅", "سيتم إضافة الرصيد بعد التأكد من التحويل (خلال 1-15 دقيقة)");
+        
+        // تنظيف الفورم
         document.getElementById("amount").value = "";
+        transferNumberEl.value = "";
         receipt.value = "";
         fileNameEl.textContent = "No file";
-        transferNumberEl.value = "";
+        fileBtn.classList.remove("dimmed", "active-input");
+        transferNumberEl.classList.remove("active-input", "dimmed");
 
-      }catch(err){
-        showOverlay("Failed ❌", err?.message || "Unknown error");
-      }finally{
+      } catch(err) {
+        showOverlay("فشل الطلب ❌", err.message);
+      } finally {
+        sending = false;
         btnReq.disabled = false;
         btnReq.textContent = "REQUEST";
-        sending = false;
       }
     });
-  </script>
-
-  <script src="app-ui.js?v=3"></script>
-</body>
-</html>
+</script>
