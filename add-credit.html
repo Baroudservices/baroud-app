@@ -2,118 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Add Credit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Baroud | Add Credit</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      background:linear-gradient(180deg,#06162a,#020b14);
-      color:#fff;
+    :root {
+      --neon-cyan: #00f2ff;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
     }
 
-    /* أصغر */
-    .wrap{max-width:520px;margin:0 auto;padding:10px 12px 78px}
-
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:flex-start; /* زر واحد فقط */
-      margin-top:4px;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Orbitron', 'Cairo', sans-serif;
+      background: var(--bg-dark);
+      color: #fff;
+      min-height: 100vh;
     }
 
-    .menuBtn,.goBtn{
-      width:44px;height:44px;border-radius:14px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:0 14px 45px rgba(0,0,0,.32);
-      cursor:pointer;
-      -webkit-tap-highlight-color:transparent;
+    .wrap { max-width: 450px; margin: 0 auto; padding: 25px 20px; }
+
+    /* ===== TOP HEADER ===== */
+    .top { display: flex; align-items: center; margin-bottom: 30px; }
+    .back-btn {
+      width: 45px; height: 45px; border-radius: 15px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 20px; transition: 0.3s;
+    }
+    .back-btn:active { transform: scale(0.9); background: var(--neon-cyan); color: #000; }
+
+    h1 {
+      font-size: 24px; font-weight: 900; margin: 0 0 25px;
+      letter-spacing: 1px; text-transform: uppercase;
     }
 
-    /* سهم أصغر */
-    .backArrow{
-      font-size:18px;
-      font-weight:900;
-      line-height:1;
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      transform: translateY(-1px);
+    /* ===== PAYMENT GRID ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    .tile {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 24px; overflow: hidden;
+      transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer; position: relative;
+    }
+    .tile:active { transform: scale(0.95); border-color: var(--neon-cyan); }
+
+    .tile img {
+      width: 100%; height: 120px; object-fit: cover;
+      display: block; filter: brightness(0.9);
     }
 
-    /* عنوان أصغر */
-    h1{
-      margin:12px 0 14px;
-      font-size:26px;
-      font-weight:900;
-      opacity:.92;
+    .label {
+      padding: 12px; text-align: center; font-weight: 700;
+      font-size: 13px; font-family: 'Cairo'; opacity: 0.9;
     }
 
-    /* كروت أصغر + فراغ أقل */
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
+    /* Automatic Badge */
+    .auto-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--neon-cyan); color: #000;
+      font-size: 8px; font-weight: 900; padding: 4px 8px;
+      border-radius: 6px; box-shadow: 0 0 10px rgba(0,242,255,0.4);
     }
 
-    .tile{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:18px;
-      overflow:hidden;
-      cursor:pointer;
-      box-shadow:0 14px 45px rgba(0,0,0,.25);
-      transition:.12s transform;
-    }
-    .tile:active{transform:scale(.99)}
-
-    /* الصورة أصغر */
-    .tile img{
-      width:100%;
-      height:132px;           /* كانت 170 */
-      object-fit:cover;
-      display:block;
-      background:transparent;
-      padding:0;
-    }
-
-    .label{
-      padding:10px 8px;       /* كانت 14x غلط */
-      text-align:center;
-      font-weight:900;
-      font-size:14px;
-      opacity:.92;
-    }
-
-    .footer{
-      margin:16px 0 0;
-      text-align:center;
-      opacity:.35;
-      font-size:12px;
-    }
-
-    /* bottom nav أصغر */
-    .nav{
-      position:fixed;left:0;right:0;bottom:0;
-      background:rgba(0,0,0,.35);
-      backdrop-filter:blur(10px);
-      border-top:1px solid rgba(255,255,255,.06);
-      padding:8px 0;
-      display:flex;
-      justify-content:space-around;
-      z-index:20;
-    }
-    .nav div{
-      opacity:.75;
-      font-weight:900;
-      font-size:16px;
+    .footer {
+      margin-top: 50px; text-align: center;
+      opacity: 0.2; font-size: 10px; letter-spacing: 4px;
     }
   </style>
 </head>
@@ -121,11 +82,10 @@
 <body>
   <div class="wrap">
     <div class="top">
-     <div class="menuBtn backArrow" onclick="location.href='services.html'">←</div>
-
+      <div class="back-btn" onclick="location.href='services.html'">←</div>
     </div>
 
-    <h1>Add Credit Section</h1>
+    <h1>Add Credit</h1>
 
     <section class="grid">
       <div class="tile" onclick="location.href='wish.html'">
@@ -135,38 +95,43 @@
 
       <div class="tile" onclick="location.href='binance.html'">
         <img src="assets/binance.png" alt="Binance"/>
-        <div class="label">Binance</div>
+        <div class="label">Binance Pay</div>
       </div>
 
       <div class="tile" onclick="location.href='usdt-bep20.html'">
+        <div class="auto-badge">AUTO</div>
         <img src="assets/usdt.jpg" alt="USDT"/>
-        <div class="label">Usdt Bep20 - Automatic</div>
+        <div class="label">USDT (BEP20)</div>
+      </div>
+
+      <div class="tile" onclick="location.href='usdt-trc20.html'">
+        <img src="assets/usdt.jpg" alt="USDT"/>
+        <div class="label">USDT (TRC20)</div>
       </div>
     </section>
 
-    <div class="footer">©2025 Baroud Services</div>
+    <div class="footer">BAROUD SERVICES © 2026</div>
   </div>
-
-  
 
   <script>
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    (async ()=>{
-      try{
+    // التحقق من الجلسة فوراً
+    async function checkAuth() {
+      try {
         const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-
-        if (!data.session?.user){
-          location.replace("login.html?v=" + Date.now());
+        if (error || !data.session) {
+          location.replace("login.html?reason=session_expired&t=" + Date.now());
         }
-      }catch(e){
-        location.replace("login.html?v=" + Date.now());
+      } catch (e) {
+        location.replace("login.html");
       }
-    })();
+    }
+
+    checkAuth();
   </script>
-<script src="app-ui.js?v=3"></script>
+  <script src="app-ui.js?v=4"></script>
 </body>
 </html>
