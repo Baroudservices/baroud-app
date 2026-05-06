@@ -3,204 +3,211 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baroud App | المتجر الأول في لبنان</title>
+  <title>Baroud | The Future of Digital Services</title>
   
   <style>
-    /* ===== MODERN SYSTEM & THEME ===== */
     :root {
-      --bg: #020b14;
-      --card-bg: #06101d;
-      --accent: #21a0f0; /* اللون الأزرق الأساسي لبارود */
-      --green-fix: #21f07a;
-      --glass: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.08);
+      --main-bg: #01060b;
+      --accent-blue: #21a0f0;
+      --glow-blue: rgba(33, 160, 240, 0.4);
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-gold: #f0c321;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    body { background: var(--bg); color: #fff; margin: 0; overflow-x: hidden; min-height: 100vh; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    body { 
+      background: var(--main-bg); 
+      color: #fff; 
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
 
-    .wrap { width: 100%; max-width: 500px; margin: 0 auto; padding: 0 16px 100px; }
+    /* خلفية متحركة خفيفة (Ambient Light) */
+    body::before {
+      content: ''; position: fixed; top: -10%; left: -10%; width: 40%; height: 40%;
+      background: radial-gradient(circle, var(--glow-blue) 0%, transparent 70%);
+      filter: blur(80px); z-index: -1; animation: drift 15s infinite alternate;
+    }
+    @keyframes drift { from { transform: translate(0,0); } to { transform: translate(50%, 30%); } }
 
-    /* ===== TOPBAR (MODERN & CLEAN) ===== */
-    .topbar {
+    .container { width: 100%; max-width: 500px; margin: 0 auto; padding: 0 18px 100px; }
+
+    /* ===== TOPBAR (FUTURE STYLE) ===== */
+    .header {
       position: sticky; top: 0; z-index: 1000;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 15px 16px; background: rgba(2, 11, 20, 0.85);
-      backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
+      padding: 18px 20px; background: rgba(1, 6, 11, 0.7);
+      backdrop-filter: blur(25px); border-bottom: 1px solid var(--border-color);
     }
-    .brand-title { font-weight: 900; font-size: 20px; letter-spacing: 1.5px; color: #fff; }
-    .icon-btn { 
-      width: 42px; height: 42px; border-radius: 12px; 
-      background: var(--glass); border: 1px solid var(--glass-border);
-      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    .brand-id { font-weight: 900; font-size: 22px; letter-spacing: 2px; background: linear-gradient(90deg, #fff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .btn-circle {
+      width: 45px; height: 45px; border-radius: 15px; 
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s;
     }
+    .btn-circle:active { transform: scale(0.9) rotate(-10deg); border-color: var(--accent-blue); }
 
-    /* ===== HERO BANNER (PREMIUM LOOK) ===== */
-    .banner-container { 
-      width: 100%; height: 175px; border-radius: 24px; 
-      overflow: hidden; margin-top: 15px; position: relative;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-      border: 1px solid var(--glass-border);
+    /* ===== SLIDER (CINEMATIC) ===== */
+    .hero-banner {
+      width: 100%; height: 200px; border-radius: 28px;
+      overflow: hidden; margin: 20px 0; position: relative;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
-    .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.2, 1, 0.2, 1); }
+    .slides { display: flex; width: 300%; height: 100%; transition: 1s cubic-bezier(0.16, 1, 0.3, 1); }
     .slide { width: 33.333%; height: 100%; position: relative; }
-    .slide img { width: 100%; height: 100%; object-fit: cover; }
-    .slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); }
+    .slide img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8); }
+    .slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--main-bg) 5%, transparent 60%); }
 
-    .dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
-    .dot { width: 6px; height: 6px; border-radius: 10px; background: rgba(255,255,255,0.3); transition: 0.4s; }
-    .dot.active { width: 20px; background: var(--accent); }
-
-    /* ===== TICKER (FAST DELIVERY) ===== */
-    .ticker {
-      margin: 15px 0; background: rgba(33, 160, 240, 0.1); 
-      border: 1px solid rgba(33, 160, 240, 0.15);
-      border-radius: 12px; padding: 8px; overflow: hidden; white-space: nowrap;
+    /* ===== SEARCH (GLOWING) ===== */
+    .search-container { position: relative; margin-bottom: 25px; }
+    .search-container input {
+      width: 100%; height: 55px; background: var(--card-bg);
+      border: 1px solid var(--border-color); border-radius: 18px;
+      padding: 0 55px 0 20px; color: #fff; font-size: 16px;
+      transition: 0.4s;
     }
-    .ticker-content { display: inline-block; animation: scroll 20s linear infinite; font-size: 12px; font-weight: 600; color: #cbd5e0; }
-    @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+    .search-container input:focus { border-color: var(--accent-blue); background: rgba(33, 160, 240, 0.05); box-shadow: 0 0 20px var(--glow-blue); }
+    .search-container i { position: absolute; right: 20px; top: 18px; color: var(--accent-blue); }
 
-    /* ===== SEARCH (NEW STYLE) ===== */
-    .search-box {
-      background: var(--card-bg); border: 1px solid var(--glass-border);
-      border-radius: 15px; padding: 2px 15px; margin-bottom: 20px;
-      display: flex; align-items: center; gap: 10px; transition: 0.3s;
-    }
-    .search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 15px rgba(33, 160, 240, 0.2); }
-    .search-box input { width: 100%; background: none; border: none; color: #fff; height: 48px; font-size: 15px; }
-
-    /* ===== GRID (HIGH QUALITY IMAGES) ===== */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .tile {
-      background: var(--card-bg); border: 1px solid var(--glass-border);
-      border-radius: 20px; overflow: hidden; position: relative;
-      transition: 0.3s; text-decoration: none; display: flex; flex-direction: column;
-      height: 180px; /* طول متناسق للموبايل */
-    }
-    .tile:active { transform: scale(0.96); }
+    /* ===== PREMIUM GRID (THE BEAST) ===== */
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     
-    .img-wrap { width: 100%; height: 135px; overflow: hidden; }
-    .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .card {
+      background: var(--card-bg); border-radius: 26px; border: 1px solid var(--border-color);
+      overflow: hidden; position: relative; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex; flex-direction: column; height: 190px;
+    }
+    .card:active { transform: translateY(-5px) scale(1.02); border-color: var(--accent-blue); }
+
+    .card-media { width: 100%; height: 140px; position: relative; overflow: hidden; }
+    .card-media img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+    .card:hover .card-media img { transform: scale(1.1); }
+
+    .card-info {
+      padding: 12px; text-align: center; font-weight: 800;
+      font-size: 14px; background: rgba(255,255,255,0.02);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    .status-tag {
+      position: absolute; top: 12px; left: 12px;
+      background: rgba(1, 6, 11, 0.6); backdrop-filter: blur(10px);
+      padding: 4px 10px; border-radius: 10px; font-size: 10px;
+      font-weight: 900; color: var(--accent-blue); border: 1px solid var(--accent-blue);
+      z-index: 10;
+    }
+
+    /* ===== DRAWER (BLUR EFFECT) ===== */
+    .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); display: none; z-index: 2000; opacity: 0; transition: 0.4s; }
+    .menu-overlay.active { display: block; opacity: 1; }
     
-    .label { 
-      padding: 10px; text-align: center; font-weight: 700; font-size: 13px; 
-      color: #fff; background: rgba(0,0,0,0.3); flex-grow: 1;
-      display: flex; align-items: center; justify-content: center;
+    .side-drawer {
+      position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
+      background: rgba(1, 6, 11, 0.95); z-index: 2100; padding: 40px 25px;
+      transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-right: 1px solid var(--border-color);
     }
+    .side-drawer.active { left: 0; box-shadow: 40px 0 100px rgba(0,0,0,0.8); }
 
-    .badge {
-      position: absolute; top: 10px; right: 10px; background: var(--green-fix);
-      color: #020b14; font-size: 9px; font-weight: 900; padding: 4px 10px;
-      border-radius: 8px; z-index: 5;
+    .nav-link {
+      display: flex; align-items: center; gap: 15px; padding: 18px;
+      color: #888; text-decoration: none; font-weight: 700;
+      border-radius: 15px; margin-bottom: 10px; transition: 0.3s;
     }
+    .nav-link:active { background: var(--accent-blue); color: #fff; }
 
-    /* ===== DRAWER ===== */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 2000; }
-    .overlay.active { opacity: 1; pointer-events: auto; }
-    .drawer {
-      position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-      background: var(--bg); border-right: 1px solid var(--glass-border);
-      transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); z-index: 2100; padding: 30px 20px;
-    }
-    .drawer.active { left: 0; }
-    .menu-item { display: block; padding: 15px; color: #a0aec0; text-decoration: none; font-weight: 600; border-radius: 12px; margin-bottom: 5px; }
-    .menu-item:active { background: var(--glass); color: #fff; }
-
-    .hint { text-align: center; opacity: 0.2; font-size: 11px; margin-top: 50px; letter-spacing: 2px; }
+    /* Floating Baroud Footer */
+    .baroud-tag { text-align: center; margin-top: 40px; font-size: 10px; color: #333; letter-spacing: 5px; font-weight: 900; }
   </style>
 </head>
 
 <body>
-  <div class="overlay" id="overlay"></div>
-  <aside class="drawer" id="drawer">
-    <div style="text-align: center; margin-bottom: 40px;">
-        <div style="width: 70px; height: 70px; background: var(--accent); border-radius: 20px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 10px 20px rgba(33, 160, 240, 0.3);">👤</div>
-        <div style="font-weight: 700;">Welcome Back</div>
+  <div class="menu-overlay" id="overlay"></div>
+  <aside class="side-drawer" id="drawer">
+    <div style="margin-bottom: 50px; border-left: 4px solid var(--accent-blue); padding-left: 15px;">
+      <h2 style="font-size: 24px;">BAROUD</h2>
+      <p style="font-size: 12px; color: #555;">LEBANON'S #1 STORE</p>
     </div>
-    <a href="index.html" class="menu-item">🏠 Home</a>
-    <a href="login.html" class="menu-item">🔑 Login</a>
-    <a href="register.html" class="menu-item">📝 Register</a>
-    <a href="https://wa.me/96170385398" class="menu-item">💬 Support</a>
+    <a href="index.html" class="nav-link">🏠 DASHBOARD</a>
+    <a href="login.html" class="nav-link">🔑 AUTHENTICATION</a>
+    <a href="wallet.html" class="nav-link">💳 WALLET SYSTEM</a>
+    <a href="https://wa.me/96170385398" class="nav-link" style="color: var(--accent-blue);">💬 LIVE SUPPORT</a>
+    <div style="position: absolute; bottom: 30px; width: calc(100% - 50px);">
+        <button onclick="location.href='login.html'" style="width: 100%; height: 50px; border-radius: 15px; border: none; background: #ff3e3e; color: #fff; font-weight: 900;">LOGOUT</button>
+    </div>
   </aside>
 
-  <header class="topbar">
-    <div class="icon-btn" id="menuBtn">☰</div>
-    <div class="brand-title">BAROUD</div>
-    <div class="icon-btn" onclick="location.href='login.html'">👤</div>
+  <header class="header">
+    <div class="btn-circle" id="openMenu">☰</div>
+    <div class="brand-id">BAROUD</div>
+    <div class="btn-circle" onclick="location.href='login.html'">👤</div>
   </header>
 
-  <main class="wrap">
-    <div class="banner-container">
-      <div class="slides" id="slides">
-        <div class="slide"><img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x300/06101d/21a0f0?text=Premium+Services'"></div>
-        <div class="slide"><img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x300/06101d/21a0f0?text=Instant+Delivery'"></div>
-        <div class="slide"><img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x300/06101d/21a0f0?text=Best+Prices'"></div>
+  <main class="container">
+    <div class="hero-banner">
+      <div class="slides" id="slider">
+        <div class="slide"><img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/01060b/21a0f0?text=ELITE+GAMING'"></div>
+        <div class="slide"><img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/01060b/21a0f0?text=INSTANT+ACCESS'"></div>
+        <div class="slide"><img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/01060b/21a0f0?text=SAFE+TRADES'"></div>
       </div>
-      <div class="dots" id="dots"></div>
     </div>
 
-    <div class="ticker">
-      <div class="ticker-content">⚡ Fast Delivery • 🔥 Best Rates in Lebanon • 📞 Support +961 70385398 • ✅ Secure Payments</div>
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Search elite services...">
+      <i>🔍</i>
     </div>
 
-    <div class="search-box">
-      <span>🔍</span>
-      <input type="text" id="mainSearch" placeholder="Search for items..." autocomplete="off">
-    </div>
+    <section class="grid-layout" id="mainGrid">
+      <div class="card" onclick="location.href='login.html'">
+        <div class="status-tag">ACTIVE</div>
+        <div class="card-media"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1614680376593-902f74cf0d41?q=80&w=500'"></div>
+        <div class="card-info">Accounts</div>
+      </div>
 
-    <section class="grid">
-      <a href="login.html" class="tile">
-        <span class="badge">POPULAR</span>
-        <div class="img-wrap"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=500'"></div>
-        <div class="label">Accounts</div>
-      </a>
-      <a href="login.html" class="tile">
-        <span class="badge" style="background: #f0a021;">HOT</span>
-        <div class="img-wrap"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500'"></div>
-        <div class="label">Games</div>
-      </a>
-      <a href="login.html" class="tile">
-        <div class="img-wrap"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=500'"></div>
-        <div class="label">Gift Cards</div>
-      </a>
-      <a href="login.html" class="tile">
-        <div class="img-wrap"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1614332287897-cdc485fa562d?q=80&w=500'"></div>
-        <div class="label">Apps</div>
-      </a>
+      <div class="card" onclick="location.href='login.html'">
+        <div class="status-tag" style="color: #f0a021; border-color: #f0a021;">TRENDING</div>
+        <div class="card-media"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=500'"></div>
+        <div class="card-info">Games</div>
+      </div>
+
+      <div class="card" onclick="location.href='login.html'">
+        <div class="card-media"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=500'"></div>
+        <div class="card-info">Gift Cards</div>
+      </div>
+
+      <div class="card" onclick="location.href='login.html'">
+        <div class="card-media"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=500'"></div>
+        <div class="card-info">Premium Apps</div>
+      </div>
     </section>
 
-    <div class="hint">BAROUDAPP.COM</div>
+    <div class="baroud-tag">BAROUDAPP.COM</div>
   </main>
 
   <script>
-    // Drawer
+    // Menu Control
     const drawer = document.getElementById('drawer');
     const overlay = document.getElementById('overlay');
-    document.getElementById('menuBtn').onclick = () => { drawer.classList.add('active'); overlay.classList.add('active'); };
+    document.getElementById('openMenu').onclick = () => { drawer.classList.add('active'); overlay.classList.add('active'); };
     overlay.onclick = () => { drawer.classList.remove('active'); overlay.classList.remove('active'); };
 
-    // Auto Slider
+    // Slider Logic
     let step = 0;
-    const slides = document.getElementById('slides');
-    const dotsContainer = document.getElementById('dots');
-    for(let i=0; i<3; i++) {
-        const d = document.createElement('div');
-        d.className = `dot ${i===0?'active':''}`;
-        dotsContainer.appendChild(d);
-    }
     setInterval(() => {
-        step = (step + 1) % 3;
-        slides.style.transform = `translateX(-${step * 33.333}%)`;
-        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === step));
-    }, 4500);
+      step = (step + 1) % 3;
+      document.getElementById('slider').style.transform = `translateX(-${step * 33.333}%)`;
+    }, 5000);
 
-    // Search Mockup
-    document.getElementById('mainSearch').oninput = (e) => {
-        const val = e.target.value.toLowerCase();
-        document.querySelectorAll('.tile').forEach(t => {
-            const text = t.innerText.toLowerCase();
-            t.style.display = text.includes(val) ? 'flex' : 'none';
-        });
+    // Filter Logic
+    document.getElementById('search').oninput = (e) => {
+      const v = e.target.value.toLowerCase();
+      document.querySelectorAll('.card').forEach(c => {
+        c.style.display = c.innerText.toLowerCase().includes(v) ? 'flex' : 'none';
+      });
     };
   </script>
 </body>
