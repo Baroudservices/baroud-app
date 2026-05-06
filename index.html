@@ -10,159 +10,198 @@
   <style>
     :root {
       --neon-cyan: #00f2ff;
-      --deep-black: #050505;
-      --card-bg: #0d0d0d;
-      --border-color: #1a1a1a;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; outline: none; }
     
     body { 
-      background-color: var(--deep-black); 
+      background-color: var(--bg-dark); 
       color: #fff; 
       font-family: 'Orbitron', 'Cairo', sans-serif;
       overflow-x: hidden;
-      min-height: 100vh;
     }
 
-    .wrapper { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 15px 120px; }
+    .wrapper { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 18px 120px; }
 
-    /* ===== TOPBAR (Clean) ===== */
-    .nav {
+    /* ===== HEADER (MODERN) ===== */
+    header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 25px 5px; position: sticky; top: 0; z-index: 1000;
-      background: var(--deep-black);
-    }
-    .logo-box {
-      font-size: 26px; font-weight: 900; letter-spacing: 4px;
-      border: 2px solid #fff; padding: 4px 18px; 
-      box-shadow: none; /* تأكيد إزالة الخط الأزرق */
+      background: rgba(2, 5, 8, 0.8); backdrop-filter: blur(15px);
     }
 
-    /* ===== IMPROVED SLIDER ===== */
-    .slider-container {
-      width: 100%; height: 210px; border-radius: 15px;
-      overflow: hidden; margin: 15px 0 30px; position: relative;
-      border: 1px solid var(--border-color);
+    .logo-container {
+      font-size: 24px; font-weight: 900; letter-spacing: 3px;
+      border: 1.5px solid #fff; padding: 5px 15px; border-radius: 4px;
     }
-    .slider-track {
-      display: flex; width: 300%; height: 100%;
-      transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+
+    /* الـ 3 خطوط بشكل عصري */
+    .menu-trigger {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+      cursor: pointer; transition: 0.3s;
     }
+    .menu-trigger span { width: 20px; height: 2px; background: #fff; border-radius: 2px; transition: 0.3s; }
+    .menu-trigger:active { transform: scale(0.9); background: var(--neon-cyan); }
+    .menu-trigger:active span { background: #000; }
+
+    /* ===== SIDE DRAWER ===== */
+    .drawer {
+      position: fixed; top: 0; right: -100%; width: 80%; height: 100%;
+      background: rgba(2, 5, 8, 0.98); backdrop-filter: blur(20px);
+      z-index: 3000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 50px 30px; border-left: 1px solid var(--glass-border);
+    }
+    .drawer.active { right: 0; }
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; z-index: 2900;
+    }
+    .drawer.active + .drawer-overlay { display: block; }
+    .drawer a { display: block; padding: 20px 0; color: #fff; text-decoration: none; font-size: 18px; border-bottom: 1px solid var(--glass-border); }
+
+    /* ===== HERO SLIDER (REFINED) ===== */
+    .slider {
+      width: 100%; height: 210px; border-radius: 24px;
+      overflow: hidden; margin: 20px 0 30px; position: relative;
+      border: 1px solid var(--glass-border);
+    }
+    .slider-inner { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
     .slide { width: 33.333%; height: 100%; position: relative; }
     .slide img { width: 100%; height: 100%; object-fit: cover; }
-    .slide::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(5,5,5,0.8), transparent);
+
+    /* ===== SEARCH (GLASS STYLE) ===== */
+    .search-box {
+      background: #fff; border-radius: 16px; padding: 0 20px;
+      margin-bottom: 30px; display: flex; align-items: center;
+    }
+    .search-box input {
+      width: 100%; height: 55px; background: none; border: none;
+      color: #000; font-size: 16px; font-weight: 700; font-family: 'Cairo', sans-serif;
     }
 
-    /* ===== SEARCH (Clean) ===== */
-    .search-wrap {
-      background: #fff; padding: 2px 18px; margin-bottom: 25px;
-      display: flex; align-items: center; 
-      box-shadow: none; border-radius: 8px;
-    }
-    .search-wrap input {
-      width: 100%; height: 50px; background: none; border: none;
-      color: #000; font-size: 15px; font-weight: 700; outline: none;
-      font-family: 'Orbitron', sans-serif;
-    }
-
-    /* ===== GRID ===== */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    /* ===== GRID (MODERN TILES) ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     
-    .card {
-      background: var(--card-bg); border: 1px solid var(--border-color);
-      position: relative; border-radius: 12px; overflow: hidden;
-      transition: 0.3s; cursor: pointer; text-decoration: none;
+    .item-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 24px; overflow: hidden; position: relative;
+      text-decoration: none; transition: 0.4s; height: 200px;
+      display: flex; flex-direction: column;
     }
-    .card:active { transform: scale(0.96); border-color: var(--neon-cyan); }
-    .card-img { width: 100%; height: 135px; overflow: hidden; }
-    .card-img img { width: 100%; height: 100%; object-fit: cover; }
-    .card-title { padding: 14px; font-weight: 900; font-size: 11px; text-align: center; color: #fff; letter-spacing: 1px; }
+    .item-card:active { transform: scale(0.95) translateY(5px); }
 
-    .badge {
-      position: absolute; top: 10px; right: 10px;
+    .img-area { width: 100%; height: 145px; overflow: hidden; }
+    .img-area img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .label-area {
+      padding: 15px; font-weight: 900; font-size: 12px;
+      text-align: center; color: #fff; letter-spacing: 1px;
+    }
+
+    .status-badge {
+      position: absolute; top: 12px; right: 12px;
       background: var(--neon-cyan); color: #000; padding: 4px 10px;
-      font-size: 9px; font-weight: 900; border-radius: 5px; z-index: 10;
+      font-size: 9px; font-weight: 900; border-radius: 8px; z-index: 10;
     }
 
-    /* ===== BOTTOM BAR ===== */
-    .bottom-bar {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      width: 90%; max-width: 400px; height: 65px;
-      background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px);
-      border: 1px solid var(--border-color); border-radius: 20px;
-      display: flex; align-items: center; justify-content: space-evenly;
-      z-index: 2000;
+    /* ===== DOCK (IOS STYLE) ===== */
+    .dock {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 380px; height: 75px;
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border); border-radius: 28px;
+      display: flex; align-items: center; justify-content: space-around;
+      z-index: 2000; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
-    .nav-link { font-size: 22px; color: #444; transition: 0.3s; cursor: pointer; }
-    .nav-link.active { color: var(--neon-cyan); }
+    .dock-icon { font-size: 24px; opacity: 0.4; transition: 0.3s; cursor: pointer; }
+    .dock-icon.active { opacity: 1; transform: translateY(-5px); filter: drop-shadow(0 0 10px var(--neon-cyan)); }
   </style>
 </head>
 
 <body>
+  <div class="drawer" id="drawer">
+    <h2 style="margin-bottom: 30px;">BAROUD MENU</h2>
+    <a href="login.html">🔑 My Profile</a>
+    <a href="wallet.html">💳 Wallet</a>
+    <a href="orders.html">📦 History</a>
+    <a href="https://wa.me/96176452027">💬 Contact Us</a>
+  </div>
+  <div class="drawer-overlay" id="overlay"></div>
+
   <div class="wrapper">
-    <header class="nav">
-      <div class="logo-box">BAROUD</div>
-      <div style="font-size: 22px; color: var(--neon-cyan);">☰</div>
+    <header>
+      <div class="logo-container">BAROUD</div>
+      <div class="menu-trigger" id="menuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
     </header>
 
-    <div class="slider-container">
-      <div class="slider-track" id="track">
-        <div class="slide"><img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/050505/00f2ff?text=PREMIUM+SERVICES'"></div>
-        <div class="slide"><img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/050505/00f2ff?text=INSTANT+DELIVERY'"></div>
-        <div class="slide"><img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/050505/00f2ff?text=SAFE+PAYMENTS'"></div>
+    <div class="slider">
+      <div class="slider-inner" id="track">
+        <div class="slide"><img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=PREMIUM+SERVICES'"></div>
+        <div class="slide"><img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=INSTANT+ACCESS'"></div>
+        <div class="slide"><img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=24/7+SUPPORT'"></div>
       </div>
     </div>
 
-    <div class="search-wrap">
+    <div class="search-box">
       <input type="text" placeholder="Explore Elite Services...">
-      <span style="color: #888;">🔍</span>
     </div>
 
     <section class="grid">
-      <a href="login.html" class="card">
-        <div class="badge">ELITE</div>
-        <div class="card-img"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500'"></div>
-        <div class="card-title">ACCOUNTS</div>
+      <a href="login.html" class="item-card">
+        <div class="status-badge">ELITE</div>
+        <div class="img-area"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500'"></div>
+        <div class="label-area">ACCOUNTS</div>
       </a>
-      <a href="login.html" class="card">
-        <div class="card-img"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500'"></div>
-        <div class="card-title">GAMING</div>
+      <a href="login.html" class="item-card">
+        <div class="img-area"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500'"></div>
+        <div class="label-area">GAMING</div>
       </a>
-      <a href="login.html" class="card">
-        <div class="card-img"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'"></div>
-        <div class="card-title">GIFT CARDS</div>
+      <a href="login.html" class="item-card">
+        <div class="img-area"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'"></div>
+        <div class="label-area">GIFT CARDS</div>
       </a>
-      <a href="login.html" class="card">
-        <div class="badge" style="background: #fff;">NEW</div>
-        <div class="card-img"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1614332287897-cdc485fa562d?w=500'"></div>
-        <div class="card-title">APPS</div>
+      <a href="login.html" class="item-card">
+        <div class="status-badge" style="background:#fff">NEW</div>
+        <div class="img-area"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1614332287897-cdc485fa562d?w=500'"></div>
+        <div class="label-area">APPS</div>
       </a>
     </section>
 
-    <p style="text-align: center; margin-top: 60px; opacity: 0.2; font-size: 10px; letter-spacing: 5px;">BAROUDAPP.COM</p>
+    <p style="text-align: center; margin-top: 60px; opacity: 0.1; font-size: 10px; letter-spacing: 6px;">BAROUDAPP.COM</p>
   </div>
 
-  <nav class="bottom-bar">
-    <div class="nav-link active">🏠</div>
-    <div class="nav-link" onclick="location.href='wallet.html'">💳</div>
-    <div class="nav-link" onclick="location.href='orders.html'">📦</div>
-    <div class="nav-link" onclick="window.open('https://wa.me/96176452027')">💬</div>
+  <nav class="dock">
+    <div class="dock-icon active">🏠</div>
+    <div class="dock-icon" onclick="location.href='wallet.html'">💳</div>
+    <div class="dock-icon" onclick="location.href='orders.html'">📦</div>
+    <div class="dock-icon" onclick="window.open('https://wa.me/96176452027')">💬</div>
   </nav>
 
   <script>
-    // Slider Logic Fix
+    // Menu Logic
+    const btn = document.getElementById('menuBtn');
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+
+    btn.onclick = () => { drawer.classList.add('active'); };
+    overlay.onclick = () => { drawer.classList.remove('active'); };
+
+    // Slider Logic
     const track = document.getElementById('track');
-    let index = 0;
-    
-    function moveSlider() {
-      index = (index + 1) % 3;
-      track.style.transform = `translateX(${index * 33.333}%)`; // تم تعديل المنطق ليتناسب مع RTL
-    }
-    
-    setInterval(moveSlider, 4000);
+    let idx = 0;
+    setInterval(() => {
+      idx = (idx + 1) % 3;
+      track.style.transform = `translateX(-${idx * 33.333}%)`;
+    }, 4500);
   </script>
 </body>
 </html>
