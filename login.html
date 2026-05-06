@@ -197,7 +197,7 @@
         if(error) throw error;
         
         showMsg("Identity Verified. Entering...", true);
-        setTimeout(() => window.location.replace("index.html"), 800);
+        setTimeout(() => window.location.replace("services.html"), 800);
       } catch(e) {
         showMsg(e.message || "Access Denied.");
         loginBtn.disabled = false;
