@@ -1,225 +1,190 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baroud | Premium Digital Hub</title>
+  <title>BAROUD | Elite Digital Realm</title>
   
   <style>
-    /* ===== MODERN DESIGN SYSTEM ===== */
+    /* ===== THE UNKNOWN SYSTEM ===== */
     :root {
-      --primary-cyan: #00f2ff;
-      --primary-blue: #0061ff;
-      --deep-bg: #03080f;
-      --glass: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --glow: rgba(0, 242, 255, 0.3);
+      --neon-cyan: #00f2ff;
+      --deep-black: #050505;
+      --glass-white: rgba(255, 255, 255, 0.05);
+      --sharp-border: #1a1a1a;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; outline: none; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    
     body { 
-      background-color: var(--deep-bg); 
+      background-color: var(--deep-black); 
       color: #fff; 
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
       overflow-x: hidden;
       min-height: 100vh;
     }
 
-    /* خلفية ضوئية متحركة لتعطي فخامة */
-    .bg-glow {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at 50% -20%, #0061ff22, transparent),
-                  radial-gradient(circle at 0% 100%, #00f2ff11, transparent);
-      z-index: -1;
+    /* تأثير الشبكة الرقمية في الخلفية */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(var(--sharp-border) 1px, transparent 1px), 
+                        linear-gradient(90deg, var(--sharp-border) 1px, transparent 1px);
+      background-size: 30px 30px; z-index: -1; opacity: 0.3;
     }
 
-    .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 0 20px 100px; }
+    .wrapper { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 15px 120px; }
 
-    /* ===== NAV BAR (FLOATING STYLE) ===== */
-    header {
+    /* ===== NAVIGATION (STATIC MINIMAL) ===== */
+    .nav {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 0; margin-bottom: 10px;
+      padding: 25px 5px; margin-bottom: 20px;
     }
-    .brand-logo { font-weight: 900; font-size: 24px; letter-spacing: 3px; color: #fff; text-shadow: 0 0 15px var(--glow); }
-    .nav-btn {
-      width: 44px; height: 44px; border-radius: 14px;
-      background: var(--glass); border: 1px solid var(--glass-border);
-      display: flex; align-items: center; justify-content: center; font-size: 20px;
-      backdrop-filter: blur(10px); cursor: pointer; transition: 0.3s;
-    }
-    .nav-btn:active { transform: scale(0.9); background: var(--primary-cyan); color: #000; }
-
-    /* ===== HERO SLIDER (THE CINEMATIC LOOK) ===== */
-    .hero-wrap {
-      position: relative; width: 100%; height: 210px;
-      border-radius: 30px; overflow: hidden; margin-bottom: 25px;
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-    .slides { display: flex; width: 300%; height: 100%; transition: 1s cubic-bezier(0.23, 1, 0.32, 1); }
-    .slide { width: 33.333%; height: 100%; position: relative; }
-    .slide img { width: 100%; height: 100%; object-fit: cover; }
-    .slide::after { 
-        content: ''; position: absolute; inset: 0; 
-        background: linear-gradient(0deg, var(--deep-bg) 0%, transparent 50%); 
+    .logo-box {
+      font-size: 26px; font-weight: 900; letter-spacing: -1px;
+      border: 3px solid #fff; padding: 2px 12px; transform: skewX(-10deg);
+      box-shadow: 5px 5px 0px var(--neon-cyan);
     }
 
-    .indicators { position: absolute; bottom: 15px; right: 25px; display: flex; gap: 8px; }
-    .ind { width: 6px; height: 6px; border-radius: 10px; background: rgba(255,255,255,0.2); transition: 0.4s; }
-    .ind.active { width: 25px; background: var(--primary-cyan); box-shadow: 0 0 10px var(--primary-cyan); }
-
-    /* ===== SEARCH (MINIMAL GLOW) ===== */
-    .search-area {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: 20px; padding: 2px 20px; display: flex; align-items: center; gap: 12px;
-      backdrop-filter: blur(10px); margin-bottom: 30px; transition: 0.4s;
+    /* ===== HERO CARDS (THE MIRROR) ===== */
+    .hero-container {
+      width: 100%; height: 230px; position: relative; margin-bottom: 35px;
+      perspective: 1000px;
     }
-    .search-area:focus-within { border-color: var(--primary-cyan); box-shadow: 0 0 20px rgba(0, 242, 255, 0.15); }
-    .search-area input { width: 100%; height: 52px; background: none; border: none; color: #fff; font-size: 16px; font-weight: 500; }
+    .hero-card {
+      width: 100%; height: 100%; position: relative;
+      background: var(--glass-white); border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px); border-radius: 5px;
+      overflow: hidden; transform: rotateX(5deg);
+    }
+    .hero-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; filter: grayscale(100%) contrast(120%); transition: 0.5s; }
+    .hero-card:hover img { filter: grayscale(0%); opacity: 1; }
 
-    /* ===== SERVICES GRID (PREMIUM TILES) ===== */
+    /* ===== SEARCH (NEO-INPUT) ===== */
+    .search-box {
+      background: #fff; border-radius: 0; padding: 5px 20px;
+      margin-bottom: 30px; display: flex; align-items: center;
+      box-shadow: 8px 8px 0px var(--neon-cyan);
+    }
+    .search-box input {
+      width: 100%; height: 50px; background: none; border: none;
+      color: #000; font-size: 16px; font-weight: 900;
+    }
+
+    /* ===== GRID (STAGGERED CARDS) ===== */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .service-card {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: 28px; overflow: hidden; position: relative;
-      text-decoration: none; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      height: 195px; display: flex; flex-direction: column;
+    
+    .item {
+      background: #111; border: 2px solid var(--sharp-border);
+      position: relative; height: 200px; transition: 0.3s;
+      cursor: pointer;
     }
-    .service-card:active { transform: scale(0.95) translateY(5px); border-color: var(--primary-cyan); }
+    .item:nth-child(even) { transform: translateY(20px); } /* حركة غير متناظرة */
 
-    .img-box { width: 100%; height: 145px; position: relative; overflow: hidden; }
-    .img-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
-    .service-card:hover .img-box img { transform: scale(1.1) rotate(2deg); }
+    .item:active { background: var(--neon-cyan); transform: scale(0.95); }
+    .item:active .item-label { color: #000; }
 
-    .title-box { 
-      padding: 12px; text-align: center; font-size: 13px; font-weight: 800; 
-      letter-spacing: 1px; color: #fff; text-transform: uppercase;
-      background: rgba(255,255,255,0.02); flex-grow: 1;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .premium-badge {
-      position: absolute; top: 12px; left: 12px;
-      padding: 4px 10px; border-radius: 10px; font-size: 9px; font-weight: 900;
-      background: var(--primary-cyan); color: #000; box-shadow: 0 5px 15px rgba(0, 242, 255, 0.4);
-      z-index: 10;
+    .item-img { width: 100%; height: 140px; overflow: hidden; position: relative; }
+    .item-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); }
+    
+    .item-label {
+      padding: 12px; font-weight: 900; font-size: 14px;
+      text-transform: uppercase; text-align: center; color: #fff;
     }
 
-    /* ===== DRAWER (MODERN BLUR) ===== */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); display: none; z-index: 2000; }
-    .side-menu {
-      position: fixed; top: 0; left: -310px; width: 300px; height: 100%;
-      background: rgba(3, 8, 15, 0.98); z-index: 2100; padding: 40px 25px;
-      transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1); border-right: 1px solid var(--glass-border);
+    /* التاج (Badge) بأسلوب ستيكر */
+    .sticker {
+      position: absolute; top: -10px; right: -10px;
+      background: #fff; color: #000; padding: 4px 10px;
+      font-size: 10px; font-weight: 900; transform: rotate(15deg);
+      box-shadow: 3px 3px 0px var(--neon-cyan);
     }
-    .side-menu.active { left: 0; }
-    .nav-item {
-      display: block; padding: 18px; color: #888; text-decoration: none;
-      font-weight: 700; border-radius: 15px; margin-bottom: 8px; transition: 0.3s;
-    }
-    .nav-item:active { background: var(--glass); color: var(--primary-cyan); }
 
-    .footer-text { text-align: center; margin-top: 50px; opacity: 0.2; font-size: 10px; letter-spacing: 4px; font-weight: 900; }
+    /* ===== BOTTOM BAR (APP STYLE) ===== */
+    .bottom-nav {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 400px; height: 70px;
+      background: rgba(255,255,255,0.05); backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+      display: flex; align-items: center; justify-content: space-around;
+      z-index: 1000;
+    }
+    .nav-icon { font-size: 20px; cursor: pointer; opacity: 0.5; transition: 0.3s; }
+    .nav-icon.active { opacity: 1; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
   </style>
 </head>
 
 <body>
-  <div class="bg-glow"></div>
-  <div class="overlay" id="overlay"></div>
-
-  <aside class="side-menu" id="menu">
-    <div style="margin-bottom: 40px; text-align: center;">
-      <div style="width: 80px; height: 80px; background: linear-gradient(45deg, var(--primary-blue), var(--primary-cyan)); border-radius: 25px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 10px 30px rgba(0, 242, 255, 0.3);">👤</div>
-      <h3 style="letter-spacing: 1px;">ELITE MEMBER</h3>
-    </div>
-    <a href="index.html" class="nav-item">DASHBOARD</a>
-    <a href="wallet.html" class="nav-item">MY WALLET</a>
-    <a href="orders.html" class="nav-item">ORDER HISTORY</a>
-    <a href="https://wa.me/96170385398" class="nav-item" style="color: var(--primary-cyan);">LIVE SUPPORT</a>
-    <div style="position: absolute; bottom: 40px; width: calc(100% - 50px);">
-        <button onclick="location.href='login.html'" style="width:100%; height:55px; border-radius:18px; border:1px solid #ff4d4d; background:none; color:#ff4d4d; font-weight:900; letter-spacing:1px;">SIGN OUT</button>
-    </div>
-  </aside>
-
-  <main class="container">
-    <header>
-      <div class="nav-btn" id="openBtn">☰</div>
-      <div class="brand-logo">BAROUD</div>
-      <div class="nav-btn" onclick="location.href='login.html'">👤</div>
+  <div class="wrapper">
+    <header class="nav">
+      <div class="logo-box">BAROUD</div>
+      <div style="display: flex; gap: 15px;">
+        <span style="font-weight: 900; color: var(--neon-cyan);">ONLINE</span>
+        <span>☰</span>
+      </div>
     </header>
 
-    <div class="hero-wrap">
-      <div class="slides" id="slider">
-        <div class="slide"><img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/03080f/00f2ff?text=PREMIUM+ACCESS'"></div>
-        <div class="slide"><img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/03080f/00f2ff?text=INSTANT+RECHARGE'"></div>
-        <div class="slide"><img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/03080f/00f2ff?text=SAFE+PAYMENTS'"></div>
+    <div class="hero-container">
+      <div class="hero-card">
+        <img src="assets/banner1.jpg" onerror="this.src='https://images.unsplash.com/photo-1614680376593-902f74cf0d41?q=80&w=1000'">
+        <div style="position: absolute; bottom: 20px; right: 20px; text-align: left;">
+            <h1 style="font-size: 40px; line-height: 0.8; font-weight: 900;">ELITE<br><span style="color: var(--neon-cyan);">DEALS</span></h1>
+        </div>
       </div>
-      <div class="indicators" id="inds"></div>
     </div>
 
-    <div class="search-area">
-      <span style="font-size: 18px; opacity: 0.5;">🔍</span>
-      <input type="text" id="searchInput" placeholder="Search for premium services...">
+    <div class="search-box">
+      <input type="text" placeholder="اكتب ما تبحث عنه...">
+      <span style="color: #000; font-size: 20px;">🔍</span>
     </div>
 
-    <div class="grid" id="serviceGrid">
-      <a href="login.html" class="service-card">
-        <div class="premium-badge">NEW</div>
-        <div class="img-box"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1614680376593-902f74cf0d41?auto=format&fit=crop&w=500'"></div>
-        <div class="title-box">Accounts</div>
-      </a>
+    <section class="grid">
+      <div class="item" onclick="location.href='login.html'">
+        <div class="sticker">BEST</div>
+        <div class="item-img"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500'"></div>
+        <div class="item-label">Accounts</div>
+      </div>
 
-      <a href="login.html" class="service-card">
-        <div class="premium-badge" style="background:#fff">HOT</div>
-        <div class="img-box"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=500'"></div>
-        <div class="title-box">Games</div>
-      </a>
+      <div class="item" onclick="location.href='login.html'">
+        <div class="item-img"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500'"></div>
+        <div class="item-label">Gaming</div>
+      </div>
 
-      <a href="login.html" class="service-card">
-        <div class="img-box"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=500'"></div>
-        <div class="title-box">Gift Cards</div>
-      </a>
+      <div class="item" onclick="location.href='login.html'">
+        <div class="item-img"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'"></div>
+        <div class="item-label">Gift Cards</div>
+      </div>
 
-      <a href="login.html" class="service-card">
-        <div class="img-box"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=500'"></div>
-        <div class="title-box">Premium Apps</div>
-      </a>
+      <div class="item" onclick="location.href='login.html'">
+        <div class="sticker" style="background: var(--neon-cyan);">HOT</div>
+        <div class="item-img"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1614332287897-cdc485fa562d?w=500'"></div>
+        <div class="item-label">Apps</div>
+      </div>
+    </section>
+
+    <div style="text-align: center; margin-top: 80px; opacity: 0.1; font-weight: 900; letter-spacing: 10px;">
+      BAROUDAPP.COM
     </div>
+  </div>
 
-    <div class="footer-text">BAROUDAPP.COM</div>
-  </main>
+  <nav class="bottom-nav">
+    <div class="nav-icon active">🏠</div>
+    <div class="nav-icon" onclick="location.href='wallet.html'">💳</div>
+    <div class="nav-icon" onclick="location.href='orders.html'">📦</div>
+    <div class="nav-icon" onclick="window.open('https://wa.me/96170385398')">💬</div>
+  </nav>
 
   <script>
-    // Navigation Control
-    const menu = document.getElementById('menu');
-    const overlay = document.getElementById('overlay');
-    document.getElementById('openBtn').onclick = () => { menu.classList.add('active'); overlay.style.display = 'block'; };
-    overlay.onclick = () => { menu.classList.remove('active'); overlay.style.display = 'none'; };
-
-    // Advanced Slider
-    let current = 0;
-    const slides = document.getElementById('slider');
-    const inds = document.getElementById('inds');
-    
-    // Create dots
-    for(let i=0; i<3; i++) {
-        const d = document.createElement('div');
-        d.className = `ind ${i===0?'active':''}`;
-        inds.appendChild(d);
-    }
-
-    setInterval(() => {
-        current = (current + 1) % 3;
-        slides.style.transform = `translateX(-${current * 33.333}%)`;
-        document.querySelectorAll('.ind').forEach((d, idx) => d.classList.toggle('active', idx === current));
-    }, 5000);
-
-    // Search Filter
-    document.getElementById('searchInput').oninput = (e) => {
-        const val = e.target.value.toLowerCase();
-        document.querySelectorAll('.service-card').forEach(card => {
-            card.style.display = card.innerText.toLowerCase().includes(val) ? 'flex' : 'none';
-        });
+    // تأثيرات بسيطة عند التحميل
+    window.onload = () => {
+      document.querySelectorAll('.item').forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform += ' translateY(30px)';
+        setTimeout(() => {
+          el.style.transition = '0.5s ease-out';
+          el.style.opacity = '1';
+          el.style.transform = el.style.transform.replace('translateY(30px)', '');
+        }, index * 100);
+      });
     };
   </script>
 </body>
