@@ -26,7 +26,6 @@
 
     .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
 
-    /* ===== HEADER ===== */
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
     .back-btn {
       width: 42px; height: 42px; border-radius: 12px;
@@ -34,7 +33,6 @@
       display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
 
-    /* ===== ORDER CARD ===== */
     .card {
       background: var(--glass); border: 1px solid var(--glass-border);
       border-radius: 24px; padding: 18px; margin-bottom: 15px;
@@ -45,7 +43,7 @@
     .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
     .order-title { font-weight: 900; font-size: 16px; color: var(--neon-blue); text-transform: uppercase; }
     .order-date { font-size: 11px; opacity: 0.5; font-family: 'Cairo'; margin-top: 4px; }
-    .order-price { font-weight: 900; font-size: 18px; }
+    .order-price { font-weight: 900; font-size: 18px; color: #fff; }
 
     .status-row { display: flex; gap: 8px; margin-bottom: 15px; }
     .status-badge {
@@ -56,7 +54,6 @@
     .status-badge.pending { color: #fbbf24; border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.1); }
     .status-badge.fail { color: #ef4444; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.1); }
 
-    /* ===== DETAILS BOX ===== */
     .details-box {
       background: rgba(0,0,0,0.3); border-radius: 15px; padding: 12px;
       margin-bottom: 15px; border: 1px solid var(--glass-border);
@@ -66,7 +63,6 @@
     .detail-label { opacity: 0.6; }
     .detail-value { font-weight: 700; color: #fff; text-align: right; }
 
-    /* ===== REPLY SECTION ===== */
     .reply-area {
       display: flex; justify-content: space-between; align-items: center;
       padding-top: 12px; border-top: 1px solid var(--glass-border);
@@ -77,7 +73,6 @@
     }
     .no-reply { font-size: 11px; opacity: 0.4; font-family: 'Cairo'; }
 
-    /* ===== MODAL ===== */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.85);
       display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
@@ -86,7 +81,7 @@
       background: #0f172a; border: 1px solid var(--neon-blue);
       border-radius: 24px; padding: 25px; width: 100%; max-width: 350px; text-align: center;
     }
-    .modal-text { font-family: 'Cairo'; font-size: 14px; line-height: 1.6; margin: 20px 0; word-break: break-all; }
+    .modal-text { font-family: 'Cairo'; font-size: 14px; line-height: 1.6; margin: 20px 0; word-break: break-all; color: #fff; }
     .close-btn { background: var(--glass); border: 1px solid var(--glass-border); color: #fff; padding: 10px 30px; border-radius: 12px; cursor: pointer; }
 
     .empty-state { text-align: center; padding: 50px 20px; opacity: 0.5; font-family: 'Cairo'; }
@@ -101,8 +96,7 @@
       <div style="width: 42px;"></div>
     </div>
 
-    <div id="ordersList">
-      </div>
+    <div id="ordersList"></div>
   </div>
 
   <div class="modal" id="replyModal">
@@ -131,7 +125,7 @@
       .order('created_at', { ascending: false });
 
     if (error || !orders.length) {
-      list.innerHTML = `<div class="empty-state">ما في طلبات حالياً.. بلّش تسوّق! 🛒</div>`;
+      list.innerHTML = `<div class="empty-state">No orders found.</div>`;
       return;
     }
 
@@ -139,12 +133,15 @@
       const statusClass = (o.delivery_status === 'done') ? 'done' : (o.delivery_status === 'rejected' ? 'fail' : 'pending');
       const payClass = (o.status === 'paid') ? 'done' : 'pending';
       const hasReply = o.admin_reply && o.admin_reply.trim() !== "";
+      
+      // اختيار الاسم الصحيح للمنتج متل ما كان بالأول
+      const orderTitle = o.product_title || o.title || o.service_name || 'Service Order';
 
       return `
         <div class="card">
           <div class="card-top">
             <div>
-              <div class="order-title">${o.product_title || 'Service Order'}</div>
+              <div class="order-title">${orderTitle}</div>
               <div class="order-date">${new Date(o.created_at).toLocaleString('en-GB')}</div>
             </div>
             <div class="order-price">$${Number(o.price || 0).toFixed(2)}</div>
@@ -156,13 +153,18 @@
           </div>
 
           <div class="details-box">
-             ${o.player_id ? `<div class="detail-item"><span class="detail-label">ID:</span><span class="detail-value">${o.player_id}</span></div>` : ''}
-             ${o.account_email ? `<div class="detail-item"><span class="detail-label">Email:</span><span class="detail-value">${o.account_email}</span></div>` : ''}
+             ${o.player_id ? `<div class="detail-item"><span class="detail-label">Player ID:</span><span class="detail-value">${o.player_id}</span></div>` : ''}
+             ${o.player_name ? `<div class="detail-item"><span class="detail-label">Player Name:</span><span class="detail-value">${o.player_name}</span></div>` : ''}
+             ${o.account_email ? `<div class="detail-item"><span class="detail-label">Account Email:</span><span class="detail-value">${o.account_email}</span></div>` : ''}
+             ${o.account_password ? `<div class="detail-item"><span class="detail-label">Password:</span><span class="detail-value">${o.account_password}</span></div>` : ''}
              ${o.plan_label ? `<div class="detail-item"><span class="detail-label">Plan:</span><span class="detail-value">${o.plan_label}</span></div>` : ''}
+             ${o.region ? `<div class="detail-item"><span class="detail-label">Region:</span><span class="detail-value">${o.region}</span></div>` : ''}
+             ${o.phone_number ? `<div class="detail-item"><span class="detail-label">Phone:</span><span class="detail-value">${o.phone_number}</span></div>` : ''}
+             ${o.notes ? `<div class="detail-item"><span class="detail-label">Notes:</span><span class="detail-value">${o.notes}</span></div>` : ''}
           </div>
 
           <div class="reply-area">
-            <span class="no-reply">${hasReply ? 'وصلك رد من الإدارة' : 'قيد المراجعة...'}</span>
+            <span class="no-reply">${hasReply ? 'Admin Replied' : 'Reviewing...'}</span>
             ${hasReply ? `<button class="reply-btn" onclick="openModal('${o.admin_reply.replace(/'/g, "\\'")}')">VIEW REPLY</button>` : ''}
           </div>
         </div>
