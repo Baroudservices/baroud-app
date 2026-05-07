@@ -43,7 +43,7 @@
     .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
     .order-title { font-weight: 900; font-size: 15px; color: var(--neon-blue); text-transform: uppercase; line-height: 1.2; max-width: 70%; }
     .order-date { font-size: 10px; opacity: 0.5; font-family: 'Cairo'; margin-top: 4px; }
-    .order-price { font-weight: 900; font-size: 18px; color: #fff; }
+    .order-price { font-weight: 900; font-size: 18px; }
 
     .status-row { display: flex; gap: 8px; margin-bottom: 15px; }
     .status-badge {
@@ -117,28 +117,37 @@
     
     if (!session) { location.replace('login.html'); return; }
 
-    // Query مطورة تعمل Join مع جدول المنتجات لتجيب الاسم
+    // 1. جلب الطلبات أولاً لضمان عمل الصفحة
     const { data: orders, error } = await sb
       .from('orders')
-      .select(`
-        *,
-        products ( title )
-      `)
+      .select('*')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 
-    if (error || !orders || orders.length === 0) {
+    if (error) {
+      list.innerHTML = `<div class="empty-state">Error loading orders.</div>`;
+      return;
+    }
+
+    if (!orders || orders.length === 0) {
       list.innerHTML = `<div class="empty-state">No orders found.</div>`;
       return;
     }
 
+    // 2. جلب خريطة المنتجات لربط الـ ID بالاسم
+    const { data: products } = await sb.from('products').select('id, title');
+    const productMap = {};
+    if (products) {
+      products.forEach(p => productMap[p.id] = p.title);
+    }
+
     list.innerHTML = orders.map(o => {
       const statusClass = (o.delivery_status === 'done') ? 'done' : (o.delivery_status === 'rejected' ? 'fail' : 'pending');
-      const payClass = (o.status === 'paid') ? 'done' : 'pending');
+      const payClass = (o.status === 'paid') ? 'done' : 'pending';
       const hasReply = o.admin_reply && o.admin_reply.trim() !== "";
       
-      // تحديد اسم المنتج من الـ Join أو الحقول الاحتياطية
-      const orderTitle = (o.products && o.products.title) || o.product_title || o.title || 'Service Order';
+      // تحديد الاسم: الأولوية لجدول المنتجات، ثم الحقول الاحتياطية
+      const orderTitle = productMap[o.product_id] || o.product_title || o.title || 'Service Order';
 
       return `
         <div class="card">
