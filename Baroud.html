@@ -99,12 +99,14 @@
                 <div style="color: var(--primary); font-weight: 900; font-size: 1.5rem;">$2.00</div>
                 <button class="btn-open" onclick="startOpening('BRONZE')">Open Box</button>
             </div>
+
             <div class="lucky-box-card" style="border-color: var(--gold);">
                 <span class="box-icon">🎁</span>
                 <h2 style="margin:0; color: var(--gold);">GOLDEN</h2>
                 <div style="color: var(--gold); font-weight: 900; font-size: 1.5rem;">$10.00</div>
                 <button class="btn-open" onclick="startOpening('GOLDEN')" style="background: linear-gradient(135deg, #d97706, #fbbf24);">Open Box</button>
             </div>
+
             <div class="lucky-box-card" style="border-color: var(--elite);">
                 <span class="box-icon">💎</span>
                 <h2 style="margin:0; color: var(--elite);">ELITE</h2>
@@ -129,12 +131,13 @@
     </div>
 
     <script>
-        // --- Supabase Official Credentials ---
+        // --- Configuration ---
         const SUPABASE_URL = 'https://atjicwulicpckfghzojr.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZCI6InVybCIsImlhdCI6MTcxOTU4MjYxNywiZXhwIjoyMDM1MTU4NjE3fQ.y_Yp25367_p7Z_Y_p7Z_Y_p7Z_Y_p7Z_Y_p7Z_Y_p7Z_Y'; // Fixed Anon Key
-        
-        // Initialize Supabase
-        const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ملاحظة: حط الـ Key كامل هون (اللي بيبدأ بـ eyJ...)
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ'; 
+
+        // Initialize Client
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const prizeList = {
             'BRONZE': [
@@ -155,7 +158,9 @@
         };
 
         function startOpening(boxType) {
+            console.log("Attempting to open box:", boxType);
             document.getElementById('openingEffect').style.display = 'flex';
+            
             setTimeout(() => {
                 document.getElementById('openingEffect').style.display = 'none';
                 revealPrize(boxType);
@@ -170,11 +175,16 @@
             document.getElementById('prizeModal').style.display = 'flex';
 
             if (win.value > 0) {
-                // Calling your stored procedure
-                const { error } = await supabase.rpc('win_lucky_box_credit', { 
+                // نداء الدالة المخزنة في Supabase لزيادة الرصيد
+                const { data, error } = await _supabase.rpc('win_lucky_box_credit', { 
                     amount_to_add: win.value 
                 });
-                if (error) console.error('Sync Error:', error.message);
+                
+                if (error) {
+                    console.error('Error updating balance:', error.message);
+                } else {
+                    console.log('Balance updated successfully in Supabase!');
+                }
             }
         }
     </script>
