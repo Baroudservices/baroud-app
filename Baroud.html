@@ -3,72 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baroud Boxes | Sync</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Baroud Lucky Box | WhatsApp Redeem</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #38bdf8; --bg: #020617; }
-        body { background: #020617; color: #fff; font-family: 'Poppins', sans-serif; margin: 0; text-align: center; }
-        .user-stats { display: flex; justify-content: flex-end; padding: 20px; }
-        .balance-card { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary); padding: 10px 20px; border-radius: 50px; font-weight: 900; }
-        .btn { padding: 15px 30px; border-radius: 12px; border: none; background: var(--primary); color: #000; font-weight: 900; cursor: pointer; margin-top: 20px; text-decoration: none; display: inline-block; }
-        #mainContent { display: none; }
-        #syncStatus { padding: 50px; }
+        :root { --primary: #38bdf8; --gold: #fbbf24; --bg: #020617; }
+        body { 
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); 
+            color: #fff; font-family: 'Poppins', sans-serif; margin: 0; min-height: 100vh; text-align: center;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-size: 3rem; text-shadow: 0 0 20px var(--primary); margin-bottom: 10px; }
+        .subtitle { opacity: 0.7; margin-bottom: 40px; }
+        
+        .lucky-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .box-card { 
+            background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 30px; padding: 40px; transition: 0.3s; cursor: pointer;
+        }
+        .box-card:hover { transform: scale(1.05); border-color: var(--primary); }
+        .box-icon { font-size: 80px; display: block; margin-bottom: 20px; }
+        
+        .btn-open { 
+            width: 100%; padding: 15px; border-radius: 12px; border: none; 
+            background: var(--primary); color: #000; font-weight: 900; cursor: pointer; 
+        }
+
+        /* Modal */
+        #prizeModal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; 
+        }
+        .modal-content { 
+            background: #0f172a; padding: 40px; border-radius: 40px; border: 2px solid var(--gold);
+            max-width: 450px; width: 90%; 
+        }
+        .prize-name { font-size: 2.5rem; color: var(--gold); font-weight: 900; margin: 20px 0; }
+        .redeem-btn { 
+            background: #25D366; color: white; padding: 15px 30px; border-radius: 12px; 
+            text-decoration: none; font-weight: 900; display: inline-block; margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="syncStatus">
-        <h2>جاري التحقق من الحساب...</h2>
-        <p>إذا لم يتم تحويلك خلال ثوانٍ، اضغط على الزر أدناه</p>
-        <a href="https://baroudapp.com" class="btn">العودة لتسجيل الدخول</a>
+    <div class="container">
+        <h1>BAROUD BOXES</h1>
+        <p class="subtitle">Unbox your luck & redeem via WhatsApp</p>
+
+        <div class="lucky-grid">
+            <div class="box-card" onclick="openBox('BRONZE')">
+                <span class="box-icon">📦</span>
+                <h2>BRONZE</h2>
+                <button class="btn-open">OPEN</button>
+            </div>
+            <div class="box-card" style="border-color: var(--gold);" onclick="openBox('GOLDEN')">
+                <span class="box-icon">🎁</span>
+                <h2 style="color: var(--gold);">GOLDEN</h2>
+                <button class="btn-open" style="background: var(--gold);">OPEN</button>
+            </div>
+            <div class="box-card" onclick="openBox('ELITE')">
+                <span class="box-icon">💎</span>
+                <h2>ELITE</h2>
+                <button class="btn-open">OPEN</button>
+            </div>
+        </div>
     </div>
 
-    <div id="mainContent">
-        <div class="user-stats">
-            <div class="balance-card">BALANCE: <span id="userBalance">$0.00</span></div>
-        </div>
-        <h1>BAROUD BOXES</h1>
-        <div style="padding: 20px;">
-            <button class="btn" onclick="openBox('BRONZE')">OPEN BRONZE</button>
+    <div id="prizeModal">
+        <div class="modal-content">
+            <h2 style="opacity: 0.7;">YOU WON!</h2>
+            <div id="prizeDisplay" class="prize-name">...</div>
+            <p style="font-size: 0.9rem; opacity: 0.6;">To claim your prize, click Redeem below to message our support.</p>
+            <a href="#" id="whatsappLink" class="redeem-btn">REDEEM ON WHATSAPP</a>
         </div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://atjicwulicpckfghzojr.supabase.co';
-        const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ';
-        
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true // هيدي أهم وحدة عشان يلقط الدخول من الرابط
-            }
-        });
+        // هون فيك تغير الهدايا متل ما بدك يا حسين
+        const prizes = {
+            'BRONZE': ['100 Points', 'Free Card', 'Better luck next time', 'Bronze Key'],
+            'GOLDEN': ['500 Points', '$5 Credit', 'Premium Account', 'Golden Key'],
+            'ELITE': ['1000 Points', '$20 Credit', 'Surprise Gift', 'Elite Rank']
+        };
 
-        async function init() {
-            // محاولة جلب الجلسة من الرابط أو التخزين
-            const { data: { session }, error } = await _supabase.auth.getSession();
+        const MY_PHONE = "96170385398"; // رقمك مع كود البلد
+
+        function openBox(type) {
+            const possiblePrizes = prizes[type];
+            const win = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
             
-            if (session) {
-                document.getElementById('syncStatus').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                updateBalance();
-            } else {
-                // إذا مش مسجل دخول، منبعته يسجل دخول ويرجع أوتوماتيك
-                console.log("No session found, redirecting...");
-                setTimeout(() => {
-                    if (!session) window.location.href = "https://baroudapp.com";
-                }, 3000);
+            // كود توثيق عشوائي عشان تتأكد إنه مش تأليف من الزبون
+            const authCode = "BRD-" + Math.floor(Math.random() * 999999);
+            
+            document.getElementById('prizeDisplay').innerText = win;
+            
+            // تجهيز رابط الواتساب
+            const message = `Hello Baroud Services!%0A%0AI just won a prize!%0A🎁 Box: ${type}%0A🏆 Prize: ${win}%0A🔑 Auth Code: ${authCode}%0A%0APlease verify and add it to my account.`;
+            document.getElementById('whatsappLink').href = `https://wa.me/${MY_PHONE}?text=${message}`;
+            
+            document.getElementById('prizeModal').style.display = 'flex';
+        }
+
+        // إغلاق المودال عند الضغط خارج المحتوى
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('prizeModal')) {
+                document.getElementById('prizeModal').style.display = "none";
             }
         }
-
-        async function updateBalance() {
-            const { data } = await _supabase.rpc('get_my_balance');
-            document.getElementById('userBalance').innerText = `$${parseFloat(data || 0).toFixed(2)}`;
-        }
-
-        window.onload = init;
     </script>
 </body>
 </html>
