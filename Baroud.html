@@ -8,150 +8,93 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #38bdf8; --gold: #fbbf24; --elite: #a855f7; --bg: #020617; }
-        body { 
-            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); 
-            color: #fff; font-family: 'Poppins', sans-serif; margin: 0; min-height: 100vh; 
-        }
+        body { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); color: #fff; font-family: 'Poppins', sans-serif; margin: 0; min-height: 100vh; }
         .user-stats { display: flex; justify-content: flex-end; padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .balance-card { 
-            background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary); 
-            padding: 10px 25px; border-radius: 50px; display: flex; align-items: center; gap: 10px; 
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-        }
+        .balance-card { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary); padding: 10px 25px; border-radius: 50px; display: flex; align-items: center; gap: 10px; }
         .balance-amount { font-weight: 900; font-size: 1.2rem; color: var(--primary); }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center; }
-        h1 { font-size: clamp(2rem, 8vw, 3.5rem); letter-spacing: 5px; margin-bottom: 40px; text-shadow: 0 0 20px var(--primary); }
-        .lucky-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .lucky-box-card { 
-            background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 30px; padding: 50px 20px; transition: 0.4s; backdrop-filter: blur(10px); 
-        }
-        .box-icon { font-size: 80px; display: block; margin-bottom: 20px; }
-        .btn-open { 
-            margin-top: 25px; width: 100%; padding: 16px; border-radius: 15px; border: none; 
-            background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; 
-            font-weight: 900; cursor: pointer; text-transform: uppercase; 
-        }
-        #openingEffect, #prizeModal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; 
-        }
-        .rolling-box { font-size: 120px; animation: shake 0.5s infinite; }
-        @keyframes shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(15deg); } 75% { transform: rotate(-15deg); } }
-        .prize-glow { font-size: 3rem; color: var(--gold); text-shadow: 0 0 30px var(--gold); font-weight: 900; margin: 20px 0; }
+        .lucky-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 40px; }
+        .lucky-box-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; padding: 50px 20px; backdrop-filter: blur(10px); }
+        .btn-open { margin-top: 25px; width: 100%; padding: 16px; border-radius: 15px; border: none; background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; font-weight: 900; cursor: pointer; }
+        #openingEffect, #prizeModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
     </style>
 </head>
 <body>
 
     <div class="user-stats">
         <div class="balance-card">
-            <span>MY BALANCE:</span>
-            <div id="userBalance" class="balance-amount">Checking...</div>
+            <span>BALANCE:</span>
+            <div id="userBalance" class="balance-amount">Syncing...</div>
         </div>
     </div>
 
     <div class="container">
         <h1>BAROUD BOXES</h1>
         <div class="lucky-grid">
-            <div class="lucky-box-card">
-                <span class="box-icon">📦</span>
-                <h2>BRONZE</h2>
-                <button class="btn-open" onclick="startOpening('BRONZE')">Open Box</button>
-            </div>
-            <div class="lucky-box-card" style="border-color: var(--gold);">
-                <span class="box-icon">🎁</span>
-                <h2 style="color: var(--gold);">GOLDEN</h2>
-                <button class="btn-open" onclick="startOpening('GOLDEN')" style="background: var(--gold); color: black;">Open Box</button>
-            </div>
-            <div class="lucky-box-card" style="border-color: var(--elite);">
-                <span class="box-icon">💎</span>
-                <h2 style="color: var(--elite);">ELITE</h2>
-                <button class="btn-open" onclick="startOpening('ELITE')" style="background: var(--elite);">Open Box</button>
-            </div>
+            <div class="lucky-box-card">📦 <h2>BRONZE</h2> <button class="btn-open" onclick="startOpening('BRONZE')">Open</button></div>
+            <div class="lucky-box-card" style="border-color: var(--gold);">🎁 <h2 style="color: var(--gold);">GOLDEN</h2> <button class="btn-open" onclick="startOpening('GOLDEN')" style="background: var(--gold); color: black;">Open</button></div>
+            <div class="lucky-box-card" style="border-color: var(--elite);">💎 <h2 style="color: var(--elite);">ELITE</h2> <button class="btn-open" onclick="startOpening('ELITE')" style="background: var(--elite);">Open</button></div>
         </div>
     </div>
 
-    <div id="openingEffect">
-        <div class="rolling-box">🎁</div>
-        <h2 style="color: var(--primary); letter-spacing: 4px; margin-top: 30px;">UNBOXING...</h2>
-    </div>
-
-    <div id="prizeModal">
-        <div style="text-align: center; padding: 40px; background: #0f172a; border: 2px solid var(--gold); border-radius: 40px;">
-            <h2 style="opacity: 0.8;">WINNER!</h2>
-            <div id="prizeResult" class="prize-glow"></div>
-            <button class="btn-open" style="width: auto; padding: 12px 60px;" onclick="location.reload()">CLAIM</button>
-        </div>
-    </div>
+    <div id="openingEffect"><h2>UNBOXING...</h2></div>
+    <div id="prizeModal"><div style="text-align:center;"><h2>WINNER!</h2><div id="prizeResult" style="font-size:3rem; color:var(--gold); font-weight:900;"></div><button class="btn-open" onclick="location.reload()">CLAIM</button></div></div>
 
     <script>
         const SUPABASE_URL = 'https://atjicwulicpckfghzojr.supabase.co';
         const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ';
         
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true
-            }
+            auth: { persistSession: true, autoRefreshToken: true }
         });
 
-        // 1. مزامنة الجلسة والرصيد
-        async function syncData() {
-            // نحاول جلب المستخدم الحالي أولاً
-            const { data: { user } } = await _supabase.auth.getUser();
+        async function initAuth() {
+            // محاولة جلب الجلسة العادية
+            let { data: { session } } = await _supabase.auth.getSession();
+
+            // إذا ما لقى جلسة، منجرب نقرأ الـ Token من الرابط (إذا بعتناه من الموقع الأساسي)
+            if (!session) {
+                const params = new URLSearchParams(window.location.search);
+                const accessToken = params.get('access_token');
+                if (accessToken) {
+                    await _supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: params.get('refresh_token')
+                    });
+                    // تنظيف الرابط بعد السحب
+                    window.history.replaceState({}, document.title, "/Baroud.html");
+                }
+            }
             
+            checkUser();
+        }
+
+        async function checkUser() {
+            const { data: { user } } = await _supabase.auth.getUser();
             if (user) {
-                console.log("Welcome back, " + user.email);
-                const { data: balance, error } = await _supabase.rpc('get_my_balance');
-                document.getElementById('userBalance').innerText = error ? "$0.00" : `$${parseFloat(balance || 0).toFixed(2)}`;
+                const { data: bal } = await _supabase.rpc('get_my_balance');
+                document.getElementById('userBalance').innerText = `$${parseFloat(bal || 0).toFixed(2)}`;
             } else {
-                // إذا لم نجد الجلسة، نطلب من المستخدم العودة للصفحة الرئيسية
                 document.getElementById('userBalance').innerText = "Login Needed";
+                alert("Please go back to baroudapp.com and login again.");
             }
         }
 
-        // 2. عملية فتح الصندوق
         async function startOpening(boxType) {
-            const { data: { user } } = await _supabase.auth.getUser();
-            if (!user) {
-                alert("Please login to your account at baroudapp.com first!");
-                return;
-            }
+            const { data: prizes } = await _supabase.from('box_prizes').select('*').eq('box_type', boxType);
+            if (!prizes || prizes.length === 0) { alert("Add prizes to Supabase table first!"); return; }
 
-            // جلب الجوائز مباشرة من الداتابيز لكل عملية فتح لضمان التحديث
-            const { data: prizes, error } = await _supabase.from('box_prizes').select('*').eq('box_type', boxType);
-            
-            if (error || !prizes || prizes.length === 0) {
-                alert("Table 'box_prizes' is empty for: " + boxType + ". Please add prizes in Supabase!");
-                return;
-            }
-
-            // تأثير الفتح
             document.getElementById('openingEffect').style.display = 'flex';
-            
             setTimeout(async () => {
                 const win = prizes[Math.floor(Math.random() * prizes.length)];
+                await _supabase.rpc('win_lucky_box_credit', { amount_to_add: win.prize_value });
                 document.getElementById('openingEffect').style.display = 'none';
                 document.getElementById('prizeResult').innerText = win.prize_name;
                 document.getElementById('prizeModal').style.display = 'flex';
-
-                // إضافة الرصيد إذا كانت الجائزة لها قيمة مالية
-                if (win.prize_value > 0) {
-                    const { error: rpcError } = await _supabase.rpc('win_lucky_box_credit', { 
-                        amount_to_add: parseFloat(win.prize_value) 
-                    });
-                    if (rpcError) console.error("Credit Error:", rpcError.message);
-                }
             }, 2000);
         }
 
-        // مراقبة حالة المستخدم فوراً
-        _supabase.auth.onAuthStateChange((event, session) => {
-            if (session) syncData();
-        });
-
-        window.onload = syncData;
+        window.onload = initAuth;
     </script>
 </body>
 </html>
