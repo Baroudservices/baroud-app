@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baroud Lucky Box</title>
+    <title>Baroud Boxes | Sync</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -11,26 +11,27 @@
         body { background: #020617; color: #fff; font-family: 'Poppins', sans-serif; margin: 0; text-align: center; }
         .user-stats { display: flex; justify-content: flex-end; padding: 20px; }
         .balance-card { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary); padding: 10px 20px; border-radius: 50px; font-weight: 900; }
-        .lucky-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
-        .box-card { background: rgba(30, 41, 59, 0.5); border-radius: 20px; padding: 40px 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary); color: #000; font-weight: 900; cursor: pointer; }
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .btn { padding: 15px 30px; border-radius: 12px; border: none; background: var(--primary); color: #000; font-weight: 900; cursor: pointer; margin-top: 20px; text-decoration: none; display: inline-block; }
+        #mainContent { display: none; }
+        #syncStatus { padding: 50px; }
     </style>
 </head>
 <body>
 
-    <div id="loader"><h2>LOADING BAROUD SYSTEM...</h2></div>
-
-    <div class="user-stats">
-        <div class="balance-card">BALANCE: <span id="userBalance" style="color: var(--primary);">$0.00</span></div>
+    <div id="syncStatus">
+        <h2>جاري التحقق من الحساب...</h2>
+        <p>إذا لم يتم تحويلك خلال ثوانٍ، اضغط على الزر أدناه</p>
+        <a href="https://baroudapp.com" class="btn">العودة لتسجيل الدخول</a>
     </div>
 
-    <h1>BAROUD BOXES</h1>
-
-    <div class="lucky-grid" id="grid" style="display: none;">
-        <div class="box-card">📦 <h3>BRONZE</h3> <button class="btn" onclick="openBox('BRONZE')">OPEN</button></div>
-        <div class="box-card">🎁 <h3>GOLDEN</h3> <button class="btn" onclick="openBox('GOLDEN')">OPEN</button></div>
-        <div class="box-card">💎 <h3>ELITE</h3> <button class="btn" onclick="openBox('ELITE')">OPEN</button></div>
+    <div id="mainContent">
+        <div class="user-stats">
+            <div class="balance-card">BALANCE: <span id="userBalance">$0.00</span></div>
+        </div>
+        <h1>BAROUD BOXES</h1>
+        <div style="padding: 20px;">
+            <button class="btn" onclick="openBox('BRONZE')">OPEN BRONZE</button>
+        </div>
     </div>
 
     <script>
@@ -38,54 +39,36 @@
         const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ';
         
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: { persistSession: true }
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true // هيدي أهم وحدة عشان يلقط الدخول من الرابط
+            }
         });
 
-        async function forceSync() {
-            // محاولة جلب الجلسة بكل الطرق
-            const { data: { session } } = await _supabase.auth.getSession();
+        async function init() {
+            // محاولة جلب الجلسة من الرابط أو التخزين
+            const { data: { session }, error } = await _supabase.auth.getSession();
             
             if (session) {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('grid').style.display = 'grid';
+                document.getElementById('syncStatus').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
                 updateBalance();
             } else {
-                // إذا فشل، منجرب نقرأ الـ LocalStorage يدوياً
-                const storage = localStorage.getItem('sb-atjicwulicpckfghzojr-auth-token');
-                if (storage) {
-                    const parsed = JSON.parse(storage);
-                    await _supabase.auth.setSession({
-                        access_token: parsed.access_token,
-                        refresh_token: parsed.refresh_token
-                    });
-                    location.reload();
-                } else {
-                    document.getElementById('loader').innerHTML = "<h2>Please Login at baroudapp.com first!</h2>";
-                }
+                // إذا مش مسجل دخول، منبعته يسجل دخول ويرجع أوتوماتيك
+                console.log("No session found, redirecting...");
+                setTimeout(() => {
+                    if (!session) window.location.href = "https://baroudapp.com";
+                }, 3000);
             }
         }
 
         async function updateBalance() {
-            const { data, error } = await _supabase.rpc('get_my_balance');
-            if (!error) document.getElementById('userBalance').innerText = `$${parseFloat(data || 0).toFixed(2)}`;
+            const { data } = await _supabase.rpc('get_my_balance');
+            document.getElementById('userBalance').innerText = `$${parseFloat(data || 0).toFixed(2)}`;
         }
 
-        async function openBox(type) {
-            const { data: prizes } = await _supabase.from('box_prizes').select('*').eq('box_type', type);
-            if (!prizes || prizes.length === 0) { alert("No prizes found in table 'box_prizes'"); return; }
-
-            const win = prizes[Math.floor(Math.random() * prizes.length)];
-            const { error } = await _supabase.rpc('win_lucky_box_credit', { amount_to_add: win.prize_value });
-            
-            if (error) {
-                alert("Error: " + error.message);
-            } else {
-                alert("CONGRATS! You won " + win.prize_name);
-                updateBalance();
-            }
-        }
-
-        window.onload = forceSync;
+        window.onload = init;
     </script>
 </body>
 </html>
