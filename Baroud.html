@@ -20,6 +20,7 @@
         .balance-card {
             background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary);
             padding: 10px 25px; border-radius: 50px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
         }
         .balance-amount { font-weight: 900; font-size: 1.2rem; color: var(--primary); }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center; }
@@ -96,62 +97,64 @@
     </div>
 
     <script>
-        // تكوين Supabase مع الـ Key تبعك
         const SUPABASE_URL = 'https://atjicwulicpckfghzojr.supabase.co';
         const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ';
         
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             auth: {
-                persistSession: true, // هيدي ضرورية جداً للـ Website ليحفظ الـ Login
-                autoRefreshToken: true
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true
             }
         });
 
         let prizeList = { 'BRONZE': [], 'GOLDEN': [], 'ELITE': [] };
 
-        // دالة لفحص الـ Session وتحديث الرصيد
-        async function checkUser() {
-            const { data: { session } } = await _supabase.auth.getSession();
-            
-            if (session) {
-                console.log("User is logged in:", session.user.email);
-                fetchUserBalance();
-            } else {
-                console.log("No active session found.");
-                document.getElementById('userBalance').innerText = "Login Needed";
-                // إذا بدك تحوله لصفحة الـ Login تبعت موقعك:
-                // window.location.href = "/login.html"; 
-            }
-        }
-
+        // تحديث الرصيد
         async function fetchUserBalance() {
             const { data, error } = await _supabase.rpc('get_my_balance');
             if (error) {
-                console.error("RPC Error:", error.message);
+                console.error("Balance Error:", error.message);
                 document.getElementById('userBalance').innerText = "Error";
             } else {
                 document.getElementById('userBalance').innerText = `$${parseFloat(data || 0).toFixed(2)}`;
             }
         }
 
+        // جلب الجوائز من الجدول
         async function syncPrizes() {
-            const { data } = await _supabase.from('box_prizes').select('*');
+            const { data, error } = await _supabase.from('box_prizes').select('*');
+            if (error) {
+                console.error("Sync Error:", error.message);
+                return;
+            }
             if (data) {
                 prizeList = { 'BRONZE': [], 'GOLDEN': [], 'ELITE': [] };
                 data.forEach(p => {
-                    prizeList[p.box_type].push({ name: p.prize_name, value: p.prize_value });
+                    if(prizeList[p.box_type]) {
+                        prizeList[p.box_type].push({ name: p.prize_name, value: p.prize_value });
+                    }
                 });
             }
         }
 
+        // بدء عملية الفتح
         async function startOpening(boxType) {
             const { data: { session } } = await _supabase.auth.getSession();
+            
             if (!session) {
                 alert("Please login to your Baroud account first!");
                 return;
             }
 
-            if (prizeList[boxType].length === 0) await syncPrizes();
+            // التأكد من وجود جوائز محملة
+            if (prizeList[boxType].length === 0) {
+                await syncPrizes();
+                if (prizeList[boxType].length === 0) {
+                    alert("No prizes found for this box type. Check your database!");
+                    return;
+                }
+            }
             
             document.getElementById('openingEffect').style.display = 'flex';
             setTimeout(() => {
@@ -160,6 +163,7 @@
             }, 2000);
         }
 
+        // كشف الجائزة وزيادة الرصيد
         async function revealPrize(boxType) {
             const prizes = prizeList[boxType];
             const win = prizes[Math.floor(Math.random() * prizes.length)];
@@ -171,16 +175,29 @@
                 const { error } = await _supabase.rpc('win_lucky_box_credit', { 
                     amount_to_add: win.value 
                 });
-                if (!error) setTimeout(fetchUserBalance, 500);
+                if (!error) {
+                    setTimeout(fetchUserBalance, 500);
+                } else {
+                    console.error("Credit Error:", error.message);
+                }
             }
         }
 
-        function closeModal() { document.getElementById('prizeModal').style.display = 'none'; }
+        function closeModal() {
+            document.getElementById('prizeModal').style.display = 'none';
+        }
 
-        // عند تحميل الصفحة
+        // مراقبة حالة المستخدم فور تحميل الصفحة
         _supabase.auth.onAuthStateChange((event, session) => {
-            checkUser();
+            if (session) {
+                document.getElementById('userStatus').innerText = "BALANCE:";
+                fetchUserBalance();
+            } else {
+                document.getElementById('userBalance').innerText = "Login Needed";
+            }
         });
+
+        // تشغيل أولي
         syncPrizes();
     </script>
 </body>
