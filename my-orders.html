@@ -41,13 +41,13 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-    .order-title { font-weight: 900; font-size: 16px; color: var(--neon-blue); text-transform: uppercase; }
-    .order-date { font-size: 11px; opacity: 0.5; font-family: 'Cairo'; margin-top: 4px; }
+    .order-title { font-weight: 900; font-size: 15px; color: var(--neon-blue); text-transform: uppercase; line-height: 1.2; max-width: 70%; }
+    .order-date { font-size: 10px; opacity: 0.5; font-family: 'Cairo'; margin-top: 4px; }
     .order-price { font-weight: 900; font-size: 18px; color: #fff; }
 
     .status-row { display: flex; gap: 8px; margin-bottom: 15px; }
     .status-badge {
-      font-size: 10px; font-weight: 900; padding: 5px 10px; border-radius: 8px;
+      font-size: 9px; font-weight: 900; padding: 5px 10px; border-radius: 8px;
       background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
     }
     .status-badge.done { color: #22c55e; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.1); }
@@ -58,10 +58,10 @@
       background: rgba(0,0,0,0.3); border-radius: 15px; padding: 12px;
       margin-bottom: 15px; border: 1px solid var(--glass-border);
     }
-    .detail-item { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; font-family: 'Cairo'; }
+    .detail-item { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; font-family: 'Cairo'; }
     .detail-item:last-child { margin-bottom: 0; }
     .detail-label { opacity: 0.6; }
-    .detail-value { font-weight: 700; color: #fff; text-align: right; }
+    .detail-value { font-weight: 700; color: #fff; text-align: right; word-break: break-all; margin-left: 10px; }
 
     .reply-area {
       display: flex; justify-content: space-between; align-items: center;
@@ -81,10 +81,10 @@
       background: #0f172a; border: 1px solid var(--neon-blue);
       border-radius: 24px; padding: 25px; width: 100%; max-width: 350px; text-align: center;
     }
-    .modal-text { font-family: 'Cairo'; font-size: 14px; line-height: 1.6; margin: 20px 0; word-break: break-all; color: #fff; }
+    .modal-text { font-family: 'Cairo'; font-size: 14px; line-height: 1.6; margin: 20px 0; color: #fff; }
     .close-btn { background: var(--glass); border: 1px solid var(--glass-border); color: #fff; padding: 10px 30px; border-radius: 12px; cursor: pointer; }
 
-    .empty-state { text-align: center; padding: 50px 20px; opacity: 0.5; font-family: 'Cairo'; }
+    .empty-state { text-align: center; padding: 80px 20px; opacity: 0.5; font-family: 'Cairo'; }
   </style>
 </head>
 <body>
@@ -95,7 +95,6 @@
       <div style="font-weight: 900; letter-spacing: 2px;">MY ORDERS</div>
       <div style="width: 42px;"></div>
     </div>
-
     <div id="ordersList"></div>
   </div>
 
@@ -118,24 +117,28 @@
     
     if (!session) { location.replace('login.html'); return; }
 
+    // Query مطورة تعمل Join مع جدول المنتجات لتجيب الاسم
     const { data: orders, error } = await sb
       .from('orders')
-      .select('*')
+      .select(`
+        *,
+        products ( title )
+      `)
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 
-    if (error || !orders.length) {
+    if (error || !orders || orders.length === 0) {
       list.innerHTML = `<div class="empty-state">No orders found.</div>`;
       return;
     }
 
     list.innerHTML = orders.map(o => {
       const statusClass = (o.delivery_status === 'done') ? 'done' : (o.delivery_status === 'rejected' ? 'fail' : 'pending');
-      const payClass = (o.status === 'paid') ? 'done' : 'pending';
+      const payClass = (o.status === 'paid') ? 'done' : 'pending');
       const hasReply = o.admin_reply && o.admin_reply.trim() !== "";
       
-      // اختيار الاسم الصحيح للمنتج متل ما كان بالأول
-      const orderTitle = o.product_title || o.title || o.service_name || 'Service Order';
+      // تحديد اسم المنتج من الـ Join أو الحقول الاحتياطية
+      const orderTitle = (o.products && o.products.title) || o.product_title || o.title || 'Service Order';
 
       return `
         <div class="card">
@@ -153,18 +156,18 @@
           </div>
 
           <div class="details-box">
-             ${o.player_id ? `<div class="detail-item"><span class="detail-label">Player ID:</span><span class="detail-value">${o.player_id}</span></div>` : ''}
-             ${o.player_name ? `<div class="detail-item"><span class="detail-label">Player Name:</span><span class="detail-value">${o.player_name}</span></div>` : ''}
-             ${o.account_email ? `<div class="detail-item"><span class="detail-label">Account Email:</span><span class="detail-value">${o.account_email}</span></div>` : ''}
+             ${o.player_id ? `<div class="detail-item"><span class="detail-label">ID:</span><span class="detail-value">${o.player_id}</span></div>` : ''}
+             ${o.player_name ? `<div class="detail-item"><span class="detail-label">Name:</span><span class="detail-value">${o.player_name}</span></div>` : ''}
+             ${o.account_email ? `<div class="detail-item"><span class="detail-label">Email:</span><span class="detail-value">${o.account_email}</span></div>` : ''}
              ${o.account_password ? `<div class="detail-item"><span class="detail-label">Password:</span><span class="detail-value">${o.account_password}</span></div>` : ''}
              ${o.plan_label ? `<div class="detail-item"><span class="detail-label">Plan:</span><span class="detail-value">${o.plan_label}</span></div>` : ''}
              ${o.region ? `<div class="detail-item"><span class="detail-label">Region:</span><span class="detail-value">${o.region}</span></div>` : ''}
-             ${o.phone_number ? `<div class="detail-item"><span class="detail-label">Phone:</span><span class="detail-value">${o.phone_number}</span></div>` : ''}
              ${o.notes ? `<div class="detail-item"><span class="detail-label">Notes:</span><span class="detail-value">${o.notes}</span></div>` : ''}
+             ${o.phone_number ? `<div class="detail-item"><span class="detail-label">Phone:</span><span class="detail-value">${o.phone_number}</span></div>` : ''}
           </div>
 
           <div class="reply-area">
-            <span class="no-reply">${hasReply ? 'Admin Replied' : 'Reviewing...'}</span>
+            <span class="no-reply">${hasReply ? 'Admin Replied' : 'Processing...'}</span>
             ${hasReply ? `<button class="reply-btn" onclick="openModal('${o.admin_reply.replace(/'/g, "\\'")}')">VIEW REPLY</button>` : ''}
           </div>
         </div>
