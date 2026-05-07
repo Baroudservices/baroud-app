@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baroud Lucky Box | صناديق بارود</title>
+    <style>
+        :root {
+            --primary: #38bdf8; /* نيون أزرق */
+            --accent: #fbbf24;  /* ذهبي */
+            --danger: #ef4444;
+            --bg: #020617;
+            --card-bg: rgba(30, 41, 59, 0.5);
+        }
+
+        body {
+            background-color: var(--bg);
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* الهيدر */
+        header {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            background: linear-gradient(to bottom, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.5));
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        /* شبكة الصناديق */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 100px;
+        }
+
+        .lucky-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .lucky-box-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lucky-box-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+        }
+
+        .box-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: block;
+            filter: drop-shadow(0 0 10px var(--primary));
+            transition: 0.3s;
+        }
+
+        .lucky-box-card:hover .box-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .box-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .box-price {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: bold;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 5px 15px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+
+        .btn-open {
+            margin-top: 30px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(90deg, #0ea5e9, #2563eb);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-open:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+        }
+
+        /* مودال النتيجة */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(15px);
+        }
+
+        .modal-content {
+            text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .prize-glow {
+            font-size: 3rem;
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent);
+            margin: 20px 0;
+            font-weight: 900;
+        }
+
+        /* شريط الرابحين */
+        .live-ticker {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+            overflow: hidden;
+        }
+
+        .ticker-wrap {
+            display: flex;
+            gap: 50px;
+            animation: ticker 25s linear infinite;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .ticker-item {
+            white-space: nowrap;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .ticker-item span {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="live-ticker">
+        <div class="ticker-wrap">
+            <div class="ticker-item">👤 علي ربح <span>500 شدة ببجي</span></div>
+            <div class="ticker-item">👤 سامر ربح <span>رصيد بقيمة $10</span></div>
+            <div class="ticker-item">👤 مريم ربحت <span>اشتراك Netflix</span></div>
+            <div class="ticker-item">👤 حسين ربح <span>2000 توكن جواكر</span></div>
+            <div class="ticker-item">👤 منير ربح <span>رصيد بقيمة $5</span></div>
+        </div>
+    </div>
+
+    <header>
+        <h1>Baroud Lucky Box</h1>
+        <p>افتح الصناديق واربح هدايا فورية تضاف لحسابك!</p>
+    </header>
+
+    <div class="container">
+        <div class="lucky-grid">
+            <div class="lucky-box-card">
+                <span class="box-icon">📦</span>
+                <div class="box-title">الصندوق البرونزي</div>
+                <div class="box-price">$1.99</div>
+                <button class="btn-open" onclick="openBox('البرونزي', '$1.99')">فتح الآن</button>
+            </div>
+
+            <div class="lucky-box-card" style="border-color: var(--accent);">
+                <span class="box-icon">🎁</span>
+                <div class="box-title" style="color: var(--accent);">صندوق بارود الذهبي</div>
+                <div class="box-price" style="color: var(--accent); background: rgba(251, 191, 36, 0.1);">$9.99</div>
+                <button class="btn-open" onclick="openBox('الذهبي', '$9.99')" style="background: linear-gradient(90deg, #d97706, #fbbf24);">فتح الآن</button>
+            </div>
+
+            <div class="lucky-box-card" style="border-color: #a855f7;">
+                <span class="box-icon">💎</span>
+                <div class="box-title" style="color: #a855f7;">صندوق VIP</div>
+                <div class="box-price" style="color: #a855f7; background: rgba(168, 85, 247, 0.1);">$24.99</div>
+                <button class="btn-open" onclick="openBox('VIP', '$24.99')" style="background: linear-gradient(90deg, #7e22ce, #a855f7);">فتح الآن</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="prizeModal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-size: 1.5rem; opacity: 0.8;">مبروك! لقد ربحت</h2>
+            <div id="prizeResult" class="prize-glow">...</div>
+            <p id="prizemsg">تمت إضافة الجائزة إلى رصيدك بنجاح</p>
+            <button class="btn-open" style="width: auto; padding: 12px 40px; margin-top: 20px;" onclick="closeModal()">تحصيل الجائزة</button>
+        </div>
+    </div>
+
+    <script>
+        function openBox(boxName, price) {
+            let confirmOpen = confirm(`هل تريد فتح ${boxName} مقابل ${price}؟`);
+            if (confirmOpen) {
+                // محاكاة عملية الفتح
+                const modal = document.getElementById('prizeModal');
+                const resultText = document.getElementById('prizeResult');
+                
+                const prizes = {
+                    'البرونزي': ['$1.00 رصيد', '$5.00 رصيد', '100 جوهرة', 'خصم 10%'],
+                    'الذهبي': ['$10.00 رصيد', '$50.00 رصيد', 'اشتراك شهر مجاني', 'بطاقة Google Play'],
+                    'VIP': ['$100.00 رصيد!!', 'iPhone 15 Pro (فرصة)', 'رصيد $75', 'اشتراك سنة VIP']
+                };
+
+                const possiblePrizes = prizes[boxName];
+                const win = possiblePrizes[Math.floor(Math.random() * possiblePrizes.length)];
+
+                // إظهار النتيجة بعد ثانية (محاكاة الحماس)
+                modal.style.display = 'flex';
+                resultText.innerText = "جاري الفتح...";
+                
+                setTimeout(() => {
+                    resultText.innerText = win;
+                }, 1500);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('prizeModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
