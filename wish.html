@@ -17,82 +17,79 @@
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
-    html, body {
-      height: 100%; margin: 0; padding: 0;
-      background-color: var(--bg-dark);
-      color: #fff;
-      font-family: system-ui, -apple-system, sans-serif;
-      overflow-x: hidden;
-    }
-
-    /* الخلفية المتوهجة مثل الصفحة الرئيسية */
     body {
-      background: 
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), transparent 40%),
-        radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.1), transparent 40%),
-        var(--bg-dark);
-    }
-
-    .wrap {
-      max-width: 480px; margin: 0 auto; padding: 20px;
+      margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), transparent 40%), var(--bg-dark);
+      color: #fff; font-family: system-ui, -apple-system, sans-serif;
       min-height: 100vh; display: flex; flex-direction: column;
     }
 
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+    .wrap { max-width: 480px; margin: 0 auto; padding: 20px; width: 100%; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
     .back-btn { 
       padding: 10px 15px; border-radius: 12px; background: var(--glass); 
-      border: 1px solid var(--glass-border); cursor: pointer; text-decoration: none; color: #fff;
+      border: 1px solid var(--glass-border); text-decoration: none; color: #fff;
     }
 
     .main-card {
-      background: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      border-radius: 28px;
-      padding: 24px;
+      background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border); border-radius: 28px; padding: 24px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
 
-    .logo-area { text-align: center; margin-bottom: 25px; }
-    .logo-area img { height: 50px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); }
+    .logo-area { text-align: center; margin-bottom: 20px; }
+    .logo-area img { height: 55px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); }
 
     .id-box {
-      background: rgba(56, 189, 248, 0.05);
-      border: 1px dashed var(--neon-blue);
-      border-radius: 18px;
-      padding: 15px;
-      text-align: center;
-      margin-bottom: 20px;
+      background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue);
+      border-radius: 18px; padding: 15px; text-align: center; margin-bottom: 20px;
     }
-    .id-number { display: block; font-size: 20px; font-weight: 900; color: var(--neon-blue); letter-spacing: 1px; margin-top: 5px; }
+    .id-number { display: block; font-size: 22px; font-weight: 900; color: var(--neon-blue); letter-spacing: 1px; margin-top: 5px; }
 
     .input-group { margin-bottom: 15px; }
     .label { display: block; font-size: 12px; opacity: 0.6; margin-bottom: 8px; margin-left: 5px; }
     
     input {
-      width: 100%; background: rgba(255,255,255,0.05);
-      border: 1px solid var(--glass-border);
-      padding: 16px; border-radius: 16px; color: #fff;
-      font-size: 15px; outline: none; transition: 0.3s;
+      width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
+      padding: 16px; border-radius: 16px; color: #fff; font-size: 16px; outline: none; transition: 0.3s;
     }
     input:focus { border-color: var(--neon-blue); background: rgba(56, 189, 248, 0.05); }
 
-    .file-upload {
-      border: 1px solid var(--glass-border);
-      background: var(--glass);
-      padding: 15px; border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
-      gap: 10px; cursor: pointer; margin-top: 10px;
+    .file-upload-btn {
+      border: 1px solid var(--glass-border); background: var(--glass);
+      padding: 16px; border-radius: 16px; display: flex; align-items: center;
+      justify-content: space-between; cursor: pointer; margin-top: 5px;
     }
+    .file-name { font-size: 12px; opacity: 0.6; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+
+    .or-divider {
+      display: flex; align-items: center; gap: 10px; margin: 20px 0;
+      font-size: 12px; font-weight: 900; opacity: 0.5;
+    }
+    .or-divider::before, .or-divider::after { content: ""; flex: 1; height: 1px; background: var(--glass-border); }
 
     .btn-submit {
-      width: 100%; padding: 18px; margin-top: 25px;
-      border-radius: 18px; border: none;
+      width: 100%; padding: 18px; margin-top: 20px; border-radius: 18px; border: none;
       background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
-      color: #fff; font-weight: 900; font-size: 16px;
-      cursor: pointer; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+      color: #fff; font-weight: 900; font-size: 16px; cursor: pointer;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
     }
-    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Modal Overlay */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+      display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+    }
+    .modal {
+      background: #0f172a; border: 1px solid var(--neon-blue); border-radius: 24px;
+      padding: 25px; text-align: center; width: 100%; max-width: 350px;
+    }
+    .modal button { 
+      background: var(--neon-blue); color: #000; border: none; padding: 12px 30px; 
+      border-radius: 12px; font-weight: 900; margin-top: 20px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -119,34 +116,114 @@
         <input type="number" id="amount" placeholder="Min. 4$" inputmode="decimal">
       </div>
 
+      <input type="file" id="receipt" style="display: none;" accept="image/*">
+      <div class="file-upload-btn" id="uploadTrigger">
+        <span>📎 Upload Receipt</span>
+        <span class="file-name" id="fileName">No file</span>
+      </div>
+
+      <div class="or-divider">OR</div>
+
       <div class="input-group">
         <span class="label">Transfer Number</span>
         <input type="tel" id="transferNumber" placeholder="Number sent from">
       </div>
 
-      <div style="text-align: center; margin: 15px 0; opacity: 0.4; font-size: 12px;">— OR —</div>
-
-      <input type="file" id="receipt" style="display: none;" accept="image/*">
-      <div class="file-upload" onclick="document.getElementById('receipt').click()">
-        <span>📎</span>
-        <span id="fileName">Upload Receipt Image</span>
-      </div>
-
       <button class="btn-submit" id="btnReq">SEND REQUEST</button>
     </div>
+  </div>
 
-    <p style="text-align: center; font-size: 11px; opacity: 0.4; margin-top: auto; padding: 20px 0;">
-      © 2026 Baroud Services. All rights reserved.
-    </p>
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3 id="modalTitle">Status</h3>
+      <p id="modalMsg">...</p>
+      <button onclick="document.getElementById('overlay').style.display='none'">OK</button>
+    </div>
   </div>
 
   <script>
-    // ربط السكربت السابق هنا مع التأكد من الـ IDs
-    const receipt = document.getElementById("receipt");
-    const fileName = document.getElementById("fileName");
+    // الإعدادات الأصلية الشغالة
+    const SB_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ";
+    const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+    const btnReq = document.getElementById("btnReq");
+    const receiptInput = document.getElementById("receipt");
+    const transferInput = document.getElementById("transferNumber");
+
+    // تحسين الـ UX: إذا اختار صورة بيمحي الرقم والعكس
+    document.getElementById("uploadTrigger").onclick = () => receiptInput.click();
     
-    receipt.onchange = () => {
-      fileName.textContent = receipt.files[0] ? receipt.files[0].name : "Upload Receipt Image";
+    receiptInput.onchange = () => {
+      if(receiptInput.files[0]) {
+        document.getElementById("fileName").textContent = receiptInput.files[0].name;
+        transferInput.value = "";
+      }
+    };
+
+    transferInput.oninput = () => {
+      if(transferInput.value.trim() !== "") {
+        receiptInput.value = "";
+        document.getElementById("fileName").textContent = "No file";
+      }
+    };
+
+    function notify(title, msg) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalMsg").textContent = msg;
+      document.getElementById("overlay").style.display = "flex";
+    }
+
+    btnReq.onclick = async () => {
+      const amount = parseFloat(document.getElementById("amount").value);
+      const file = receiptInput.files[0];
+      const tNum = transferInput.value.trim();
+
+      if(!amount || amount < 4) return notify("Error", "Minimum deposit is 4$");
+      if(!file && !tNum) return notify("Error", "Upload receipt or enter number");
+
+      btnReq.disabled = true;
+      btnReq.textContent = "SENDING...";
+
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if(!session) return window.location.replace("login.html");
+
+        let path = null, url = null;
+
+        if(file) {
+          const fileName = `${session.user.id}/${Date.now()}_${file.name}`;
+          const { error: upErr } = await sb.storage.from("receipts").upload(fileName, file);
+          if(upErr) throw upErr;
+          path = fileName;
+          url = sb.storage.from("receipts").getPublicUrl(path).data.publicUrl;
+        }
+
+        const { error: insErr } = await sb.from("deposits").insert([{
+          user_id: session.user.id,
+          amount,
+          receipt_path: path,
+          receipt_url: url,
+          transfer_number: tNum || null,
+          method: "Whish Money",
+          status: "pending"
+        }]);
+
+        if(insErr) throw insErr;
+
+        notify("Success ✅", "Request sent! Pending verification.");
+        // Reset fields
+        document.getElementById("amount").value = "";
+        transferInput.value = "";
+        receiptInput.value = "";
+        document.getElementById("fileName").textContent = "No file";
+
+      } catch (err) {
+        notify("Failed ❌", err.message);
+      } finally {
+        btnReq.disabled = false;
+        btnReq.textContent = "SEND REQUEST";
+      }
     };
   </script>
 </body>
