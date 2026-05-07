@@ -18,7 +18,7 @@
             color: #fff; font-family: 'Poppins', sans-serif; margin: 0; min-height: 100vh;
         }
 
-        /* Balance Header */
+        /* Balance Section */
         .user-stats {
             display: flex; justify-content: flex-end; padding: 20px;
             max-width: 1200px; margin: 0 auto;
@@ -48,12 +48,12 @@
             background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white;
             font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.3s;
         }
-        .btn-open:hover { filter: brightness(1.2); transform: scale(1.02); }
+        .btn-open:hover { filter: brightness(1.2); }
 
-        /* Animation Overlay */
+        /* Unboxing Animation Overlay */
         #openingEffect {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; flex-direction: column;
+            background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; flex-direction: column;
         }
         .rolling-box { font-size: 100px; animation: shake 0.4s infinite; }
         @keyframes shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 75% { transform: rotate(-10deg); } }
@@ -91,12 +91,12 @@
             <div class="lucky-box-card" style="border-color: var(--gold);">
                 <span class="box-icon">🎁</span>
                 <h2 style="color: var(--gold);">GOLDEN</h2>
-                <button class="btn-open" onclick="startOpening('GOLDEN')" style="background: linear-gradient(135deg, #d97706, #fbbf24); color: black;">Open Box</button>
+                <button class="btn-open" onclick="startOpening('GOLDEN')" style="background: var(--gold); color: black;">Open Box</button>
             </div>
             <div class="lucky-box-card" style="border-color: var(--elite);">
                 <span class="box-icon">💎</span>
                 <h2 style="color: var(--elite);">ELITE</h2>
-                <button class="btn-open" onclick="startOpening('ELITE')" style="background: linear-gradient(135deg, #7e22ce, #a855f7);">Open Box</button>
+                <button class="btn-open" onclick="startOpening('ELITE')" style="background: var(--elite);">Open Box</button>
             </div>
         </div>
     </div>
@@ -115,7 +115,7 @@
     </div>
 
     <script>
-        // --- Supabase Config with your NEW Key ---
+        // --- Supabase Config ---
         const SUPABASE_URL = 'https://atjicwulicpckfghzojr.supabase.co';
         const SUPABASE_KEY = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcndpdG9sb25oZmJmd3RzbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjQyNTcsImV4cCI6MjA4MzA0MDI1N30.N-OqDDDOz1wJnKfmOFAtwlH00m_oJvUKEQvbygVeujQ';
         
@@ -125,23 +125,23 @@
 
         // 1. Fetch User Balance
         async function fetchUserBalance() {
-            const { data, error } = await _supabase.rpc('get_my_balance');
-            if (error) {
-                console.error("Balance Error:", error.message);
-                document.getElementById('userBalance').innerText = "Error";
-            } else {
+            try {
+                const { data, error } = await _supabase.rpc('get_my_balance');
+                if (error) throw error;
                 document.getElementById('userBalance').innerText = `$${parseFloat(data || 0).toFixed(2)}`;
+            } catch (err) {
+                console.error("Balance Error:", err.message);
+                document.getElementById('userBalance').innerText = "Login Required";
             }
         }
 
-        // 2. Load Prizes from DB
+        // 2. Load Prizes from box_prizes Table
         async function syncPrizes() {
             const { data, error } = await _supabase.from('box_prizes').select('*');
             if (error) {
                 console.error("Prize Sync Error:", error.message);
                 return;
             }
-            // Clear current list to avoid duplicates
             prizeList = { 'BRONZE': [], 'GOLDEN': [], 'ELITE': [] };
             data.forEach(p => {
                 if(prizeList[p.box_type]) {
@@ -154,7 +154,7 @@
             if (prizeList[boxType].length === 0) {
                 await syncPrizes();
                 if (prizeList[boxType].length === 0) {
-                    alert("No prizes found in this box. Add some in Admin!");
+                    alert("Please add prizes to the " + boxType + " box in the admin panel first.");
                     return;
                 }
             }
@@ -174,15 +174,16 @@
             document.getElementById('prizeModal').style.display = 'flex';
 
             if (win.value > 0) {
+                // Call the SQL function to add credit
                 const { error } = await _supabase.rpc('win_lucky_box_credit', { 
                     amount_to_add: win.value 
                 });
                 
                 if (!error) {
-                    // Update balance on screen after winning
-                    setTimeout(fetchUserBalance, 500); 
+                    // Update the balance display
+                    setTimeout(fetchUserBalance, 800); 
                 } else {
-                    console.error("Win sync error:", error.message);
+                    console.error("Failed to add credit:", error.message);
                 }
             }
         }
@@ -191,7 +192,7 @@
             document.getElementById('prizeModal').style.display = 'none';
         }
 
-        // Initial Calls
+        // Initialize on load
         syncPrizes();
         fetchUserBalance();
     </script>
