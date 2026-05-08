@@ -25,7 +25,6 @@
     
     .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 20px 15px 120px; }
 
-    /* ===== HEADER ===== */
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .back-circle { 
       width: 40px; height: 40px; background: var(--glass); border: 1px solid var(--glass-border);
@@ -33,7 +32,6 @@
       cursor: pointer; color: #fff; text-decoration: none; font-size: 20px;
     }
 
-    /* ===== HERO SECTION ===== */
     .hero-card {
       background: var(--glass); border: 1px solid var(--glass-border);
       border-radius: 30px; overflow: hidden; box-shadow: var(--shadow);
@@ -45,14 +43,12 @@
     .product-title { font-weight: 900; font-size: 22px; text-transform: uppercase; margin-bottom: 5px; }
     .price-tag { color: var(--neon-cyan); font-weight: 900; font-size: 20px; }
 
-    /* ===== SECTION STYLE ===== */
     .section-box {
       background: var(--glass); border: 1px solid var(--glass-border);
       border-radius: 24px; padding: 20px; margin-bottom: 15px;
     }
     .section-box h3 { margin: 0 0 15px; font-size: 14px; letter-spacing: 2px; opacity: 0.6; }
 
-    /* ===== DYNAMIC FORM ===== */
     .input-group { margin-bottom: 15px; }
     label { display: block; font-family: 'Cairo'; font-size: 12px; margin-bottom: 8px; opacity: 0.8; font-weight: 700; }
     input, textarea, select {
@@ -62,7 +58,6 @@
     }
     input:focus { border-color: var(--neon-cyan); }
 
-    /* ===== PLAN PICKER ===== */
     .plan-selector {
       width: 100%; padding: 15px 20px; border-radius: 14px;
       background: var(--neon-cyan); color: #000; border: none;
@@ -70,7 +65,6 @@
       cursor: pointer; font-weight: 900; font-family: 'Orbitron'; margin-bottom: 15px;
     }
 
-    /* ===== BUTTONS ===== */
     .buy-btn {
       width: 100%; padding: 18px; border-radius: 20px; border: none;
       background: linear-gradient(90deg, #00f2ff, #0072ff);
@@ -79,8 +73,8 @@
     }
     .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ===== BOTTOM SHEET (PLANS) ===== */
-    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2000; }
+    /* ===== BOTTOM SHEET (FIXED LOGIC) ===== */
+    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; z-index: 2000; backdrop-filter: blur(4px); }
     .bottom-sheet {
       position: fixed; bottom: -100%; left: 0; width: 100%;
       background: #060a0f; border-radius: 30px 30px 0 0;
@@ -89,21 +83,18 @@
     }
     .bottom-sheet.active { bottom: 0; }
     .plan-option {
-      padding: 18px; border-radius: 15px; background: var(--glass);
+      padding: 18px; border-radius: 15px; background: rgba(255,255,255,0.02);
       border: 1px solid var(--glass-border); margin-bottom: 10px;
-      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; 
+      cursor: pointer; pointer-events: auto;
     }
-    .plan-option.selected { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.05); }
+    .plan-option.selected { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.08); }
 
-    /* ===== MODALS ===== */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.9);
       display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px;
     }
-    .modal-content {
-      background: #0a0f14; border: 1px solid var(--glass-border);
-      border-radius: 25px; padding: 30px; text-align: center; width: 100%; max-width: 350px;
-    }
+    .modal-content { background: #0a0f14; border: 1px solid var(--glass-border); border-radius: 25px; padding: 30px; text-align: center; width: 100%; max-width: 350px; }
   </style>
 </head>
 
@@ -112,7 +103,7 @@
     <div class="header">
       <a href="javascript:history.back()" class="back-circle">←</a>
       <div style="font-weight: 900; opacity: 0.5; font-size: 12px;">PRODUCT DETAILS</div>
-      <div id="quickOrders" style="cursor:pointer; font-size: 20px;">📦</div>
+      <div onclick="location.href='my-orders.html'" style="cursor:pointer; font-size: 20px;">📦</div>
     </div>
 
     <div class="hero-card">
@@ -136,8 +127,7 @@
         <span>▼</span>
       </button>
 
-      <div id="dynamicFields" style="display:none; margin-top: 20px;">
-        </div>
+      <div id="dynamicFields" style="display:none; margin-top: 20px;"></div>
 
       <div class="input-group" style="margin-top: 15px;">
         <label>CUSTOMER NOTE (OPTIONAL)</label>
@@ -148,7 +138,7 @@
     </div>
   </div>
 
-  <div class="sheet-overlay" id="sheetOverlay"></div>
+  <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
   <div class="bottom-sheet" id="planSheet">
     <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
       <h2 style="margin:0; font-size: 18px;">SELECT PLAN</h2>
@@ -160,8 +150,8 @@
 
   <div class="modal" id="globalModal">
     <div class="modal-content">
-      <h2 id="modalTitle" style="margin-top:0;">Notice</h2>
-      <p id="modalText" style="font-family:'Cairo'; opacity:0.8;"></p>
+      <h2 id="modalTitle">Notice</h2>
+      <p id="modalText"></p>
       <button class="buy-btn" onclick="closeModal()">OK</button>
     </div>
   </div>
@@ -179,41 +169,29 @@
 
   async function init() {
     if(!productId) return;
-    
-    // 1. Get Product Details
     const { data: product, error } = await sb.from("products").select("*").eq("id", productId).single();
     if(error) return showModal("Error", "Product not found");
     currentProduct = product;
     
-    // Render Static Info
     document.getElementById("pTitle").textContent = product.title;
     document.getElementById("pCat").textContent = "Category: " + (product.category || "General");
     document.getElementById("heroImg").src = `assets/products/${product.id}.jpg`;
     document.getElementById("heroImg").onerror = function() { this.src = 'assets/products/default.png'; };
 
-    // 2. Get Plans
     await refreshPlans();
-    
-    // 3. Listen for changes in plans (Real-time)
-    sb.channel('plan-updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_plan_prices', filter: `product_id=eq.${productId}` }, refreshPlans)
-      .subscribe();
   }
 
   async function refreshPlans() {
-    const { data: plans } = await sb.from("product_plan_prices").select("*").eq("product_id", productId).eq("active", true);
+    const { data: plans } = await sb.from("product_plan_prices").select("*").eq("product_id", productId).eq("active", true).order('price', {ascending: true});
     allPlans = plans || [];
     renderPlansInSheet();
-    
-    if(allPlans.length > 0 && !selectedPlan) {
-      setPlan(allPlans[0]);
-    }
+    if(allPlans.length > 0 && !selectedPlan) setPlan(allPlans[0]);
   }
 
   function renderPlansInSheet() {
     const container = document.getElementById("plansContainer");
     container.innerHTML = allPlans.map(p => `
-      <div class="plan-option ${tempSelectedPlanId == p.id ? 'selected' : ''}" onclick="tempSelectPlan('${p.id}')">
+      <div class="plan-option ${String(tempSelectedPlanId) === String(p.id) ? 'selected' : ''}" onclick="tempSelectPlan('${p.id}')">
         <div style="font-weight:900;">${p.plan_label}</div>
         <div style="color:var(--neon-cyan); font-weight:900;">$${Number(p.price).toFixed(2)}</div>
       </div>
@@ -226,13 +204,14 @@
   }
 
   function confirmPlanSelection() {
-    const plan = allPlans.find(p => p.id == tempSelectedPlanId);
+    const plan = allPlans.find(p => String(p.id) === String(tempSelectedPlanId));
     if(plan) setPlan(plan);
     closeSheet();
   }
 
   function setPlan(plan) {
     selectedPlan = plan;
+    tempSelectedPlanId = plan.id;
     document.getElementById("planLabel").textContent = `${plan.plan_label} - $${Number(plan.price).toFixed(2)}`;
     document.getElementById("pPrice").textContent = `$${Number(plan.price).toFixed(2)}`;
     updateDynamicFields();
@@ -242,42 +221,29 @@
     const container = document.getElementById("dynamicFields");
     container.style.display = "block";
     container.innerHTML = "";
-
-    const titleLower = currentProduct.title.toLowerCase();
+    let fields = [];
     const planLower = selectedPlan.plan_label.toLowerCase();
 
-    // Logic for required fields
-    let fields = [];
-
-    // Rule: Direct plans always need Email/Pass
     if(planLower.includes("direct") || currentProduct.require_email) {
       fields.push({ id: "acc_email", label: currentProduct.email_label || "EMAIL / PHONE", type: "text" });
       fields.push({ id: "acc_pass", label: currentProduct.password_label || "PASSWORD", type: "password" });
     }
-
     if(currentProduct.require_player_id) fields.push({ id: "player_id", label: currentProduct.player_id_label || "PLAYER ID", type: "text" });
     if(currentProduct.require_player_name) fields.push({ id: "player_name", label: currentProduct.player_name_label || "INGAME NAME", type: "text" });
-    
-    // Custom logic for Netflix/Tiktok etc.
-    if(titleLower.includes("netflix")) {
-      fields.push({ id: "device", label: "DEVICE TYPE", type: "select", options: ["TV", "Mobile/Tablet", "Laptop"] });
-    }
 
     container.innerHTML = fields.map(f => `
       <div class="input-group">
         <label>${f.label}</label>
-        ${f.type === 'select' ? 
-          `<select id="${f.id}">${f.options.map(o => `<option value="${o}">${o}</option>`).join('')}</select>` : 
-          `<input type="${f.type}" id="${f.id}" placeholder="Enter ${f.label.toLowerCase()}">`
-        }
+        <input type="${f.type}" id="${f.id}" placeholder="Required">
       </div>
     `).join('');
   }
 
-  // --- ACTIONS ---
   document.getElementById("planBtn").onclick = () => {
     document.getElementById("sheetOverlay").style.display = "block";
-    setTimeout(() => document.getElementById("planSheet").classList.add("active"), 10);
+    if(selectedPlan) tempSelectedPlanId = selectedPlan.id;
+    renderPlansInSheet();
+    setTimeout(() => document.getElementById("planSheet").classList.add("active"), 50);
   };
 
   function closeSheet() {
@@ -288,24 +254,20 @@
   document.getElementById("buyBtn").onclick = async () => {
     const btn = document.getElementById("buyBtn");
     btn.disabled = true;
-    btn.textContent = "PROCESSING...";
+    btn.textContent = "CHECKING WALLET...";
 
     try {
       const { data: { session } } = await sb.auth.getSession();
       if(!session) return window.location.href = "login.html";
 
-      // Basic Validation
       const inputs = document.querySelectorAll("#dynamicFields input");
       for(let input of inputs) {
         if(!input.value.trim()) {
-          showModal("Missing Info", `Please fill in ${input.previousElementSibling.textContent}`);
-          btn.disabled = false;
-          btn.textContent = "BUY NOW";
-          return;
+          showModal("Info Required", `Please enter your ${input.previousElementSibling.textContent}`);
+          btn.disabled = false; btn.textContent = "BUY NOW"; return;
         }
       }
 
-      // Collect Data
       const orderData = {
         p_product_id: productId,
         p_price: selectedPlan.price,
@@ -318,16 +280,13 @@
       };
 
       const { data, error } = await sb.rpc("place_order", orderData);
-      
       if(error) throw error;
 
-      showModal("Success!", "Your order has been placed. Redirecting...");
-      setTimeout(() => window.location.href = "my-orders.html", 2000);
-
+      showModal("Done!", "Order placed successfully!");
+      setTimeout(() => window.location.href = "my-orders.html", 1500);
     } catch(err) {
       showModal("Error", err.message);
-      btn.disabled = false;
-      btn.textContent = "BUY NOW";
+      btn.disabled = false; btn.textContent = "BUY NOW";
     }
   };
 
@@ -336,10 +295,7 @@
     document.getElementById("modalText").textContent = text;
     document.getElementById("globalModal").style.display = "flex";
   }
-
-  function closeModal() {
-    document.getElementById("globalModal").style.display = "none";
-  }
+  function closeModal() { document.getElementById("globalModal").style.display = "none"; }
 
   init();
 </script>
