@@ -14,7 +14,6 @@
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.08);
-      --shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -34,67 +33,73 @@
 
     .hero-card {
       background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: 30px; overflow: hidden; box-shadow: var(--shadow);
-      margin-bottom: 20px;
+      border-radius: 30px; overflow: hidden; margin-bottom: 20px;
     }
-    .hero-img { width: 100%; height: 220px; object-fit: cover; background: #000; }
-    .hero-info { padding: 20px; }
-    .title-row { display: flex; justify-content: space-between; align-items: flex-start; }
-    .product-title { font-weight: 900; font-size: 22px; text-transform: uppercase; margin-bottom: 5px; }
-    .price-tag { color: var(--neon-cyan); font-weight: 900; font-size: 20px; }
+    .hero-img { width: 100%; height: 200px; object-fit: cover; background: #000; }
+    .hero-info { padding: 15px 20px; }
+    .product-title { font-weight: 900; font-size: 20px; text-transform: uppercase; }
+    .price-tag { color: var(--neon-cyan); font-weight: 900; font-size: 18px; }
 
     .section-box {
       background: var(--glass); border: 1px solid var(--glass-border);
       border-radius: 24px; padding: 20px; margin-bottom: 15px;
     }
-    .section-box h3 { margin: 0 0 15px; font-size: 14px; letter-spacing: 2px; opacity: 0.6; }
+    .section-box h3 { margin: 0 0 15px; font-size: 12px; letter-spacing: 2px; opacity: 0.5; }
 
     .input-group { margin-bottom: 15px; }
-    label { display: block; font-family: 'Cairo'; font-size: 12px; margin-bottom: 8px; opacity: 0.8; font-weight: 700; }
-    input, textarea, select {
-      width: 100%; padding: 14px 18px; border-radius: 14px;
-      background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
-      color: #fff; font-family: 'Cairo'; font-size: 14px; transition: 0.3s;
+    label { display: block; font-family: 'Cairo'; font-size: 11px; margin-bottom: 6px; opacity: 0.7; font-weight: 700; }
+    input, textarea {
+      width: 100%; padding: 14px; border-radius: 12px;
+      background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
+      color: #fff; font-family: 'Cairo'; font-size: 14px;
     }
-    input:focus { border-color: var(--neon-cyan); }
 
     .plan-selector {
-      width: 100%; padding: 15px 20px; border-radius: 14px;
+      width: 100%; padding: 15px; border-radius: 12px;
       background: var(--neon-cyan); color: #000; border: none;
       display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; font-weight: 900; font-family: 'Orbitron'; margin-bottom: 15px;
+      cursor: pointer; font-weight: 900; font-size: 14px;
     }
 
     .buy-btn {
-      width: 100%; padding: 18px; border-radius: 20px; border: none;
+      width: 100%; padding: 18px; border-radius: 18px; border: none;
       background: linear-gradient(90deg, #00f2ff, #0072ff);
       color: #fff; font-weight: 900; font-size: 16px; cursor: pointer;
-      box-shadow: 0 10px 20px rgba(0, 242, 255, 0.2);
     }
-    .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ===== BOTTOM SHEET (FIXED LOGIC) ===== */
-    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; z-index: 2000; backdrop-filter: blur(4px); }
+    /* ===== BOTTOM SHEET (LIST STYLE) ===== */
+    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2000; backdrop-filter: blur(4px); }
     .bottom-sheet {
       position: fixed; bottom: -100%; left: 0; width: 100%;
-      background: #060a0f; border-radius: 30px 30px 0 0;
+      background: #060a0f; border-radius: 25px 25px 0 0;
       z-index: 2100; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      padding: 30px 20px; border-top: 1px solid var(--glass-border);
+      padding: 25px 20px; border-top: 1px solid var(--glass-border);
     }
     .bottom-sheet.active { bottom: 0; }
-    .plan-option {
-      padding: 18px; border-radius: 15px; background: rgba(255,255,255,0.02);
-      border: 1px solid var(--glass-border); margin-bottom: 10px;
-      display: flex; justify-content: space-between; align-items: center; 
-      cursor: pointer; pointer-events: auto;
+    
+    #plansContainer {
+      max-height: 380px; /* طول القائمة */
+      overflow-y: auto;
+      padding-right: 5px;
+      margin-bottom: 15px;
     }
-    .plan-option.selected { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.08); }
+    #plansContainer::-webkit-scrollbar { width: 3px; }
+    #plansContainer::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 10px; }
+
+    .plan-option {
+      padding: 12px 15px; border-radius: 10px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--glass-border); margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+    .plan-option.selected { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.05); }
+    .plan-option .p-name { font-family: 'Cairo'; font-size: 13px; font-weight: 700; }
+    .plan-option .p-price { color: var(--neon-cyan); font-weight: 900; font-size: 14px; }
 
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.9);
       display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px;
     }
-    .modal-content { background: #0a0f14; border: 1px solid var(--glass-border); border-radius: 25px; padding: 30px; text-align: center; width: 100%; max-width: 350px; }
+    .modal-content { background: #0a0f14; border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; text-align: center; width: 100%; }
   </style>
 </head>
 
@@ -102,17 +107,17 @@
   <div class="wrap">
     <div class="header">
       <a href="javascript:history.back()" class="back-circle">←</a>
-      <div style="font-weight: 900; opacity: 0.5; font-size: 12px;">PRODUCT DETAILS</div>
-      <div onclick="location.href='my-orders.html'" style="cursor:pointer; font-size: 20px;">📦</div>
+      <div style="font-weight: 900; opacity: 0.5; font-size: 11px;">BAROUD ELITE</div>
+      <div onclick="location.href='my-orders.html'" style="font-size: 20px;">📦</div>
     </div>
 
     <div class="hero-card">
       <img id="heroImg" class="hero-img" src="assets/products/default.png">
       <div class="hero-info">
-        <div class="title-row">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div id="pTitle" class="product-title">Loading...</div>
-            <div id="pCat" style="font-size: 11px; opacity: 0.5;">Category: -</div>
+            <div id="pTitle" class="product-title">...</div>
+            <div id="pCat" style="font-size: 10px; opacity: 0.4; margin-top: 2px;">Category: -</div>
           </div>
           <div id="pPrice" class="price-tag">$0.00</div>
         </div>
@@ -120,38 +125,35 @@
     </div>
 
     <div class="section-box">
-      <h3>ORDER CONFIGURATION</h3>
-      <label>SELECT PLAN</label>
+      <h3>CONFIGURATION</h3>
+      <label>SELECT PACKAGE</label>
       <button class="plan-selector" id="planBtn">
-        <span id="planLabel">Choose a plan</span>
+        <span id="planLabel">Pick a plan</span>
         <span>▼</span>
       </button>
 
-      <div id="dynamicFields" style="display:none; margin-top: 20px;"></div>
+      <div id="dynamicFields" style="display:none; margin-top: 15px;"></div>
 
       <div class="input-group" style="margin-top: 15px;">
-        <label>CUSTOMER NOTE (OPTIONAL)</label>
-        <textarea id="customerNote" placeholder="Anything else we should know?"></textarea>
+        <label>NOTE (OPTIONAL)</label>
+        <textarea id="customerNote" rows="2" placeholder="Ex: Player ID or details..."></textarea>
       </div>
 
-      <button id="buyBtn" class="buy-btn" style="margin-top: 10px;">BUY NOW</button>
+      <button id="buyBtn" class="buy-btn">PURCHASE NOW</button>
     </div>
   </div>
 
   <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
   <div class="bottom-sheet" id="planSheet">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-      <h2 style="margin:0; font-size: 18px;">SELECT PLAN</h2>
-      <button onclick="closeSheet()" style="background:none; border:none; color:#fff; font-size: 20px;">✕</button>
-    </div>
+    <h2 style="margin: 0 0 15px; font-size: 16px;">AVAILABLE PLANS</h2>
     <div id="plansContainer"></div>
-    <button class="buy-btn" onclick="confirmPlanSelection()" style="margin-top: 15px;">CONFIRM</button>
+    <button class="buy-btn" onclick="confirmPlanSelection()">CONFIRM</button>
   </div>
 
   <div class="modal" id="globalModal">
     <div class="modal-content">
-      <h2 id="modalTitle">Notice</h2>
-      <p id="modalText"></p>
+      <h3 id="modalTitle">Notice</h3>
+      <p id="modalText" style="font-family:'Cairo'; font-size: 14px; opacity:0.8;"></p>
       <button class="buy-btn" onclick="closeModal()">OK</button>
     </div>
   </div>
@@ -162,46 +164,37 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const productId = new URLSearchParams(window.location.search).get("id");
-  let currentProduct = null;
-  let allPlans = [];
-  let selectedPlan = null;
-  let tempSelectedPlanId = null;
+  let currentProduct = null, allPlans = [], selectedPlan = null, tempSelectedPlanId = null;
 
   async function init() {
     if(!productId) return;
-    const { data: product, error } = await sb.from("products").select("*").eq("id", productId).single();
-    if(error) return showModal("Error", "Product not found");
+    const { data: product } = await sb.from("products").select("*").eq("id", productId).single();
+    if(!product) return;
     currentProduct = product;
     
     document.getElementById("pTitle").textContent = product.title;
     document.getElementById("pCat").textContent = "Category: " + (product.category || "General");
     document.getElementById("heroImg").src = `assets/products/${product.id}.jpg`;
-    document.getElementById("heroImg").onerror = function() { this.src = 'assets/products/default.png'; };
 
-    await refreshPlans();
-  }
-
-  async function refreshPlans() {
-    const { data: plans } = await sb.from("product_plan_prices").select("*").eq("product_id", productId).eq("active", true).order('price', {ascending: true});
+    const { data: plans } = await sb.from("product_plan_prices")
+                                .select("*").eq("product_id", productId)
+                                .eq("active", true).order('price', {ascending: true});
     allPlans = plans || [];
-    renderPlansInSheet();
-    if(allPlans.length > 0 && !selectedPlan) setPlan(allPlans[0]);
+    renderPlans();
+    if(allPlans.length > 0) setPlan(allPlans[0]);
   }
 
-  function renderPlansInSheet() {
+  function renderPlans() {
     const container = document.getElementById("plansContainer");
     container.innerHTML = allPlans.map(p => `
       <div class="plan-option ${String(tempSelectedPlanId) === String(p.id) ? 'selected' : ''}" onclick="tempSelectPlan('${p.id}')">
-        <div style="font-weight:900;">${p.plan_label}</div>
-        <div style="color:var(--neon-cyan); font-weight:900;">$${Number(p.price).toFixed(2)}</div>
+        <div class="p-name">${p.plan_label}</div>
+        <div class="p-price">$${Number(p.price).toFixed(2)}</div>
       </div>
     `).join('');
   }
 
-  function tempSelectPlan(id) {
-    tempSelectedPlanId = id;
-    renderPlansInSheet();
-  }
+  function tempSelectPlan(id) { tempSelectedPlanId = id; renderPlans(); }
 
   function confirmPlanSelection() {
     const plan = allPlans.find(p => String(p.id) === String(tempSelectedPlanId));
@@ -212,87 +205,66 @@
   function setPlan(plan) {
     selectedPlan = plan;
     tempSelectedPlanId = plan.id;
-    document.getElementById("planLabel").textContent = `${plan.plan_label} - $${Number(plan.price).toFixed(2)}`;
+    document.getElementById("planLabel").textContent = plan.plan_label;
     document.getElementById("pPrice").textContent = `$${Number(plan.price).toFixed(2)}`;
-    updateDynamicFields();
+    updateFields();
   }
 
-  function updateDynamicFields() {
+  function updateFields() {
     const container = document.getElementById("dynamicFields");
     container.style.display = "block";
     container.innerHTML = "";
     let fields = [];
-    const planLower = selectedPlan.plan_label.toLowerCase();
+    const planL = selectedPlan.plan_label.toLowerCase();
 
-    if(planLower.includes("direct") || currentProduct.require_email) {
-      fields.push({ id: "acc_email", label: currentProduct.email_label || "EMAIL / PHONE", type: "text" });
-      fields.push({ id: "acc_pass", label: currentProduct.password_label || "PASSWORD", type: "password" });
+    if(planL.includes("direct") || currentProduct.require_email) {
+      fields.push({ id: "acc_email", label: currentProduct.email_label || "EMAIL / PHONE" });
+      fields.push({ id: "acc_pass", label: currentProduct.password_label || "PASSWORD" });
     }
-    if(currentProduct.require_player_id) fields.push({ id: "player_id", label: currentProduct.player_id_label || "PLAYER ID", type: "text" });
-    if(currentProduct.require_player_name) fields.push({ id: "player_name", label: currentProduct.player_name_label || "INGAME NAME", type: "text" });
+    if(currentProduct.require_player_id) fields.push({ id: "player_id", label: currentProduct.player_id_label || "PLAYER ID" });
 
     container.innerHTML = fields.map(f => `
       <div class="input-group">
         <label>${f.label}</label>
-        <input type="${f.type}" id="${f.id}" placeholder="Required">
+        <input type="${f.id==='acc_pass'?'password':'text'}" id="${f.id}" placeholder="Required">
       </div>
     `).join('');
   }
 
   document.getElementById("planBtn").onclick = () => {
     document.getElementById("sheetOverlay").style.display = "block";
-    if(selectedPlan) tempSelectedPlanId = selectedPlan.id;
-    renderPlansInSheet();
-    setTimeout(() => document.getElementById("planSheet").classList.add("active"), 50);
+    setTimeout(() => document.getElementById("planSheet").classList.add("active"), 10);
   };
 
   function closeSheet() {
     document.getElementById("planSheet").classList.remove("active");
-    setTimeout(() => document.getElementById("sheetOverlay").style.display = "none", 400);
+    setTimeout(() => document.getElementById("sheetOverlay").style.display = "none", 300);
   }
 
   document.getElementById("buyBtn").onclick = async () => {
     const btn = document.getElementById("buyBtn");
-    btn.disabled = true;
-    btn.textContent = "CHECKING WALLET...";
+    btn.disabled = true; btn.textContent = "PROCESSING...";
 
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      if(!session) return window.location.href = "login.html";
-
-      const inputs = document.querySelectorAll("#dynamicFields input");
-      for(let input of inputs) {
-        if(!input.value.trim()) {
-          showModal("Info Required", `Please enter your ${input.previousElementSibling.textContent}`);
-          btn.disabled = false; btn.textContent = "BUY NOW"; return;
-        }
-      }
-
-      const orderData = {
-        p_product_id: productId,
-        p_price: selectedPlan.price,
-        p_duration: selectedPlan.plan_label,
-        p_note: document.getElementById("customerNote").value,
-        p_player_id: document.getElementById("player_id")?.value || null,
-        p_player_name: document.getElementById("player_name")?.value || null,
-        p_acc_email: document.getElementById("acc_email")?.value || null,
-        p_acc_pass: document.getElementById("acc_pass")?.value || null
-      };
-
-      const { data, error } = await sb.rpc("place_order", orderData);
-      if(error) throw error;
-
-      showModal("Done!", "Order placed successfully!");
-      setTimeout(() => window.location.href = "my-orders.html", 1500);
-    } catch(err) {
-      showModal("Error", err.message);
-      btn.disabled = false; btn.textContent = "BUY NOW";
+    const inputs = document.querySelectorAll("#dynamicFields input");
+    for(let i of inputs) {
+      if(!i.value.trim()) { showModal("Error", "Please fill all fields"); btn.disabled = false; return; }
     }
+
+    const { data, error } = await sb.rpc("place_order", {
+      p_product_id: productId, p_price: selectedPlan.price,
+      p_duration: selectedPlan.plan_label, p_note: document.getElementById("customerNote").value,
+      p_player_id: document.getElementById("player_id")?.value || null,
+      p_acc_email: document.getElementById("acc_email")?.value || null,
+      p_acc_pass: document.getElementById("acc_pass")?.value || null
+    });
+
+    if(error) { showModal("Failed", error.message); btn.disabled = false; }
+    else { showModal("Success!", "Redirecting..."); setTimeout(()=>location.href="my-orders.html", 1200); }
   };
 
-  function showModal(title, text) {
-    document.getElementById("modalTitle").textContent = title;
-    document.getElementById("modalText").textContent = text;
+  function showModal(t, txt) { 
+    document.getElementById("modalTitle").textContent = t;
+    document.getElementById("modalText").textContent = txt;
     document.getElementById("globalModal").style.display = "flex";
   }
   function closeModal() { document.getElementById("globalModal").style.display = "none"; }
