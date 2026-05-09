@@ -142,6 +142,37 @@
       </div>
     </div>
   </div>
+<div id="maintenance-screen" style="
+    position: fixed; 
+    inset: 0; 
+    background: #020508; 
+    z-index: 999999; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center; 
+    padding: 20px;
+    font-family: 'Orbitron', 'Cairo', sans-serif;">
+    
+    <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
+    
+    <h1 style="color: #00f2ff; font-weight: 900; letter-spacing: 2px; margin-bottom: 10px;">UNDER MAINTENANCE</h1>
+    
+    <p style="color: #fff; font-family: 'Cairo'; opacity: 0.8; max-width: 300px; line-height: 1.6;">
+        نحن نقوم بتحديث الخدمات لنمنحك تجربة أفضل. <br> 
+        سنعود خلال وقت قصير جداً!
+    </p>
+
+    <div style="margin-top: 30px; font-size: 10px; color: #fff; opacity: 0.3; letter-spacing: 5px;">
+        BAROUDAPP.COM
+    </div>
+</div>
+
+<style>
+    /* منع الـ Scroll لما تكون الصيانة شغال */
+    body { overflow: hidden !important; }
+</style>
 
 <script>
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
