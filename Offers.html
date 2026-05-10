@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Baroud | Special Offers</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --neon-yellow: #f7ff00;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Orbitron', 'Cairo', sans-serif;
+      background: var(--bg-dark); color: #fff;
+      min-height: 100vh;
+    }
+
+    .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
+
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+    .btn-circle {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff; text-decoration: none;
+    }
+
+    /* هيدر الصفحة المميز */
+    .header-offer {
+      text-align: center; margin-bottom: 30px;
+      background: linear-gradient(45deg, #f7ff00, #ff8c00);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+    .card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 25px; overflow: hidden; position: relative;
+      transition: 0.3s; cursor: pointer;
+    }
+    .card:active { transform: scale(0.96); border-color: var(--neon-yellow); }
+
+    /* شارة العرض */
+    .offer-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: #ff3e3e; color: #fff; font-size: 10px;
+      padding: 4px 8px; border-radius: 8px; font-weight: 900;
+      z-index: 2; box-shadow: 0 4px 10px rgba(255, 62, 62, 0.3);
+    }
+
+    .card-img { width: 100%; height: 130px; object-fit: cover; background: #000; }
+    
+    .card-body { padding: 12px; }
+    .card-name { font-weight: 900; font-size: 14px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .card-price { color: var(--neon-yellow); font-weight: 900; font-size: 14px; }
+    
+    .open-btn {
+      padding: 6px 12px; border-radius: 10px; background: var(--neon-yellow);
+      color: #000; font-weight: 900; font-size: 11px; border: none;
+    }
+
+    .shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+      background-size: 200% 100%; animation: loading 1.5s infinite;
+    }
+    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="top">
+      <div class="btn-circle" onclick="history.back()">←</div>
+      <div class="header-offer"><h2 style="margin:0; font-size: 22px;">HOT OFFERS</h2></div>
+      <div class="btn-circle" onclick="location.href='services.html'">🏠</div>
+    </div>
+
+    <div class="grid" id="productGrid">
+      <div class="card shimmer" style="height: 200px;"></div>
+      <div class="card shimmer" style="height: 200px;"></div>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function loadOffers() {
+    try {
+      const { data, error } = await sb
+        .from("products_with_min_price")
+        .select("id, title, category, min_price")
+        .eq("active", true)
+        .eq("category", "Offers") // هيدا هو الكاتيجوري اللي رح تزيدو بالداتابيز
+        .order('min_price', { ascending: true });
+
+      if (error) throw error;
+      render(data);
+    } catch (e) {
+      document.getElementById("productGrid").innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Error loading offers.</div>`;
+    }
+  }
+
+  function render(list) {
+    const grid = document.getElementById("productGrid");
+    if (list.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5; padding: 40px;">No active offers at the moment.</div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(item => `
+      <div class="card" onclick="location.href='account.html?id=${item.id}'">
+        <div class="offer-badge">HOT DEAL</div>
+        <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='assets/products/default.png'">
+        <div class="card-body">
+          <div class="card-name">${item.title}</div>
+          <div class="card-footer">
+            <div class="card-price">$${Number(item.min_price || 0).toFixed(2)}</div>
+            <button class="open-btn">GET IT</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  loadOffers();
+</script>
+</body>
+</html>
