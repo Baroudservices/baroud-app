@@ -1,142 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baroud App | Services</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #00d2ff;
-            --accent: #FF4B2B;
-            --bg: #020508;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Baroud App | Services Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --neon-cyan: #00f2ff;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    body {
+      margin: 0; padding: 0;
+      background: var(--bg-dark);
+      color: #fff;
+      font-family: 'Orbitron', 'Cairo', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    .container { max-width: 500px; margin: 0 auto; padding: 20px 15px 100px; }
+    .header { text-align: center; margin-bottom: 30px; padding-top: 20px; }
+    .logo-text { font-size: 32px; font-weight: 900; letter-spacing: 5px; color: var(--neon-cyan); text-shadow: 0 0 15px rgba(0, 242, 255, 0.4); }
+    
+    .search-box {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 15px 20px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+    }
+    .search-box input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      width: 100%;
+      font-family: 'Cairo', sans-serif;
+      font-size: 16px;
+    }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            margin: 0; padding: 0;
-            background: var(--bg);
-            color: white;
-            font-family: 'Cairo', sans-serif;
-            overflow-x: hidden;
-        }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .nav-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 25px;
+      padding: 25px 15px;
+      text-align: center;
+      text-decoration: none;
+      color: #fff;
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nav-card:active { transform: scale(0.95); background: rgba(255,255,255,0.08); border-color: var(--neon-cyan); }
+    .nav-card .emoji { font-size: 35px; display: block; margin-bottom: 12px; }
+    .nav-card span { font-weight: 700; font-size: 14px; letter-spacing: 1px; display: block; }
 
-        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
-
-        /* Header Section */
-        .header { text-align: center; margin-bottom: 25px; padding-top: 10px; }
-        .logo { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; color: var(--primary); letter-spacing: 3px; }
-        .sub-logo { font-size: 12px; opacity: 0.6; letter-spacing: 1px; }
-
-        /* --- نيو: كبسة الـ OFFERS الجديدة --- */
-        .offers-banner {
-            margin-bottom: 30px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: linear-gradient(90deg, #FF4B2B, #FF416C);
-            padding: 20px;
-            border-radius: 25px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(255, 75, 43, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .offers-banner:active { transform: scale(0.97); }
-
-        .offers-content h2 { 
-            margin: 0; font-family: 'Orbitron', sans-serif; font-size: 18px; 
-            color: white; font-weight: 900; 
-        }
-        .offers-content p { margin: 5px 0 0; font-size: 12px; opacity: 0.9; }
-
-        .offers-banner .icon { font-size: 30px; }
-
-        /* تأثير اللمعان المتحرك على الكبسة */
-        .offers-banner::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -100%;
-            width: 100%; height: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% { left: -100%; }
-            20% { left: 100%; }
-            100% { left: 100%; }
-        }
-
-        /* Category Grid */
-        .section-title { font-family: 'Orbitron', sans-serif; font-size: 14px; margin-bottom: 15px; color: var(--primary); opacity: 0.8; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-
-        .nav-card {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 25px 15px;
-            text-align: center;
-            text-decoration: none;
-            color: white;
-            transition: 0.3s;
-        }
-
-        .nav-card:active { background: rgba(255,255,255,0.1); border-color: var(--primary); }
-        .nav-card .emoji { font-size: 35px; display: block; margin-bottom: 10px; }
-        .nav-card span { font-weight: 700; font-size: 15px; }
-
-    </style>
+    .bottom-nav {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 400px;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 25px;
+      display: flex; justify-content: space-around;
+      padding: 15px; z-index: 100;
+    }
+    .nav-item { color: #fff; text-decoration: none; font-size: 20px; opacity: 0.6; }
+    .nav-item.active { color: var(--neon-cyan); opacity: 1; }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <div class="logo">BAROUD</div>
-            <div class="sub-logo">DIGITAL SOLUTIONS</div>
-        </div>
-
-        <a href="offers.html" class="offers-banner">
-            <div class="offers-content">
-                <h2>HOT OFFERS</h2>
-                <p>Exclusive Deals & Discounts</p>
-            </div>
-            <div class="icon">🔥</div>
-        </a>
-
-        <div class="section-title">CATEGORIES</div>
-        <div class="grid">
-            <a href="games.html" class="nav-card">
-                <span class="emoji">🎮</span>
-                <span>Games</span>
-            </a>
-            <a href="accounts.html" class="nav-card">
-                <span class="emoji">💎</span>
-                <span>Accounts</span>
-            </a>
-            <a href="cards.html" class="nav-card">
-                <span class="emoji">🎟️</span>
-                <span>Gift Cards</span>
-            </a>
-            <a href="phone.html" class="nav-card">
-                <span class="emoji">📱</span>
-                <span>Mobile</span>
-            </a>
-        </div>
-
-        <div class="section-title">SUPPORT</div>
-        <a href="https://wa.me/96170385398" class="nav-card" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 15px;">
-            <span style="font-size: 20px;">💬</span>
-            <span>Contact Support</span>
-        </a>
+  <div class="container">
+    <div class="header">
+      <div class="logo-text">BAROUD</div>
+      <div style="font-size: 10px; opacity: 0.5; margin-top: 5px; letter-spacing: 3px;">PREMIUM SERVICES</div>
     </div>
+
+    <div class="search-box">
+      <span>🔍 </span>
+      <input type="text" placeholder="Search services...">
+    </div>
+
+    <div class="grid">
+      <a href="games.html" class="nav-card">
+        <span class="emoji">🎮</span>
+        <span>GAMES</span>
+      </a>
+      <a href="accounts.html" class="nav-card">
+        <span class="emoji">💎</span>
+        <span>ACCOUNTS</span>
+      </a>
+      <a href="giftcards.html" class="nav-card">
+        <span class="emoji">🎟️</span>
+        <span>GIFT CARDS</span>
+      </a>
+      <a href="phones.html" class="nav-card">
+        <span class="emoji">📱</span>
+        <span>MOBILE</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="index.html" class="nav-item">🏠</a>
+    <a href="services.html" class="nav-item active">⚡</a>
+    <a href="profile.html" class="nav-item">👤</a>
+  </div>
 
 </body>
 </html>
