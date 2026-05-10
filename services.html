@@ -1,11 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Baroud App | Services Portal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>BAROUD | Elite Digital Realm</title>
+  
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <style>
     :root {
       --neon-cyan: #00f2ff;
@@ -13,104 +14,192 @@
       --glass: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.08);
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-    body {
-      margin: 0; padding: 0;
-      background: var(--bg-dark);
-      color: #fff;
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; outline: none; }
+    
+    body { 
+      background-color: var(--bg-dark); 
+      color: #fff; 
       font-family: 'Orbitron', 'Cairo', sans-serif;
       overflow-x: hidden;
-      min-height: 100vh;
     }
-    .container { max-width: 500px; margin: 0 auto; padding: 20px 15px 100px; }
-    .header { text-align: center; margin-bottom: 30px; padding-top: 20px; }
-    .logo-text { font-size: 32px; font-weight: 900; letter-spacing: 5px; color: var(--neon-cyan); text-shadow: 0 0 15px rgba(0, 242, 255, 0.4); }
-    
-    .search-box {
-      background: var(--glass);
+
+    .wrapper { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 18px 120px; }
+
+    /* ===== HEADER ===== */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 25px 5px; position: sticky; top: 0; z-index: 1000;
+      background: rgba(2, 5, 8, 0.8); backdrop-filter: blur(15px);
+    }
+
+    .logo-container {
+      font-size: 24px; font-weight: 900; letter-spacing: 3px;
+      border: 1.5px solid #fff; padding: 5px 15px; border-radius: 4px;
+    }
+
+    .menu-trigger {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+      cursor: pointer; transition: 0.3s;
+    }
+    .menu-trigger span { width: 20px; height: 2px; background: #fff; border-radius: 2px; }
+
+    /* ===== SIDE DRAWER ===== */
+    .drawer {
+      position: fixed; top: 0; right: -100%; width: 80%; height: 100%;
+      background: rgba(2, 5, 8, 0.98); backdrop-filter: blur(20px);
+      z-index: 3000; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 50px 30px; border-left: 1px solid var(--glass-border);
+    }
+    .drawer.active { right: 0; }
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; z-index: 2900;
+    }
+    .drawer.active + .drawer-overlay { display: block; }
+    .drawer a { display: block; padding: 20px 0; color: #fff; text-decoration: none; font-size: 18px; border-bottom: 1px solid var(--glass-border); }
+
+    /* ===== HERO SLIDER ===== */
+    .slider {
+      width: 100%; height: 210px; border-radius: 24px;
+      overflow: hidden; margin: 20px 0 30px; position: relative;
       border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      padding: 15px 20px;
-      margin-bottom: 25px;
-      display: flex;
-      align-items: center;
+    }
+    .slider-inner { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
+    .slide { width: 33.333%; height: 100%; }
+    .slide img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ===== SEARCH ===== */
+    .search-box {
+      background: #fff; border-radius: 16px; padding: 0 20px;
+      margin-bottom: 30px; display: flex; align-items: center;
     }
     .search-box input {
-      background: transparent;
-      border: none;
-      color: #fff;
-      width: 100%;
-      font-family: 'Cairo', sans-serif;
-      font-size: 16px;
+      width: 100%; height: 55px; background: none; border: none;
+      color: #000; font-size: 16px; font-weight: 700; font-family: 'Cairo', sans-serif;
     }
 
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .nav-card {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      border-radius: 25px;
-      padding: 25px 15px;
-      text-align: center;
-      text-decoration: none;
-      color: #fff;
-      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* ===== GRID ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    
+    .item-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 24px; overflow: hidden; position: relative;
+      text-decoration: none; transition: 0.4s; height: 200px;
+      display: flex; flex-direction: column;
     }
-    .nav-card:active { transform: scale(0.95); background: rgba(255,255,255,0.08); border-color: var(--neon-cyan); }
-    .nav-card .emoji { font-size: 35px; display: block; margin-bottom: 12px; }
-    .nav-card span { font-weight: 700; font-size: 14px; letter-spacing: 1px; display: block; }
+    .item-card:active { transform: scale(0.95); }
 
-    .bottom-nav {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      width: 90%; max-width: 400px;
-      background: rgba(10, 10, 10, 0.8);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      border-radius: 25px;
-      display: flex; justify-content: space-around;
-      padding: 15px; z-index: 100;
+    .img-area { width: 100%; height: 145px; overflow: hidden; }
+    .img-area img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .label-area {
+      padding: 15px; font-weight: 900; font-size: 12px;
+      text-align: center; color: #fff; letter-spacing: 1px;
     }
-    .nav-item { color: #fff; text-decoration: none; font-size: 20px; opacity: 0.6; }
-    .nav-item.active { color: var(--neon-cyan); opacity: 1; }
+
+    .status-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--neon-cyan); color: #000; padding: 4px 10px;
+      font-size: 9px; font-weight: 900; border-radius: 8px; z-index: 10;
+    }
+
+    /* ===== DOCK ===== */
+    .dock {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 380px; height: 75px;
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border); border-radius: 28px;
+      display: flex; align-items: center; justify-content: space-around;
+      z-index: 2000;
+    }
+    .dock-icon { font-size: 24px; opacity: 0.4; transition: 0.3s; cursor: pointer; }
+    .dock-icon.active { opacity: 1; transform: translateY(-5px); filter: drop-shadow(0 0 10px var(--neon-cyan)); }
   </style>
 </head>
-<body>
 
-  <div class="container">
-    <div class="header">
-      <div class="logo-text">BAROUD</div>
-      <div style="font-size: 10px; opacity: 0.5; margin-top: 5px; letter-spacing: 3px;">PREMIUM SERVICES</div>
+<body>
+  <div class="drawer" id="drawer">
+    <h2 style="margin-bottom: 30px; letter-spacing: 2px;">BAROUD MENU</h2>
+    <a href="login.html">🔑 Login</a>
+    <a href="signup.html" style="color: var(--neon-cyan);">✨ Sign Up</a>
+    <a href="wallet.html">💳 Wallet</a>
+    <a href="orders.html">📦 History</a>
+    <a href="https://wa.me/96170385398">💬 Contact</a>
+  </div>
+  <div class="drawer-overlay" id="overlay"></div>
+
+  <div class="wrapper">
+    <header>
+      <div class="logo-container">BAROUD</div>
+      <div class="menu-trigger" id="menuBtn">
+        <span></span><span></span><span></span>
+      </div>
+    </header>
+
+    <div class="slider">
+      <div class="slider-inner" id="track">
+        <div class="slide"><img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=PREMIUM+SERVICES'"></div>
+        <div class="slide"><img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=INSTANT+ACCESS'"></div>
+        <div class="slide"><img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=24/7+SUPPORT'"></div>
+      </div>
     </div>
 
     <div class="search-box">
-      <span>🔍 </span>
-      <input type="text" placeholder="Search services...">
+      <input type="text" placeholder="Explore Elite Services...">
     </div>
 
-    <div class="grid">
-      <a href="games.html" class="nav-card">
-        <span class="emoji">🎮</span>
-        <span>GAMES</span>
+    <section class="grid">
+      <a href="login.html" class="item-card">
+        <div class="status-badge">ELITE</div>
+        <div class="img-area"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500'"></div>
+        <div class="label-area">ACCOUNTS</div>
       </a>
-      <a href="accounts.html" class="nav-card">
-        <span class="emoji">💎</span>
-        <span>ACCOUNTS</span>
+      <a href="login.html" class="item-card">
+        <div class="img-area"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500'"></div>
+        <div class="label-area">GAMING</div>
       </a>
-      <a href="giftcards.html" class="nav-card">
-        <span class="emoji">🎟️</span>
-        <span>GIFT CARDS</span>
+      <a href="login.html" class="item-card">
+        <div class="img-area"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'"></div>
+        <div class="label-area">GIFT CARDS</div>
       </a>
-      <a href="phones.html" class="nav-card">
-        <span class="emoji">📱</span>
-        <span>MOBILE</span>
+      <a href="login.html" class="item-card">
+        <div class="status-badge" style="background:#fff">NEW</div>
+        <div class="img-area"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1614332287897-cdc485fa562d?w=500'"></div>
+        <div class="label-area">APPS</div>
       </a>
+    </section>
+
+    <div style="text-align: center; margin-top: 30px; font-family: 'Cairo'; font-size: 13px;">
+      Don't have an account? <a href="signup.html" style="color: var(--neon-cyan); text-decoration: none; font-weight: 700;">Sign Up</a>
     </div>
+
+    <p style="text-align: center; margin-top: 60px; opacity: 0.1; font-size: 10px; letter-spacing: 6px;">BAROUDAPP.COM</p>
   </div>
 
-  <div class="bottom-nav">
-    <a href="index.html" class="nav-item">🏠</a>
-    <a href="services.html" class="nav-item active">⚡</a>
-    <a href="profile.html" class="nav-item">👤</a>
-  </div>
+  <nav class="dock">
+    <div class="dock-icon active">🏠</div>
+    <div class="dock-icon" onclick="location.href='wallet.html'">💳</div>
+    <div class="dock-icon" onclick="location.href='orders.html'">📦</div>
+    <div class="dock-icon" onclick="window.open('https://wa.me/96170385398')">💬</div>
+  </nav>
 
+  <script>
+    const btn = document.getElementById('menuBtn');
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+
+    btn.onclick = () => { drawer.classList.add('active'); };
+    overlay.onclick = () => { drawer.classList.remove('active'); };
+
+    const track = document.getElementById('track');
+    let idx = 0;
+    setInterval(() => {
+      idx = (idx + 1) % 3;
+      track.style.transform = `translateX(-${idx * 33.333}%)`;
+    }, 4500);
+  </script>
 </body>
 </html>
