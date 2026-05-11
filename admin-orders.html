@@ -3,94 +3,71 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin Orders | Baroud</title>
+<title>Admin Orders</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
-  :root {
-    --neon-blue: #0aa0ff;
-    --neon-green: #4ade80;
-    --neon-yellow: #facc15;
-    --neon-red: #f87171;
-    --bg-dark: #060b14;
-    --glass: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.08);
-  }
-
-  body { 
-    margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-dark); color: #fff; 
-    min-height: 100vh; padding: 15px; 
-  }
+  body{ margin:0; font-family:system-ui,Arial; background:linear-gradient(180deg,#0b1424,#050a14); color:#fff; min-height:100vh; padding:16px; }
+  .wrap{max-width:880px;margin:auto}
+  .top{ display:flex;align-items:center;gap:10px; margin-bottom:14px; }
+  .back{ padding:10px 14px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); cursor:pointer; text-decoration: none; color: white; }
+  h2{margin:0;font-size:22px}
+  .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
+  .row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
   
-  .wrap { max-width: 900px; margin: auto; }
-  
-  /* HEADER */
-  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
-  .back { width: 40px; height: 40px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; color: white; font-weight: bold; }
-  h2 { margin: 0; font-family: 'Orbitron'; font-size: 18px; letter-spacing: 1px; color: var(--neon-blue); }
-
-  /* SEARCH BAR */
-  .search-row { display: flex; gap: 10px; margin-bottom: 20px; }
-  input[type="text"], select { 
-    background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #fff; 
-    border-radius: 12px; padding: 12px; outline: none; font-family: 'Cairo'; font-weight: 600;
+  .name{ font-weight:900; display: flex; align-items: center; }
+  .status-dot {
+    width: 10px; height: 10px; 
+    border-radius: 50%; 
+    margin-right: 8px; 
+    display: inline-block;
+    box-shadow: 0 0 8px currentColor;
   }
-  input[type="text"]:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(10, 160, 255, 0.2); }
+  .st-pending { background-color: #facc15; color: #facc15; }
+  .st-done { background-color: #4ade80; color: #4ade80; }
+  .st-rejected { background-color: #f87171; color: #f87171; }
 
-  /* ORDER CARD */
-  .card { 
-    background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; 
-    padding: 18px; margin-bottom: 15px; position: relative; overflow: hidden;
-    backdrop-filter: blur(5px); transition: 0.3s;
+  .small{opacity:.65;font-size:12px; line-height:1.35}
+  .price{font-weight:900;color:#38bdf8; font-size:18px}
+
+  select, textarea, input{
+    background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.12);
+    color:#fff;
+    border-radius:12px;
+    padding:10px;
+    outline:none;
   }
-  .card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+  textarea{ width:100%; min-height:120px; resize:vertical; }
 
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; display: inline-block; }
-  .st-pending { background-color: var(--neon-yellow); box-shadow: 0 0 10px var(--neon-yellow); }
-  .st-done { background-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
-  .st-rejected { background-color: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
-
-  .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .product-name { font-weight: 900; font-size: 16px; display: flex; align-items: center; color: #fff; }
-  .order-meta { font-size: 11px; opacity: 0.5; margin-top: 4px; font-weight: 700; }
-  .price { font-family: 'Orbitron'; font-weight: 900; color: var(--neon-blue); font-size: 18px; }
-
-  /* CHIPS */
-  .chipRow { display: flex; gap: 8px; flex-wrap: wrap; margin: 15px 0; }
-  .chip {
-    padding: 8px 14px; border-radius: 10px; background: rgba(255,255,255,0.05);
-    border: 1px solid var(--glass-border); font-size: 12px; font-weight: 800;
-    cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;
+  .btn{
+    border:0; cursor:pointer; padding:12px 14px; border-radius:14px;
+    font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff);
   }
-  .chip:hover { background: rgba(255,255,255,0.1); border-color: var(--neon-blue); }
+  .btn2{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); }
+  .empty{ opacity:.7; text-align:center; margin-top:40px; }
 
-  /* DETAILS BOX */
-  .details { 
-    background: rgba(0,0,0,0.3); border-radius: 14px; padding: 12px; margin-top: 10px;
-    border: 1px solid var(--glass-border); font-size: 13px;
+  .details{ margin-top:12px; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:12px; }
+  .kv{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+  .kv:last-child{ border-bottom:0; }
+  .k{ opacity:.7; font-size:12px; font-weight:800; }
+  .v{ font-size:12px; font-weight:900; text-align:right; max-width:65%; word-break:break-word; }
+
+  .chipRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 12px; border-radius:999px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+    font-weight:900; font-size:12px; cursor:pointer; user-select:none;
   }
-  .kv { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .kv:last-child { border-bottom: none; }
-  .k { opacity: 0.6; font-weight: 700; }
-  .v { font-weight: 900; color: #eee; }
 
-  /* ACTIONS ROW */
-  .actions-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-top: 15px; align-items: flex-end; }
-  .action-item label { display: block; font-size: 10px; opacity: 0.5; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; }
-
-  .btn {
-    border: 0; cursor: pointer; padding: 12px 20px; border-radius: 12px;
-    font-weight: 900; color: #fff; background: linear-gradient(90deg, #0aa0ff, #2a74ff);
-    font-family: 'Orbitron'; font-size: 12px; transition: 0.3s;
-  }
-  .btn:hover { transform: scale(1.02); filter: brightness(1.1); }
-  .btn-refresh { background: var(--glass); font-family: 'Cairo'; border: 1px solid var(--glass-border); }
-
-  /* MODAL */
-  .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(8px); }
-  .modalCard { width: 90%; max-width: 500px; background: #0c1018; border: 1px solid var(--glass-border); border-radius: 25px; padding: 25px; }
-  textarea { width: 100%; min-height: 120px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #fff; border-radius: 15px; padding: 15px; outline: none; font-family: 'Cairo'; }
+  .modal{ position:fixed; inset:0; background: rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; padding:16px; z-index:99999; }
+  .modalCard{ width:min(720px,100%); background: rgba(12, 16, 24, 0.98); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:16px; }
+  .mTitle{ font-weight:950; font-size:16px; margin-bottom:10px; }
+  .mSmall{ opacity:.7; font-weight:800; font-size:12px; margin-top:6px; }
+  .mErr{ color:#fca5a5; font-weight:900; font-size:12px; margin-top:8px; min-height:16px; }
+  .mBtns{ display:flex; gap:10px; margin-top: 12px; }
+  .mBtn{ flex:1; border:0; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); }
+  .mBtn.secondary{ background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.10); }
 </style>
 </head>
 
@@ -98,26 +75,27 @@
 <div class="wrap">
   <div class="top">
     <a href="admin.html" class="back">←</a>
-    <h2>ORDER CONTROL</h2>
-    <button class="btn btn-refresh" onclick="loadOrders()">REFRESH</button>
+    <h2>Admin Orders</h2>
   </div>
 
-  <div class="search-row">
-    <input id="q" placeholder="Search Order ID / User ID..." style="flex:1;" />
+  <div class="row" style="margin-bottom:12px">
+    <input id="q" placeholder="Search by order id / user id" style="flex:1; min-width:220px" />
+    <button class="btn btn2" onclick="loadOrders()">Refresh</button>
   </div>
 
   <div id="list"></div>
-  <div id="empty" style="text-align:center; opacity:0.5; margin-top:50px; display:none;">No orders found</div>
+  <div id="empty" class="empty" style="display:none">No orders</div>
 </div>
 
 <div class="modal" id="replyModal">
   <div class="modalCard">
-    <h3 style="margin-top:0; font-family: 'Orbitron'; font-size: 16px; color: var(--neon-blue);">ADMIN REPLY</h3>
-    <div id="rmMeta" style="font-size:12px; opacity:0.6; margin-bottom:15px; font-weight:700;"></div>
-    <textarea id="rmText" placeholder="Enter delivery info or rejection reason..."></textarea>
-    <div class="mBtns" style="display:flex; gap:10px; margin-top:20px;">
-      <button class="btn" style="background:var(--glass); flex:1;" id="rmCancel">CANCEL</button>
-      <button class="btn" style="flex:1;" id="rmSave">SAVE & CLOSE</button>
+    <div class="mTitle" id="rmTitle">Admin Reply</div>
+    <div class="mSmall" id="rmMeta"></div>
+    <div style="margin-top:12px;"><textarea id="rmText" placeholder="Write details / delivery info..."></textarea></div>
+    <div class="mErr" id="rmErr"></div>
+    <div class="mBtns">
+      <button class="mBtn secondary" id="rmCancel">Cancel</button>
+      <button class="mBtn" id="rmSave">Save Reply</button>
     </div>
   </div>
 </div>
@@ -128,23 +106,23 @@ const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function toArr(x){ return Array.isArray(x) ? x : []; }
 
 async function requireAdmin(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session) return location.replace("login.html");
+  if(!session){ location.replace("login.html"); return false; }
   const { data: prof } = await sb.from("profiles").select("is_admin").eq("id", session.user.id).single();
-  if(!prof?.is_admin) return location.replace("services.html");
+  if(!prof?.is_admin){ location.replace("services.html"); return false; }
+  return true;
 }
 
 function pickDetails(o){
   const candidates = [
-    ["phone_number","Phone"], ["whatsapp","WhatsApp"], ["player_id","Player ID"],
-    ["account_email","Email"], ["account_password","Pass"], ["duration","Plan"], ["note","Note"]
+    ["phone_number","Phone"],["number","Phone"],["whatsapp","WhatsApp"],["player_id","Player ID"],
+    ["player_name","Player Name"],["account_email","Email"],["account_password","Password"],["note","Note"]
   ];
   const out = [];
-  candidates.forEach(([key,label])=>{
-    if(o[key]) out.push([label, String(o[key])]);
-  });
+  candidates.forEach(([key,label])=>{ if(o && o[key]) out.push([label, String(o[key])]); });
   return out;
 }
 
@@ -153,14 +131,20 @@ let titleById = {};
 let currentReplyOrderId = null;
 
 async function loadOrders(){
-  await requireAdmin();
-  const { data: orders } = await sb.from("orders").select("*").order("created_at", { ascending:false });
-  ordersCache = orders || [];
+  const listEl = document.getElementById("list");
+  listEl.innerHTML = `<div class="empty">Loading...</div>`;
+  if(!(await requireAdmin())) return;
+
+  const { data: orders, error } = await sb.from("orders").select("*").order("created_at", { ascending:false });
+  if(error) { listEl.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  
+  ordersCache = toArr(orders);
+  if(!ordersCache.length) { document.getElementById("empty").style.display = "block"; listEl.innerHTML=""; return; }
   
   const ids = [...new Set(ordersCache.map(o => o.product_id).filter(Boolean))];
   if(ids.length){
     const { data: prods } = await sb.from("products").select("id,title").in("id", ids);
-    prods.forEach(p => titleById[p.id] = p.title);
+    toArr(prods).forEach(p => titleById[p.id] = p.title);
   }
   renderOrders();
 }
@@ -171,82 +155,51 @@ function renderOrders(){
   const filtered = term ? ordersCache.filter(o => String(o.id).includes(term) || String(o.user_id).includes(term)) : ordersCache;
 
   document.getElementById("empty").style.display = filtered.length ? "none" : "block";
-
   listEl.innerHTML = filtered.map(o => {
     const title = titleById[o.product_id] || o.product_title || "Product";
+    const status = (o.status || "pending").toLowerCase();
     const delivery = (o.delivery_status || "pending").toLowerCase();
-    const dt = new Date(o.created_at).toLocaleString('en-GB', { hour12: true });
+    const dotClass = delivery === "done" ? "st-done" : delivery === "rejected" ? "st-rejected" : "st-pending";
     const details = pickDetails(o);
-    
-    let dotClass = "st-pending"; 
-    if(delivery === "done") dotClass = "st-done";      
-    if(delivery === "rejected") dotClass = "st-rejected"; 
 
     return `
-      <div class="card" id="card_${o.id}">
-        <div class="order-header">
+      <div class="card">
+        <div class="row">
           <div>
-            <div class="product-name"><span class="status-dot ${dotClass}"></span>${esc(title)}</div>
-            <div class="order-meta">#${o.id} • ${dt}</div>
-            <div class="order-meta" style="color:var(--neon-blue)">User: ${o.user_id.slice(0,8)}...</div>
+            <div class="name"><span class="status-dot ${dotClass}"></span>${esc(title)}</div>
+            <div class="small">#${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
           </div>
           <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
         </div>
-
         <div class="chipRow">
-          <div class="chip" onclick="toggleDetails(${o.id})">📦 DETAILS</div>
-          <div class="chip" onclick="openReplyModal(${o.id})">💬 REPLY</div>
-          <div class="chip" style="opacity:0.6; cursor:default; max-width:150px; overflow:hidden;">${o.admin_reply || 'No reply'}</div>
+          <div class="chip" onclick="toggleDetails(${o.id})">📦 Details</div>
+          <div class="chip" onclick="openReplyModal(${o.id})">💬 Admin Reply</div>
+          <div class="chip" style="opacity:.7;cursor:default;">${esc(o.admin_reply?.slice(0,20))}${o.admin_reply?.length>20?'...':''}</div>
         </div>
-
         <div class="details" id="details_${o.id}" style="display:none;">
-          ${details.map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${esc(v)}</span></div>`).join("")}
+          ${details.map(([k,v])=>`<div class="kv"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}
         </div>
-
-        <div class="actions-grid">
-          <div class="action-item">
-            <label>Payment</label>
-            <select id="status_${o.id}" style="width:100%">
-              <option value="pending" ${o.status==="pending"?"selected":""}>Pending</option>
-              <option value="paid" ${o.status==="paid"?"selected":""}>Paid</option>
-              <option value="cancelled" ${o.status==="cancelled"?"selected":""}>Cancelled</option>
-            </select>
-          </div>
-          <div class="action-item">
-            <label>Delivery</label>
-            <select id="delivery_${o.id}" style="width:100%">
-              <option value="pending" ${delivery==="pending"?"selected":""}>Pending</option>
-              <option value="done" ${delivery==="done"?"selected":""}>Done</option>
-              <option value="rejected" ${delivery==="rejected"?"selected":""}>Rejected</option>
-            </select>
-          </div>
-          <button class="btn" onclick="saveOrder(${o.id})">SAVE</button>
+        <div class="row" style="margin-top:12px">
+          <div><div class="small">Payment</div><select id="status_${o.id}"><option value="pending" ${status==="pending"?"selected":""}>pending</option><option value="paid" ${status==="paid"?"selected":""}>paid</option></select></div>
+          <div><div class="small">Delivery</div><select id="delivery_${o.id}"><option value="pending" ${delivery==="pending"?"selected":""}>pending</option><option value="done" ${delivery==="done"?"selected":""}>done</option><option value="rejected" ${delivery==="rejected"?"selected":""}>rejected</option></select></div>
+          <div style="min-width:150px"><button class="btn" style="width:100%" onclick="saveOrder(${o.id})">Save</button><div id="msg_${o.id}" class="small" style="margin-top:5px"></div></div>
         </div>
-        <div id="msg_${o.id}" style="font-size:10px; margin-top:10px; text-align:right; font-weight:700;"></div>
         <input type="hidden" id="reply_${o.id}" value="${esc(o.admin_reply)}" />
-      </div>
-    `;
+      </div>`;
   }).join("");
 }
 
-function toggleDetails(id){
-  const el = document.getElementById(`details_${id}`);
-  el.style.display = el.style.display === "none" ? "block" : "none";
-}
+function toggleDetails(id){ const el = document.getElementById(`details_${id}`); el.style.display = el.style.display === "none" ? "block" : "none"; }
 
 function openReplyModal(id){
   currentReplyOrderId = id;
-  document.getElementById("rmMeta").textContent = "Order #" + id;
   document.getElementById("rmText").value = document.getElementById(`reply_${id}`).value;
   document.getElementById("replyModal").style.display = "flex";
 }
-
 document.getElementById("rmCancel").onclick = () => document.getElementById("replyModal").style.display = "none";
 document.getElementById("rmSave").onclick = () => {
-  const val = document.getElementById("rmText").value;
-  document.getElementById(`reply_${currentReplyOrderId}`).value = val;
+  document.getElementById(`reply_${currentReplyOrderId}`).value = document.getElementById("rmText").value;
   document.getElementById("replyModal").style.display = "none";
-  renderOrders();
 };
 
 async function saveOrder(id){
@@ -258,21 +211,25 @@ async function saveOrder(id){
   const admin_reply = document.getElementById(`reply_${id}`).value;
 
   const { error } = await sb.from("orders").update({ status, delivery_status, admin_reply, admin_reply_at: new Date() }).eq("id", id);
-  
-  if(!error) {
-    msg.style.color = "var(--neon-green)";
-    msg.textContent = "SAVED! ✅";
-    // WhatsApp Logic Trigger (Simplified for clarity)
-    if(delivery_status !== "pending") triggerWhatsApp(id, delivery_status);
-  } else {
-    msg.style.color = "var(--neon-red)";
-    msg.textContent = "Error!";
-  }
-}
+  if(error) { msg.textContent = "Error!"; return; }
 
-function triggerWhatsApp(id, status) {
-  // المنطق تبع الواتساب اللي كنت عامله بضل متل ما هو هون
-  console.log("Triggering WA for order:", id, status);
+  msg.textContent = "Saved ✅";
+  
+  if(delivery_status === "done" || delivery_status === "rejected"){
+    const order = ordersCache.find(o => o.id === id);
+    let phone = order.phone_number || order.number || order.whatsapp || "";
+    
+    if(!phone && order.user_id){
+      const { data: prof } = await sb.from("profiles").select("phone,whatsapp").eq("id", order.user_id).single();
+      if(prof) phone = prof.phone || prof.whatsapp || "";
+    }
+
+    if(phone){
+      const text = `Hello, Order #${id} is ${delivery_status.toUpperCase()} ✅\nCheck here: https://baroudapp.com/my-orders.html`;
+      window.open(`https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+  }
+  loadOrders();
 }
 
 document.getElementById("q").oninput = renderOrders;
