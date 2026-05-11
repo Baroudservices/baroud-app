@@ -3,183 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baroud | Recharge</title>
+  <title>Baroud | Recharge System</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --neon-blue: #38bdf8;
-      --neon-pink: #f472b6;
       --bg-dark: #020508;
-      --glass: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.08);
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; padding: 0; font-family: 'Orbitron', 'Cairo', sans-serif; background: var(--bg-dark); color: #fff; min-height: 100vh; }
-    .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
-    .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    .back-btn { width: 42px; height: 42px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .wallet-status { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); padding: 8px 15px; border-radius: 12px; display: flex; align-items: center; gap: 8px; }
-    .balance-val { color: var(--neon-blue); font-weight: 900; font-size: 14px; }
-    .filters-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 15px; scrollbar-width: none; }
-    .filters-scroll::-webkit-scrollbar { display: none; }
-    .f-pill { flex: 0 0 auto; padding: 10px 20px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 12px; font-weight: 900; cursor: pointer; transition: 0.3s; }
+
+    body {
+      margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-dark); color: #fff; min-height: 100vh; padding: 15px;
+    }
+
+    .wrap { max-width: 450px; margin: 0 auto; padding-bottom: 50px; }
+
+    /* Wallet Style (مثل باقي الصفحات) */
+    .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .balance-box { background: rgba(56, 189, 248, 0.1); padding: 8px 15px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); font-family: 'Orbitron'; font-size: 13px; color: var(--neon-blue); font-weight: 900; }
+
+    /* Filters Scroll */
+    .f-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 20px; scrollbar-width: none; }
+    .f-scroll::-webkit-scrollbar { display: none; }
+    .f-pill { flex: 0 0 auto; padding: 10px 22px; border-radius: 14px; background: var(--card-bg); border: 1px solid var(--border); font-size: 12px; font-weight: 900; cursor: pointer; transition: 0.3s; }
     .f-pill.active { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); }
-    .list { display: flex; flex-direction: column; gap: 12px; }
-    .item-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 20px; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
-    .item-info { display: flex; align-items: center; gap: 15px; }
-    .item-icon { width: 45px; height: 45px; background: rgba(255,255,255,0.03); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    .item-title { font-weight: 900; font-size: 14px; color: #fff; }
-    .item-price { font-weight: 900; color: var(--neon-blue); font-size: 15px; }
-    .buy-btn { background: linear-gradient(90deg, #0aa0ff, #2a74ff); border: none; color: #fff; padding: 8px 18px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; }
-    .ct-card { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 24px; padding: 20px; margin-top: 10px; }
-    .ct-input { width: 100%; background: var(--glass); border: 1px solid var(--glass-border); padding: 14px; border-radius: 14px; color: #fff; font-weight: 900; font-size: 16px; outline: none; margin-top: 5px; }
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal-content { background: #0f172a; border: 1px solid var(--neon-blue); border-radius: 24px; padding: 25px; width: 100%; max-width: 350px; }
+
+    /* Product Card (مثل account.html) */
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px;
+      padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(10px);
+    }
+    .card-info { display: flex; align-items: center; gap: 12px; }
+    .card-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid var(--border); }
+    .card-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+    .card-price { color: var(--neon-blue); font-family: 'Orbitron'; font-weight: 900; font-size: 15px; }
+    .buy-btn { background: var(--neon-blue); color: #000; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; font-family: 'Orbitron'; }
+
+    /* Credit Transfer Section */
+    .ct-container { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 22px; padding: 20px; }
+    .ct-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 15px; border-radius: 14px; color: #fff; font-size: 18px; font-weight: 900; outline: none; margin-bottom: 10px; }
+    .ct-res { text-align: center; font-size: 28px; font-weight: 900; color: var(--neon-blue); margin: 15px 0; font-family: 'Orbitron'; }
   </style>
 </head>
 <body>
 
-  <div id="maintenance-screen" style="display: none; position: fixed; inset: 0; background: #020508; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
-    <h1 style="color: #00f2ff;">UNDER MAINTENANCE</h1>
+<div class="wrap">
+  <div class="top-nav">
+    <div onclick="history.back()" style="cursor:pointer; font-size: 20px;">←</div>
+    <div class="balance-box" id="userBalance">0.00 🇱🇧</div>
   </div>
 
-  <div class="wrap">
-    <div class="top-row">
-      <div class="back-btn" onclick="location.href='services.html'">←</div>
-      <div class="wallet-status">
-        <span style="color:#ffd700">★</span>
-        <span class="balance-val" id="userBalance">0.00 🇱🇧</span>
-      </div>
-    </div>
+  <h2 style="font-family:'Orbitron'; font-weight:900; font-size:22px; margin:0;">RECHARGE</h2>
+  <p style="opacity:0.5; font-size:12px; margin-top:5px;">Select service or transfer credit</p>
 
-    <div style="margin-bottom: 20px;">
-      <h2 style="margin:0; font-weight:900; font-size:22px;">RECHARGE</h2>
-      <p style="margin:5px 0 0; font-family:'Cairo'; font-size:12px; opacity:0.6;">Alfa, Touch, and Credit Transfer</p>
-    </div>
-
-    <div class="filters-scroll" id="mainFilters">
-      <div class="f-pill active" data-mode="ALFA">ALFA</div>
-      <div class="f-pill" data-mode="MTC">TOUCH</div>
-      <div class="f-pill" data-mode="CREDIT_TRANSFER">CREDIT TRANSFER</div>
-    </div>
-
-    <div class="filters-scroll" id="subFilters">
-      <div class="f-pill active" data-sub="CARDS">Cards</div>
-      <div class="f-pill" data-sub="USHARE">uShare</div>
-      <div class="f-pill" data-sub="INTERNET">Internet</div>
-    </div>
-
-    <div id="rechargeList" class="list"></div>
-
-    <div id="ctPanel" class="ct-card" style="display:none;">
-      <input type="number" id="ctAmt" class="ct-input" placeholder="Amount to Send ($)">
-      <input type="number" id="ctPhone" class="ct-input" placeholder="70123456" style="margin-top:10px;">
-      <div id="ctTotalDisplay" style="text-align:center; font-size:24px; font-weight:900; color:var(--neon-blue); margin-top:15px;">$0.00</div>
-      <button class="buy-btn" style="width:100%; margin-top:15px; padding:15px;">CONFIRM TRANSFER</button>
-    </div>
+  <div class="f-scroll">
+    <div class="f-pill active" data-cat="ALFA">ALFA</div>
+    <div class="f-pill" data-cat="MTC">TOUCH</div>
+    <div class="f-pill" data-cat="INTERNET">INTERNET</div>
+    <div class="f-pill" data-cat="CT">CREDIT TRANSFER</div>
   </div>
 
-  <div class="modal" id="buyModal">
-    <div class="modal-content">
-      <h3 id="modalInfo" style="text-align:center; color:var(--neon-blue);"></h3>
-      <input type="number" id="mPhone" style="width:100%; padding:12px; margin:10px 0; border-radius:10px;" placeholder="Phone Number">
-      <div style="display:flex; gap:10px;">
-        <button class="f-pill" style="flex:1;" onclick="closeModal()">CANCEL</button>
-        <button class="buy-btn" style="flex:1;">BUY NOW</button>
-      </div>
+  <div id="product-list"></div>
+
+  <div id="ct-panel" style="display:none;">
+    <div class="ct-container">
+      <label style="font-size:11px; opacity:0.6; margin-bottom:8px; display:block;">AMOUNT TO SEND ($)</label>
+      <input type="number" id="ctAmt" class="ct-input" placeholder="0.00">
+      <label style="font-size:11px; opacity:0.6; margin-bottom:8px; display:block;">RECIPIENT PHONE</label>
+      <input type="number" id="ctPhone" class="ct-input" placeholder="70 000 000">
+      <div class="ct-res" id="ctTotalDisplay">$0.00</div>
+      <button class="buy-btn" style="width:100%; padding:15px; font-size:14px;">TRANSFER NOW</button>
     </div>
   </div>
+</div>
 
 <script>
-  // تعطيل وضع الصيانة
-  const maintenanceMode = false; 
-  if (maintenanceMode) document.getElementById('maintenance-screen').style.display = 'flex';
-
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let currentMode = "ALFA";
-  let currentSub = "CARDS";
+  let activeFilter = "ALFA";
 
-  async function updateBalance() {
+  async function loadBalance() {
     const { data: { session } } = await sb.auth.getSession();
-    if (session) {
+    if(session) {
       const { data } = await sb.from('profiles').select('balance').eq('id', session.user.id).single();
-      if(data) document.getElementById('userBalance').innerText = `${Number(data.balance || 0).toFixed(2)} 🇱🇧`;
+      if(data) document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} 🇱🇧`;
     }
   }
 
-  async function loadItems() {
-    const list = document.getElementById('rechargeList');
-    const ctPanel = document.getElementById('ctPanel');
-    const subFilters = document.getElementById('subFilters');
+  async function fetchProducts() {
+    const listEl = document.getElementById('product-list');
+    const ctEl = document.getElementById('ct-panel');
+    
+    if(activeFilter === "CT") {
+      listEl.innerHTML = ""; ctEl.style.display = "block"; return;
+    }
+    
+    ctEl.style.display = "none";
+    listEl.innerHTML = "<p style='text-align:center; opacity:0.5;'>Scanning Baroud Servers...</p>";
 
-    if (currentMode === 'CREDIT_TRANSFER') {
-      list.innerHTML = ""; subFilters.style.display = "none"; ctPanel.style.display = "block"; return;
+    // منجيب كل شي بـ Category "Phone recharge" وبنفلتر حسب الـ Pill
+    const { data: prods } = await sb.from('products')
+      .select('*')
+      .eq('category', 'Phone recharge')
+      .ilike('title', `%${activeFilter}%`)
+      .eq('active', true);
+
+    if(!prods || prods.length === 0) {
+      listEl.innerHTML = "<p style='text-align:center; opacity:0.5;'>Coming Soon...</p>";
+      return;
     }
 
-    ctPanel.style.display = "none";
-    subFilters.style.display = "flex";
-    list.innerHTML = "<div style='text-align:center; opacity:0.5;'>Loading...</div>";
-
-    // البحث عن Alfa أو MTC (Touch) مع الفئة
-    const queryTerm = `%${currentMode}%${currentSub}%`;
-    const { data: prods } = await sb.from('products').select('id, title').ilike('title', queryTerm).eq('active', true);
-
-    if (prods && prods.length > 0) {
-      const ids = prods.map(p => p.id);
-      const { data: plans } = await sb.from('product_plan_prices').select('*').in('product_id', ids).eq('active', true).order('price', {ascending:true});
-      renderPlans(plans || []);
-    } else {
-      list.innerHTML = "<div style='text-align:center; opacity:0.5;'>Coming Soon...</div>";
-    }
-  }
-
-  function renderPlans(plans) {
-    const list = document.getElementById('rechargeList');
-    list.innerHTML = plans.map(p => `
-      <div class="item-card">
-        <div class="item-info">
-          <div class="item-icon">${currentMode === 'ALFA' ? '🔴' : '🔵'}</div>
+    listEl.innerHTML = prods.map(p => `
+      <div class="card">
+        <div class="card-info">
+          <div class="card-icon">${activeFilter === 'ALFA' ? '🔴' : (activeFilter === 'MTC' ? '🔵' : '🌐')}</div>
           <div>
-            <div class="item-title">${p.plan_label}</div>
-            <div class="item-price">$${Number(p.price).toFixed(2)}</div>
+            <div class="card-title">${p.title}</div>
+            <div class="card-price">$${p.price.toFixed(2)}</div>
           </div>
         </div>
-        <button class="buy-btn" onclick="openBuyModal('${p.plan_label}', ${p.price})">BUY</button>
+        <button class="buy-btn" onclick="location.href='order.html?id=${p.id}'">BUY</button>
       </div>
     `).join('');
   }
 
-  function openBuyModal(label, price) {
-    document.getElementById('modalInfo').innerText = `${label} - $${price.toFixed(2)}`;
-    document.getElementById('buyModal').style.display = 'flex';
-  }
+  // Credit Transfer Logic
+  document.getElementById('ctAmt').oninput = (e) => {
+    const val = parseFloat(e.target.value) || 0;
+    const rate = activeFilter === 'ALFA' ? 1.30 : 1.25; // فيك تعدل النسبة هون
+    document.getElementById('ctTotalDisplay').innerText = `$${(val * rate).toFixed(2)}`;
+  };
 
-  function closeModal() { document.getElementById('buyModal').style.display = 'none'; }
-
-  document.querySelectorAll('#mainFilters .f-pill').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('#mainFilters .f-pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentMode = btn.dataset.mode;
-      loadItems();
-    }
+  document.querySelectorAll('.f-pill').forEach(pill => {
+    pill.onclick = () => {
+      document.querySelectorAll('.f-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeFilter = pill.dataset.cat;
+      fetchProducts();
+    };
   });
 
-  document.querySelectorAll('#subFilters .f-pill').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('#subFilters .f-pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentSub = btn.dataset.sub;
-      loadItems();
-    }
-  });
-
-  updateBalance();
-  loadItems();
+  loadBalance();
+  fetchProducts();
 </script>
 </body>
 </html>
