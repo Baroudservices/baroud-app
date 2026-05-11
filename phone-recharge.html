@@ -19,11 +19,12 @@
     .card-info { display: flex; align-items: center; gap: 12px; }
     .card-icon { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid var(--border); }
     .card-title { font-weight: 700; font-size: 13px; }
-    .card-price { color: var(--neon-blue); font-family: 'Orbitron'; font-weight: 900; font-size: 15px; margin-top: 2px; }
-    .buy-btn { background: var(--neon-blue); color: #000; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 900; font-size: 11px; cursor: pointer; font-family: 'Orbitron'; }
+    .card-price { color: var(--neon-blue); font-family: 'Orbitron'; font-weight: 900; font-size: 15px; }
+    .buy-btn { background: var(--neon-blue); color: #000; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 900; font-size: 11px; cursor: pointer; font-family: 'Orbitron'; }
     .ct-container { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 20px; padding: 20px; }
     .ct-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-size: 18px; font-weight: 900; outline: none; margin-bottom: 12px; text-align: center; }
     .ct-res { text-align: center; font-size: 30px; font-weight: 900; color: var(--neon-blue); margin: 10px 0; font-family: 'Orbitron'; }
+    .loading { text-align: center; opacity: 0.5; padding: 20px; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -34,15 +35,15 @@
     <div class="balance-box" id="userBalance">0.00 🇱🇧</div>
   </div>
 
-  <h2 id="pageTitle" style="font-family:'Orbitron'; font-weight:900; font-size:22px; margin-bottom:15px; letter-spacing:1px;">RECHARGE</h2>
+  <h2 id="pageTitle" style="font-family:'Orbitron'; font-weight:900; font-size:22px; margin-bottom:15px;">RECHARGE</h2>
   
   <div class="f-grid">
-    <div class="f-pill active" data-cat="Alfa">Alfa Cards</div>
-    <div class="f-pill" data-cat="Touch">Touch Cards</div>
-    <div class="f-pill" data-cat="Internet">Internet</div>
-    <div class="f-pill" data-cat="uShare">uShare</div>
-    <div class="f-pill" data-cat="Alfa CREDIT">Alfa Credit</div>
-    <div class="f-pill" data-cat="Mtc CREDIT">Mtc Credit</div>
+    <div class="f-pill active" data-cat="Alfa Card">Alfa Cards</div>
+    <div class="f-pill" data-cat="Touch Card">Touch Cards</div>
+    <div class="f-pill" data-cat="Alfa Internet">Internet</div>
+    <div class="f-pill" data-cat="Alfa uShare">uShare</div>
+    <div class="f-pill" data-cat="ALFA CREDIT">Alfa Credit</div>
+    <div class="f-pill" data-cat="MTC CREDIT">Mtc Credit</div>
   </div>
 
   <div id="product-list"></div>
@@ -52,7 +53,7 @@
       <input type="number" id="ctAmt" class="ct-input" placeholder="Amount ($)">
       <input type="number" id="ctPhone" class="ct-input" placeholder="70 000 000">
       <div class="ct-res" id="ctTotalDisplay">$0.00</div>
-      <button class="buy-btn" id="confirmCT" style="width:100%; padding:15px; font-size:14px;">CONFIRM TRANSFER</button>
+      <button class="buy-btn" onclick="sendCreditOrder()" style="width:100%; padding:15px; font-size:14px;">CONFIRM TRANSFER</button>
     </div>
   </div>
 </div>
@@ -62,14 +63,25 @@
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let activeFilter = "Alfa";
+  let activeFilter = "Alfa Card";
+  let currentUser = null;
 
-  async function loadBalance() {
+  async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if(session) {
-      const { data } = await sb.from('profiles').select('balance').eq('id', session.user.id).single();
-      if(data) document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} 🇱🇧`;
+      currentUser = session.user;
+      loadBalance();
+    } else {
+      alert("Please login first");
+      window.location.href = "login.html";
     }
+    fetchProducts();
+  }
+
+  async function loadBalance() {
+    const { data } = await sb.from('profiles').select('balance').eq('id', currentUser.id).single();
+    if(data) document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} 🇱🇧`;
+    return data.balance;
   }
 
   async function fetchProducts() {
@@ -81,10 +93,9 @@
     }
     
     ctEl.style.display = "none";
-    listEl.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Loading Baroud Data...</p>";
+    listEl.innerHTML = "<div class='loading'>Scanning Baroud Services...</div>";
 
-    // البحث مباشرة في جدول المنتجات بفلتر ذكي
-    const { data: prods, error } = await sb.from('products')
+    const { data: prods } = await sb.from('products')
       .select('*')
       .eq('category', 'Phone recharge')
       .ilike('title', `%${activeFilter}%`)
@@ -92,33 +103,77 @@
       .order('price', {ascending: true});
 
     if(!prods || prods.length === 0) {
-      listEl.innerHTML = "<p style='text-align:center; opacity:0.5; padding:20px;'>Coming Soon...</p>";
+      listEl.innerHTML = "<div class='loading'>Coming Soon...</div>";
       return;
     }
 
     listEl.innerHTML = prods.map(p => `
       <div class="card">
         <div class="card-info">
-          <div class="card-icon">${p.title.toUpperCase().includes('ALFA') ? '🔴' : '🔵'}</div>
+          <div class="card-icon">${p.title.includes('Alfa') ? '🔴' : '🔵'}</div>
           <div>
             <div class="card-title">${p.title}</div>
             <div class="card-price">$${p.price.toFixed(2)}</div>
           </div>
         </div>
-        <button class="buy-btn" onclick="goToOrder('${p.id}')">BUY</button>
+        <button class="buy-btn" onclick="handlePurchase(${JSON.stringify(p).replace(/"/g, '&quot;')})">BUY</button>
       </div>
     `).join('');
   }
 
-  // دالة تحويل لصفحة الطلب مع التأكد من اسم الصفحة
-  function goToOrder(id) {
-    // إذا اسم الصفحة عندك orders.html غيرها هون
-    window.location.href = `my-orders.html?id=${id}`;
+  // معالجة شراء الكروت والإنترنت
+  async function handlePurchase(product) {
+    const balance = await loadBalance();
+    if (balance < product.price) return alert("Insufficient Balance! ❌");
+
+    if (!confirm(`Buy ${product.title} for $${product.price}?`)) return;
+
+    const { error: orderErr } = await sb.from('orders').insert([{
+      user_id: currentUser.id,
+      product_id: product.id,
+      amount: product.price,
+      status: 'pending',
+      details: `Recharge: ${product.title}`
+    }]);
+
+    if (!orderErr) {
+      await sb.from('profiles').update({ balance: balance - product.price }).eq('id', currentUser.id);
+      alert("Order Placed Successfully! ✅");
+      window.location.href = "my-orders.html";
+    } else {
+      alert("Error processing order.");
+    }
+  }
+
+  // معالجة طلب الكريديت
+  async function sendCreditOrder() {
+    const amount = parseFloat(document.getElementById('ctAmt').value);
+    const phone = document.getElementById('ctPhone').value;
+    const rate = activeFilter === 'ALFA CREDIT' ? 1.44 : 1.39;
+    const totalCost = amount * rate;
+
+    if (!amount || !phone) return alert("Please enter amount and phone!");
+    
+    const balance = await loadBalance();
+    if (balance < totalCost) return alert("Insufficient Balance! ❌");
+
+    const { error: orderErr } = await sb.from('orders').insert([{
+      user_id: currentUser.id,
+      amount: totalCost,
+      status: 'pending',
+      details: `Credit Transfer: ${amount}$ to ${phone} (${activeFilter})`
+    }]);
+
+    if (!orderErr) {
+      await sb.from('profiles').update({ balance: balance - totalCost }).eq('id', currentUser.id);
+      alert("Credit Request Sent! ✅");
+      window.location.href = "my-orders.html";
+    }
   }
 
   document.getElementById('ctAmt').oninput = (e) => {
     const val = parseFloat(e.target.value) || 0;
-    const rate = activeFilter === 'Alfa CREDIT' ? 1.44 : 1.39;
+    const rate = activeFilter === 'ALFA CREDIT' ? 1.44 : 1.39;
     document.getElementById('ctTotalDisplay').innerText = `$${(val * rate).toFixed(2)}`;
   };
 
@@ -131,8 +186,7 @@
     };
   });
 
-  loadBalance();
-  fetchProducts();
+  init();
 </script>
 </body>
 </html>
