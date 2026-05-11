@@ -3,99 +3,143 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin Orders</title>
+<title>Admin Orders | BaroudApp</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  body{ margin:0; font-family:system-ui,Arial; background:linear-gradient(180deg,#0b1424,#050a14); color:#fff; min-height:100vh; padding:16px; }
-  .wrap{max-width:880px;margin:auto}
-  .top{ display:flex;align-items:center;gap:10px; margin-bottom:14px; }
-  .back{ padding:10px 14px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); cursor:pointer; text-decoration: none; color: white; }
-  h2{margin:0;font-size:22px}
-  .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:14px; margin-bottom:12px; }
-  .row{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
+  :root {
+    --neon-blue: #0aa0ff;
+    --neon-green: #4ade80;
+    --neon-red: #f87171;
+    --bg-main: #0b1424;
+    --card-bg: rgba(255, 255, 255, 0.04);
+    --border: rgba(255, 255, 255, 0.1);
+  }
+
+  body { 
+    margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-main); 
+    color: #fff; min-height: 100vh; padding: 16px; line-height: 1.6;
+  }
   
-  .name{ font-weight:900; display: flex; align-items: center; }
+  .wrap { max-width: 900px; margin: auto; }
+  
+  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+  .back-btn { 
+    text-decoration: none; color: #fff; background: var(--card-bg); 
+    padding: 8px 15px; border-radius: 12px; border: 1px solid var(--border); font-weight: 700;
+  }
+
+  h2 { margin: 0; font-weight: 900; letter-spacing: 1px; color: var(--neon-blue); }
+
+  .search-box {
+    width: 100%; padding: 14px; border-radius: 15px; border: 1px solid var(--border);
+    background: rgba(0,0,0,0.3); color: #fff; margin-bottom: 20px; outline: none; box-sizing: border-box;
+  }
+
+  /* Order Card */
+  .card { 
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; 
+    padding: 20px; margin-bottom: 20px; transition: 0.3s; position: relative;
+    backdrop-filter: blur(10px);
+  }
+  .card:hover { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(10, 160, 255, 0.1); }
+
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+  
   .status-dot {
-    width: 10px; height: 10px; 
-    border-radius: 50%; 
-    margin-right: 8px; 
-    display: inline-block;
-    box-shadow: 0 0 8px currentColor;
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px;
+    box-shadow: 0 0 10px currentColor;
   }
-  .st-pending { background-color: #facc15; color: #facc15; }
-  .st-done { background-color: #4ade80; color: #4ade80; }
-  .st-rejected { background-color: #f87171; color: #f87171; }
+  .st-pending { color: #facc15; background: #facc15; }
+  .st-done { color: var(--neon-green); background: var(--neon-green); }
+  .st-rejected { color: var(--neon-red); background: var(--neon-red); }
 
-  .small{opacity:.65;font-size:12px; line-height:1.35}
-  .price{font-weight:900;color:#38bdf8; font-size:18px}
+  .order-title { font-weight: 900; font-size: 18px; display: flex; align-items: center; }
+  .price-tag { font-weight: 900; color: var(--neon-blue); font-size: 20px; }
 
-  select, textarea, input{
-    background:rgba(0,0,0,.25);
-    border:1px solid rgba(255,255,255,.12);
-    color:#fff;
-    border-radius:12px;
-    padding:10px;
-    outline:none;
+  /* Chips */
+  .chip-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
+  .chip {
+    padding: 8px 16px; border-radius: 10px; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border); font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
   }
-  textarea{ width:100%; min-height:120px; resize:vertical; }
+  .chip:hover { background: var(--neon-blue); color: #000; }
 
-  .btn{
-    border:0; cursor:pointer; padding:12px 14px; border-radius:14px;
-    font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff);
+  /* Details Area */
+  .details-box {
+    background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px; margin-top: 10px;
+    border: 1px solid var(--border); display: none;
   }
-  .btn2{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); }
-  .empty{ opacity:.7; text-align:center; margin-top:40px; }
+  .kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+  .kv:last-child { border-bottom: none; }
+  .k { opacity: 0.6; }
+  .v { font-weight: 700; color: #ddd; }
 
-  .details{ margin-top:12px; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:12px; }
-  .kv{ display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
-  .kv:last-child{ border-bottom:0; }
-  .k{ opacity:.7; font-size:12px; font-weight:800; }
-  .v{ font-size:12px; font-weight:900; text-align:right; max-width:65%; word-break:break-word; }
-
-  .chipRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-  .chip{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:10px 12px; border-radius:999px;
-    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
-    font-weight:900; font-size:12px; cursor:pointer; user-select:none;
+  /* Controls */
+  .controls { 
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+    gap: 15px; margin-top: 20px; align-items: flex-end;
+  }
+  
+  label { font-size: 11px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 5px; display: block; }
+  
+  select {
+    width: 100%; padding: 12px; border-radius: 12px; background: #161b22; 
+    border: 1px solid var(--border); color: #fff; outline: none; cursor: pointer;
   }
 
-  .modal{ position:fixed; inset:0; background: rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; padding:16px; z-index:99999; }
-  .modalCard{ width:min(720px,100%); background: rgba(12, 16, 24, 0.98); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:16px; }
-  .mTitle{ font-weight:950; font-size:16px; margin-bottom:10px; }
-  .mSmall{ opacity:.7; font-weight:800; font-size:12px; margin-top:6px; }
-  .mErr{ color:#fca5a5; font-weight:900; font-size:12px; margin-top:8px; min-height:16px; }
-  .mBtns{ display:flex; gap:10px; margin-top: 12px; }
-  .mBtn{ flex:1; border:0; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:950; color:#fff; background:linear-gradient(90deg,#0aa0ff,#2a74ff); }
-  .mBtn.secondary{ background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.10); }
+  .save-btn {
+    background: linear-gradient(135deg, var(--neon-blue), #0072ff);
+    color: #fff; border: none; padding: 13px; border-radius: 12px;
+    font-weight: 900; cursor: pointer; transition: 0.3s;
+  }
+  .save-btn:active { transform: scale(0.96); }
+
+  /* WP Alert Link */
+  .wp-link {
+    display: inline-flex; align-items: center; gap: 5px; color: var(--neon-green);
+    text-decoration: none; font-weight: 900; font-size: 12px; margin-top: 10px;
+    padding: 5px 10px; background: rgba(74, 222, 128, 0.1); border-radius: 8px;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: none; align-items: center; justify-content: center; z-index: 999;
+  }
+  .modal-content {
+    background: #0d1117; width: 90%; max-width: 500px; padding: 25px;
+    border-radius: 24px; border: 1px solid var(--border);
+  }
+  textarea {
+    width: 100%; min-height: 120px; background: #161b22; border: 1px solid var(--border);
+    color: #fff; border-radius: 15px; padding: 15px; outline: none; margin-top: 10px; font-family: inherit;
+  }
+
+  .empty-state { text-align: center; padding: 50px; opacity: 0.5; font-weight: 700; }
 </style>
 </head>
 
 <body>
 <div class="wrap">
   <div class="top">
-    <a href="admin.html" class="back">←</a>
-    <h2>Admin Orders</h2>
+    <h2>BAROUD CONTROL</h2>
+    <a href="admin.html" class="back-btn">Back</a>
   </div>
 
-  <div class="row" style="margin-bottom:12px">
-    <input id="q" placeholder="Search by order id / user id" style="flex:1; min-width:220px" />
-    <button class="btn btn2" onclick="loadOrders()">Refresh</button>
-  </div>
+  <input type="text" id="q" class="search-box" placeholder="Search by Order ID or User ID..." />
 
   <div id="list"></div>
-  <div id="empty" class="empty" style="display:none">No orders</div>
+  <div id="empty" class="empty-state" style="display:none;">No active orders found.</div>
 </div>
 
 <div class="modal" id="replyModal">
-  <div class="modalCard">
-    <div class="mTitle" id="rmTitle">Admin Reply</div>
-    <div class="mSmall" id="rmMeta"></div>
-    <div style="margin-top:12px;"><textarea id="rmText" placeholder="Write details / delivery info..."></textarea></div>
-    <div class="mErr" id="rmErr"></div>
-    <div class="mBtns">
-      <button class="mBtn secondary" id="rmCancel">Cancel</button>
-      <button class="mBtn" id="rmSave">Save Reply</button>
+  <div class="modal-content">
+    <h3 style="margin:0; color:var(--neon-blue)">Admin Response</h3>
+    <textarea id="rmText" placeholder="Enter delivery info or rejection reason..."></textarea>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="save-btn" style="background:rgba(255,255,255,0.05); flex:1" id="rmCancel">Cancel</button>
+      <button class="save-btn" style="flex:2" id="rmSave">Confirm Reply</button>
     </div>
   </div>
 </div>
@@ -105,97 +149,91 @@ const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function toArr(x){ return Array.isArray(x) ? x : []; }
-
-async function requireAdmin(){
-  const { data: { session } } = await sb.auth.getSession();
-  if(!session){ location.replace("login.html"); return false; }
-  const { data: prof } = await sb.from("profiles").select("is_admin").eq("id", session.user.id).single();
-  if(!prof?.is_admin){ location.replace("services.html"); return false; }
-  return true;
-}
-
-function pickDetails(o){
-  const candidates = [
-    ["phone_number","Phone"],["number","Phone"],["whatsapp","WhatsApp"],["player_id","Player ID"],
-    ["player_name","Player Name"],["account_email","Email"],["account_password","Password"],["note","Note"]
-  ];
-  const out = [];
-  candidates.forEach(([key,label])=>{ if(o && o[key]) out.push([label, String(o[key])]); });
-  return out;
-}
-
 let ordersCache = [];
 let titleById = {};
 let currentReplyOrderId = null;
 
 async function loadOrders(){
-  const listEl = document.getElementById("list");
-  listEl.innerHTML = `<div class="empty">Loading...</div>`;
-  if(!(await requireAdmin())) return;
-
   const { data: orders, error } = await sb.from("orders").select("*").order("created_at", { ascending:false });
-  if(error) { listEl.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
-  
-  ordersCache = toArr(orders);
-  if(!ordersCache.length) { document.getElementById("empty").style.display = "block"; listEl.innerHTML=""; return; }
+  if(error) return;
+  ordersCache = orders || [];
   
   const ids = [...new Set(ordersCache.map(o => o.product_id).filter(Boolean))];
   if(ids.length){
     const { data: prods } = await sb.from("products").select("id,title").in("id", ids);
-    toArr(prods).forEach(p => titleById[p.id] = p.title);
+    prods?.forEach(p => titleById[p.id] = p.title);
   }
   renderOrders();
 }
 
 function renderOrders(){
   const listEl = document.getElementById("list");
-  const term = (document.getElementById("q").value || "").trim().toLowerCase();
-  const filtered = term ? ordersCache.filter(o => String(o.id).includes(term) || String(o.user_id).includes(term)) : ordersCache;
+  const term = document.getElementById("q").value.toLowerCase();
+  const filtered = ordersCache.filter(o => String(o.id).includes(term) || String(o.user_id).includes(term));
 
   document.getElementById("empty").style.display = filtered.length ? "none" : "block";
+
   listEl.innerHTML = filtered.map(o => {
     const title = titleById[o.product_id] || o.product_title || "Product";
-    const status = (o.status || "pending").toLowerCase();
-    const delivery = (o.delivery_status || "pending").toLowerCase();
-    const dotClass = delivery === "done" ? "st-done" : delivery === "rejected" ? "st-rejected" : "st-pending";
-    const details = pickDetails(o);
-
+    const dStatus = (o.delivery_status || "pending").toLowerCase();
+    const dotClass = dStatus === "done" ? "st-done" : dStatus === "rejected" ? "st-rejected" : "st-pending";
+    
     return `
-      <div class="card">
-        <div class="row">
+      <div class="card" id="card_${o.id}">
+        <div class="card-header">
           <div>
-            <div class="name"><span class="status-dot ${dotClass}"></span>${esc(title)}</div>
-            <div class="small">#${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
+            <div class="order-title"><span class="status-dot ${dotClass}"></span>${title}</div>
+            <div class="small" style="font-size:11px; opacity:0.5">#${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
           </div>
-          <div class="price">$${Number(o.price || 0).toFixed(2)}</div>
+          <div class="price-tag">$${Number(o.price || 0).toFixed(2)}</div>
         </div>
-        <div class="chipRow">
-          <div class="chip" onclick="toggleDetails(${o.id})">📦 Details</div>
-          <div class="chip" onclick="openReplyModal(${o.id})">💬 Admin Reply</div>
-          <div class="chip" style="opacity:.7;cursor:default;">${esc(o.admin_reply?.slice(0,20))}${o.admin_reply?.length>20?'...':''}</div>
+
+        <div class="chip-row">
+          <div class="chip" onclick="toggleDetails(${o.id})">📦 View Details</div>
+          <div class="chip" onclick="openReplyModal(${o.id})">💬 Edit Reply</div>
         </div>
-        <div class="details" id="details_${o.id}" style="display:none;">
-          ${details.map(([k,v])=>`<div class="kv"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}
+
+        <div class="details-box" id="details_${o.id}"></div>
+
+        <div class="controls">
+          <div>
+            <label>Payment</label>
+            <select id="status_${o.id}">
+              <option value="pending" ${o.status==="pending"?"selected":""}>Pending</option>
+              <option value="paid" ${o.status==="paid"?"selected":""}>Paid</option>
+            </select>
+          </div>
+          <div>
+            <label>Delivery</label>
+            <select id="delivery_${o.id}">
+              <option value="pending" ${dStatus==="pending"?"selected":""}>Pending</option>
+              <option value="done" ${dStatus==="done"?"selected":""}>Done</option>
+              <option value="rejected" ${dStatus==="rejected"?"selected":""}>Rejected</option>
+            </select>
+          </div>
+          <button class="save-btn" onclick="saveOrder(${o.id})">UPDATE</button>
         </div>
-        <div class="row" style="margin-top:12px">
-          <div><div class="small">Payment</div><select id="status_${o.id}"><option value="pending" ${status==="pending"?"selected":""}>pending</option><option value="paid" ${status==="paid"?"selected":""}>paid</option></select></div>
-          <div><div class="small">Delivery</div><select id="delivery_${o.id}"><option value="pending" ${delivery==="pending"?"selected":""}>pending</option><option value="done" ${delivery==="done"?"selected":""}>done</option><option value="rejected" ${delivery==="rejected"?"selected":""}>rejected</option></select></div>
-          <div style="min-width:150px"><button class="btn" style="width:100%" onclick="saveOrder(${o.id})">Save</button><div id="msg_${o.id}" class="small" style="margin-top:5px"></div></div>
-        </div>
-        <input type="hidden" id="reply_${o.id}" value="${esc(o.admin_reply)}" />
+        <div id="msg_${o.id}" style="margin-top:10px; font-size:12px; text-align:right"></div>
+        <input type="hidden" id="reply_${o.id}" value="${o.admin_reply || ''}" />
       </div>`;
   }).join("");
 }
 
-function toggleDetails(id){ const el = document.getElementById(`details_${id}`); el.style.display = el.style.display === "none" ? "block" : "none"; }
+function toggleDetails(id){
+  const el = document.getElementById(`details_${id}`);
+  if(el.style.display === "block") { el.style.display = "none"; return; }
+  const o = ordersCache.find(x => x.id === id);
+  const keys = ["phone_number", "whatsapp", "player_id", "player_name", "account_email", "account_password", "note"];
+  el.innerHTML = keys.filter(k => o[k]).map(k => `<div class="kv"><span class="k">${k}</span><span class="v">${o[k]}</span></div>`).join("");
+  el.style.display = "block";
+}
 
 function openReplyModal(id){
   currentReplyOrderId = id;
   document.getElementById("rmText").value = document.getElementById(`reply_${id}`).value;
   document.getElementById("replyModal").style.display = "flex";
 }
+
 document.getElementById("rmCancel").onclick = () => document.getElementById("replyModal").style.display = "none";
 document.getElementById("rmSave").onclick = () => {
   document.getElementById(`reply_${currentReplyOrderId}`).value = document.getElementById("rmText").value;
@@ -204,32 +242,48 @@ document.getElementById("rmSave").onclick = () => {
 
 async function saveOrder(id){
   const msg = document.getElementById(`msg_${id}`);
-  msg.textContent = "Saving...";
+  msg.innerHTML = "Saving...";
   
   const status = document.getElementById(`status_${id}`).value;
   const delivery_status = document.getElementById(`delivery_${id}`).value;
   const admin_reply = document.getElementById(`reply_${id}`).value;
 
-  const { error } = await sb.from("orders").update({ status, delivery_status, admin_reply, admin_reply_at: new Date() }).eq("id", id);
+  // 1. Get Phone Number (Order or Profile)
+  const order = ordersCache.find(o => o.id === id);
+  let phone = order.phone_number || order.number || order.whatsapp || "";
+  
+  if(!phone && order.user_id){
+    const { data: prof } = await sb.from("profiles").select("phone,whatsapp").eq("id", order.user_id).single();
+    if(prof) phone = prof.phone || prof.whatsapp || "";
+  }
+
+  // 2. Update Database
+  const { error } = await sb.from("orders").update({ 
+    status, delivery_status, admin_reply, admin_reply_at: new Date() 
+  }).eq("id", id);
+
   if(error) { msg.textContent = "Error!"; return; }
 
-  msg.textContent = "Saved ✅";
+  msg.innerHTML = "Saved ✅";
   
+  // 3. WhatsApp Logic
   if(delivery_status === "done" || delivery_status === "rejected"){
-    const order = ordersCache.find(o => o.id === id);
-    let phone = order.phone_number || order.number || order.whatsapp || "";
-    
-    if(!phone && order.user_id){
-      const { data: prof } = await sb.from("profiles").select("phone,whatsapp").eq("id", order.user_id).single();
-      if(prof) phone = prof.phone || prof.whatsapp || "";
-    }
-
     if(phone){
-      const text = `Hello, Order #${id} is ${delivery_status.toUpperCase()} ✅\nCheck here: https://baroudapp.com/my-orders.html`;
-      window.open(`https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`, '_blank');
+      const text = `Hello, Order #${id} is ${delivery_status.toUpperCase()} ✅\nDetails: ${admin_reply}\nCheck here: https://baroudapp.com/my-orders.html`;
+      const wpUrl = `https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
+      
+      const win = window.open(wpUrl, '_blank');
+      
+      // If popup blocked, show manual button
+      if(!win || win.closed || typeof win.closed == 'undefined') {
+        msg.innerHTML += ` <a href="${wpUrl}" target="_blank" class="wp-link">Send WhatsApp 🟢</a>`;
+      }
+    } else {
+      msg.innerHTML += " (No Phone Found)";
     }
   }
-  loadOrders();
+  
+  setTimeout(loadOrders, 1000);
 }
 
 document.getElementById("q").oninput = renderOrders;
