@@ -13,39 +13,23 @@
       --card-bg: rgba(255, 255, 255, 0.03);
       --border: rgba(255, 255, 255, 0.08);
     }
-
-    body {
-      margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-dark); color: #fff; min-height: 100vh; padding: 15px;
-    }
-
+    body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-dark); color: #fff; min-height: 100vh; padding: 15px; }
     .wrap { max-width: 450px; margin: 0 auto; padding-bottom: 50px; }
-
-    /* Wallet Style (مثل باقي الصفحات) */
     .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
     .balance-box { background: rgba(56, 189, 248, 0.1); padding: 8px 15px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); font-family: 'Orbitron'; font-size: 13px; color: var(--neon-blue); font-weight: 900; }
-
-    /* Filters Scroll */
     .f-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 0 20px; scrollbar-width: none; }
     .f-scroll::-webkit-scrollbar { display: none; }
-    .f-pill { flex: 0 0 auto; padding: 10px 22px; border-radius: 14px; background: var(--card-bg); border: 1px solid var(--border); font-size: 12px; font-weight: 900; cursor: pointer; transition: 0.3s; }
+    .f-pill { flex: 0 0 auto; padding: 10px 20px; border-radius: 14px; background: var(--card-bg); border: 1px solid var(--border); font-size: 11px; font-weight: 900; cursor: pointer; transition: 0.3s; }
     .f-pill.active { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); }
-
-    /* Product Card (مثل account.html) */
-    .card {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px;
-      padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
-      backdrop-filter: blur(10px);
-    }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); }
     .card-info { display: flex; align-items: center; gap: 12px; }
-    .card-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid var(--border); }
-    .card-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+    .card-icon { width: 45px; height: 45px; border-radius: 12px; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid var(--border); }
+    .card-title { font-weight: 800; font-size: 13px; margin-bottom: 4px; }
     .card-price { color: var(--neon-blue); font-family: 'Orbitron'; font-weight: 900; font-size: 15px; }
-    .buy-btn { background: var(--neon-blue); color: #000; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; font-family: 'Orbitron'; }
-
-    /* Credit Transfer Section */
+    .buy-btn { background: var(--neon-blue); color: #000; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 11px; cursor: pointer; font-family: 'Orbitron'; }
     .ct-container { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 22px; padding: 20px; }
-    .ct-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 15px; border-radius: 14px; color: #fff; font-size: 18px; font-weight: 900; outline: none; margin-bottom: 10px; }
-    .ct-res { text-align: center; font-size: 28px; font-weight: 900; color: var(--neon-blue); margin: 15px 0; font-family: 'Orbitron'; }
+    .ct-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 15px; border-radius: 14px; color: #fff; font-size: 18px; font-weight: 900; outline: none; margin-bottom: 10px; text-align: center; }
+    .ct-res { text-align: center; font-size: 32px; font-weight: 900; color: var(--neon-blue); margin: 15px 0; font-family: 'Orbitron'; }
   </style>
 </head>
 <body>
@@ -56,26 +40,26 @@
     <div class="balance-box" id="userBalance">0.00 🇱🇧</div>
   </div>
 
-  <h2 style="font-family:'Orbitron'; font-weight:900; font-size:22px; margin:0;">RECHARGE</h2>
-  <p style="opacity:0.5; font-size:12px; margin-top:5px;">Select service or transfer credit</p>
-
+  <h2 id="pageTitle" style="font-family:'Orbitron'; font-weight:900; font-size:22px; margin:0;">ALFA CARDS</h2>
+  
   <div class="f-scroll">
-    <div class="f-pill active" data-cat="ALFA">ALFA</div>
-    <div class="f-pill" data-cat="MTC">TOUCH</div>
-    <div class="f-pill" data-cat="INTERNET">INTERNET</div>
-    <div class="f-pill" data-cat="CT">CREDIT TRANSFER</div>
+    <div class="f-pill active" data-cat="ALFA CARDS">Alfa Cards</div>
+    <div class="f-pill" data-cat="TOUCH CARDS">Touch Cards</div>
+    <div class="f-pill" data-cat="ALFA INTERNET">Internet</div>
+    <div class="f-pill" data-cat="ALFA USHARE">uShare</div>
+    <div class="f-pill" data-cat="ALFA CREDIT">Alfa Credit</div>
+    <div class="f-pill" data-cat="MTC CREDIT">Mtc Credit</div>
   </div>
 
   <div id="product-list"></div>
 
   <div id="ct-panel" style="display:none;">
     <div class="ct-container">
-      <label style="font-size:11px; opacity:0.6; margin-bottom:8px; display:block;">AMOUNT TO SEND ($)</label>
+      <label id="ctLabel" style="font-size:11px; opacity:0.6; margin-bottom:8px; display:block; text-align:center;">AMOUNT ($)</label>
       <input type="number" id="ctAmt" class="ct-input" placeholder="0.00">
-      <label style="font-size:11px; opacity:0.6; margin-bottom:8px; display:block;">RECIPIENT PHONE</label>
-      <input type="number" id="ctPhone" class="ct-input" placeholder="70 000 000">
+      <input type="number" id="ctPhone" class="ct-input" placeholder="Phone Number">
       <div class="ct-res" id="ctTotalDisplay">$0.00</div>
-      <button class="buy-btn" style="width:100%; padding:15px; font-size:14px;">TRANSFER NOW</button>
+      <button class="buy-btn" style="width:100%; padding:15px; font-size:14px;">CONFIRM TRANSFER</button>
     </div>
   </div>
 </div>
@@ -85,7 +69,7 @@
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let activeFilter = "ALFA";
+  let activeFilter = "ALFA CARDS";
 
   async function loadBalance() {
     const { data: { session } } = await sb.auth.getSession();
@@ -98,15 +82,18 @@
   async function fetchProducts() {
     const listEl = document.getElementById('product-list');
     const ctEl = document.getElementById('ct-panel');
+    document.getElementById('pageTitle').innerText = activeFilter;
     
-    if(activeFilter === "CT") {
-      listEl.innerHTML = ""; ctEl.style.display = "block"; return;
+    if(activeFilter.includes("CREDIT")) {
+      listEl.innerHTML = ""; ctEl.style.display = "block";
+      document.getElementById('ctLabel').innerText = activeFilter + " AMOUNT ($)";
+      resetCT();
+      return;
     }
     
     ctEl.style.display = "none";
-    listEl.innerHTML = "<p style='text-align:center; opacity:0.5;'>Scanning Baroud Servers...</p>";
+    listEl.innerHTML = "<p style='text-align:center; opacity:0.3; font-size:12px; padding:20px;'>Loading Baroud Services...</p>";
 
-    // منجيب كل شي بـ Category "Phone recharge" وبنفلتر حسب الـ Pill
     const { data: prods } = await sb.from('products')
       .select('*')
       .eq('category', 'Phone recharge')
@@ -114,14 +101,14 @@
       .eq('active', true);
 
     if(!prods || prods.length === 0) {
-      listEl.innerHTML = "<p style='text-align:center; opacity:0.5;'>Coming Soon...</p>";
+      listEl.innerHTML = "<p style='text-align:center; opacity:0.5; padding:20px;'>Coming Soon...</p>";
       return;
     }
 
     listEl.innerHTML = prods.map(p => `
       <div class="card">
         <div class="card-info">
-          <div class="card-icon">${activeFilter === 'ALFA' ? '🔴' : (activeFilter === 'MTC' ? '🔵' : '🌐')}</div>
+          <div class="card-icon">${getIcon(activeFilter)}</div>
           <div>
             <div class="card-title">${p.title}</div>
             <div class="card-price">$${p.price.toFixed(2)}</div>
@@ -132,10 +119,23 @@
     `).join('');
   }
 
-  // Credit Transfer Logic
+  function getIcon(f) {
+    if(f.includes('ALFA')) return '🔴';
+    if(f.includes('TOUCH')) return '🔵';
+    if(f.includes('INTERNET')) return '🌐';
+    return '📦';
+  }
+
+  function resetCT() {
+    document.getElementById('ctAmt').value = "";
+    document.getElementById('ctPhone').value = "";
+    document.getElementById('ctTotalDisplay').innerText = "$0.00";
+  }
+
   document.getElementById('ctAmt').oninput = (e) => {
     const val = parseFloat(e.target.value) || 0;
-    const rate = activeFilter === 'ALFA' ? 1.30 : 1.25; // فيك تعدل النسبة هون
+    // الحسبة حسب الأرقام اللي بعتتها: 1.44 للألفا و 1.39 للتاتش
+    const rate = activeFilter === 'ALFA CREDIT' ? 1.44 : 1.39;
     document.getElementById('ctTotalDisplay').innerText = `$${(val * rate).toFixed(2)}`;
   };
 
