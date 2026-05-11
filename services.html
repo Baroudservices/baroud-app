@@ -11,6 +11,7 @@
   <style>
     :root {
       --neon-cyan: #00f2ff;
+      --neon-pink: #ff007a;
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -24,7 +25,7 @@
     
     .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 15px 120px; }
 
-    /* ===== TOPBAR (MODERN GLASS) ===== */
+    /* ===== TOPBAR ===== */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 15px 20px; background: rgba(2, 5, 8, 0.85);
@@ -35,7 +36,6 @@
       display: flex; align-items: center; gap: 10px;
       background: var(--glass); padding: 5px 5px 5px 15px;
       border-radius: 20px; border: 1px solid var(--neon-cyan);
-      box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
     }
     .balance-text { font-weight: 900; font-size: 13px; color: var(--neon-cyan); }
     .add-btn { 
@@ -45,6 +45,33 @@
 
     .menu-trigger { font-size: 24px; cursor: pointer; color: #fff; }
 
+    /* ===== OFFERS BUTTON (NEW) ===== */
+    .offers-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(90deg, #ff007a, #ff4b2b);
+      margin: 10px 0 25px; padding: 18px 25px; border-radius: 20px;
+      text-decoration: none; position: relative; overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 0, 122, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .offers-btn:active { transform: scale(0.96); }
+    .off-txt h2 { margin: 0; font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px; }
+    .off-txt p { margin: 2px 0 0; font-size: 10px; opacity: 0.8; font-family: 'Cairo'; }
+    .off-icon { font-size: 24px; animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .offers-btn::after {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shine 3s infinite;
+    }
+    @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
+
     /* ===== BANNER SLIDER ===== */
     .slider-box { 
       width: 100%; height: 180px; border-radius: 24px; overflow: hidden; 
@@ -53,7 +80,7 @@
     .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     .slides img { width: 33.333%; height: 100%; object-fit: cover; }
 
-    /* ===== SEARCH (CLEAN) ===== */
+    /* ===== SEARCH ===== */
     .search-wrap { 
       background: #fff; border-radius: 14px; padding: 0 18px; 
       margin-bottom: 25px; display: flex; align-items: center;
@@ -65,25 +92,22 @@
 
     /* ===== GRID SYSTEM ===== */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    
     .service-card {
       background: var(--glass); border-radius: 24px;
       border: 1px solid var(--glass-border); overflow: hidden;
       text-decoration: none; display: flex; flex-direction: column;
-      transition: 0.3s; height: 190px;
+      height: 190px;
     }
     .service-card:active { transform: scale(0.95); border-color: var(--neon-cyan); }
-    
     .img-box { width: 100%; height: 140px; overflow: hidden; }
-    .img-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-    
-    .label-box { padding: 12px; text-align: center; font-size: 11px; font-weight: 900; color: #fff; letter-spacing: 1px; }
+    .img-box img { width: 100%; height: 100%; object-fit: cover; }
+    .label-box { padding: 12px; text-align: center; font-size: 11px; font-weight: 900; color: #fff; }
 
-    /* ===== DRAWER (RIGHT SIDE) ===== */
+    /* ===== DRAWER ===== */
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 2000; }
     .drawer { 
       position: fixed; top: 0; right: -100%; width: 280px; height: 100%; 
-      background: var(--bg-dark); z-index: 2100; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
+      background: var(--bg-dark); z-index: 2100; transition: 0.5s; 
       padding: 40px 25px; border-left: 1px solid var(--glass-border);
     }
     .drawer.active { right: 0; }
@@ -98,8 +122,8 @@
       display: flex; align-items: center; justify-content: space-around;
       z-index: 1000;
     }
-    .dock-icon { font-size: 24px; cursor: pointer; opacity: 0.5; transition: 0.3s; }
-    .dock-icon.active { opacity: 1; transform: translateY(-5px); color: var(--neon-cyan); }
+    .dock-icon { font-size: 24px; cursor: pointer; opacity: 0.5; }
+    .dock-icon.active { opacity: 1; color: var(--neon-cyan); }
   </style>
 </head>
 
@@ -139,6 +163,14 @@
       <input type="text" placeholder="Search for accounts, games...">
     </div>
 
+    <a href="offers.html" class="offers-btn">
+        <div class="off-txt">
+            <h2>EXCLUSIVE OFFERS</h2>
+            <p>Check out our hottest daily deals</p>
+        </div>
+        <div class="off-icon">🔥</div>
+    </a>
+
     <section class="grid">
       <a href="accounts.html" class="service-card">
         <div class="img-box"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500'"></div>
@@ -175,7 +207,6 @@
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Menu Controls
     const btn = document.getElementById("menuBtn");
     const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
@@ -183,18 +214,15 @@
     btn.onclick = () => { drawer.classList.add("active"); overlay.style.display = "block"; };
     overlay.onclick = () => { drawer.classList.remove("active"); overlay.style.display = "none"; };
 
-    // Supabase Profile Data
     async function init() {
       const { data: { session } } = await sb.auth.getSession();
       if(!session) return window.location.replace("login.html");
-
       document.getElementById("userEmail").textContent = session.user.email;
       const { data } = await sb.from("profiles").select("balance").eq("id", session.user.id).single();
       if(data) document.getElementById("balanceText").textContent = data.balance.toFixed(2) + " 🇱🇧";
     }
     init();
 
-    // Smooth Slider Logic
     let currentIdx = 0;
     setInterval(() => { 
       currentIdx = (currentIdx + 1) % 3; 
