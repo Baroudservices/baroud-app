@@ -24,7 +24,6 @@
     .ct-container { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 20px; padding: 20px; }
     .ct-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-size: 18px; font-weight: 900; outline: none; margin-bottom: 12px; text-align: center; }
     .ct-res { text-align: center; font-size: 30px; font-weight: 900; color: var(--neon-blue); margin: 10px 0; font-family: 'Orbitron'; }
-    .loading { text-align: center; opacity: 0.5; padding: 20px; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -53,7 +52,7 @@
       <input type="number" id="ctAmt" class="ct-input" placeholder="Amount ($)">
       <input type="number" id="ctPhone" class="ct-input" placeholder="70 000 000">
       <div class="ct-res" id="ctTotalDisplay">$0.00</div>
-      <button class="buy-btn" onclick="sendCreditOrder()" style="width:100%; padding:15px; font-size:14px;">CONFIRM TRANSFER</button>
+      <button id="ctBtn" class="buy-btn" onclick="sendCreditOrder()" style="width:100%; padding:15px; font-size:14px;">CONFIRM TRANSFER</button>
     </div>
   </div>
 </div>
@@ -70,30 +69,30 @@
     const { data: { session } } = await sb.auth.getSession();
     if(session) {
       currentUser = session.user;
-      loadBalance();
+      updateBalanceUI();
     } else {
-      alert("Please login first");
       window.location.href = "login.html";
     }
     fetchProducts();
   }
 
-  async function loadBalance() {
+  async function updateBalanceUI() {
     const { data } = await sb.from('profiles').select('balance').eq('id', currentUser.id).single();
-    if(data) document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} 🇱🇧`;
-    return data.balance;
+    if(data) {
+      document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} 🇱🇧`;
+      return data.balance;
+    }
+    return 0;
   }
 
   async function fetchProducts() {
     const listEl = document.getElementById('product-list');
     const ctEl = document.getElementById('ct-panel');
-    
     if(activeFilter.includes("CREDIT")) {
       listEl.innerHTML = ""; ctEl.style.display = "block"; return;
     }
-    
     ctEl.style.display = "none";
-    listEl.innerHTML = "<div class='loading'>Scanning Baroud Services...</div>";
+    listEl.innerHTML = "<div style='text-align:center; opacity:0.3; padding:20px;'>Loading...</div>";
 
     const { data: prods } = await sb.from('products')
       .select('*')
@@ -102,12 +101,7 @@
       .eq('active', true)
       .order('price', {ascending: true});
 
-    if(!prods || prods.length === 0) {
-      listEl.innerHTML = "<div class='loading'>Coming Soon...</div>";
-      return;
-    }
-
-    listEl.innerHTML = prods.map(p => `
+    listEl.innerHTML = prods && prods.length > 0 ? prods.map(p => `
       <div class="card">
         <div class="card-info">
           <div class="card-icon">${p.title.includes('Alfa') ? '🔴' : '🔵'}</div>
@@ -116,58 +110,63 @@
             <div class="card-price">$${p.price.toFixed(2)}</div>
           </div>
         </div>
-        <button class="buy-btn" onclick="handlePurchase(${JSON.stringify(p).replace(/"/g, '&quot;')})">BUY</button>
+        <button class="buy-btn" onclick='handlePurchase(${JSON.stringify(p)})'>BUY</button>
       </div>
-    `).join('');
+    `).join('') : "<div style='text-align:center; padding:20px; opacity:0.5;'>Coming Soon...</div>";
   }
 
-  // معالجة شراء الكروت والإنترنت
   async function handlePurchase(product) {
-    const balance = await loadBalance();
+    const balance = await updateBalanceUI();
     if (balance < product.price) return alert("Insufficient Balance! ❌");
+    
+    if (!confirm(`Confirm buying ${product.title}?`)) return;
 
-    if (!confirm(`Buy ${product.title} for $${product.price}?`)) return;
-
-    const { error: orderErr } = await sb.from('orders').insert([{
+    // تسجيل الطلب مع كل الداتا اللازمة لضمان عدم رفض الـ Database
+    const { data: orderData, error: orderErr } = await sb.from('orders').insert([{
       user_id: currentUser.id,
       product_id: product.id,
       amount: product.price,
       status: 'pending',
-      details: `Recharge: ${product.title}`
-    }]);
+      details: `Recharge Order: ${product.title}`
+    }]).select();
 
-    if (!orderErr) {
-      await sb.from('profiles').update({ balance: balance - product.price }).eq('id', currentUser.id);
-      alert("Order Placed Successfully! ✅");
-      window.location.href = "my-orders.html";
+    if (orderErr) {
+      console.error(orderErr);
+      alert("Error: " + orderErr.message);
     } else {
-      alert("Error processing order.");
+      await sb.from('profiles').update({ balance: balance - product.price }).eq('id', currentUser.id);
+      alert("Success! Check your orders.");
+      window.location.href = "my-orders.html";
     }
   }
 
-  // معالجة طلب الكريديت
   async function sendCreditOrder() {
     const amount = parseFloat(document.getElementById('ctAmt').value);
     const phone = document.getElementById('ctPhone').value;
     const rate = activeFilter === 'ALFA CREDIT' ? 1.44 : 1.39;
     const totalCost = amount * rate;
 
-    if (!amount || !phone) return alert("Please enter amount and phone!");
+    if (!amount || !phone) return alert("Fill all fields!");
     
-    const balance = await loadBalance();
+    const balance = await updateBalanceUI();
     if (balance < totalCost) return alert("Insufficient Balance! ❌");
+
+    document.getElementById('ctBtn').disabled = true;
 
     const { error: orderErr } = await sb.from('orders').insert([{
       user_id: currentUser.id,
       amount: totalCost,
       status: 'pending',
-      details: `Credit Transfer: ${amount}$ to ${phone} (${activeFilter})`
+      details: `Credit: ${amount}$ to ${phone} (${activeFilter})`
     }]);
 
     if (!orderErr) {
       await sb.from('profiles').update({ balance: balance - totalCost }).eq('id', currentUser.id);
-      alert("Credit Request Sent! ✅");
+      alert("Credit Request Placed! ✅");
       window.location.href = "my-orders.html";
+    } else {
+      alert("Error processing Credit Transfer.");
+      document.getElementById('ctBtn').disabled = false;
     }
   }
 
