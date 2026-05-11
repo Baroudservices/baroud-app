@@ -12,11 +12,11 @@
     :root {
       --neon-purple: #a855f7;
       --bg-dark: #020508;
-      --glass: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.08);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
     body {
       margin: 0; padding: 0;
       font-family: 'Orbitron', 'Cairo', sans-serif;
@@ -39,16 +39,16 @@
     .hero {
       background: linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(0,0,0,0) 100%);
       border: 1px solid rgba(168,85,247,0.3);
-      border-radius: 24px; padding: 20px; margin-bottom: 20px;
+      border-radius: 20px; padding: 15px 20px; margin-bottom: 20px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .hero h1 { margin: 0; font-size: 20px; letter-spacing: 1px; color: var(--neon-purple); }
-    .hero p { margin: 5px 0 0; font-size: 11px; opacity: 0.6; font-family: 'Cairo'; }
+    .hero h1 { margin: 0; font-size: 18px; letter-spacing: 1px; color: var(--neon-purple); }
+    .hero p { margin: 3px 0 0; font-size: 10px; opacity: 0.6; font-family: 'Cairo'; }
 
     /* ===== SEARCH ===== */
     .search-container {
       background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: 20px; padding: 14px 20px; margin-bottom: 20px;
+      border-radius: 20px; padding: 12px 20px; margin-bottom: 20px;
       display: flex; align-items: center;
     }
     .search-container input {
@@ -56,33 +56,37 @@
       font-family: 'Cairo'; font-size: 15px; outline: none;
     }
 
-    /* ===== GRID ===== */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    /* ===== LIST VIEW (MODIFIED) ===== */
+    .products-list { display: flex; flex-direction: column; gap: 15px; }
 
     .card {
       background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: 22px; overflow: hidden; transition: 0.3s; cursor: pointer;
+      border-radius: 20px; padding: 12px;
+      display: flex; align-items: center; gap: 15px;
+      transition: 0.3s; cursor: pointer;
     }
-    .card:active { transform: scale(0.96); border-color: var(--neon-purple); }
+    .card:active { transform: scale(0.98); border-color: var(--neon-purple); }
 
-    .card-img { width: 100%; height: 125px; object-fit: cover; filter: brightness(0.9); }
+    .card-img { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; background: #000; }
     
-    .card-body { padding: 12px; }
-    .card-name { font-weight: 900; font-size: 14px; margin-bottom: 8px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-body { flex: 1; }
+    .card-name { font-weight: 900; font-size: 14px; margin-bottom: 4px; text-transform: uppercase; }
     
-    .pill { font-size: 9px; padding: 4px 10px; border-radius: 8px; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); color: var(--neon-purple); font-weight: 700; margin-bottom: 10px; display: inline-block; }
+    .pill { font-size: 8px; padding: 2px 8px; border-radius: 5px; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); color: var(--neon-purple); font-weight: 700; }
 
-    .card-footer { display: flex; justify-content: space-between; align-items: center; }
-    .card-price { color: #fff; font-weight: 900; font-size: 16px; }
+    .card-footer { text-align: right; }
+    .card-price { color: #fff; font-weight: 900; font-size: 15px; display: block; margin-bottom: 4px; }
     
     .open-btn {
-      padding: 6px 12px; border-radius: 10px; background: var(--neon-purple);
-      color: #fff; font-weight: 900; font-size: 11px; border: none;
+      padding: 4px 10px; border-radius: 8px; background: var(--neon-purple);
+      color: #fff; font-weight: 900; font-size: 9px; border: none;
     }
 
-    .shimmer {
+    .shimmer-card {
+      height: 85px; width: 100%; border-radius: 20px;
       background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
       background-size: 200% 100%; animation: load 1.5s infinite;
+      margin-bottom: 15px;
     }
     @keyframes load { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
   </style>
@@ -108,33 +112,12 @@
       <input type="text" id="q" placeholder="Search cards...">
     </div>
 
-    <div class="grid" id="grid">
-      <div class="card shimmer" style="height: 210px;"></div>
-      <div class="card shimmer" style="height: 210px;"></div>
+    <div class="products-list" id="grid">
+      <div class="shimmer-card"></div>
+      <div class="shimmer-card"></div>
+      <div class="shimmer-card"></div>
     </div>
   </div>
-  <div id="maintenance-screen" style="display: none; position: fixed; inset: 0; background: #020508; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; font-family: 'Orbitron', 'Cairo', sans-serif;">
-    <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
-    <h1 style="color: #00f2ff; font-weight: 900; letter-spacing: 2px; margin-bottom: 10px;">UNDER MAINTENANCE</h1>
-    <p style="color: #fff; font-family: 'Cairo'; opacity: 0.8; max-width: 300px; line-height: 1.6;">
-        نحن نقوم بتحديث الخدمات لنمنحك تجربة أفضل. <br> 
-        سنعود خلال وقت قصير جداً!
-    </p>
-    <div style="margin-top: 30px; font-size: 10px; color: #fff; opacity: 0.3; letter-spacing: 5px;">BAROUDAPP.COM</div>
-</div>
-
-<script>
-    // هيدا هو المفتاح:
-    // حط false عشان تفتح الصفحة طبيعي
-    // حط true عشان تسكر الصفحة وتعمل صيانة
-    const maintenanceMode = false; 
-
-    if (maintenanceMode) {
-        document.getElementById('maintenance-screen').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-</script>
-
 
 <script>
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
@@ -145,7 +128,6 @@
 
   async function loadData() {
     try {
-      // محاولة الجلب حسب الـ View الموحد لضمان أفضل أداء
       const { data, error } = await sb
         .from("products_with_min_price")
         .select("id, title, category, min_price")
@@ -157,27 +139,27 @@
       allGifts = data;
       render(allGifts);
     } catch (e) {
-      document.getElementById("grid").innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Error loading cards.</div>`;
+      document.getElementById("grid").innerHTML = `<div style="text-align: center; opacity: 0.5;">Error loading cards.</div>`;
     }
   }
 
   function render(list) {
     const grid = document.getElementById("grid");
     if (list.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5; padding: 40px;">No cards found.</div>`;
+      grid.innerHTML = `<div style="text-align: center; opacity: 0.5; padding: 40px;">No cards found.</div>`;
       return;
     }
 
     grid.innerHTML = list.map(item => `
       <div class="card" onclick="location.href='account.html?id=${item.id}'">
-        <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='assets/products/default.png'">
+        <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='https://placehold.co/100x100/020508/a855f7?text=GIFT'">
         <div class="card-body">
           <div class="card-name">${item.title}</div>
-          <span class="pill">INSTANT</span>
-          <div class="card-footer">
-            <div class="card-price">$${Number(item.min_price || 0).toFixed(2)}</div>
-            <button class="open-btn">OPEN</button>
-          </div>
+          <span class="pill">INSTANT DELIVERY</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-price">$${Number(item.min_price || 0).toFixed(2)}</div>
+          <button class="open-btn">OPEN</button>
         </div>
       </div>
     `).join('');
