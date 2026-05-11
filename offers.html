@@ -16,7 +16,7 @@
       --glass-border: rgba(255, 255, 255, 0.08);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
     body {
       margin: 0; padding: 0;
       font-family: 'Orbitron', 'Cairo', sans-serif;
@@ -34,9 +34,8 @@
       cursor: pointer; color: #fff; text-decoration: none;
     }
 
-    /* هيدر الصفحة المميز */
     .header-offer {
-      text-align: center; margin-bottom: 30px;
+      text-align: center; 
       background: linear-gradient(45deg, #f7ff00, #ff8c00);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
@@ -45,30 +44,36 @@
 
     .card {
       background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: 25px; overflow: hidden; position: relative;
+      border-radius: 20px; overflow: hidden; position: relative;
       transition: 0.3s; cursor: pointer;
     }
     .card:active { transform: scale(0.96); border-color: var(--neon-yellow); }
 
-    /* شارة العرض */
     .offer-badge {
       position: absolute; top: 10px; right: 10px;
       background: #ff3e3e; color: #fff; font-size: 10px;
       padding: 4px 8px; border-radius: 8px; font-weight: 900;
       z-index: 2; box-shadow: 0 4px 10px rgba(255, 62, 62, 0.3);
+      animation: pulse 1.5s infinite;
     }
 
-    .card-img { width: 100%; height: 130px; object-fit: cover; background: #000; }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .card-img { width: 100%; height: 130px; object-fit: cover; background: #111; }
     
     .card-body { padding: 12px; }
-    .card-name { font-weight: 900; font-size: 14px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-name { font-weight: 900; font-size: 13px; margin-bottom: 8px; color: #fff; height: 32px; overflow: hidden; }
     
     .card-footer { display: flex; justify-content: space-between; align-items: center; }
     .card-price { color: var(--neon-yellow); font-weight: 900; font-size: 14px; }
     
     .open-btn {
-      padding: 6px 12px; border-radius: 10px; background: var(--neon-yellow);
-      color: #000; font-weight: 900; font-size: 11px; border: none;
+      padding: 6px 10px; border-radius: 8px; background: var(--neon-yellow);
+      color: #000; font-weight: 900; font-size: 10px; border: none;
     }
 
     .shimmer {
@@ -83,7 +88,7 @@
   <div class="wrap">
     <div class="top">
       <div class="btn-circle" onclick="history.back()">←</div>
-      <div class="header-offer"><h2 style="margin:0; font-size: 22px;">HOT OFFERS</h2></div>
+      <div class="header-offer"><h2 style="margin:0; font-size: 20px;">HOT OFFERS</h2></div>
       <div class="btn-circle" onclick="location.href='services.html'">🏠</div>
     </div>
 
@@ -100,36 +105,37 @@
 
   async function loadOffers() {
     try {
+      // سحب المنتجات التي تتبع فئة الـ offers
       const { data, error } = await sb
-        .from("products_with_min_price")
-        .select("id, title, category, min_price")
-        .eq("active", true)
-        .eq("category", "Offers") // هيدا هو الكاتيجوري اللي رح تزيدو بالداتابيز
-        .order('min_price', { ascending: true });
+        .from("products") // تأكد من اسم الجدول عندك (products)
+        .select("*")
+        .eq("category", "offers") // الفئة المطلوبة (تأكد إنها مكتوبة كدة بالـ Supabase)
+        .order('price', { ascending: true });
 
       if (error) throw error;
       render(data);
     } catch (e) {
+      console.error(e);
       document.getElementById("productGrid").innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Error loading offers.</div>`;
     }
   }
 
   function render(list) {
     const grid = document.getElementById("productGrid");
-    if (list.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5; padding: 40px;">No active offers at the moment.</div>`;
+    if (!list || list.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5; padding: 60px;">No active offers found.</div>`;
       return;
     }
 
     grid.innerHTML = list.map(item => `
-      <div class="card" onclick="location.href='account.html?id=${item.id}'">
-        <div class="offer-badge">HOT DEAL</div>
-        <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='assets/products/default.png'">
+      <div class="card" onclick="location.href='product-details.html?id=${item.id}'">
+        <div class="offer-badge">SALE</div>
+        <img class="card-img" src="${item.image_url || 'assets/products/default.png'}" onerror="this.src='https://placehold.co/300x200/020508/f7ff00?text=SPECIAL+OFFER'">
         <div class="card-body">
-          <div class="card-name">${item.title}</div>
+          <div class="card-name">${item.name}</div>
           <div class="card-footer">
-            <div class="card-price">$${Number(item.min_price || 0).toFixed(2)}</div>
-            <button class="open-btn">GET IT</button>
+            <div class="card-price">${Number(item.price || 0).toFixed(2)} 🇱🇧</div>
+            <button class="open-btn">GET</button>
           </div>
         </div>
       </div>
