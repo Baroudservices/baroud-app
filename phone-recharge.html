@@ -165,6 +165,14 @@
 </script>
 
 <script>
+    // حط false لفتح الصفحة، و true للصيانة
+    const maintenanceMode = false; 
+
+    if (maintenanceMode) {
+        document.getElementById('maintenance-screen').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
   const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -174,16 +182,14 @@
   let activeProduct = null;
   let allPlans = [];
 
-  // Load Balance
   async function updateBalance() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
       const { data } = await sb.from('profiles').select('balance').eq('id', session.user.id).single();
-      document.getElementById('userBalance').innerText = `${Number(data.balance || 0).toFixed(2)} 🇱🇧`;
+      if(data) document.getElementById('userBalance').innerText = `${Number(data.balance || 0).toFixed(2)} 🇱🇧`;
     }
   }
 
-  // Load Products
   async function loadItems() {
     const list = document.getElementById('rechargeList');
     const ctPanel = document.getElementById('ctPanel');
@@ -198,24 +204,49 @@
 
     ctPanel.style.display = "none";
     subFilters.style.display = "flex";
-    list.innerHTML = "<div style='text-align:center; opacity:0.5;'>Loading...</div>";
+    list.innerHTML = "<div style='text-align:center; opacity:0.5; padding:20px;'>Searching for " + currentMode + " " + currentSub + "...</div>";
 
-    const searchTitle = currentMode === 'ALFA' ? `ALFA ${currentSub}` : `MTC Cards`;
+    // تصحيح البحث: منفتش على النوعين Alfa و MTC حسب الفئة المختارة
+    let searchQuery = `%${currentMode}%${currentSub}%`;
     
-    const { data: prod } = await sb.from('products').select('id, title').ilike('title', `%${searchTitle}%`).eq('active', true).single();
-    
-    if (prod) {
-      activeProduct = prod;
-      const { data: plans } = await sb.from('product_plan_prices').select('*').eq('product_id', prod.id).eq('active', true).order('price', {ascending:true});
-      allPlans = plans;
-      renderPlans(plans);
+    // سحب المنتجات التي تطابق الفئة
+    const { data: prods, error: err } = await sb
+        .from('products')
+        .select('id, title')
+        .ilike('title', searchQuery)
+        .eq('active', true);
+
+    if (err) { console.error(err); return; }
+
+    if (prods && prods.length > 0) {
+      // مناخد أول منتج بيطلع معنا كـ Active Product
+      activeProduct = prods[0];
+      
+      // سحب كل الـ Plans لهالمنتجات
+      const prodIds = prods.map(p => p.id);
+      const { data: plans } = await sb
+        .from('product_plan_prices')
+        .select('*')
+        .in('product_id', prodIds)
+        .eq('active', true)
+        .order('price', {ascending:true});
+
+      allPlans = plans || [];
+      renderPlans(allPlans);
     } else {
-      list.innerHTML = "<div style='text-align:center; opacity:0.5;'>Coming Soon...</div>";
+      list.innerHTML = `<div style='text-align:center; opacity:0.3; padding:40px; font-size:12px;'>
+        No products found for ${currentMode} ${currentSub}<br>
+        Check names in Database
+      </div>`;
     }
   }
 
   function renderPlans(plans) {
     const list = document.getElementById('rechargeList');
+    if(plans.length === 0) {
+        list.innerHTML = "<div style='text-align:center; opacity:0.5;'>No plans available.</div>";
+        return;
+    }
     list.innerHTML = plans.map(p => `
       <div class="item-card">
         <div class="item-info">
@@ -225,29 +256,30 @@
             <div class="item-price">$${Number(p.price).toFixed(2)}</div>
           </div>
         </div>
-        <button class="buy-btn" onclick="openBuyModal('${p.plan_label}', ${p.price})">BUY</button>
+        <button class="buy-btn" onclick="openBuyModal('${p.plan_label}', ${p.price}, ${p.product_id})">BUY</button>
       </div>
     `).join('');
   }
 
-  // Credit Transfer Logic
+  // Credit Transfer logic
   const ctAmtInput = document.getElementById('ctAmt');
-  ctAmtInput.oninput = () => {
-    const val = parseFloat(ctAmtInput.value) || 0;
-    const multiplier = currentMode === 'ALFA' ? 1.30 : 1.25; // عمولتك يا حسين
-    document.getElementById('ctTotalDisplay').innerText = `$${(val * multiplier).toFixed(2)}`;
-  };
+  if(ctAmtInput) {
+      ctAmtInput.oninput = () => {
+        const val = parseFloat(ctAmtInput.value) || 0;
+        const multiplier = currentMode === 'ALFA' ? 1.30 : 1.25; 
+        document.getElementById('ctTotalDisplay').innerText = `$${(val * multiplier).toFixed(2)}`;
+      };
+  }
 
-  function openBuyModal(label, price) {
-    activeProduct.selectedPlan = label;
-    activeProduct.selectedPrice = price;
+  function openBuyModal(label, price, prodId) {
+    activeProduct = { id: prodId, selectedPlan: label, selectedPrice: price };
     document.getElementById('modalInfo').innerText = `${label} - $${price.toFixed(2)}`;
     document.getElementById('buyModal').style.display = 'flex';
   }
 
   function closeModal() { document.getElementById('buyModal').style.display = 'none'; }
 
-  // Event Listeners
+  // Listeners
   document.querySelectorAll('#mainFilters .f-pill').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('#mainFilters .f-pill').forEach(b => b.classList.remove('active'));
@@ -269,5 +301,6 @@
   updateBalance();
   loadItems();
 </script>
+
 </body>
 </html>
