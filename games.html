@@ -1,1 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Baroud | Games</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <style>
+    :root {
+      --neon-blue: #1bc7ff;
+      --bg-dark: #020508;
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Orbitron', 'Cairo', sans-serif;
+      background: var(--bg-dark); color: #fff;
+      min-height: 100vh;
+    }
+
+    .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
+
+    /* ===== HEADER ===== */
+    .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .btn-circle {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff; text-decoration: none;
+    }
+    .page-title { font-weight: 900; font-size: 18px; letter-spacing: 2px; }
+
+    /* ===== SEARCH BOX ===== */
+    .search-container {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 12px 20px; margin-bottom: 25px;
+      display: flex; align-items: center;
+    }
+    .search-container input {
+      background: none; border: none; color: #fff; width: 100%;
+      font-family: 'Cairo'; font-size: 15px; outline: none;
+    }
+
+    /* ===== LIST VIEW ===== */
+    .products-list { display: flex; flex-direction: column; gap: 15px; }
+
+    .card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 20px; padding: 12px;
+      display: flex; align-items: center; gap: 15px;
+      transition: 0.3s; cursor: pointer;
+    }
+    .card:active { transform: scale(0.98); border-color: var(--neon-blue); }
+
+    .card-img { width: 65px; height: 65px; border-radius: 15px; object-fit: cover; background: #000; }
+    
+    .card-body { flex: 1; }
+    .card-name { font-weight: 900; font-size: 15px; margin-bottom: 4px; text-transform: uppercase; }
+    
+    .badge-row { display: flex; gap: 5px; }
+    .pill { font-size: 8px; padding: 2px 8px; border-radius: 5px; background: rgba(27, 199, 255, 0.05); border: 1px solid rgba(27, 199, 255, 0.1); color: var(--neon-blue); font-weight: 700; }
+
+    .card-footer { text-align: right; }
+    .card-price { color: #fff; font-weight: 900; font-size: 16px; display: block; margin-bottom: 4px; }
+    
+    .open-btn {
+      padding: 5px 12px; border-radius: 8px; background: linear-gradient(90deg, #0aa0ff, #2a74ff);
+      color: #fff; font-weight: 900; font-size: 10px; border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="top">
+      <div class="btn-circle" onclick="history.back()">←</div>
+      <div class="page-title">GAMES</div>
+      <div class="btn-circle" onclick="location.href='services.html'">🏠</div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="q" placeholder="Search (PUBG, Free Fire...)">
+    </div>
+
+    <div class="products-list" id="grid">
+        </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let allGames = [];
+
+  async function loadGames() {
+    try {
+      // رجعنا للجدول الأساسي products عشان تفتح الصفحة فوراً
+      const { data, error } = await sb
+        .from("products") 
+        .select("*")
+        .eq('category', 'Games')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      allGames = data;
+      render(allGames);
+    } catch (e) {
+      console.error(e);
+      document.getElementById("grid").innerHTML = `<div style="text-align: center; opacity: 0.5;">Error loading games.</div>`;
+    }
+  }
+
+  function render(list) {
+    const grid = document.getElementById("grid");
+    if (!list || list.length === 0) {
+      grid.innerHTML = `<div style="text-align: center; opacity: 0.5; padding: 40px;">No games found.</div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(item => `
+      <div class="card" onclick="location.href='account.html?id=${item.id}'">
+        <img class="card-img" src="${item.image_url || 'assets/products/' + item.id + '.jpg'}" onerror="this.src='https://placehold.co/100x100/020508/1bc7ff?text=GAME'">
+        <div class="card-body">
+          <div class="card-name">${item.name || item.title}</div>
+          <div class="badge-row">
+            <span class="pill">TOP UP</span>
+            <span class="pill" style="color:#00ff88">FAST</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="card-price">$${Number(item.price || 0).toFixed(2)}</div>
+          <button class="open-btn">OPEN</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById("q").oninput = (e) => {
+    const v = e.target.value.toLowerCase().trim();
+    // البحث بيمشي على name أو title حسب شو مسميه بجدولك
+    const filtered = allGames.filter(g => (g.name || g.title).toLowerCase().includes(v));
+    render(filtered);
+  };
+
+  loadGames();
+</script>
+</body>
+</html>
