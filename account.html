@@ -66,8 +66,8 @@
       background: linear-gradient(90deg, #00f2ff, #0072ff);
       color: #fff; font-weight: 900; font-size: 16px; cursor: pointer;
     }
+    .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ===== BOTTOM SHEET (LIST STYLE) ===== */
     .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2000; backdrop-filter: blur(4px); }
     .bottom-sheet {
       position: fixed; bottom: -100%; left: 0; width: 100%;
@@ -77,23 +77,13 @@
     }
     .bottom-sheet.active { bottom: 0; }
     
-    #plansContainer {
-      max-height: 380px; /* طول القائمة */
-      overflow-y: auto;
-      padding-right: 5px;
-      margin-bottom: 15px;
-    }
-    #plansContainer::-webkit-scrollbar { width: 3px; }
-    #plansContainer::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 10px; }
-
+    #plansContainer { max-height: 380px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; }
     .plan-option {
       padding: 12px 15px; border-radius: 10px; background: rgba(255,255,255,0.02);
       border: 1px solid var(--glass-border); margin-bottom: 8px;
       display: flex; justify-content: space-between; align-items: center; cursor: pointer;
     }
     .plan-option.selected { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.05); }
-    .plan-option .p-name { font-family: 'Cairo'; font-size: 13px; font-weight: 700; }
-    .plan-option .p-price { color: var(--neon-cyan); font-weight: 900; font-size: 14px; }
 
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.9);
@@ -136,7 +126,7 @@
 
       <div class="input-group" style="margin-top: 15px;">
         <label>NOTE (OPTIONAL)</label>
-        <textarea id="customerNote" rows="2" placeholder="Ex: Player ID or details..."></textarea>
+        <textarea id="customerNote" rows="2" placeholder="Ex: Specific instructions..."></textarea>
       </div>
 
       <button id="buyBtn" class="buy-btn">PURCHASE NOW</button>
@@ -168,6 +158,7 @@
 
   async function init() {
     if(!productId) return;
+    // جلب كل البيانات بما فيها العواميد الجديدة
     const { data: product } = await sb.from("products").select("*").eq("id", productId).single();
     if(!product) return;
     currentProduct = product;
@@ -212,23 +203,39 @@
 
   function updateFields() {
     const container = document.getElementById("dynamicFields");
-    container.style.display = "block";
     container.innerHTML = "";
     let fields = [];
-    const planL = selectedPlan.plan_label.toLowerCase();
 
-    if(planL.includes("direct") || currentProduct.require_email) {
-      fields.push({ id: "acc_email", label: currentProduct.email_label || "EMAIL / PHONE" });
+    const planL = selectedPlan && selectedPlan.plan_label ? selectedPlan.plan_label.toLowerCase() : "";
+    const isDirectPlan = planL.includes("direct");
+
+    // فحص Email/Password (دمجنا المنطق القديم والجديد)
+    if (isDirectPlan || currentProduct.require_email || currentProduct.require_account_details) {
+      fields.push({ id: "acc_email", label: currentProduct.email_label || "EMAIL / USERNAME" });
       fields.push({ id: "acc_pass", label: currentProduct.password_label || "PASSWORD" });
     }
-    if(currentProduct.require_player_id) fields.push({ id: "player_id", label: currentProduct.player_id_label || "PLAYER ID" });
 
-    container.innerHTML = fields.map(f => `
-      <div class="input-group">
-        <label>${f.label}</label>
-        <input type="${f.id==='acc_pass'?'password':'text'}" id="${f.id}" placeholder="Required">
-      </div>
-    `).join('');
+    // فحص الـ Backup Codes (الجديد)
+    if (currentProduct.require_backup_codes) {
+      fields.push({ id: "backup_codes", label: "BACKUP CODES (2FA)" });
+    }
+
+    // فحص الـ Player ID (الجديد والقديم)
+    if (currentProduct.require_player_id || currentProduct.requires_player_id) {
+      fields.push({ id: "player_id", label: currentProduct.player_id_label || "PLAYER ID" });
+    }
+
+    if (fields.length > 0) {
+      container.style.display = "block";
+      container.innerHTML = fields.map(f => `
+        <div class="input-group">
+          <label>${f.label}</label>
+          <input type="${f.id==='acc_pass'?'password':'text'}" id="${f.id}" placeholder="Required">
+        </div>
+      `).join('');
+    } else {
+      container.style.display = "none";
+    }
   }
 
   document.getElementById("planBtn").onclick = () => {
@@ -250,9 +257,16 @@
       if(!i.value.trim()) { showModal("Error", "Please fill all fields"); btn.disabled = false; return; }
     }
 
+    // تجهيز الـ Backup Codes بقلب الـ Note عشان يوصلوك عالمكتب
+    let finalNote = document.getElementById("customerNote").value;
+    const bCodes = document.getElementById("backup_codes")?.value;
+    if(bCodes) finalNote += "\nBackup Codes: " + bCodes;
+
     const { data, error } = await sb.rpc("place_order", {
-      p_product_id: productId, p_price: selectedPlan.price,
-      p_duration: selectedPlan.plan_label, p_note: document.getElementById("customerNote").value,
+      p_product_id: productId, 
+      p_price: selectedPlan.price,
+      p_duration: selectedPlan.plan_label, 
+      p_note: finalNote,
       p_player_id: document.getElementById("player_id")?.value || null,
       p_acc_email: document.getElementById("acc_email")?.value || null,
       p_acc_pass: document.getElementById("acc_pass")?.value || null
