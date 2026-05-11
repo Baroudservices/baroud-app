@@ -7,46 +7,42 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --neon-blue: #38bdf8; --bg-dark: #020508; --card-bg: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.08); }
+    :root { --neon-blue: #38bdf8; --bg-dark: #020508; --card-bg: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.1); }
     body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-dark); color: #fff; min-height: 100vh; padding: 15px; }
     .wrap { max-width: 450px; margin: 0 auto; padding-bottom: 50px; }
     .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .balance-box { background: rgba(56, 189, 248, 0.1); padding: 8px 15px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); font-family: 'Orbitron'; font-size: 13px; color: var(--neon-blue); font-weight: 900; }
-    
-    /* إلغاء السلايد وجعل الأقسام تظهر بصفوف */
     .f-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
-    .f-pill { padding: 8px 5px; border-radius: 10px; background: var(--card-bg); border: 1px solid var(--border); font-size: 10px; font-weight: 900; cursor: pointer; text-align: center; transition: 0.3s; font-family: 'Orbitron'; }
+    .f-pill { padding: 10px 5px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--border); font-size: 10px; font-weight: 900; cursor: pointer; text-align: center; transition: 0.3s; font-family: 'Orbitron'; color: #888; }
     .f-pill.active { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); }
-
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
-    .card-info { display: flex; align-items: center; gap: 10px; }
-    .card-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid var(--border); }
-    .card-title { font-weight: 700; font-size: 12px; }
-    .card-price { color: var(--neon-blue); font-family: 'Orbitron'; font-weight: 900; font-size: 14px; }
-    .buy-btn { background: var(--neon-blue); color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 900; font-size: 10px; cursor: pointer; font-family: 'Orbitron'; }
-
-    .ct-container { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 20px; padding: 15px; }
-    .ct-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: #fff; font-size: 16px; font-weight: 900; outline: none; margin-bottom: 10px; text-align: center; }
-    .ct-res { text-align: center; font-size: 28px; font-weight: 900; color: var(--neon-blue); margin: 10px 0; font-family: 'Orbitron'; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+    .card-info { display: flex; align-items: center; gap: 12px; }
+    .card-icon { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid var(--border); }
+    .card-title { font-weight: 700; font-size: 13px; }
+    .card-price { color: var(--neon-blue); font-family: 'Orbitron'; font-weight: 900; font-size: 15px; margin-top: 2px; }
+    .buy-btn { background: var(--neon-blue); color: #000; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 900; font-size: 11px; cursor: pointer; font-family: 'Orbitron'; }
+    .ct-container { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 20px; padding: 20px; }
+    .ct-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-size: 18px; font-weight: 900; outline: none; margin-bottom: 12px; text-align: center; }
+    .ct-res { text-align: center; font-size: 30px; font-weight: 900; color: var(--neon-blue); margin: 10px 0; font-family: 'Orbitron'; }
   </style>
 </head>
 <body>
 
 <div class="wrap">
   <div class="top-nav">
-    <div onclick="history.back()" style="cursor:pointer; font-size: 20px;">←</div>
+    <div onclick="window.location.href='services.html'" style="cursor:pointer; font-size: 24px;">←</div>
     <div class="balance-box" id="userBalance">0.00 🇱🇧</div>
   </div>
 
-  <h2 id="pageTitle" style="font-family:'Orbitron'; font-weight:900; font-size:20px; margin-bottom:15px;">RECHARGE</h2>
+  <h2 id="pageTitle" style="font-family:'Orbitron'; font-weight:900; font-size:22px; margin-bottom:15px; letter-spacing:1px;">RECHARGE</h2>
   
   <div class="f-grid">
-    <div class="f-pill active" data-cat="ALFA CARDS">Alfa Cards</div>
-    <div class="f-pill" data-cat="TOUCH CARDS">Touch Cards</div>
-    <div class="f-pill" data-cat="INTERNET">Internet</div>
-    <div class="f-pill" data-cat="USHARE">uShare</div>
-    <div class="f-pill" data-cat="ALFA CREDIT">Alfa Credit</div>
-    <div class="f-pill" data-cat="MTC CREDIT">Mtc Credit</div>
+    <div class="f-pill active" data-cat="Alfa">Alfa Cards</div>
+    <div class="f-pill" data-cat="Touch">Touch Cards</div>
+    <div class="f-pill" data-cat="Internet">Internet</div>
+    <div class="f-pill" data-cat="uShare">uShare</div>
+    <div class="f-pill" data-cat="Alfa CREDIT">Alfa Credit</div>
+    <div class="f-pill" data-cat="Mtc CREDIT">Mtc Credit</div>
   </div>
 
   <div id="product-list"></div>
@@ -54,9 +50,9 @@
   <div id="ct-panel" style="display:none;">
     <div class="ct-container">
       <input type="number" id="ctAmt" class="ct-input" placeholder="Amount ($)">
-      <input type="number" id="ctPhone" class="ct-input" placeholder="Phone Number">
+      <input type="number" id="ctPhone" class="ct-input" placeholder="70 000 000">
       <div class="ct-res" id="ctTotalDisplay">$0.00</div>
-      <button class="buy-btn" style="width:100%; padding:12px; font-size:12px;">CONFIRM TRANSFER</button>
+      <button class="buy-btn" id="confirmCT" style="width:100%; padding:15px; font-size:14px;">CONFIRM TRANSFER</button>
     </div>
   </div>
 </div>
@@ -66,7 +62,7 @@
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let activeFilter = "ALFA CARDS";
+  let activeFilter = "Alfa";
 
   async function loadBalance() {
     const { data: { session } } = await sb.auth.getSession();
@@ -76,7 +72,7 @@
     }
   }
 
-  async function fetchPlans() {
+  async function fetchProducts() {
     const listEl = document.getElementById('product-list');
     const ctEl = document.getElementById('ct-panel');
     
@@ -85,37 +81,44 @@
     }
     
     ctEl.style.display = "none";
-    listEl.innerHTML = "<p style='text-align:center; opacity:0.3; font-size:12px; padding:20px;'>Loading...</p>";
+    listEl.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Loading Baroud Data...</p>";
 
-    // الربط بين الجداول لجلب الـ Plans بناءً على نوع المنتج
-    const { data: plans, error } = await sb.from('product_plan_prices')
-      .select(`*, products!inner(title, category)`)
-      .eq('products.category', 'Phone recharge')
-      .ilike('products.title', `%${activeFilter.split(' ')[0]}%`) // يأخذ أول كلمة (Alfa أو Touch)
-      .eq('active', true);
+    // البحث مباشرة في جدول المنتجات بفلتر ذكي
+    const { data: prods, error } = await sb.from('products')
+      .select('*')
+      .eq('category', 'Phone recharge')
+      .ilike('title', `%${activeFilter}%`)
+      .eq('active', true)
+      .order('price', {ascending: true});
 
-    if(!plans || plans.length === 0) {
-      listEl.innerHTML = "<p style='text-align:center; opacity:0.5; padding:20px;'>No Items Found.</p>";
+    if(!prods || prods.length === 0) {
+      listEl.innerHTML = "<p style='text-align:center; opacity:0.5; padding:20px;'>Coming Soon...</p>";
       return;
     }
 
-    listEl.innerHTML = plans.map(p => `
+    listEl.innerHTML = prods.map(p => `
       <div class="card">
         <div class="card-info">
-          <div class="card-icon">${activeFilter.includes('ALFA') ? '🔴' : '🔵'}</div>
+          <div class="card-icon">${p.title.toUpperCase().includes('ALFA') ? '🔴' : '🔵'}</div>
           <div>
-            <div class="card-title">${p.plan_label}</div>
+            <div class="card-title">${p.title}</div>
             <div class="card-price">$${p.price.toFixed(2)}</div>
           </div>
         </div>
-        <button class="buy-btn" onclick="location.href='order.html?plan_id=${p.id}'">BUY</button>
+        <button class="buy-btn" onclick="goToOrder('${p.id}')">BUY</button>
       </div>
     `).join('');
   }
 
+  // دالة تحويل لصفحة الطلب مع التأكد من اسم الصفحة
+  function goToOrder(id) {
+    // إذا اسم الصفحة عندك orders.html غيرها هون
+    window.location.href = `my-orders.html?id=${id}`;
+  }
+
   document.getElementById('ctAmt').oninput = (e) => {
     const val = parseFloat(e.target.value) || 0;
-    const rate = activeFilter === 'ALFA CREDIT' ? 1.44 : 1.39;
+    const rate = activeFilter === 'Alfa CREDIT' ? 1.44 : 1.39;
     document.getElementById('ctTotalDisplay').innerText = `$${(val * rate).toFixed(2)}`;
   };
 
@@ -124,12 +127,12 @@
       document.querySelectorAll('.f-pill').forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
       activeFilter = pill.dataset.cat;
-      fetchPlans();
+      fetchProducts();
     };
   });
 
   loadBalance();
-  fetchPlans();
+  fetchProducts();
 </script>
 </body>
 </html>
