@@ -37,10 +37,10 @@
   <h2 id="pageTitle" style="font-family:'Orbitron'; font-weight:900; font-size:22px; margin-bottom:15px;">RECHARGE</h2>
   
   <div class="f-grid">
-    <div class="f-pill active" data-cat="Alfa Card">Alfa Cards</div>
-    <div class="f-pill" data-cat="Touch Card">Touch Cards</div>
-    <div class="f-pill" data-cat="Alfa Internet">Internet</div>
-    <div class="f-pill" data-cat="Alfa uShare">uShare</div>
+    <div class="f-pill active" data-cat="ALFA Cards">Alfa Cards</div>
+    <div class="f-pill" data-cat="TOUCH">Touch Cards</div>
+    <div class="f-pill" data-cat="Internet">Internet</div>
+    <div class="f-pill" data-cat="uShare">uShare</div>
     <div class="f-pill" data-cat="ALFA CREDIT">Alfa Credit</div>
     <div class="f-pill" data-cat="MTC CREDIT">Mtc Credit</div>
   </div>
@@ -62,7 +62,7 @@
   const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let activeFilter = "Alfa Card";
+  let activeFilter = "ALFA Cards";
   let currentUser = null;
 
   async function init() {
@@ -96,7 +96,6 @@
 
     const { data: prods } = await sb.from('products')
       .select('*')
-      .eq('category', 'Phone recharge')
       .ilike('title', `%${activeFilter}%`)
       .eq('active', true)
       .order('price', {ascending: true});
@@ -104,7 +103,7 @@
     listEl.innerHTML = prods && prods.length > 0 ? prods.map(p => `
       <div class="card">
         <div class="card-info">
-          <div class="card-icon">${p.title.includes('Alfa') ? '🔴' : '🔵'}</div>
+          <div class="card-icon">${p.title.toUpperCase().includes('ALFA') ? '🔴' : '🔵'}</div>
           <div>
             <div class="card-title">${p.title}</div>
             <div class="card-price">$${p.price.toFixed(2)}</div>
@@ -121,21 +120,19 @@
     
     if (!confirm(`Confirm buying ${product.title}?`)) return;
 
-    // تسجيل الطلب مع كل الداتا اللازمة لضمان عدم رفض الـ Database
-    const { data: orderData, error: orderErr } = await sb.from('orders').insert([{
+    const { error: orderErr } = await sb.from('orders').insert([{
       user_id: currentUser.id,
       product_id: product.id,
       amount: product.price,
       status: 'pending',
       details: `Recharge Order: ${product.title}`
-    }]).select();
+    }]);
 
     if (orderErr) {
-      console.error(orderErr);
       alert("Error: " + orderErr.message);
     } else {
       await sb.from('profiles').update({ balance: balance - product.price }).eq('id', currentUser.id);
-      alert("Success! Check your orders.");
+      alert("Success! ✅");
       window.location.href = "my-orders.html";
     }
   }
@@ -157,15 +154,15 @@
       user_id: currentUser.id,
       amount: totalCost,
       status: 'pending',
-      details: `Credit: ${amount}$ to ${phone} (${activeFilter})`
+      details: `Credit Transfer: ${amount}$ to ${phone} (${activeFilter})`
     }]);
 
     if (!orderErr) {
       await sb.from('profiles').update({ balance: balance - totalCost }).eq('id', currentUser.id);
-      alert("Credit Request Placed! ✅");
+      alert("Credit Request Sent! ✅");
       window.location.href = "my-orders.html";
     } else {
-      alert("Error processing Credit Transfer.");
+      alert("Error: " + orderErr.message);
       document.getElementById('ctBtn').disabled = false;
     }
   }
