@@ -6,73 +6,96 @@
 <title>Admin – Plan Prices</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-body{margin:0;font-family:system-ui,Arial;background:linear-gradient(160deg,#060b16,#0a1330);color:#fff;padding:16px}
-.wrap{max-width:1100px;margin:auto}
-.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-.btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;background:#1e293b;color:#fff}
-.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:14px;margin-bottom:12px}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.title{font-weight:950}
-.small{opacity:.75;font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));gap:10px;margin-top:10px}
-.box{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px}
-.label{font-size:12px;opacity:.75;font-weight:900;margin-bottom:6px}
-input{
-  width:100%;
-  padding:10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.25);
-  color:#fff;
-  outline:none;
-  font-weight:900;
-}
-.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
-.save{background:linear-gradient(90deg,#0aa0ff,#2a74ff);font-weight:950}
-.toggle{display:flex;gap:8px;align-items:center;font-size:12px;opacity:.9;font-weight:900;margin-top:8px}
-select{
-  padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.25);color:#fff;outline:none;font-weight:900
+:root {
+  --neon-blue: #1bc7ff;
+  --bg-dark: #020508;
+  --glass: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --accent: #2a74ff;
 }
 
-/* Search UI */
-.searchRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; width:100%;}
-.searchInput{width:min(340px,100%);}
+body {
+  margin: 0; font-family: 'Cairo', sans-serif;
+  background: var(--bg-dark); color: #fff;
+  background-attachment: fixed;
+  padding: 20px;
+}
 
-/* ===== Manage Plans Modal ===== */
-.modal{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.7);
-  display:none; align-items:center; justify-content:center;
-  padding:16px; z-index:99999;
+.wrap { max-width: 1000px; margin: auto; }
+
+/* ===== HEADER ===== */
+.top { 
+  display: flex; justify-content: space-between; align-items: center; 
+  margin-bottom: 30px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;
 }
-.modalCard{
-  width:min(720px,100%);
-  background:#0f172a;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:18px;
-  box-shadow:0 18px 60px rgba(0,0,0,.45);
-  padding:20px;
+.page-title { font-family: 'Orbitron'; font-weight: 900; font-size: 24px; letter-spacing: 2px; color: var(--neon-blue); }
+
+.btn {
+  padding: 10px 20px; border-radius: 12px; border: 1px solid var(--glass-border);
+  cursor: pointer; background: var(--glass); color: #fff; font-weight: 700; transition: 0.3s;
 }
-.modalTop{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.modalTitle{font-weight:950;font-size:16px}
-.modalX{
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.06);
-  color:#fff; border-radius:12px;
-  padding:8px 10px; cursor:pointer;
+.btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+/* ===== SEARCH & SELECTION CARD ===== */
+.card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: 20px; padding: 25px; margin-bottom: 25px;
+  backdrop-filter: blur(10px);
 }
-.plansTable{width:100%;border-collapse:collapse;margin-top:12px}
-.plansTable th,.plansTable td{border-bottom:1px solid rgba(255,255,255,.10);padding:10px;font-size:13px;vertical-align:top}
-.plansTable th{opacity:.85;text-align:left}
-.pillBtn{
-  padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font-weight:900
+
+.search-box {
+  display: flex; gap: 10px; margin-bottom: 20px;
 }
-.danger{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35); color: #ff6b6b}
-.modalBtns{margin-top:12px;display:flex;gap:10px;justify-content:flex-end}
+input, select {
+  flex: 1; padding: 12px 15px; border-radius: 12px;
+  background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+  color: #fff; font-family: 'Cairo'; outline: none; font-weight: 600;
+}
+input:focus, select:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(27, 199, 255, 0.2); }
+
+.save-btn {
+  background: linear-gradient(90deg, #0aa0ff, #2a74ff); border: none;
+  font-weight: 900; letter-spacing: 1px; padding: 12px 25px;
+}
+
+/* ===== PRICE EDITOR GRID ===== */
+.editor-title { font-family: 'Orbitron'; font-weight: 900; margin-bottom: 15px; font-size: 18px; color: #fff; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+.box {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+  border-radius: 18px; padding: 15px; transition: 0.3s;
+}
+.box:hover { border-color: var(--neon-blue); background: rgba(255,255,255,0.06); }
+.label { font-size: 13px; font-weight: 900; margin-bottom: 8px; opacity: 0.7; letter-spacing: 1px; }
+
+.toggle {
+  display: flex; align-items: center; gap: 10px; margin-top: 12px; 
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.toggle input { flex: none; width: 18px; height: 18px; cursor: pointer; }
+
+/* ===== MODAL ===== */
+.modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px; z-index: 10000; backdrop-filter: blur(8px);
+}
+.modalCard {
+  width: 100%; max-width: 800px; background: #0b111a;
+  border: 1px solid var(--glass-border); border-radius: 25px; padding: 30px;
+}
+.plansTable { width: 100%; border-collapse: collapse; margin-top: 20px; }
+.plansTable th { text-align: left; padding: 12px; border-bottom: 2px solid var(--glass-border); font-size: 12px; opacity: 0.6; }
+.plansTable td { padding: 10px; border-bottom: 1px solid var(--glass-border); }
+
+.danger { background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
+.danger:hover { background: #ff4444; color: #fff; }
+
+#msg { padding: 10px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 14px; min-height: 20px; }
 </style>
 </head>
 
@@ -80,206 +103,136 @@ select{
 <div class="wrap">
   <div class="top">
     <div>
-      <div style="font-weight:950;font-size:20px">Admin – Plan Prices</div>
-      <div class="small">Edit prices per product (no auto multiply)</div>
+      <div class="page-title">BAROUD ADMIN</div>
+      <div style="font-size: 12px; opacity: 0.5;">PRICE CONTROL CENTER</div>
     </div>
-    <div class="row">
+    <div style="display: flex; gap: 10px;">
       <button class="btn" id="btnRefresh">Refresh</button>
-      <button class="btn" id="btnLogout">Logout</button>
+      <button class="btn danger" id="btnLogout" style="border:none">Logout</button>
     </div>
   </div>
 
   <div class="card">
-    <div class="row searchRow">
-      <div class="small">Search product:</div>
-      <input id="productSearch" class="searchInput" placeholder="Type product name..." />
-      <button class="btn" id="btnSearch" type="button">Search</button>
-      <button class="btn" id="btnClearSearch" type="button">Clear</button>
+    <div class="search-box">
+      <input id="productSearch" placeholder="Search product name..." />
+      <button class="btn" id="btnClearSearch">Clear</button>
     </div>
 
-    <div class="row" style="margin-top:10px">
-      <div class="small">Quick select product:</div>
+    <div style="display: flex; gap: 10px; align-items: center;">
       <select id="productSelect"></select>
-      <button class="btn save" id="btnOpen">Open</button>
+      <button class="btn save-btn" id="btnOpen">OPEN EDITOR</button>
     </div>
   </div>
 
+  <div id="msg"></div>
   <div id="editor"></div>
-  <div id="msg" class="small" style="margin-top: 10px; font-weight: bold;"></div>
 </div>
 
 <div id="plansModal" class="modal">
   <div class="modalCard">
-    <div class="modalTop">
-      <div class="modalTitle">Manage Plans</div>
-      <button class="modalX" id="plansClose" type="button">✕</button>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="page-title" style="font-size:18px">PLAN STRUCTURE</div>
+      <button class="btn" id="plansClose">✕</button>
     </div>
 
-    <div class="small" style="margin-top:6px">
-      Add / edit durations. <b>plan_key</b> must be unique (e.g., 1m, 2y, vip).
-    </div>
-
-    <div style="max-height: 400px; overflow-y: auto; margin-top: 10px;">
+    <div style="max-height: 400px; overflow-y: auto; margin-top: 20px;">
       <table class="plansTable">
         <thead>
           <tr>
-            <th style="width:160px">plan_key</th>
-            <th>plan_label</th>
-            <th style="width:140px">price</th>
-            <th style="width:110px">active</th>
-            <th style="width:120px">remove</th>
+            <th>KEY</th>
+            <th>LABEL</th>
+            <th>PRICE ($)</th>
+            <th>ACTIVE</th>
+            <th>ACTION</th>
           </tr>
         </thead>
         <tbody id="plansTbody"></tbody>
       </table>
     </div>
 
-    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="pillBtn" id="btnAddPlan" type="button">+ Add plan</button>
-    </div>
-
-    <div class="modalBtns">
-      <button class="pillBtn" id="btnPlansCancel" type="button">Cancel</button>
-      <button class="pillBtn" id="btnPlansSave" type="button" style="background:linear-gradient(90deg,#0aa0ff,#2a74ff);border:0">Save Plans</button>
+    <div style="margin-top:25px; display:flex; justify-content:space-between; align-items:center;">
+      <button class="btn" id="btnAddPlan" style="color:var(--neon-blue)">+ ADD NEW ROW</button>
+      <div style="display:flex; gap:10px">
+        <button class="btn" id="btnPlansCancel">CANCEL</button>
+        <button class="btn save-btn" id="btnPlansSave">SAVE STRUCTURE</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-// 1. Supabase Config
+// Supabase Config
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const DEFAULT_PLAN_LIST = [
-  { key:"1" },
-  { key:"2"},
-  { key:"3"},
-  { key:"4"},
-];
+const DEFAULT_PLAN_LIST = [{ key:"1" }, { key:"2"}, { key:"3"}, { key:"4"}];
 
 let PLAN_LIST = [];
 let _currentPlansProductId = null;
-let IS_ADMIN = false;
+let ALL_PRODUCTS = [];
 
 const productSelect = document.getElementById("productSelect");
 const editor = document.getElementById("editor");
 const msg = document.getElementById("msg");
 const plansModal = document.getElementById("plansModal");
 const plansTbody = document.getElementById("plansTbody");
-
-// search elements + products cache
 const productSearch = document.getElementById("productSearch");
-const btnSearch = document.getElementById("btnSearch");
-const btnClearSearch = document.getElementById("btnClearSearch");
-let ALL_PRODUCTS = []; // cache
 
-function esc(s){
-  return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+function esc(s){ return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function setMsg(text, type='info'){ 
+  msg.textContent = text || ""; 
+  msg.style.color = type === 'error' ? '#ff4444' : '#1bc7ff';
 }
 
-function setMsg(text){ msg.textContent = text || ""; }
-
-// Auth & Admin Check
 async function boot(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session) { window.location.href="login.html"; return; }
 
-  const { data: profile, error: pErr } = await sb
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", session.user.id)
-    .single();
+  const { data: profile } = await sb.from("profiles").select("is_admin").eq("id", session.user.id).single();
+  if(!profile?.is_admin){ window.location.href = "services.html"; return; }
 
-  if(pErr){ alert("Profile error: " + pErr.message); return; }
-
-  if(!profile?.is_admin){
-    alert("Access Denied: Admins Only");
-    window.location.href = "services.html";
-    return;
-  }
-
-  IS_ADMIN = true;
   await loadProducts();
 }
 
-function renderProductSelect(list){
-  productSelect.innerHTML = list
-    .map(p => `<option value="${p.id}">#${p.id} – ${esc(p.title)}</option>`)
-    .join("");
-
-  if(list.length === 0){
-    productSelect.innerHTML = `<option value="">No products found</option>`;
-  }
-}
-
 async function loadProducts(){
-  setMsg("Loading products...");
+  setMsg("Loading...");
   const { data, error } = await sb.from("products").select("id,title,active").order("title");
-  if(error){ setMsg("Error loading products: " + error.message); return; }
+  if(error) return setMsg("Error", "error");
 
   ALL_PRODUCTS = data || [];
   renderProductSelect(ALL_PRODUCTS);
-
-  if(ALL_PRODUCTS.length > 0){
-    productSelect.value = ALL_PRODUCTS[0].id;
-    await loadPlans(productSelect.value);
-  } else {
-    setMsg("No products found.");
-  }
+  if(ALL_PRODUCTS.length > 0) loadPlans(ALL_PRODUCTS[0].id);
   setMsg("");
 }
 
-// search/filter
-function applySearch(){
-  const q = String(productSearch.value || "").trim().toLowerCase();
-  if(!q){
-    renderProductSelect(ALL_PRODUCTS);
-    return;
-  }
-  const filtered = ALL_PRODUCTS.filter(p => String(p.title || "").toLowerCase().includes(q));
-  renderProductSelect(filtered);
-  if(filtered.length > 0) productSelect.value = filtered[0].id;
+function renderProductSelect(list){
+  productSelect.innerHTML = list.map(p => `<option value="${p.id}">${esc(p.title)} (#${p.id})</option>`).join("");
 }
 
-btnSearch.onclick = applySearch;
-btnClearSearch.onclick = () => {
-  productSearch.value = "";
-  renderProductSelect(ALL_PRODUCTS);
-  if(ALL_PRODUCTS.length > 0) productSelect.value = ALL_PRODUCTS[0].id;
+productSearch.oninput = () => {
+  const q = productSearch.value.toLowerCase();
+  const filtered = ALL_PRODUCTS.filter(p => p.title.toLowerCase().includes(q));
+  renderProductSelect(filtered);
 };
-
-productSearch.addEventListener("input", applySearch);
-productSearch.addEventListener("keydown", (e) => {
-  if(e.key === "Enter"){ e.preventDefault(); applySearch(); }
-});
 
 async function loadPlans(productId){
   if(!productId) return;
-
-  setMsg("Fetching plans...");
+  setMsg("Fetching...");
   _currentPlansProductId = productId;
 
-  const { data: dbPlans, error } = await sb
-    .from("product_plan_prices")
-    .select("*")
-    .eq("product_id", productId);
+  const { data: dbPlans, error } = await sb.from("product_plan_prices").select("*").eq("product_id", productId);
+  if(error) return setMsg("Error", "error");
 
-  if(error) { setMsg("Error: " + error.message); return; }
+  PLAN_LIST = (dbPlans && dbPlans.length > 0) ? dbPlans.map(x => ({ key: String(x.plan_key), label: x.plan_label || x.plan_key })) : DEFAULT_PLAN_LIST;
+  const map = {}; (dbPlans || []).forEach(r => map[String(r.plan_key)] = r);
 
-  PLAN_LIST = (dbPlans && dbPlans.length > 0)
-    ? dbPlans.map(x => ({ key: String(x.plan_key), label: x.plan_label || x.plan_key }))
-    : DEFAULT_PLAN_LIST.slice();
-
-  const map = {};
-  (dbPlans || []).forEach(r => map[String(r.plan_key)] = r);
-
-  const title = productSelect.options[productSelect.selectedIndex]?.textContent || "Product";
+  const title = productSelect.options[productSelect.selectedIndex]?.textContent || "Product Editor";
 
   editor.innerHTML = `
     <div class="card">
-      <div class="title">${esc(title)}</div>
-      <div class="grid" id="pricesGrid">
+      <div class="editor-title">${esc(title)}</div>
+      <div class="grid">
         ${PLAN_LIST.map(pl => {
           const row = map[pl.key];
           const price = row ? Number(row.price || 0) : 0;
@@ -289,14 +242,14 @@ async function loadPlans(productId){
               <div class="label">${esc(pl.label)}</div>
               <input type="number" step="0.01" value="${price.toFixed(2)}" data-price-key="${esc(pl.key)}" />
               <label class="toggle">
-                <input type="checkbox" ${active ? "checked" : ""} data-active-key="${esc(pl.key)}" /> Active
+                <input type="checkbox" ${active ? "checked" : ""} data-active-key="${esc(pl.key)}" /> <span>ACTIVE</span>
               </label>
             </div>`;
         }).join("")}
       </div>
-      <div class="actions">
-        <button class="btn" id="btnManagePlans">Manage Plans Structure</button>
-        <button class="btn save" id="btnSave">Quick Update Prices</button>
+      <div style="display:flex; justify-content:flex-end; gap:15px; margin-top:25px;">
+        <button class="btn" id="btnManagePlans">EDIT STRUCTURE</button>
+        <button class="btn save-btn" id="btnSave">SAVE CHANGES</button>
       </div>
     </div>`;
 
@@ -305,69 +258,44 @@ async function loadPlans(productId){
     await loadPlansForManage(productId);
     plansModal.style.display = "flex";
   };
-
-  setMsg("Ready.");
-}
-
-function dedupeRowsByKey(rows){
-  const m = new Map();
-  for(const r of rows){
-    const k = `${r.product_id}__${String(r.plan_key).trim()}`;
-    m.set(k, r);
-  }
-  return [...m.values()];
+  setMsg("Loaded Product ID: " + productId);
 }
 
 async function savePrices(productId){
-  if(!IS_ADMIN) return;
-  setMsg("Updating database...");
-
+  setMsg("Saving...");
   const rows = PLAN_LIST.map(pl => ({
     product_id: Number(productId),
     plan_key: String(pl.key).trim(),
     plan_label: String(pl.label || pl.key).trim(),
     price: parseFloat(editor.querySelector(`input[data-price-key="${pl.key}"]`).value) || 0,
     active: !!editor.querySelector(`input[data-active-key="${pl.key}"]`).checked
-    // ✅ removed updated_at to avoid column missing errors
   }));
 
-  const uniqueRows = dedupeRowsByKey(rows);
-
-  const { error } = await sb
-    .from("product_plan_prices")
-    .upsert(uniqueRows, { onConflict: "product_id,plan_key" });
-
-  if(error) setMsg("Error: " + error.message);
-  else {
-    setMsg("Prices Saved Successfully! ✅");
-    setTimeout(() => setMsg(""), 2000);
-  }
-}
-
-function renderPlanRow(row){
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td><input data-k value="${esc(row.plan_key)}" placeholder="e.g. 1m" /></td>
-    <td><input data-l value="${esc(row.plan_label)}" placeholder="e.g. 1 Month" /></td>
-    <td><input data-p type="number" step="0.01" value="${Number(row.price||0).toFixed(2)}" /></td>
-    <td style="text-align:center"><input data-a type="checkbox" ${row.active !== false ? "checked":""} /></td>
-    <td><button class="pillBtn danger" type="button" onclick="this.closest('tr').remove()">Delete</button></td>`;
-  plansTbody.appendChild(tr);
+  const { error } = await sb.from("product_plan_prices").upsert(rows, { onConflict: "product_id,plan_key" });
+  if(error) setMsg("Error", "error");
+  else setMsg("Success! ✅");
 }
 
 async function loadPlansForManage(productId){
-  const { data, error } = await sb.from("product_plan_prices").select("*").eq("product_id", productId);
-  if(error){ alert("Error loading plans: " + error.message); return; }
-
+  const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", productId);
   plansTbody.innerHTML = "";
   if(data && data.length > 0) data.forEach(renderPlanRow);
   else renderPlanRow({ plan_key:"", plan_label:"", price:0, active:true });
 }
 
-document.getElementById("btnPlansSave").onclick = async () => {
-  const trs = Array.from(plansTbody.querySelectorAll("tr"));
+function renderPlanRow(row){
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td><input style="padding:8px" data-k value="${esc(row.plan_key)}" /></td>
+    <td><input style="padding:8px" data-l value="${esc(row.plan_label)}" /></td>
+    <td><input style="padding:8px" data-p type="number" value="${Number(row.price||0).toFixed(2)}" /></td>
+    <td style="text-align:center"><input data-a type="checkbox" ${row.active !== false ? "checked":""} /></td>
+    <td><button class="danger" onclick="this.closest('tr').remove()">DEL</button></td>`;
+  plansTbody.appendChild(tr);
+}
 
-  const rows = trs.map(tr => ({
+document.getElementById("btnPlansSave").onclick = async () => {
+  const rows = Array.from(plansTbody.querySelectorAll("tr")).map(tr => ({
     product_id: Number(_currentPlansProductId),
     plan_key: tr.querySelector("[data-k]").value.trim(),
     plan_label: tr.querySelector("[data-l]").value.trim(),
@@ -375,33 +303,12 @@ document.getElementById("btnPlansSave").onclick = async () => {
     active: tr.querySelector("[data-a]").checked
   })).filter(r => r.plan_key);
 
-  if(rows.length === 0) { alert("Please add at least one plan"); return; }
-
-  // ✅ prevent duplicates BEFORE upsert
-  const keys = rows.map(r => r.plan_key);
-  const dup = keys.find((k, i) => keys.indexOf(k) !== i);
-  if(dup){
-    alert(`Duplicate plan_key found: "${dup}".\nEach plan_key must be unique.`);
-    return;
-  }
-
-  const uniqueRows = dedupeRowsByKey(rows);
-
-  const { error } = await sb
-    .from("product_plan_prices")
-    .upsert(uniqueRows, { onConflict: "product_id,plan_key" });
-
-  if(!error) {
-    plansModal.style.display = "none";
-    await loadPlans(_currentPlansProductId);
-  } else {
-    alert("Error: " + error.message);
-  }
+  const { error } = await sb.from("product_plan_prices").upsert(rows, { onConflict: "product_id,plan_key" });
+  if(!error) { plansModal.style.display="none"; loadPlans(_currentPlansProductId); }
 };
 
 document.getElementById("btnOpen").onclick = () => loadPlans(productSelect.value);
 document.getElementById("btnRefresh").onclick = () => location.reload();
-document.getElementById("btnLogout").onclick = async () => { await sb.auth.signOut(); location.href="login.html"; };
 document.getElementById("btnAddPlan").onclick = () => renderPlanRow({ plan_key:"", plan_label:"", price:0, active:true });
 document.getElementById("plansClose").onclick = () => plansModal.style.display = "none";
 document.getElementById("btnPlansCancel").onclick = () => plansModal.style.display = "none";
