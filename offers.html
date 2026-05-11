@@ -66,7 +66,7 @@
     .card-img { width: 100%; height: 130px; object-fit: cover; background: #111; }
     
     .card-body { padding: 12px; }
-    .card-name { font-weight: 900; font-size: 13px; margin-bottom: 8px; color: #fff; height: 32px; overflow: hidden; }
+    .card-name { font-weight: 900; font-size: 13px; margin-bottom: 8px; color: #fff; height: 32px; overflow: hidden; font-family: 'Cairo'; }
     
     .card-footer { display: flex; justify-content: space-between; align-items: center; }
     .card-price { color: var(--neon-yellow); font-weight: 900; font-size: 14px; }
@@ -105,17 +105,18 @@
 
   async function loadOffers() {
     try {
-      // سحب المنتجات التي تتبع فئة الـ offers
+      // سحب البيانات من جدول products الأساسي
       const { data, error } = await sb
-        .from("products") // تأكد من اسم الجدول عندك (products)
-        .select("*")
-        .eq("category", "offers") // الفئة المطلوبة (تأكد إنها مكتوبة كدة بالـ Supabase)
+        .from("products") 
+        .select("id, title, price, category, active, image_url")
+        .eq("category", "offers") // تأكد أنها مكتوبة offers بالسمول في السوبابيس
+        .eq("active", true)
         .order('price', { ascending: true });
 
       if (error) throw error;
       render(data);
     } catch (e) {
-      console.error(e);
+      console.error("Supabase Error:", e);
       document.getElementById("productGrid").innerHTML = `<div style="grid-column: 1/-1; text-align: center; opacity: 0.5;">Error loading offers.</div>`;
     }
   }
@@ -129,10 +130,10 @@
 
     grid.innerHTML = list.map(item => `
       <div class="card" onclick="location.href='product-details.html?id=${item.id}'">
-        <div class="offer-badge">SALE</div>
-        <img class="card-img" src="${item.image_url || 'assets/products/default.png'}" onerror="this.src='https://placehold.co/300x200/020508/f7ff00?text=SPECIAL+OFFER'">
+        <div class="offer-badge">HOT DEAL</div>
+        <img class="card-img" src="${item.image_url || 'assets/products/default.png'}" onerror="this.src='https://placehold.co/300x200/020508/f7ff00?text=${encodeURIComponent(item.title)}'">
         <div class="card-body">
-          <div class="card-name">${item.name}</div>
+          <div class="card-name">${item.title}</div>
           <div class="card-footer">
             <div class="card-price">${Number(item.price || 0).toFixed(2)} 🇱🇧</div>
             <button class="open-btn">GET</button>
