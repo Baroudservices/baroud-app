@@ -129,7 +129,7 @@
     }
 
     grid.innerHTML = list.map(item => `
-      <div class="card" onclick="location.href='product-details.html?id=${item.id}'">
+      <div class="card" onclick="location.href='account.html?id=${item.id}'">
         <div class="offer-badge">HOT DEAL</div>
         <img class="card-img" src="${item.image_url || 'assets/products/default.png'}" onerror="this.src='https://placehold.co/300x200/020508/f7ff00?text=${encodeURIComponent(item.title)}'">
         <div class="card-body">
