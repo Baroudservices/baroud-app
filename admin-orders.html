@@ -16,87 +16,50 @@
     --border: rgba(255, 255, 255, 0.08);
   }
 
-  body { 
-    margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-main); 
-    color: #fff; min-height: 100vh; padding: 15px; 
-  }
-  
+  body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-main); color: #fff; min-height: 100vh; padding: 15px; }
   .wrap { max-width: 900px; margin: auto; }
-  
   .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
   .back-btn { text-decoration: none; color: #fff; background: var(--card-bg); padding: 8px 15px; border-radius: 12px; border: 1px solid var(--border); font-weight: 700; font-size: 13px; }
-
   h2 { margin: 0; font-family: 'Orbitron'; font-size: 18px; color: var(--neon-blue); letter-spacing: 1px; }
 
   .search-box {
     width: 100%; padding: 15px; border-radius: 16px; border: 1px solid var(--border);
     background: rgba(0,0,0,0.4); color: #fff; margin-bottom: 20px; outline: none; box-sizing: border-box;
-    font-family: 'Cairo'; font-size: 14px;
   }
 
-  /* Card Style */
-  .card { 
-    background: var(--card-bg); border: 1px solid var(--border); border-radius: 22px; 
-    padding: 18px; margin-bottom: 15px; position: relative; backdrop-filter: blur(12px);
-    transition: 0.3s ease;
-  }
-  .card:hover { border-color: var(--neon-blue); background: rgba(255,255,255,0.05); }
+  .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 22px; padding: 18px; margin-bottom: 15px; backdrop-filter: blur(12px); transition: 0.3s; }
+  .card:hover { border-color: var(--neon-blue); }
 
   .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
   
-  .status-dot {
-    width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px;
-    box-shadow: 0 0 12px currentColor;
+  /* Status Icons */
+  .status-icon {
+    font-size: 16px; margin-right: 10px; font-weight: 900;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
   }
-  .st-pending { color: #facc15; background: #facc15; }
-  .st-done { color: var(--neon-green); background: var(--neon-green); }
-  .st-rejected { color: var(--neon-red); background: var(--neon-red); }
+  .st-pending { color: #facc15; background: rgba(250, 204, 21, 0.1); border: 1px solid #facc15; }
+  .st-done { color: var(--neon-green); background: rgba(74, 222, 128, 0.1); border: 1px solid var(--neon-green); }
+  .st-rejected { color: var(--neon-red); background: rgba(248, 113, 113, 0.1); border: 1px solid var(--neon-red); }
 
   .order-title { font-weight: 900; font-size: 16px; display: flex; align-items: center; }
   .price-tag { font-family: 'Orbitron'; color: var(--neon-blue); font-weight: 900; font-size: 18px; }
 
   .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
-  .chip {
-    padding: 7px 14px; border-radius: 10px; background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border); font-size: 11px; font-weight: 800; cursor: pointer;
-  }
+  .chip { padding: 7px 14px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); font-size: 11px; font-weight: 800; cursor: pointer; }
 
-  .details-box {
-    background: rgba(0,0,0,0.3); border-radius: 14px; padding: 12px; margin-top: 8px;
-    border: 1px solid var(--border); display: none;
-  }
-  .kv { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 12px; }
-  .k { opacity: 0.5; font-weight: 400; }
-  .v { font-weight: 700; color: #efefef; }
+  .details-box { background: rgba(0,0,0,0.3); border-radius: 14px; padding: 12px; margin-top: 8px; border: 1px solid var(--border); display: none; }
+  .kv { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); }
 
-  .controls { 
-    display: grid; grid-template-columns: 1fr 1fr auto; 
-    gap: 10px; margin-top: 18px; align-items: flex-end;
-  }
-  
-  label { font-size: 10px; font-weight: 900; opacity: 0.4; margin-bottom: 4px; display: block; text-transform: uppercase; }
-  
-  select {
-    width: 100%; padding: 11px; border-radius: 10px; background: #0c121d; 
-    border: 1px solid var(--border); color: #fff; outline: none; font-size: 12px;
-  }
+  .controls { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-top: 18px; align-items: flex-end; }
+  select { width: 100%; padding: 11px; border-radius: 10px; background: #0c121d; border: 1px solid var(--border); color: #fff; font-size: 12px; }
+  .save-btn { background: linear-gradient(90deg, var(--neon-blue), #0062ff); color: #fff; border: none; padding: 11px 20px; border-radius: 10px; font-weight: 900; cursor: pointer; }
 
-  .save-btn {
-    background: linear-gradient(90deg, var(--neon-blue), #0062ff);
-    color: #fff; border: none; padding: 11px 20px; border-radius: 10px;
-    font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 11px;
-  }
+  .wp-link { display: inline-flex; align-items: center; gap: 6px; color: var(--neon-green); text-decoration: none; font-weight: 900; font-size: 11px; margin-top: 10px; padding: 6px 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border: 1px solid rgba(74,222,128,0.2); }
 
-  .wp-link {
-    display: inline-flex; align-items: center; gap: 6px; color: var(--neon-green);
-    text-decoration: none; font-weight: 900; font-size: 11px; margin-top: 10px;
-    padding: 6px 12px; background: rgba(74, 222, 128, 0.1); border-radius: 8px; border: 1px solid rgba(74,222,128,0.2);
-  }
-
-  /* Modal */
-  .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px); }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 9999; }
   .modal-content { background: #0a0f18; width: 90%; max-width: 450px; padding: 20px; border-radius: 20px; border: 1px solid var(--border); }
-  textarea { width: 100%; min-height: 100px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff; border-radius: 12px; padding: 12px; outline: none; margin-top: 10px; font-family: 'Cairo'; }
+  textarea { width: 100%; min-height: 100px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff; border-radius: 12px; padding: 12px; outline: none; margin-top: 10px; }
 </style>
 </head>
 
@@ -106,16 +69,13 @@
     <h2>BAROUD ORDERS</h2>
     <a href="admin.html" class="back-btn">BACK</a>
   </div>
-
   <input type="text" id="q" class="search-box" placeholder="Search ID or User..." oninput="renderOrders()" />
-
   <div id="list"></div>
-  <div id="empty" class="empty-state" style="display:none; text-align: center; margin-top: 50px; opacity: 0.5;">No orders found.</div>
 </div>
 
 <div class="modal" id="replyModal">
   <div class="modal-content">
-    <h3 style="margin:0; font-family: 'Orbitron'; font-size: 14px; color: var(--neon-blue)">ADMIN REPLY</h3>
+    <h3 style="margin:0; font-size: 14px; color: var(--neon-blue)">ADMIN REPLY</h3>
     <textarea id="rmText" placeholder="Enter delivery info..."></textarea>
     <div style="display:flex; gap:10px; margin-top:20px;">
       <button class="save-btn" style="background:var(--card-bg); flex:1" id="rmCancel">CANCEL</button>
@@ -136,7 +96,6 @@ let currentReplyOrderId = null;
 async function loadOrders(){
   const { data: orders } = await sb.from("orders").select("*").order("created_at", { ascending:false });
   ordersCache = orders || [];
-  
   const ids = [...new Set(ordersCache.map(o => o.product_id).filter(Boolean))];
   if(ids.length){
     const { data: prods } = await sb.from("products").select("id,title").in("id", ids);
@@ -150,48 +109,33 @@ function renderOrders(){
   const term = document.getElementById("q").value.toLowerCase();
   const filtered = ordersCache.filter(o => String(o.id).includes(term) || String(o.user_id).includes(term));
 
-  document.getElementById("empty").style.display = filtered.length ? "none" : "block";
-
   listEl.innerHTML = filtered.map(o => {
     const title = titleById[o.product_id] || o.product_title || "Product";
     const dStatus = (o.delivery_status || "pending").toLowerCase();
-    const dotClass = dStatus === "done" ? "st-done" : dStatus === "rejected" ? "st-rejected" : "st-pending";
+    
+    // 🔥 اختيار الرمز واللون حسب الحالة
+    let icon = "•"; 
+    let iconClass = "st-pending";
+    if(dStatus === "done") { icon = "✓"; iconClass = "st-done"; }
+    if(dStatus === "rejected") { icon = "✕"; iconClass = "st-rejected"; }
     
     return `
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="order-title"><span class="status-dot ${dotClass}"></span>${title}</div>
+            <div class="order-title"><span class="status-icon ${iconClass}">${icon}</span>${title}</div>
             <div style="font-size:10px; opacity:0.4">#${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
           </div>
           <div class="price-tag">$${Number(o.price || 0).toFixed(2)}</div>
         </div>
-
         <div class="chip-row">
           <div class="chip" onclick="toggleDetails(${o.id})">📦 DETAILS</div>
-          <div class="chip" onclick="openReplyModal(${o.id})">💬 REPLY</div>
-          <div class="chip" style="opacity:0.5; cursor:default; border:none">${o.admin_reply ? 'Replied' : 'No reply'}</div>
+          <div class="chip" onclick="openReplyModal(${o.id})">💬 REPLY ${o.admin_reply ? '✅' : ''}</div>
         </div>
-
         <div class="details-box" id="details_${o.id}"></div>
-
         <div class="controls">
-          <div>
-            <label>Payment</label>
-            <select id="status_${o.id}">
-              <option value="pending" ${o.status==="pending"?"selected":""}>Pending</option>
-              <option value="paid" ${o.status==="paid"?"selected":""}>Paid</option>
-              <option value="cancelled" ${o.status==="cancelled"?"selected":""}>Cancelled</option>
-            </select>
-          </div>
-          <div>
-            <label>Delivery</label>
-            <select id="delivery_${o.id}">
-              <option value="pending" ${dStatus==="pending"?"selected":""}>Pending</option>
-              <option value="done" ${dStatus==="done"?"selected":""}>Done</option>
-              <option value="rejected" ${dStatus==="rejected"?"selected":""}>Rejected</option>
-            </select>
-          </div>
+          <div><select id="status_${o.id}"><option value="pending" ${o.status==="pending"?"selected":""}>Pending</option><option value="paid" ${o.status==="paid"?"selected":""}>Paid</option></select></div>
+          <div><select id="delivery_${o.id}"><option value="pending" ${dStatus==="pending"?"selected":""}>Pending</option><option value="done" ${dStatus==="done"?"selected":""}>Done</option><option value="rejected" ${dStatus==="rejected"?"selected":""}>Rejected</option></select></div>
           <button class="save-btn" onclick="saveOrder(${o.id})">SAVE</button>
         </div>
         <div id="msg_${o.id}" style="margin-top:10px; font-size:11px; text-align:right"></div>
@@ -204,7 +148,7 @@ function toggleDetails(id){
   const el = document.getElementById(`details_${id}`);
   if(el.style.display === "block") { el.style.display = "none"; return; }
   const o = ordersCache.find(x => x.id === id);
-  const keys = ["phone_number", "number", "whatsapp", "phone", "player_id", "player_name", "account_email", "account_password", "note"];
+  const keys = ["phone", "phone_number", "number", "whatsapp", "player_id", "player_name", "account_email", "note"];
   el.innerHTML = keys.filter(k => o[k]).map(k => `<div class="kv"><span class="k">${k}</span><span class="v">${o[k]}</span></div>`).join("");
   el.style.display = "block";
 }
@@ -214,7 +158,6 @@ function openReplyModal(id){
   document.getElementById("rmText").value = document.getElementById(`reply_${id}`).value;
   document.getElementById("replyModal").style.display = "flex";
 }
-
 document.getElementById("rmCancel").onclick = () => document.getElementById("replyModal").style.display = "none";
 document.getElementById("rmSave").onclick = () => {
   document.getElementById(`reply_${currentReplyOrderId}`).value = document.getElementById("rmText").value;
@@ -223,50 +166,29 @@ document.getElementById("rmSave").onclick = () => {
 
 async function saveOrder(id){
   const msg = document.getElementById(`msg_${id}`);
-  msg.innerHTML = "<span style='color:var(--neon-blue)'>Updating...</span>";
-  
+  msg.innerHTML = "Updating...";
   const status = document.getElementById(`status_${id}`).value;
   const delivery_status = document.getElementById(`delivery_${id}`).value;
   const admin_reply = document.getElementById(`reply_${id}`).value;
-
-  // 1. Get User ID & Data
   const order = ordersCache.find(o => String(o.id) === String(id));
   
-  // 2. Fetch Fresh Phone from Profile (Because Column is 'phone')
   let phone = order.phone || order.phone_number || order.number || order.whatsapp || "";
-  
   if(!phone && order.user_id){
     const { data: prof } = await sb.from("profiles").select("phone").eq("id", order.user_id).single();
     if(prof) phone = prof.phone;
   }
 
-  // 3. Update Database
-  const { error } = await sb.from("orders").update({ 
-    status, delivery_status, admin_reply, admin_reply_at: new Date() 
-  }).eq("id", id);
-
+  const { error } = await sb.from("orders").update({ status, delivery_status, admin_reply, admin_reply_at: new Date() }).eq("id", id);
   if(error) { msg.textContent = "Error!"; return; }
 
-  msg.innerHTML = "<span style='color:var(--neon-green)'>Saved ✅</span>";
-  
-  // 4. WhatsApp Trigger
-  if(delivery_status === "done" || delivery_status === "rejected"){
-    if(phone){
-      const message = `Hello, Order #${id} is ${delivery_status.toUpperCase()} ✅\nDetails: ${admin_reply}\nCheck here: https://baroudapp.com/my-orders.html`;
-      const cleanPhone = String(phone).replace(/\D/g,'');
-      const wpUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-      
-      const win = window.open(wpUrl, '_blank');
-      
-      if(!win || win.closed || typeof win.closed == 'undefined') {
-        msg.innerHTML += ` <a href="${wpUrl}" target="_blank" class="wp-link">Open WhatsApp 🟢</a>`;
-      }
-    } else {
-      msg.innerHTML += " <span style='color:orange'>(No Phone Found)</span>";
-    }
+  msg.innerHTML = "Saved ✅";
+  if((delivery_status === "done" || delivery_status === "rejected") && phone){
+    const text = `Hello, Order #${id} is ${delivery_status.toUpperCase()} ${delivery_status==='done'?'✅':'❌'}\nDetails: ${admin_reply}\nCheck here: https://baroudapp.com/my-orders.html`;
+    const wpUrl = `https://wa.me/${String(phone).replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
+    const win = window.open(wpUrl, '_blank');
+    if(!win) msg.innerHTML += ` <a href="${wpUrl}" target="_blank" class="wp-link">Open WhatsApp 🟢</a>`;
   }
-  
-  setTimeout(loadOrders, 1200);
+  setTimeout(loadOrders, 1000);
 }
 
 loadOrders();
