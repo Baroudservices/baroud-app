@@ -11,6 +11,7 @@
   <style>
     :root {
       --neon-purple: #a855f7;
+      --neon-green: #2ecc71; /* لون الموزع */
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.04);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -26,7 +27,6 @@
 
     .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
 
-    /* ===== TOP BAR ===== */
     .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .btn-circle {
       width: 40px; height: 40px; border-radius: 12px;
@@ -35,17 +35,21 @@
       cursor: pointer; color: #fff; text-decoration: none;
     }
 
-    /* ===== HERO ===== */
     .hero {
       background: linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(0,0,0,0) 100%);
       border: 1px solid rgba(168,85,247,0.3);
       border-radius: 20px; padding: 15px 20px; margin-bottom: 20px;
       display: flex; align-items: center; justify-content: space-between;
+      transition: 0.3s;
+    }
+    .hero.reseller-hero {
+      background: linear-gradient(135deg, rgba(46,204,113,0.15) 0%, rgba(0,0,0,0) 100%);
+      border-color: rgba(46,204,113,0.3);
     }
     .hero h1 { margin: 0; font-size: 18px; letter-spacing: 1px; color: var(--neon-purple); }
+    .hero.reseller-hero h1 { color: var(--neon-green); }
     .hero p { margin: 3px 0 0; font-size: 10px; opacity: 0.6; font-family: 'Cairo'; }
 
-    /* ===== SEARCH ===== */
     .search-container {
       background: var(--glass); border: 1px solid var(--glass-border);
       border-radius: 20px; padding: 12px 20px; margin-bottom: 20px;
@@ -56,7 +60,6 @@
       font-family: 'Cairo'; font-size: 15px; outline: none;
     }
 
-    /* ===== LIST VIEW (MODIFIED) ===== */
     .products-list { display: flex; flex-direction: column; gap: 15px; }
 
     .card {
@@ -65,22 +68,28 @@
       display: flex; align-items: center; gap: 15px;
       transition: 0.3s; cursor: pointer;
     }
-    .card:active { transform: scale(0.98); border-color: var(--neon-purple); }
+    .card:active { transform: scale(0.98); }
+    .card.reseller-card:active { border-color: var(--neon-green); }
+    .card.user-card:active { border-color: var(--neon-purple); }
 
     .card-img { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; background: #000; }
     
     .card-body { flex: 1; }
     .card-name { font-weight: 900; font-size: 14px; margin-bottom: 4px; text-transform: uppercase; }
     
-    .pill { font-size: 8px; padding: 2px 8px; border-radius: 5px; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); color: var(--neon-purple); font-weight: 700; }
+    .pill { font-size: 8px; padding: 2px 8px; border-radius: 5px; font-weight: 700; }
+    .user-pill { background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); color: var(--neon-purple); }
+    .reseller-pill { background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.2); color: var(--neon-green); }
 
     .card-footer { text-align: right; }
-    .card-price { color: #fff; font-weight: 900; font-size: 15px; display: block; margin-bottom: 4px; }
+    .card-price { font-weight: 900; font-size: 15px; display: block; margin-bottom: 4px; color: #fff; }
+    .reseller-price { color: var(--neon-green) !important; }
     
     .open-btn {
-      padding: 4px 10px; border-radius: 8px; background: var(--neon-purple);
-      color: #fff; font-weight: 900; font-size: 9px; border: none;
+      padding: 4px 10px; border-radius: 8px; color: #fff; font-weight: 900; font-size: 9px; border: none;
     }
+    .user-btn { background: var(--neon-purple); }
+    .reseller-btn { background: var(--neon-green); color: #000; }
 
     .shimmer-card {
       height: 85px; width: 100%; border-radius: 20px;
@@ -100,7 +109,7 @@
       <div class="btn-circle" onclick="location.href='services.html'">🏠</div>
     </div>
 
-    <div class="hero">
+    <div class="hero" id="heroSection">
       <div>
         <h1>Digital Cards</h1>
         <p>iTunes, Razer, Steam & more</p>
@@ -112,11 +121,7 @@
       <input type="text" id="q" placeholder="Search cards...">
     </div>
 
-    <div class="products-list" id="grid">
-      <div class="shimmer-card"></div>
-      <div class="shimmer-card"></div>
-      <div class="shimmer-card"></div>
-    </div>
+    <div class="products-list" id="grid"></div>
   </div>
 
 <script>
@@ -125,12 +130,30 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let allGifts = [];
+  let userRole = 'user';
+
+  async function getUserRole() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const { data: profile } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
+      if (profile) {
+        userRole = profile.role;
+        if(userRole === 'reseller') {
+          document.getElementById('heroSection').classList.add('reseller-hero');
+        }
+      }
+    }
+  }
 
   async function loadData() {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = Array(3).fill('<div class="shimmer-card"></div>').join('');
+    
     try {
+      await getUserRole();
       const { data, error } = await sb
         .from("products_with_min_price")
-        .select("id, title, category, min_price")
+        .select("id, title, category, min_price, reseller_min_price")
         .eq("active", true)
         .ilike("category", "%gift%")
         .order('title', { ascending: true });
@@ -139,7 +162,7 @@
       allGifts = data;
       render(allGifts);
     } catch (e) {
-      document.getElementById("grid").innerHTML = `<div style="text-align: center; opacity: 0.5;">Error loading cards.</div>`;
+      grid.innerHTML = `<div style="text-align: center; opacity: 0.5;">Error loading cards.</div>`;
     }
   }
 
@@ -150,19 +173,25 @@
       return;
     }
 
-    grid.innerHTML = list.map(item => `
-      <div class="card" onclick="location.href='account.html?id=${item.id}'">
-        <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='https://placehold.co/100x100/020508/a855f7?text=GIFT'">
-        <div class="card-body">
-          <div class="card-name">${item.title}</div>
-          <span class="pill">INSTANT DELIVERY</span>
+    const isReseller = (userRole === 'reseller');
+
+    grid.innerHTML = list.map(item => {
+      const displayPrice = isReseller ? (item.reseller_min_price || item.min_price) : item.min_price;
+      
+      return `
+        <div class="card ${isReseller ? 'reseller-card' : 'user-card'}" onclick="location.href='account.html?id=${item.id}'">
+          <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='https://placehold.co/100x100/020508/a855f7?text=GIFT'">
+          <div class="card-body">
+            <div class="card-name">${item.title}</div>
+            <span class="pill ${isReseller ? 'reseller-pill' : 'user-pill'}">${isReseller ? 'VIP PRICE' : 'INSTANT DELIVERY'}</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-price ${isReseller ? 'reseller-price' : ''}">$${Number(displayPrice || 0).toFixed(2)}</div>
+            <button class="open-btn ${isReseller ? 'reseller-btn' : 'user-btn'}">OPEN</button>
+          </div>
         </div>
-        <div class="card-footer">
-          <div class="card-price">$${Number(item.min_price || 0).toFixed(2)}</div>
-          <button class="open-btn">OPEN</button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   document.getElementById("q").oninput = (e) => {
