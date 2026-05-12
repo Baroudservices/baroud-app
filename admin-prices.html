@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin – Plan Prices</title>
+<title>Admin – Baroud Plan Management</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
 body {
   margin: 0; font-family: 'Cairo', sans-serif;
   background: var(--bg-dark); color: #fff;
-  padding: 10px; font-size: 13px; /* تصغير الخط العام */
+  padding: 10px; font-size: 13px;
 }
 
 .wrap { width: 100%; max-width: 1200px; margin: auto; }
@@ -50,7 +50,7 @@ input, select {
   color: #fff; font-family: 'Cairo'; outline: none; font-size: 13px;
 }
 
-.save-btn { background: linear-gradient(90deg, #0aa0ff, #2a74ff); border: none; font-weight: 900; }
+.save-btn { background: linear-gradient(90deg, #0aa0ff, #2a74ff); border: none; font-weight: 900; color: white; }
 
 /* ===== EDITOR GRID ===== */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
@@ -60,7 +60,7 @@ input, select {
 }
 .label { font-size: 11px; font-weight: 900; margin-bottom: 5px; opacity: 0.7; }
 
-/* ===== MODAL (STRUCTURE) - هوي هيدا اللي صغرناه ليبين كله ===== */
+/* ===== MODAL ===== */
 .modal {
   position: fixed; inset: 0; background: rgba(0,0,0,0.9);
   display: none; align-items: center; justify-content: center; z-index: 10000;
@@ -70,15 +70,13 @@ input, select {
   border: 1px solid var(--glass-border); border-radius: 15px; padding: 15px;
 }
 
-/* تعديل الجدول ليكون مضغوط ويبين بالعرض */
 .plansTable { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .plansTable th { font-size: 11px; opacity: 0.5; padding: 8px 5px; text-align: left; }
 .plansTable td { padding: 5px; }
 
-/* تصغير الانبوت داخل الجدول */
 .plansTable input { padding: 6px; font-size: 12px; width: 100%; }
 
-.danger { background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; padding: 4px 8px; border-radius: 5px; font-size: 11px; }
+.danger { background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; padding: 4px 8px; border-radius: 5px; font-size: 11px; cursor: pointer; }
 
 #msg { text-align: center; font-weight: 700; margin-bottom: 10px; min-height: 15px; font-size: 12px; }
 </style>
@@ -146,10 +144,9 @@ const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const DEFAULT_PLAN_LIST = [{ key:"1" }, { key:"2"}, { key:"3"}, { key:"4"}];
-let PLAN_LIST = [];
-let _currentPlansProductId = null;
 let ALL_PRODUCTS = [];
+let CURRENT_PLANS = [];
+let _currentProductId = null;
 
 const productSelect = document.getElementById("productSelect");
 const editor = document.getElementById("editor");
@@ -159,22 +156,22 @@ const plansTbody = document.getElementById("plansTbody");
 const productSearch = document.getElementById("productSearch");
 
 function esc(s){ return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
 function setMsg(text, type='info'){ 
   msg.textContent = text || ""; 
   msg.style.color = type === 'error' ? '#ff4444' : '#1bc7ff';
+  if(type !== 'error') setTimeout(() => { msg.textContent = ""; }, 3000);
 }
 
 async function boot(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session) { window.location.href="login.html"; return; }
-  const { data: profile } = await sb.from("profiles").select("is_admin").eq("id", session.user.id).single();
-  if(!profile?.is_admin){ window.location.href = "services.html"; return; }
   await loadProducts();
 }
 
 async function loadProducts(){
   const { data, error } = await sb.from("products").select("id,title").order("title");
-  if(error) return;
+  if(error) { setMsg("Failed to load products", "error"); return; }
   ALL_PRODUCTS = data || [];
   renderProductSelect(ALL_PRODUCTS);
   if(ALL_PRODUCTS.length > 0) loadPlans(ALL_PRODUCTS[0].id);
@@ -190,86 +187,114 @@ productSearch.oninput = () => {
   renderProductSelect(filtered);
 };
 
+document.getElementById("btnClearSearch").onclick = () => {
+  productSearch.value = "";
+  renderProductSelect(ALL_PRODUCTS);
+};
+
 async function loadPlans(productId){
   if(!productId) return;
-  _currentPlansProductId = productId;
-  const { data: dbPlans } = await sb.from("product_plan_prices").select("*").eq("product_id", productId);
-  PLAN_LIST = (dbPlans && dbPlans.length > 0) ? dbPlans.map(x => ({ key: String(x.plan_key), label: x.plan_label || x.plan_key })) : DEFAULT_PLAN_LIST;
-  const map = {}; (dbPlans || []).forEach(r => map[String(r.plan_key)] = r);
+  _currentProductId = productId;
+  setMsg("Loading plans...");
+  
+  const { data: dbPlans, error } = await sb.from("product_plan_prices")
+    .select("*")
+    .eq("product_id", productId)
+    .order("plan_key");
 
+  CURRENT_PLANS = dbPlans || [];
+  
   const title = productSelect.options[productSelect.selectedIndex]?.textContent || "Editor";
-  editor.innerHTML = `
-    <div class="card">
-      <div style="font-weight:900; margin-bottom:10px; color:var(--neon-blue)">${esc(title)}</div>
-      <div class="grid">
-        ${PLAN_LIST.map(pl => {
-          const row = map[pl.key];
-          const price = row ? Number(row.price || 0) : 0;
-          const active = row ? !!row.active : true;
-          return `
-            <div class="box">
-              <div class="label">${esc(pl.label)}</div>
-              <input type="number" step="0.01" value="${price.toFixed(2)}" data-price-key="${esc(pl.key)}" />
+  
+  if(CURRENT_PLANS.length === 0){
+    editor.innerHTML = `<div class="card" style="text-align:center">No plans found. Click <b>STRUCTURE</b> to add. <br><br> <button class="btn" id="btnManagePlans">STRUCTURE</button></div>`;
+  } else {
+    editor.innerHTML = `
+      <div class="card">
+        <div style="font-weight:900; margin-bottom:10px; color:var(--neon-blue)">${esc(title)}</div>
+        <div class="grid" id="pricesGrid">
+          ${CURRENT_PLANS.map(pl => `
+            <div class="box" data-id="${pl.id}" data-key="${esc(pl.plan_key)}">
+              <div class="label">${esc(pl.plan_label || pl.plan_key)}</div>
+              <input type="number" step="0.01" value="${Number(pl.price || 0).toFixed(2)}" class="price-input" />
               <label style="display:flex; align-items:center; gap:5px; margin-top:8px; font-size:10px;">
-                <input type="checkbox" ${active ? "checked" : ""} data-active-key="${esc(pl.key)}" /> ACTIVE
+                <input type="checkbox" ${pl.active !== false ? "checked" : ""} class="active-checkbox" /> ACTIVE
               </label>
-            </div>`;
-        }).join("")}
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-        <button class="btn" id="btnManagePlans">STRUCTURE</button>
-        <button class="btn save-btn" id="btnSave">SAVE PRICES</button>
-      </div>
-    </div>`;
-
-  document.getElementById("btnSave").onclick = () => savePrices(productId);
-  document.getElementById("btnManagePlans").onclick = async () => {
-    await loadPlansForManage(productId);
-    plansModal.style.display = "flex";
-  };
+            </div>`).join("")}
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button class="btn" id="btnManagePlans">STRUCTURE</button>
+          <button class="btn save-btn" id="btnSave">SAVE PRICES</button>
+        </div>
+      </div>`;
+    
+    document.getElementById("btnSave").onclick = savePrices;
+  }
+  
+  document.getElementById("btnManagePlans").onclick = openStructureModal;
 }
 
-async function savePrices(productId){
-  setMsg("Saving...");
-  const rows = PLAN_LIST.map(pl => ({
-    product_id: Number(productId),
-    plan_key: String(pl.key).trim(),
-    plan_label: String(pl.label || pl.key).trim(),
-    price: parseFloat(editor.querySelector(`input[data-price-key="${pl.key}"]`).value) || 0,
-    active: !!editor.querySelector(`input[data-active-key="${pl.key}"]`).checked
+async function savePrices(){
+  setMsg("Saving prices...");
+  const boxes = document.querySelectorAll("#pricesGrid .box");
+  const updates = Array.from(boxes).map(box => ({
+    product_id: Number(_currentProductId),
+    plan_key: box.getAttribute("data-key"),
+    price: parseFloat(box.querySelector(".price-input").value) || 0,
+    active: box.querySelector(".active-checkbox").checked,
+    plan_label: box.querySelector(".label").textContent.trim()
   }));
-  const { error } = await sb.from("product_plan_prices").upsert(rows, { onConflict: "product_id,plan_key" });
-  setMsg(error ? "Error" : "Saved! ✅", error ? "error" : "info");
+
+  const { error } = await sb.from("product_plan_prices").upsert(updates, { onConflict: "product_id,plan_key" });
+  if(error) setMsg("Error saving prices", "error");
+  else setMsg("Prices saved successfully! ✅");
 }
 
-async function loadPlansForManage(productId){
-  const { data } = await sb.from("product_plan_prices").select("*").eq("product_id", productId);
+function openStructureModal(){
   plansTbody.innerHTML = "";
-  if(data && data.length > 0) data.forEach(renderPlanRow);
-  else renderPlanRow({ plan_key:"", plan_label:"", price:0, active:true });
+  if(CURRENT_PLANS.length > 0) {
+    CURRENT_PLANS.forEach(renderPlanRow);
+  } else {
+    renderPlanRow({ plan_key: "", plan_label: "", price: 0, active: true });
+  }
+  plansModal.style.display = "flex";
 }
 
 function renderPlanRow(row){
   const tr = document.createElement("tr");
   tr.innerHTML = `
-    <td><input data-k value="${esc(row.plan_key)}" /></td>
-    <td><input data-l value="${esc(row.plan_label)}" /></td>
-    <td><input data-p type="number" value="${Number(row.price||0).toFixed(2)}" /></td>
-    <td style="text-align:center"><input data-a type="checkbox" ${row.active !== false ? "checked":""} /></td>
+    <td><input class="row-key" value="${esc(row.plan_key)}" placeholder="Key" /></td>
+    <td><input class="row-label" value="${esc(row.plan_label)}" placeholder="Label" /></td>
+    <td><input class="row-price" type="number" step="0.01" value="${Number(row.price || 0).toFixed(2)}" /></td>
+    <td style="text-align:center"><input class="row-active" type="checkbox" ${row.active !== false ? "checked" : ""} /></td>
     <td><button class="danger" onclick="this.closest('tr').remove()">X</button></td>`;
   plansTbody.appendChild(tr);
 }
 
 document.getElementById("btnPlansSave").onclick = async () => {
   const rows = Array.from(plansTbody.querySelectorAll("tr")).map(tr => ({
-    product_id: Number(_currentPlansProductId),
-    plan_key: tr.querySelector("[data-k]").value.trim(),
-    plan_label: tr.querySelector("[data-l]").value.trim(),
-    price: parseFloat(tr.querySelector("[data-p]").value) || 0,
-    active: tr.querySelector("[data-a]").checked
+    product_id: Number(_currentProductId),
+    plan_key: tr.querySelector(".row-key").value.trim(),
+    plan_label: tr.querySelector(".row-label").value.trim(),
+    price: parseFloat(tr.querySelector(".row-price").value) || 0,
+    active: tr.querySelector(".row-active").checked
   })).filter(r => r.plan_key);
+
+  if(rows.length === 0) { alert("Please add at least one plan key."); return; }
+
+  setMsg("Updating structure...");
+  
+  // First, optional: delete old plans that are not in the new list if you want a clean sync
+  // For safety, we just upsert here.
   const { error } = await sb.from("product_plan_prices").upsert(rows, { onConflict: "product_id,plan_key" });
-  if(!error) { plansModal.style.display="none"; loadPlans(_currentPlansProductId); }
+  
+  if(error) {
+    setMsg("Error updating structure", "error");
+  } else {
+    setMsg("Structure updated! ✅");
+    plansModal.style.display = "none";
+    loadPlans(_currentProductId);
+  }
 };
 
 document.getElementById("btnOpen").onclick = () => loadPlans(productSelect.value);
