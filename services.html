@@ -26,70 +26,94 @@
     
     .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 15px 120px; }
 
+    /* ===== TOPBAR ===== */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 15px 20px; background: rgba(2, 5, 8, 0.85);
+      padding: 15px 20px; background: rgba(2, 5, 8, 0.9);
       position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--glass-border);
     }
     
     .wallet-pill {
       display: flex; align-items: center; gap: 10px;
-      background: var(--glass); padding: 5px 5px 5px 15px;
+      background: var(--glass); padding: 4px 4px 4px 12px;
       border-radius: 20px; border: 1px solid var(--neon-cyan);
     }
-    .wallet-pill.reseller-mode { border-color: var(--neon-green); box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
-    .balance-text { font-weight: 900; font-size: 13px; color: var(--neon-cyan); }
+    .wallet-pill.reseller-mode { border-color: var(--neon-green); box-shadow: 0 0 10px rgba(46, 204, 113, 0.1); }
+    .balance-text { font-weight: 900; font-size: 12px; color: var(--neon-cyan); }
     .reseller-mode .balance-text { color: var(--neon-green); }
 
     .add-btn { 
-      width: 28px; height: 28px; background: var(--neon-cyan); 
-      border-radius: 50%; color: #000; border: none; font-weight: bold; cursor: pointer;
+      width: 24px; height: 24px; background: var(--neon-cyan); 
+      border-radius: 50%; color: #000; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
     .reseller-mode .add-btn { background: var(--neon-green); }
 
-    .menu-trigger { font-size: 24px; cursor: pointer; color: #fff; }
+    /* ===== OFFERS BUTTON (FIXED SIZE) ===== */
+    .offers-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(90deg, #ff007a, #ff4b2b);
+      margin: 10px 0 20px; padding: 12px 20px; border-radius: 15px;
+      text-decoration: none; position: relative;
+      box-shadow: 0 0 15px rgba(255, 0, 122, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .offers-btn:active { transform: scale(0.97); }
+    .off-txt h2 { margin: 0; font-size: 13px; font-weight: 900; color: #fff; letter-spacing: 1px; }
+    .off-txt p { margin: 1px 0 0; font-size: 9px; opacity: 0.9; font-family: 'Cairo'; }
+    .off-icon { font-size: 18px; animation: pulse 1.5s infinite; }
+    
+    /* ===== SLIDER ===== */
+    .slider-box { width: 100%; height: 160px; border-radius: 20px; overflow: hidden; margin: 15px 0; border: 1px solid var(--glass-border); }
+    .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .slides img { width: 33.333%; height: 100%; object-fit: cover; }
+
+    /* ===== SEARCH ===== */
+    .search-wrap { background: #fff; border-radius: 12px; padding: 0 15px; margin-bottom: 20px; display: flex; align-items: center; }
+    .search-wrap input { width: 100%; height: 44px; background: none; border: none; color: #000; font-size: 14px; font-weight: 700; font-family: 'Cairo'; }
+
+    /* ===== GRID & CARDS (FIXED IMAGES) ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .service-card { 
+      background: var(--glass); border-radius: 20px; border: 1px solid var(--glass-border); 
+      overflow: hidden; text-decoration: none; display: flex; flex-direction: column; 
+      height: 165px; transition: 0.3s; 
+    }
+    .service-card:active { transform: scale(0.95); }
+    
+    .img-box { width: 100%; height: 115px; overflow: hidden; background: #000; }
+    .img-box img { 
+      width: 100%; height: 100%; 
+      object-fit: cover; /* هيدا اللي بيمنع الصورة تمط */
+      object-position: center;
+    }
+    
+    .label-box { 
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 5px; text-align: center; font-size: 10px; font-weight: 900; color: #fff; 
+    }
+
+    /* Reseller States */
+    .reseller-card-active:active { border-color: var(--neon-green) !important; }
+    .user-card-active:active { border-color: var(--neon-cyan) !important; }
+
+    /* Drawer & Dock */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 2000; }
+    .drawer { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background: var(--bg-dark); z-index: 2100; transition: 0.5s; padding: 40px 25px; border-left: 1px solid var(--glass-border); }
+    .drawer.active { right: 0; }
+    .m-item { display: block; padding: 18px 0; color: #fff; text-decoration: none; font-weight: 600; border-bottom: 1px solid var(--glass-border); }
+
+    .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 400px; height: 65px; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 22px; display: flex; align-items: center; justify-content: space-around; z-index: 1000; }
+    .dock-icon { font-size: 22px; cursor: pointer; opacity: 0.5; }
+    .dock-icon.active { opacity: 1; color: var(--neon-cyan); }
+    .reseller-mode-dock.active { color: var(--neon-green) !important; }
 
     #resellerBadge {
       display: none; background: var(--neon-green); color: #000;
       font-size: 10px; font-weight: 900; padding: 2px 10px;
       border-radius: 10px; margin-top: 5px; text-align: center;
     }
-
-    .offers-btn {
-      display: flex; align-items: center; justify-content: space-between;
-      background: linear-gradient(90deg, #ff007a, #ff4b2b);
-      margin: 10px 0 25px; padding: 18px 25px; border-radius: 20px;
-      text-decoration: none; position: relative; overflow: hidden;
-      box-shadow: 0 0 20px rgba(255, 0, 122, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
-    }
     
-    .slider-box { width: 100%; height: 180px; border-radius: 24px; overflow: hidden; margin: 20px 0; border: 1px solid var(--glass-border); position: relative; }
-    .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-    .slides img { width: 33.333%; height: 100%; object-fit: cover; }
-
-    .search-wrap { background: #fff; border-radius: 14px; padding: 0 18px; margin-bottom: 25px; display: flex; align-items: center; }
-    .search-wrap input { width: 100%; height: 48px; background: none; border: none; color: #000; font-size: 15px; font-weight: 700; font-family: 'Cairo'; }
-
-    /* جرد الخدمات المحدث ليشمل 6 خانات */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .service-card { background: var(--glass); border-radius: 24px; border: 1px solid var(--glass-border); overflow: hidden; text-decoration: none; display: flex; flex-direction: column; height: 180px; transition: 0.3s; }
-    .service-card:active { transform: scale(0.95); }
-    .reseller-card-active:active { border-color: var(--neon-green) !important; }
-    .user-card-active:active { border-color: var(--neon-cyan) !important; }
-
-    .img-box { width: 100%; height: 130px; overflow: hidden; }
-    .img-box img { width: 100%; height: 100%; object-fit: cover; }
-    .label-box { padding: 10px; text-align: center; font-size: 11px; font-weight: 900; color: #fff; }
-
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 2000; }
-    .drawer { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background: var(--bg-dark); z-index: 2100; transition: 0.5s; padding: 40px 25px; border-left: 1px solid var(--glass-border); }
-    .drawer.active { right: 0; }
-    .m-item { display: block; padding: 18px 0; color: #fff; text-decoration: none; font-weight: 600; border-bottom: 1px solid var(--glass-border); }
-
-    .dock { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; height: 70px; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 25px; display: flex; align-items: center; justify-content: space-around; z-index: 1000; }
-    .dock-icon { font-size: 24px; cursor: pointer; opacity: 0.5; }
-    .dock-icon.active { opacity: 1; color: var(--neon-cyan); }
-    .reseller-mode-dock.active { color: var(--neon-green) !important; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
   </style>
 </head>
 
@@ -113,8 +137,8 @@
       <span class="balance-text" id="balanceText">0.00 🇱🇧</span>
       <button class="add-btn" onclick="location.href='add-credit.html'">+</button>
     </div>
-    <div style="font-weight: 900; letter-spacing: 2px; color: #fff; font-size: 20px;">BAROUD</div>
-    <div class="menu-trigger" id="menuBtn">☰</div>
+    <div style="font-weight: 900; letter-spacing: 2px; color: #fff; font-size: 18px;">BAROUD</div>
+    <div class="menu-trigger" id="menuBtn" style="font-size: 20px;">☰</div>
   </header>
 
   <main class="wrap">
@@ -127,13 +151,13 @@
     </div>
 
     <div class="search-wrap">
-      <input type="text" placeholder="Search for accounts, games...">
+      <input type="text" placeholder="Search accounts, games...">
     </div>
 
     <a href="offers.html" class="offers-btn">
         <div class="off-txt">
-            <h2>EXCLUSIVE OFFERS</h2>
-            <p>Check out our hottest daily deals</p>
+            <h2>DAILY OFFERS</h2>
+            <p>Hottest deals available now</p>
         </div>
         <div class="off-icon">🔥</div>
     </a>
@@ -200,15 +224,9 @@
             document.getElementById("resellerBadge").style.display = "block";
             document.getElementById("userAvatar").style.background = "var(--neon-green)";
             document.getElementById("homeIcon").classList.add("reseller-mode-dock");
-            
-            // إضافة كلاس للمربعات عشان لما يكبس عليها الموزع تعطي ضوء أخضر
-            document.querySelectorAll('.service-card').forEach(card => {
-                card.classList.add('reseller-card-active');
-            });
+            document.querySelectorAll('.service-card').forEach(card => card.classList.add('reseller-card-active'));
         } else {
-            document.querySelectorAll('.service-card').forEach(card => {
-                card.classList.add('user-card-active');
-            });
+            document.querySelectorAll('.service-card').forEach(card => card.classList.add('user-card-active'));
         }
       }
     }
