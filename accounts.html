@@ -11,6 +11,7 @@
   <style>
     :root {
       --neon-cyan: #00f2ff;
+      --neon-green: #2ecc71; /* لون الموزع */
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.04);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -28,7 +29,6 @@
 
     .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
 
-    /* ===== TOP NAVIGATION ===== */
     .top-nav {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 20px;
@@ -41,7 +41,6 @@
     }
     .page-title { font-weight: 900; font-size: 20px; letter-spacing: 2px; }
 
-    /* ===== SEARCH BAR ===== */
     .search-container {
       background: var(--glass); border: 1px solid var(--glass-border);
       border-radius: 20px; padding: 12px 20px; margin-bottom: 25px;
@@ -52,7 +51,6 @@
       font-family: 'Cairo'; font-size: 15px; outline: none;
     }
 
-    /* ===== LIST VIEW (MODIFIED) ===== */
     .products-list { display: flex; flex-direction: column; gap: 15px; }
     
     .card {
@@ -74,16 +72,19 @@
       background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.1);
       font-weight: 700; color: var(--neon-cyan);
     }
+    /* ستايل الموزع */
+    .pill.reseller-pill { color: var(--neon-green); border-color: var(--neon-green); background: rgba(46, 204, 113, 0.05); }
 
     .card-footer { text-align: right; }
     .card-price { color: var(--neon-cyan); font-weight: 900; font-size: 15px; display: block; }
+    .reseller-price { color: var(--neon-green) !important; }
     
     .open-btn {
       margin-top: 4px; padding: 4px 10px; border-radius: 8px; background: var(--neon-cyan);
       color: #000; font-weight: 900; font-size: 9px; border: none;
     }
+    .reseller-btn { background: var(--neon-green); }
 
-    /* ===== LOADING SHIMMER ===== */
     .shimmer-card {
       height: 85px; width: 100%; border-radius: 20px;
       background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
@@ -108,8 +109,7 @@
       <input type="text" id="q" placeholder="Search (Netflix, Shahid, IPTV...)">
     </div>
 
-    <div class="products-list" id="grid">
-      </div>
+    <div class="products-list" id="grid"></div>
 
     <div class="footer-text">BAROUDAPP.COM</div>
   </div>
@@ -121,6 +121,7 @@
 
   const grid = document.getElementById("grid");
   const q = document.getElementById("q");
+  let userRole = 'user'; // الافتراضي
 
   function showLoading() {
     grid.innerHTML = Array(5).fill('<div class="shimmer-card"></div>').join('');
@@ -138,28 +139,41 @@
       card.className = "card";
       card.onclick = () => location.href = `account.html?id=${it.id}`;
       
+      // منطق السعر: إذا كان موزع استعمل السعر التاني
+      const displayPrice = (userRole === 'reseller') ? (it.reseller_price || it.price) : it.price;
+      const isResellerStyle = (userRole === 'reseller') ? 'reseller-price' : '';
+
       card.innerHTML = `
         <img class="card-img" src="assets/products/${it.id}.jpg" onerror="this.src='https://placehold.co/100x100/020508/00f2ff?text=${encodeURIComponent(it.title)}'">
         <div class="card-body">
           <div class="card-name">${it.title}</div>
           <div class="badge-row">
-            <span class="pill">PREMIUM</span>
+            <span class="pill ${userRole === 'reseller' ? 'reseller-pill' : ''}">${userRole === 'reseller' ? 'VIP PRICE' : 'PREMIUM'}</span>
             <span class="pill">INSTANT</span>
           </div>
         </div>
         <div class="card-footer">
-          <div class="card-price">$${Number(it.price).toFixed(2)}</div>
-          <button class="open-btn">OPEN</button>
+          <div class="card-price ${isResellerStyle}">$${Number(displayPrice).toFixed(2)}</div>
+          <button class="open-btn ${userRole === 'reseller' ? 'reseller-btn' : ''}">OPEN</button>
         </div>
       `;
       grid.appendChild(card);
     });
   }
 
+  async function getUserRole() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const { data: profile } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
+      if (profile) userRole = profile.role;
+    }
+  }
+
   async function loadProducts() {
+    // جلب المنتجات مع كل الأعمدة (بما فيها السعر التاني)
     const { data, error } = await sb
       .from("products_with_min_price")
-      .select("id, title, category, min_price")
+      .select("id, title, category, min_price, reseller_price")
       .eq("active", true)
       .eq("category", "Accounts")
       .order('title', { ascending: true });
@@ -168,7 +182,8 @@
     return data.map(p => ({
       id: p.id,
       title: p.title,
-      price: p.min_price || 0
+      price: p.min_price || 0,
+      reseller_price: p.reseller_price || 0
     }));
   }
 
@@ -176,6 +191,7 @@
   (async () => {
     showLoading();
     try {
+      await getUserRole(); // أول خطوة نعرف مين الزبون
       allProducts = await loadProducts();
       render(allProducts);
 
@@ -184,6 +200,7 @@
         render(allProducts.filter(p => p.title.toLowerCase().includes(val)));
       };
     } catch(e) {
+      console.error(e);
       grid.innerHTML = `<div style="text-align:center; color:#ff4444; padding:20px;">Error loading data.</div>`;
     }
   })();
