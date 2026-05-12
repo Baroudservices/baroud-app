@@ -12,7 +12,7 @@
     :root {
       --neon-cyan: #00f2ff;
       --neon-pink: #ff007a;
-      --neon-green: #2ecc71; /* لون جديد للموزعين */
+      --neon-green: #2ecc71;
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -26,7 +26,6 @@
     
     .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 15px 120px; }
 
-    /* ===== TOPBAR ===== */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 15px 20px; background: rgba(2, 5, 8, 0.85);
@@ -38,7 +37,6 @@
       background: var(--glass); padding: 5px 5px 5px 15px;
       border-radius: 20px; border: 1px solid var(--neon-cyan);
     }
-    /* ستايل خاص للرصيد إذا كان موزع */
     .wallet-pill.reseller-mode { border-color: var(--neon-green); box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
     .balance-text { font-weight: 900; font-size: 13px; color: var(--neon-cyan); }
     .reseller-mode .balance-text { color: var(--neon-green); }
@@ -51,14 +49,12 @@
 
     .menu-trigger { font-size: 24px; cursor: pointer; color: #fff; }
 
-    /* ===== RESELLER BADGE ===== */
     #resellerBadge {
       display: none; background: var(--neon-green); color: #000;
       font-size: 10px; font-weight: 900; padding: 2px 10px;
       border-radius: 10px; margin-top: 5px; text-align: center;
     }
 
-    /* بقية الستايل كما هو لعدم التخريب */
     .offers-btn {
       display: flex; align-items: center; justify-content: space-between;
       background: linear-gradient(90deg, #ff007a, #ff4b2b);
@@ -66,11 +62,6 @@
       text-decoration: none; position: relative; overflow: hidden;
       box-shadow: 0 0 20px rgba(255, 0, 122, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .offers-btn:active { transform: scale(0.96); }
-    .off-txt h2 { margin: 0; font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px; }
-    .off-txt p { margin: 2px 0 0; font-size: 10px; opacity: 0.8; font-family: 'Cairo'; }
-    .off-icon { font-size: 24px; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
     
     .slider-box { width: 100%; height: 180px; border-radius: 24px; overflow: hidden; margin: 20px 0; border: 1px solid var(--glass-border); position: relative; }
     .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -79,12 +70,16 @@
     .search-wrap { background: #fff; border-radius: 14px; padding: 0 18px; margin-bottom: 25px; display: flex; align-items: center; }
     .search-wrap input { width: 100%; height: 48px; background: none; border: none; color: #000; font-size: 15px; font-weight: 700; font-family: 'Cairo'; }
 
+    /* جرد الخدمات المحدث ليشمل 6 خانات */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .service-card { background: var(--glass); border-radius: 24px; border: 1px solid var(--glass-border); overflow: hidden; text-decoration: none; display: flex; flex-direction: column; height: 190px; }
-    .service-card:active { transform: scale(0.95); border-color: var(--neon-cyan); }
-    .img-box { width: 100%; height: 140px; overflow: hidden; }
+    .service-card { background: var(--glass); border-radius: 24px; border: 1px solid var(--glass-border); overflow: hidden; text-decoration: none; display: flex; flex-direction: column; height: 180px; transition: 0.3s; }
+    .service-card:active { transform: scale(0.95); }
+    .reseller-card-active:active { border-color: var(--neon-green) !important; }
+    .user-card-active:active { border-color: var(--neon-cyan) !important; }
+
+    .img-box { width: 100%; height: 130px; overflow: hidden; }
     .img-box img { width: 100%; height: 100%; object-fit: cover; }
-    .label-box { padding: 12px; text-align: center; font-size: 11px; font-weight: 900; color: #fff; }
+    .label-box { padding: 10px; text-align: center; font-size: 11px; font-weight: 900; color: #fff; }
 
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 2000; }
     .drawer { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background: var(--bg-dark); z-index: 2100; transition: 0.5s; padding: 40px 25px; border-left: 1px solid var(--glass-border); }
@@ -94,6 +89,7 @@
     .dock { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; height: 70px; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 25px; display: flex; align-items: center; justify-content: space-around; z-index: 1000; }
     .dock-icon { font-size: 24px; cursor: pointer; opacity: 0.5; }
     .dock-icon.active { opacity: 1; color: var(--neon-cyan); }
+    .reseller-mode-dock.active { color: var(--neon-green) !important; }
   </style>
 </head>
 
@@ -125,7 +121,7 @@
     <div class="slider-box">
       <div class="slides" id="mainSlider">
         <img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=PREMIUM+SERVICES'">
-        <img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=INSTANT+DELIVERY'">
+        <img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/020508/2ecc71?text=RESELLER+PRICES'">
         <img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/020508/00f2ff?text=24/7+SUPPORT'">
       </div>
     </div>
@@ -142,28 +138,36 @@
         <div class="off-icon">🔥</div>
     </a>
 
-    <section class="grid">
+    <section class="grid" id="serviceGrid">
       <a href="accounts.html" class="service-card">
         <div class="img-box"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500'"></div>
         <div class="label-box">ACCOUNTS</div>
+      </a>
+      <a href="apps.html" class="service-card">
+        <div class="img-box"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500'"></div>
+        <div class="label-box">PREMIUM APPS</div>
       </a>
       <a href="games.html" class="service-card">
         <div class="img-box"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500'"></div>
         <div class="label-box">GAMING</div>
       </a>
-      <a href="phone-recharge.html" class="service-card">
-        <div class="img-box"><img src="assets/mobile.png" onerror="this.src='https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?w=500'"></div>
-        <div class="label-box">MOBILE</div>
-      </a>
       <a href="giftcards.html" class="service-card">
         <div class="img-box"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'"></div>
         <div class="label-box">GIFT CARDS</div>
       </a>
+      <a href="ai-tools.html" class="service-card">
+        <div class="img-box"><img src="assets/ai.png" onerror="this.src='https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500'"></div>
+        <div class="label-box">AI TOOLS</div>
+      </a>
+      <a href="phone-recharge.html" class="service-card">
+        <div class="img-box"><img src="assets/mobile.png" onerror="this.src='https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?w=500'"></div>
+        <div class="label-box">MOBILE RECHARGE</div>
+      </a>
     </section>
   </main>
 
-  <nav class="dock">
-    <div class="dock-icon active">🏠</div>
+  <nav class="dock" id="bottomDock">
+    <div class="dock-icon active" id="homeIcon">🏠</div>
     <div class="dock-icon" onclick="location.href='add-credit.html'">💳</div>
     <div class="dock-icon" onclick="location.href='my-orders.html'">📦</div>
     <div class="dock-icon" onclick="window.open('https://wa.me/96170385398')">💬</div>
@@ -186,18 +190,25 @@
       if(!session) return window.location.replace("login.html");
       
       document.getElementById("userEmail").textContent = session.user.email;
-      
-      // جلب البيانات مع الـ Role
       const { data: profile } = await sb.from("profiles").select("balance, role").eq("id", session.user.id).single();
       
       if(profile) {
         document.getElementById("balanceText").textContent = profile.balance.toFixed(2) + " 🇱🇧";
         
-        // إذا كان موزع، فعل ستايل الـ Reseller
         if(profile.role === 'reseller') {
             document.getElementById("walletPill").classList.add("reseller-mode");
             document.getElementById("resellerBadge").style.display = "block";
             document.getElementById("userAvatar").style.background = "var(--neon-green)";
+            document.getElementById("homeIcon").classList.add("reseller-mode-dock");
+            
+            // إضافة كلاس للمربعات عشان لما يكبس عليها الموزع تعطي ضوء أخضر
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.classList.add('reseller-card-active');
+            });
+        } else {
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.classList.add('user-card-active');
+            });
         }
       }
     }
