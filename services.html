@@ -12,6 +12,7 @@
     :root {
       --neon-cyan: #00f2ff;
       --neon-pink: #ff007a;
+      --neon-green: #2ecc71; /* لون جديد للموزعين */
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -37,91 +38,60 @@
       background: var(--glass); padding: 5px 5px 5px 15px;
       border-radius: 20px; border: 1px solid var(--neon-cyan);
     }
+    /* ستايل خاص للرصيد إذا كان موزع */
+    .wallet-pill.reseller-mode { border-color: var(--neon-green); box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
     .balance-text { font-weight: 900; font-size: 13px; color: var(--neon-cyan); }
+    .reseller-mode .balance-text { color: var(--neon-green); }
+
     .add-btn { 
       width: 28px; height: 28px; background: var(--neon-cyan); 
       border-radius: 50%; color: #000; border: none; font-weight: bold; cursor: pointer;
     }
+    .reseller-mode .add-btn { background: var(--neon-green); }
 
     .menu-trigger { font-size: 24px; cursor: pointer; color: #fff; }
 
-    /* ===== OFFERS BUTTON ===== */
+    /* ===== RESELLER BADGE ===== */
+    #resellerBadge {
+      display: none; background: var(--neon-green); color: #000;
+      font-size: 10px; font-weight: 900; padding: 2px 10px;
+      border-radius: 10px; margin-top: 5px; text-align: center;
+    }
+
+    /* بقية الستايل كما هو لعدم التخريب */
     .offers-btn {
       display: flex; align-items: center; justify-content: space-between;
       background: linear-gradient(90deg, #ff007a, #ff4b2b);
       margin: 10px 0 25px; padding: 18px 25px; border-radius: 20px;
       text-decoration: none; position: relative; overflow: hidden;
-      box-shadow: 0 0 20px rgba(255, 0, 122, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 20px rgba(255, 0, 122, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .offers-btn:active { transform: scale(0.96); }
     .off-txt h2 { margin: 0; font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px; }
     .off-txt p { margin: 2px 0 0; font-size: 10px; opacity: 0.8; font-family: 'Cairo'; }
     .off-icon { font-size: 24px; animation: pulse 1.5s infinite; }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-
-    .offers-btn::after {
-      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      animation: shine 3s infinite;
-    }
-    @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
-
-    /* ===== BANNER SLIDER ===== */
-    .slider-box { 
-      width: 100%; height: 180px; border-radius: 24px; overflow: hidden; 
-      margin: 20px 0; border: 1px solid var(--glass-border); position: relative;
-    }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    
+    .slider-box { width: 100%; height: 180px; border-radius: 24px; overflow: hidden; margin: 20px 0; border: 1px solid var(--glass-border); position: relative; }
     .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     .slides img { width: 33.333%; height: 100%; object-fit: cover; }
 
-    /* ===== SEARCH ===== */
-    .search-wrap { 
-      background: #fff; border-radius: 14px; padding: 0 18px; 
-      margin-bottom: 25px; display: flex; align-items: center;
-    }
-    .search-wrap input { 
-      width: 100%; height: 48px; background: none; border: none; 
-      color: #000; font-size: 15px; font-weight: 700; font-family: 'Cairo';
-    }
+    .search-wrap { background: #fff; border-radius: 14px; padding: 0 18px; margin-bottom: 25px; display: flex; align-items: center; }
+    .search-wrap input { width: 100%; height: 48px; background: none; border: none; color: #000; font-size: 15px; font-weight: 700; font-family: 'Cairo'; }
 
-    /* ===== GRID SYSTEM ===== */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .service-card {
-      background: var(--glass); border-radius: 24px;
-      border: 1px solid var(--glass-border); overflow: hidden;
-      text-decoration: none; display: flex; flex-direction: column;
-      height: 190px;
-    }
+    .service-card { background: var(--glass); border-radius: 24px; border: 1px solid var(--glass-border); overflow: hidden; text-decoration: none; display: flex; flex-direction: column; height: 190px; }
     .service-card:active { transform: scale(0.95); border-color: var(--neon-cyan); }
     .img-box { width: 100%; height: 140px; overflow: hidden; }
     .img-box img { width: 100%; height: 100%; object-fit: cover; }
     .label-box { padding: 12px; text-align: center; font-size: 11px; font-weight: 900; color: #fff; }
 
-    /* ===== DRAWER ===== */
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 2000; }
-    .drawer { 
-      position: fixed; top: 0; right: -100%; width: 280px; height: 100%; 
-      background: var(--bg-dark); z-index: 2100; transition: 0.5s; 
-      padding: 40px 25px; border-left: 1px solid var(--glass-border);
-    }
+    .drawer { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background: var(--bg-dark); z-index: 2100; transition: 0.5s; padding: 40px 25px; border-left: 1px solid var(--glass-border); }
     .drawer.active { right: 0; }
     .m-item { display: block; padding: 18px 0; color: #fff; text-decoration: none; font-weight: 600; border-bottom: 1px solid var(--glass-border); }
 
-    /* ===== BOTTOM DOCK ===== */
-    .dock {
-      position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-      width: 90%; max-width: 380px; height: 70px;
-      background: rgba(255,255,255,0.05); backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border); border-radius: 25px;
-      display: flex; align-items: center; justify-content: space-around;
-      z-index: 1000;
-    }
+    .dock { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 380px; height: 70px; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 25px; display: flex; align-items: center; justify-content: space-around; z-index: 1000; }
     .dock-icon { font-size: 24px; cursor: pointer; opacity: 0.5; }
     .dock-icon.active { opacity: 1; color: var(--neon-cyan); }
   </style>
@@ -131,8 +101,9 @@
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="drawer">
     <div style="text-align: center; margin-bottom: 30px;">
-        <div style="width: 60px; height: 60px; background: var(--neon-cyan); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 24px;">👤</div>
-        <div id="userEmail" style="font-size: 11px; opacity: 0.5;">Loading profile...</div>
+        <div id="userAvatar" style="width: 60px; height: 60px; background: var(--neon-cyan); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 24px;">👤</div>
+        <div id="userEmail" style="font-size: 11px; opacity: 0.5;">Loading...</div>
+        <div id="resellerBadge">RESELLER PARTNER</div>
     </div>
     <a href="services.html" class="m-item">🏠 Home </a>
     <a href="my-orders.html" class="m-item">📦 Order History</a>
@@ -142,7 +113,7 @@
   </aside>
 
   <header class="topbar">
-    <div class="wallet-pill">
+    <div class="wallet-pill" id="walletPill">
       <span class="balance-text" id="balanceText">0.00 🇱🇧</span>
       <button class="add-btn" onclick="location.href='add-credit.html'">+</button>
     </div>
@@ -188,14 +159,6 @@
         <div class="img-box"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'"></div>
         <div class="label-box">GIFT CARDS</div>
       </a>
-      <a href="apps.html" class="service-card">
-        <div class="img-box"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1614332287897-cdc485fa562d?w=500'"></div>
-        <div class="label-box">PREMIUM APPS</div>
-      </a>
-      <a href="ai-tools.html" class="service-card">
-        <div class="img-box"><img src="assets/ai-tools.png" onerror="this.src='https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500'"></div>
-        <div class="label-box">AI TOOLS</div>
-      </a>
     </section>
   </main>
 
@@ -221,16 +184,30 @@
     async function init() {
       const { data: { session } } = await sb.auth.getSession();
       if(!session) return window.location.replace("login.html");
+      
       document.getElementById("userEmail").textContent = session.user.email;
-      const { data } = await sb.from("profiles").select("balance").eq("id", session.user.id).single();
-      if(data) document.getElementById("balanceText").textContent = data.balance.toFixed(2) + " 🇱🇧";
+      
+      // جلب البيانات مع الـ Role
+      const { data: profile } = await sb.from("profiles").select("balance, role").eq("id", session.user.id).single();
+      
+      if(profile) {
+        document.getElementById("balanceText").textContent = profile.balance.toFixed(2) + " 🇱🇧";
+        
+        // إذا كان موزع، فعل ستايل الـ Reseller
+        if(profile.role === 'reseller') {
+            document.getElementById("walletPill").classList.add("reseller-mode");
+            document.getElementById("resellerBadge").style.display = "block";
+            document.getElementById("userAvatar").style.background = "var(--neon-green)";
+        }
+      }
     }
     init();
 
     let currentIdx = 0;
     setInterval(() => { 
       currentIdx = (currentIdx + 1) % 3; 
-      document.getElementById("mainSlider").style.transform = `translateX(-${currentIdx * 33.333}%)`; 
+      const slider = document.getElementById("mainSlider");
+      if(slider) slider.style.transform = `translateX(-${currentIdx * 33.333}%)`; 
     }, 5000);
   </script>
 </body>
