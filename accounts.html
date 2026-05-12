@@ -11,7 +11,7 @@
   <style>
     :root {
       --neon-cyan: #00f2ff;
-      --neon-green: #2ecc71; /* لون الموزع */
+      --neon-green: #2ecc71;
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.04);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -72,7 +72,6 @@
       background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.1);
       font-weight: 700; color: var(--neon-cyan);
     }
-    /* ستايل الموزع */
     .pill.reseller-pill { color: var(--neon-green); border-color: var(--neon-green); background: rgba(46, 204, 113, 0.05); }
 
     .card-footer { text-align: right; }
@@ -92,7 +91,6 @@
       margin-bottom: 15px;
     }
     @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
     .footer-text { text-align: center; margin-top: 40px; opacity: 0.1; font-size: 10px; letter-spacing: 5px; }
   </style>
 </head>
@@ -121,7 +119,7 @@
 
   const grid = document.getElementById("grid");
   const q = document.getElementById("q");
-  let userRole = 'user'; // الافتراضي
+  let userRole = 'user'; 
 
   function showLoading() {
     grid.innerHTML = Array(5).fill('<div class="shimmer-card"></div>').join('');
@@ -139,22 +137,22 @@
       card.className = "card";
       card.onclick = () => location.href = `account.html?id=${it.id}`;
       
-      // منطق السعر: إذا كان موزع استعمل السعر التاني
-      const displayPrice = (userRole === 'reseller') ? (it.reseller_price || it.price) : it.price;
-      const isResellerStyle = (userRole === 'reseller') ? 'reseller-price' : '';
-
+      // نختار السعر بناءً على الرول
+      const isReseller = (userRole === 'reseller');
+      const displayPrice = isReseller ? (it.reseller_min_price || it.min_price) : it.min_price;
+      
       card.innerHTML = `
         <img class="card-img" src="assets/products/${it.id}.jpg" onerror="this.src='https://placehold.co/100x100/020508/00f2ff?text=${encodeURIComponent(it.title)}'">
         <div class="card-body">
           <div class="card-name">${it.title}</div>
           <div class="badge-row">
-            <span class="pill ${userRole === 'reseller' ? 'reseller-pill' : ''}">${userRole === 'reseller' ? 'VIP PRICE' : 'PREMIUM'}</span>
+            <span class="pill ${isReseller ? 'reseller-pill' : ''}">${isReseller ? 'VIP PRICE' : 'PREMIUM'}</span>
             <span class="pill">INSTANT</span>
           </div>
         </div>
         <div class="card-footer">
-          <div class="card-price ${isResellerStyle}">$${Number(displayPrice).toFixed(2)}</div>
-          <button class="open-btn ${userRole === 'reseller' ? 'reseller-btn' : ''}">OPEN</button>
+          <div class="card-price ${isReseller ? 'reseller-price' : ''}">$${Number(displayPrice).toFixed(2)}</div>
+          <button class="open-btn ${isReseller ? 'reseller-btn' : ''}">OPEN</button>
         </div>
       `;
       grid.appendChild(card);
@@ -170,28 +168,23 @@
   }
 
   async function loadProducts() {
-    // جلب المنتجات مع كل الأعمدة (بما فيها السعر التاني)
+    // جلب الداتا من الـ View مع التأكد من أسماء العواميد في الـ SQL
     const { data, error } = await sb
       .from("products_with_min_price")
-      .select("id, title, category, min_price, reseller_price")
+      .select("id, title, category, min_price, reseller_min_price") 
       .eq("active", true)
       .eq("category", "Accounts")
       .order('title', { ascending: true });
 
     if(error) throw error;
-    return data.map(p => ({
-      id: p.id,
-      title: p.title,
-      price: p.min_price || 0,
-      reseller_price: p.reseller_price || 0
-    }));
+    return data; 
   }
 
   let allProducts = [];
   (async () => {
     showLoading();
     try {
-      await getUserRole(); // أول خطوة نعرف مين الزبون
+      await getUserRole(); 
       allProducts = await loadProducts();
       render(allProducts);
 
@@ -200,8 +193,8 @@
         render(allProducts.filter(p => p.title.toLowerCase().includes(val)));
       };
     } catch(e) {
-      console.error(e);
-      grid.innerHTML = `<div style="text-align:center; color:#ff4444; padding:20px;">Error loading data.</div>`;
+      console.error("Load Error:", e);
+      grid.innerHTML = `<div style="text-align:center; color:#ff4444; padding:20px;">Error loading data. Check console for details.</div>`;
     }
   })();
 </script>
