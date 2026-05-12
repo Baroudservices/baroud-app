@@ -11,6 +11,7 @@
 <style>
 :root {
   --neon-blue: #1bc7ff;
+  --neon-green: #2ecc71;
   --bg-dark: #020508;
   --glass: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
@@ -24,7 +25,6 @@ body {
 
 .wrap { width: 100%; max-width: 1200px; margin: auto; }
 
-/* ===== HEADER ===== */
 .top { 
   display: flex; justify-content: space-between; align-items: center; 
   margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--glass-border);
@@ -36,7 +36,6 @@ body {
   cursor: pointer; background: var(--glass); color: #fff; font-weight: 700; font-size: 12px;
 }
 
-/* ===== CARDS ===== */
 .card {
   background: var(--glass); border: 1px solid var(--glass-border);
   border-radius: 15px; padding: 15px; margin-bottom: 20px;
@@ -52,28 +51,28 @@ input, select {
 
 .save-btn { background: linear-gradient(90deg, #0aa0ff, #2a74ff); border: none; font-weight: 900; color: white; }
 
-/* ===== EDITOR GRID ===== */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
 .box {
   background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
-  border-radius: 12px; padding: 10px;
+  border-radius: 12px; padding: 12px;
 }
-.label { font-size: 11px; font-weight: 900; margin-bottom: 5px; opacity: 0.7; }
+.label { font-size: 11px; font-weight: 900; margin-bottom: 8px; color: var(--neon-blue); border-bottom: 1px solid var(--glass-border); padding-bottom: 4px;}
 
-/* ===== MODAL ===== */
+.price-label { font-size: 10px; opacity: 0.6; margin-top: 5px; margin-bottom: 2px; }
+.box input[type="number"] { width: 100%; padding: 6px; margin-bottom: 5px; }
+
 .modal {
   position: fixed; inset: 0; background: rgba(0,0,0,0.9);
   display: none; align-items: center; justify-content: center; z-index: 10000;
 }
 .modalCard {
-  width: 98%; max-width: 900px; background: #0b111a;
+  width: 98%; max-width: 950px; background: #0b111a;
   border: 1px solid var(--glass-border); border-radius: 15px; padding: 15px;
 }
 
-.plansTable { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.plansTable { width: 100%; border-collapse: collapse; }
 .plansTable th { font-size: 11px; opacity: 0.5; padding: 8px 5px; text-align: left; }
 .plansTable td { padding: 5px; }
-
 .plansTable input { padding: 6px; font-size: 12px; width: 100%; }
 
 .danger { background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444; padding: 4px 8px; border-radius: 5px; font-size: 11px; cursor: pointer; }
@@ -110,7 +109,7 @@ input, select {
 <div id="plansModal" class="modal">
   <div class="modalCard">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <div class="page-title" style="font-size:15px">PLAN STRUCTURE</div>
+      <div class="page-title" style="font-size:15px">PLAN STRUCTURE & PRICING</div>
       <button class="btn" id="plansClose">✕</button>
     </div>
 
@@ -119,10 +118,11 @@ input, select {
         <thead>
           <tr>
             <th style="width: 15%;">KEY</th>
-            <th style="width: 40%;">LABEL</th>
-            <th style="width: 20%;">PRICE ($)</th>
-            <th style="width: 12%;">ACT</th>
-            <th style="width: 13%;">DEL</th>
+            <th style="width: 30%;">LABEL</th>
+            <th style="width: 15%;">USER ($)</th>
+            <th style="width: 15%;">RESELLER ($)</th>
+            <th style="width: 10%;">ACT</th>
+            <th style="width: 10%;">DEL</th>
           </tr>
         </thead>
         <tbody id="plansTbody"></tbody>
@@ -171,7 +171,7 @@ async function boot(){
 
 async function loadProducts(){
   const { data, error } = await sb.from("products").select("id,title").order("title");
-  if(error) { setMsg("Failed to load products", "error"); return; }
+  if(error) return;
   ALL_PRODUCTS = data || [];
   renderProductSelect(ALL_PRODUCTS);
   if(ALL_PRODUCTS.length > 0) loadPlans(ALL_PRODUCTS[0].id);
@@ -195,78 +195,76 @@ document.getElementById("btnClearSearch").onclick = () => {
 async function loadPlans(productId){
   if(!productId) return;
   _currentProductId = productId;
-  setMsg("Loading plans...");
+  setMsg("Loading...");
   
-  const { data: dbPlans, error } = await sb.from("product_plan_prices")
-    .select("*")
-    .eq("product_id", productId)
-    .order("plan_key");
-
+  const { data: dbPlans } = await sb.from("product_plan_prices").select("*").eq("product_id", productId).order("plan_key");
   CURRENT_PLANS = dbPlans || [];
   
   const title = productSelect.options[productSelect.selectedIndex]?.textContent || "Editor";
   
   if(CURRENT_PLANS.length === 0){
-    editor.innerHTML = `<div class="card" style="text-align:center">No plans found. Click <b>STRUCTURE</b> to add. <br><br> <button class="btn" id="btnManagePlans">STRUCTURE</button></div>`;
+    editor.innerHTML = `<div class="card" style="text-align:center">No plans found. <br><br> <button class="btn" id="btnManagePlans">STRUCTURE</button></div>`;
   } else {
     editor.innerHTML = `
       <div class="card">
-        <div style="font-weight:900; margin-bottom:10px; color:var(--neon-blue)">${esc(title)}</div>
+        <div style="font-weight:900; margin-bottom:15px; color:var(--neon-blue)">${esc(title)}</div>
         <div class="grid" id="pricesGrid">
           ${CURRENT_PLANS.map(pl => `
-            <div class="box" data-id="${pl.id}" data-key="${esc(pl.plan_key)}">
+            <div class="box" data-key="${esc(pl.plan_key)}" data-label="${esc(pl.plan_label)}">
               <div class="label">${esc(pl.plan_label || pl.plan_key)}</div>
-              <input type="number" step="0.01" value="${Number(pl.price || 0).toFixed(2)}" class="price-input" />
-              <label style="display:flex; align-items:center; gap:5px; margin-top:8px; font-size:10px;">
-                <input type="checkbox" ${pl.active !== false ? "checked" : ""} class="active-checkbox" /> ACTIVE
+              
+              <div class="price-label">USER PRICE ($)</div>
+              <input type="number" step="0.01" value="${Number(pl.price || 0).toFixed(2)}" class="price-user" />
+              
+              <div class="price-label" style="color:var(--neon-green)">RESELLER PRICE ($)</div>
+              <input type="number" step="0.01" value="${Number(pl.reseller_price || 0).toFixed(2)}" class="price-reseller" />
+              
+              <label style="display:flex; align-items:center; gap:5px; margin-top:10px; font-size:10px; opacity:0.8;">
+                <input type="checkbox" ${pl.active !== false ? "checked" : ""} class="active-chk" /> ACTIVE
               </label>
             </div>`).join("")}
         </div>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
           <button class="btn" id="btnManagePlans">STRUCTURE</button>
-          <button class="btn save-btn" id="btnSave">SAVE PRICES</button>
+          <button class="btn save-btn" id="btnSave">SAVE ALL PRICES</button>
         </div>
       </div>`;
-    
     document.getElementById("btnSave").onclick = savePrices;
   }
-  
   document.getElementById("btnManagePlans").onclick = openStructureModal;
 }
 
 async function savePrices(){
-  setMsg("Saving prices...");
+  setMsg("Saving...");
   const boxes = document.querySelectorAll("#pricesGrid .box");
   const updates = Array.from(boxes).map(box => ({
     product_id: Number(_currentProductId),
     plan_key: box.getAttribute("data-key"),
-    price: parseFloat(box.querySelector(".price-input").value) || 0,
-    active: box.querySelector(".active-checkbox").checked,
-    plan_label: box.querySelector(".label").textContent.trim()
+    plan_label: box.getAttribute("data-label"),
+    price: parseFloat(box.querySelector(".price-user").value) || 0,
+    reseller_price: parseFloat(box.querySelector(".price-reseller").value) || 0,
+    active: box.querySelector(".active-chk").checked
   }));
 
   const { error } = await sb.from("product_plan_prices").upsert(updates, { onConflict: "product_id,plan_key" });
-  if(error) setMsg("Error saving prices", "error");
-  else setMsg("Prices saved successfully! ✅");
+  setMsg(error ? "Error" : "Saved successfully! ✅", error ? "error" : "info");
 }
 
 function openStructureModal(){
   plansTbody.innerHTML = "";
-  if(CURRENT_PLANS.length > 0) {
-    CURRENT_PLANS.forEach(renderPlanRow);
-  } else {
-    renderPlanRow({ plan_key: "", plan_label: "", price: 0, active: true });
-  }
+  if(CURRENT_PLANS.length > 0) CURRENT_PLANS.forEach(renderPlanRow);
+  else renderPlanRow({ plan_key: "", plan_label: "", price: 0, reseller_price: 0, active: true });
   plansModal.style.display = "flex";
 }
 
 function renderPlanRow(row){
   const tr = document.createElement("tr");
   tr.innerHTML = `
-    <td><input class="row-key" value="${esc(row.plan_key)}" placeholder="Key" /></td>
-    <td><input class="row-label" value="${esc(row.plan_label)}" placeholder="Label" /></td>
-    <td><input class="row-price" type="number" step="0.01" value="${Number(row.price || 0).toFixed(2)}" /></td>
-    <td style="text-align:center"><input class="row-active" type="checkbox" ${row.active !== false ? "checked" : ""} /></td>
+    <td><input class="row-key" value="${esc(row.plan_key)}" /></td>
+    <td><input class="row-label" value="${esc(row.plan_label)}" /></td>
+    <td><input class="row-p" type="number" step="0.01" value="${Number(row.price||0).toFixed(2)}" /></td>
+    <td><input class="row-rp" type="number" step="0.01" value="${Number(row.reseller_price||0).toFixed(2)}" /></td>
+    <td style="text-align:center"><input class="row-a" type="checkbox" ${row.active !== false ? "checked":""} /></td>
     <td><button class="danger" onclick="this.closest('tr').remove()">X</button></td>`;
   plansTbody.appendChild(tr);
 }
@@ -276,30 +274,18 @@ document.getElementById("btnPlansSave").onclick = async () => {
     product_id: Number(_currentProductId),
     plan_key: tr.querySelector(".row-key").value.trim(),
     plan_label: tr.querySelector(".row-label").value.trim(),
-    price: parseFloat(tr.querySelector(".row-price").value) || 0,
-    active: tr.querySelector(".row-active").checked
+    price: parseFloat(tr.querySelector(".row-p").value) || 0,
+    reseller_price: parseFloat(tr.querySelector(".row-rp").value) || 0,
+    active: tr.querySelector(".row-active") ? tr.querySelector(".row-active").checked : tr.querySelector(".row-a").checked
   })).filter(r => r.plan_key);
 
-  if(rows.length === 0) { alert("Please add at least one plan key."); return; }
-
-  setMsg("Updating structure...");
-  
-  // First, optional: delete old plans that are not in the new list if you want a clean sync
-  // For safety, we just upsert here.
   const { error } = await sb.from("product_plan_prices").upsert(rows, { onConflict: "product_id,plan_key" });
-  
-  if(error) {
-    setMsg("Error updating structure", "error");
-  } else {
-    setMsg("Structure updated! ✅");
-    plansModal.style.display = "none";
-    loadPlans(_currentProductId);
-  }
+  if(!error) { plansModal.style.display="none"; loadPlans(_currentProductId); }
 };
 
 document.getElementById("btnOpen").onclick = () => loadPlans(productSelect.value);
 document.getElementById("btnRefresh").onclick = () => location.reload();
-document.getElementById("btnAddPlan").onclick = () => renderPlanRow({ plan_key:"", plan_label:"", price:0, active:true });
+document.getElementById("btnAddPlan").onclick = () => renderPlanRow({ plan_key:"", plan_label:"", price:0, reseller_price:0, active:true });
 document.getElementById("plansClose").onclick = () => plansModal.style.display = "none";
 document.getElementById("btnPlansCancel").onclick = () => plansModal.style.display = "none";
 document.getElementById("btnLogout").onclick = async () => { await sb.auth.signOut(); location.href="login.html"; };
