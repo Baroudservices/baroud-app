@@ -11,6 +11,7 @@
   <style>
     :root {
       --neon-cyan: #00f2ff;
+      --neon-green: #2ecc71; /* لون الموزع */
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -25,15 +26,16 @@
     .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 15px 120px; }
 
     /* Header */
-    .page-header {
-      padding: 30px 0; display: flex; align-items: center; gap: 15px;
-    }
+    .page-header { padding: 30px 0; display: flex; align-items: center; gap: 15px; }
     .back-btn {
       width: 40px; height: 40px; background: var(--glass); border: 1px solid var(--glass-border);
       border-radius: 12px; color: #fff; text-decoration: none;
       display: flex; align-items: center; justify-content: center; font-size: 20px;
     }
-    .title-box h1 { margin: 0; font-family: 'Orbitron'; font-size: 22px; color: var(--neon-cyan); letter-spacing: 1px; }
+    
+    .title-box h1 { margin: 0; font-family: 'Orbitron'; font-size: 22px; letter-spacing: 1px; }
+    .user-title { color: var(--neon-cyan); }
+    .reseller-title { color: var(--neon-green); }
     .title-box p { margin: 0; font-size: 12px; opacity: 0.6; }
 
     /* Products List */
@@ -44,20 +46,29 @@
       padding: 15px; display: flex; align-items: center; gap: 15px;
       transition: 0.3s; text-decoration: none; color: white;
     }
-    .item-card:active { transform: scale(0.98); border-color: var(--neon-cyan); }
+    .item-card:active { transform: scale(0.98); }
+    .user-card:active { border-color: var(--neon-cyan); }
+    .reseller-card:active { border-color: var(--neon-green); }
     
-    /* تعديل الصور لتستخدم نظام الـ ID */
     .item-img { width: 65px; height: 65px; border-radius: 15px; object-fit: cover; background: #111; }
     
     .item-info { flex: 1; }
-    .item-name { font-weight: 900; font-size: 16px; margin-bottom: 4px; font-family: 'Orbitron'; text-transform: uppercase; }
+    .item-name { font-weight: 900; font-size: 15px; margin-bottom: 4px; font-family: 'Orbitron'; text-transform: uppercase; }
     .item-desc { font-size: 11px; opacity: 0.5; font-family: 'Cairo'; }
     
     .item-price { text-align: right; }
-    .price-val { display: block; font-family: 'Orbitron'; font-weight: 900; color: var(--neon-cyan); font-size: 15px; }
-    .price-unit { font-size: 9px; opacity: 0.6; }
+    .price-val { display: block; font-family: 'Orbitron'; font-weight: 900; font-size: 15px; }
+    .user-price { color: var(--neon-cyan); }
+    .reseller-price { color: var(--neon-green); }
+    .price-unit { font-size: 9px; opacity: 0.6; display: block; margin-top: 2px; }
 
-    .loader { text-align: center; padding: 50px; display: none; }
+    /* Shimmer Loading */
+    .shimmer {
+      height: 95px; width: 100%; border-radius: 20px; margin-bottom: 15px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%; animation: load 1.5s infinite;
+    }
+    @keyframes load { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .empty-state { text-align: center; padding: 50px; opacity: 0.5; display: none; }
   </style>
 </head>
@@ -67,13 +78,15 @@
     <header class="page-header">
       <a href="services.html" class="back-btn">←</a>
       <div class="title-box">
-        <h1>AI TOOLS</h1>
-        <p>Premium Artificial Intelligence Accounts</p>
+        <h1 id="pageTitle" class="user-title">AI TOOLS</h1>
+        <p>Premium Intelligence Access</p>
       </div>
     </header>
 
-    <div id="loader" class="loader">
-        <div style="font-size: 30px; animation: spin 1s linear infinite;">⌛</div>
+    <div id="loader">
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
+        <div class="shimmer"></div>
     </div>
 
     <div id="emptyState" class="empty-state">
@@ -88,48 +101,70 @@
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    let userRole = 'user';
+
+    async function getUserRole() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const { data: profile } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
+        if (profile) userRole = profile.role;
+      }
+      
+      if(userRole === 'reseller') {
+        const title = document.getElementById('pageTitle');
+        title.classList.replace('user-title', 'reseller-title');
+      }
+    }
+
     async function fetchAiTools() {
       const loader = document.getElementById('loader');
       const container = document.getElementById('aiProducts');
       const emptyState = document.getElementById('emptyState');
 
-      loader.style.display = 'block';
-      
-      // السحب من الـ View لضمان جلب أرخص سعر (min_price)
-      const { data, error } = await sb
-        .from('products_with_min_price') 
-        .select('*')
-        .eq('category', 'ai') // تأكد أن الكاتيجوري في السوبابيس هو "ai"
-        .eq('active', true)
-        .order('title', { ascending: true });
+      try {
+        await getUserRole();
+        
+        const { data, error } = await sb
+          .from('products_with_min_price') 
+          .select('id, title, min_price, reseller_min_price')
+          .eq('category', 'ai')
+          .eq('active', true)
+          .order('title', { ascending: true });
 
-      loader.style.display = 'none';
+        loader.style.display = 'none';
 
-      if (error || !data || data.length === 0) {
+        if (error || !data || data.length === 0) {
+          emptyState.style.display = 'block';
+          return;
+        }
+
+        const isReseller = (userRole === 'reseller');
+
+        container.innerHTML = data.map(item => {
+          const displayPrice = isReseller ? (item.reseller_min_price || item.min_price) : item.min_price;
+          
+          return `
+            <a href="account.html?id=${item.id}" class="item-card ${isReseller ? 'reseller-card' : 'user-card'}">
+              <img src="assets/products/${item.id}.jpg" onerror="this.src='https://placehold.co/100x100/020508/00f2ff?text=AI'" class="item-img">
+              <div class="item-info">
+                <div class="item-name">${item.title}</div>
+                <div class="item-desc">${isReseller ? 'VIP Reseller Access' : 'Premium AI Access'}</div>
+              </div>
+              <div class="item-price">
+                <span class="price-val ${isReseller ? 'reseller-price' : 'user-price'}">$${Number(displayPrice || 0).toFixed(2)}</span>
+                <span class="price-unit">${isReseller ? 'WHOLESALE' : 'STARTING AT'}</span>
+              </div>
+            </a>
+          `;
+        }).join('');
+
+      } catch (e) {
+        loader.style.display = 'none';
         emptyState.style.display = 'block';
-        return;
       }
-
-      container.innerHTML = data.map(item => `
-        <a href="account.html?id=${item.id}" class="item-card">
-          <img src="assets/products/${item.id}.jpg" onerror="this.src='https://placehold.co/100x100/020508/00f2ff?text=AI'" class="item-img" alt="${item.title}">
-          <div class="item-info">
-            <div class="item-name">${item.title}</div>
-            <div class="item-desc">Premium AI Access</div>
-          </div>
-          <div class="item-price">
-            <span class="price-val">$${Number(item.min_price || 0).toFixed(2)}</span>
-            <span class="price-unit">Starting at</span>
-          </div>
-        </a>
-      `).join('');
     }
 
     fetchAiTools();
   </script>
-
-  <style>
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  </style>
 </body>
 </html>
