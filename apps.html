@@ -11,6 +11,7 @@
   <style>
     :root {
       --neon-cyan: #00f2ff;
+      --neon-green: #2ecc71; /* لون الموزع */
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.04);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -26,7 +27,6 @@
 
     .wrap { max-width: 450px; margin: 0 auto; padding: 20px 15px 100px; }
 
-    /* ===== HEADER ===== */
     .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .btn-circle {
       width: 40px; height: 40px; border-radius: 12px;
@@ -35,7 +35,6 @@
       cursor: pointer; color: #fff; text-decoration: none;
     }
 
-    /* ===== SEARCH ===== */
     .search-container {
       background: var(--glass); border: 1px solid var(--glass-border);
       border-radius: 20px; padding: 12px 20px; margin-bottom: 20px;
@@ -46,7 +45,6 @@
       font-family: 'Cairo'; font-size: 15px; outline: none;
     }
 
-    /* ===== LIST VIEW (MODIFIED) ===== */
     .products-list { display: flex; flex-direction: column; gap: 15px; }
 
     .card {
@@ -63,15 +61,20 @@
     .card-name { font-weight: 900; font-size: 14px; margin-bottom: 4px; text-transform: uppercase; }
     .card-sub { font-size: 10px; opacity: 0.5; font-family: 'Cairo'; }
     
+    /* ستايل الموزع */
+    .reseller-pill { color: var(--neon-green) !important; border: 1px solid var(--neon-green) !important; background: rgba(46, 204, 113, 0.05) !important; padding: 2px 6px; border-radius: 5px; font-size: 8px; font-weight: 700; }
+    .user-pill { color: var(--neon-cyan); border: 1px solid rgba(0, 242, 255, 0.1); background: rgba(0, 242, 255, 0.05); padding: 2px 6px; border-radius: 5px; font-size: 8px; font-weight: 700; }
+
     .card-footer { text-align: right; }
     .card-price { color: var(--neon-cyan); font-weight: 900; font-size: 15px; display: block; }
+    .reseller-price { color: var(--neon-green) !important; }
     
     .open-btn {
       margin-top: 4px; padding: 4px 10px; border-radius: 8px; background: var(--neon-cyan);
       color: #000; font-weight: 900; font-size: 9px; border: none; cursor: pointer;
     }
+    .reseller-btn { background: var(--neon-green) !important; }
 
-    /* ===== LOADING SHIMMER ===== */
     .shimmer {
       height: 85px; width: 100%; border-radius: 20px;
       background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
@@ -86,7 +89,7 @@
   <div class="wrap">
     <div class="top">
       <div class="btn-circle" onclick="history.back()">←</div>
-      <div style="font-weight: 900; letter-spacing: 2px;">APPS</div>
+      <div id="pageTitle" style="font-weight: 900; letter-spacing: 2px;">APPS</div>
       <div class="btn-circle" onclick="location.href='services.html'">🏠</div>
     </div>
 
@@ -94,41 +97,36 @@
       <input type="text" id="searchInput" placeholder="Search Apps...">
     </div>
 
-    <div class="products-list" id="productGrid">
-      <div class="shimmer"></div>
-      <div class="shimmer"></div>
-      <div class="shimmer"></div>
-    </div>
+    <div class="products-list" id="productGrid"></div>
   </div>
 
-<div id="maintenance-screen" style="display: none; position: fixed; inset: 0; background: #020508; z-index: 999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; font-family: 'Orbitron', 'Cairo', sans-serif;">
-    <div style="font-size: 60px; margin-bottom: 20px;">🛠️</div>
-    <h1 style="color: #00f2ff; font-weight: 900; letter-spacing: 2px; margin-bottom: 10px;">UNDER MAINTENANCE</h1>
-    <p style="color: #fff; font-family: 'Cairo'; opacity: 0.8; max-width: 300px; line-height: 1.6;">
-        نحن نقوم بتحديث الخدمات لنمنحك تجربة أفضل. <br> 
-        سنعود خلال وقت قصير جداً!
-    </p>
-    <div style="margin-top: 30px; font-size: 10px; color: #fff; opacity: 0.3; letter-spacing: 5px;">BAROUDAPP.COM</div>
-</div>
-
 <script>
-    const maintenanceMode = false; 
-    if (maintenanceMode) {
-        document.getElementById('maintenance-screen').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
     const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
     const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let allProducts = [];
+    let userRole = 'user';
+
+    async function getUserRole() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const { data: profile } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
+        if (profile) userRole = profile.role;
+      }
+    }
 
     async function loadProducts() {
+      const grid = document.getElementById("productGrid");
+      grid.innerHTML = Array(3).fill('<div class="shimmer"></div>').join('');
+
       try {
+        await getUserRole();
+        
+        // جلب البيانات مع عمود سعر الموزع
         const { data, error } = await sb
           .from("products_with_min_price")
-          .select("id, title, category, min_price")
+          .select("id, title, category, min_price, reseller_min_price")
           .eq("active", true)
           .eq("category", "Apps")
           .order('title', { ascending: true });
@@ -137,7 +135,7 @@
         allProducts = data;
         render(allProducts);
       } catch (e) {
-        document.getElementById("productGrid").innerHTML = `<div style="text-align: center; opacity: 0.5;">Error loading apps.</div>`;
+        grid.innerHTML = `<div style="text-align: center; opacity: 0.5;">Error loading apps.</div>`;
       }
     }
 
@@ -148,19 +146,27 @@
         return;
       }
 
-      grid.innerHTML = list.map(item => `
-        <div class="card" onclick="location.href='account.html?id=${item.id}'">
-          <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='assets/products/default.png'">
-          <div class="card-body">
-            <div class="card-name">${item.title}</div>
-            <div class="card-sub">Premium Subscription</div>
+      const isReseller = (userRole === 'reseller');
+
+      grid.innerHTML = list.map(item => {
+        const displayPrice = isReseller ? (item.reseller_min_price || item.min_price) : item.min_price;
+        
+        return `
+          <div class="card" onclick="location.href='account.html?id=${item.id}'">
+            <img class="card-img" src="assets/products/${item.id}.jpg" onerror="this.src='assets/products/default.png'">
+            <div class="card-body">
+              <div class="card-name">${item.title}</div>
+              <div style="margin-top: 5px;">
+                <span class="${isReseller ? 'reseller-pill' : 'user-pill'}">${isReseller ? 'VIP PRICE' : 'PREMIUM'}</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="card-price ${isReseller ? 'reseller-price' : ''}">$${Number(displayPrice || 0).toFixed(2)}</div>
+              <button class="open-btn ${isReseller ? 'reseller-btn' : ''}">OPEN</button>
+            </div>
           </div>
-          <div class="card-footer">
-            <div class="card-price">$${Number(item.min_price || 0).toFixed(2)}</div>
-            <button class="open-btn">OPEN</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     document.getElementById("searchInput").oninput = (e) => {
