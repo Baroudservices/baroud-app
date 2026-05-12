@@ -11,6 +11,7 @@
   <style>
     :root {
       --neon-cyan: #00f2ff;
+      --neon-green: #2ecc71; /* لون الموزع */
       --bg-dark: #020508;
       --glass: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.08);
@@ -39,6 +40,7 @@
     .hero-info { padding: 15px 20px; }
     .product-title { font-weight: 900; font-size: 20px; text-transform: uppercase; }
     .price-tag { color: var(--neon-cyan); font-weight: 900; font-size: 18px; }
+    .reseller-color { color: var(--neon-green) !important; }
 
     .section-box {
       background: var(--glass); border: 1px solid var(--glass-border);
@@ -60,12 +62,14 @@
       display: flex; justify-content: space-between; align-items: center;
       cursor: pointer; font-weight: 900; font-size: 14px;
     }
+    .reseller-bg { background: var(--neon-green) !important; }
 
     .buy-btn {
       width: 100%; padding: 18px; border-radius: 18px; border: none;
       background: linear-gradient(90deg, #00f2ff, #0072ff);
       color: #fff; font-weight: 900; font-size: 16px; cursor: pointer;
     }
+    .buy-btn.reseller-btn { background: linear-gradient(90deg, #2ecc71, #27ae60); }
     .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; z-index: 2000; backdrop-filter: blur(4px); }
@@ -84,6 +88,7 @@
       display: flex; justify-content: space-between; align-items: center; cursor: pointer;
     }
     .plan-option.selected { border-color: var(--neon-cyan); background: rgba(0, 242, 255, 0.05); }
+    .plan-option.selected.reseller-border { border-color: var(--neon-green); background: rgba(46, 204, 113, 0.05); }
 
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.9);
@@ -97,7 +102,7 @@
   <div class="wrap">
     <div class="header">
       <a href="javascript:history.back()" class="back-circle">←</a>
-      <div style="font-weight: 900; opacity: 0.5; font-size: 11px;">BAROUD ELITE</div>
+      <div id="badgeLabel" style="font-weight: 900; opacity: 0.5; font-size: 11px;">BAROUD ELITE</div>
       <div onclick="location.href='my-orders.html'" style="font-size: 20px;">📦</div>
     </div>
 
@@ -115,7 +120,7 @@
     </div>
 
     <div class="section-box">
-      <h3>CONFIGURATION</h3>
+      <h3 id="configTitle">CONFIGURATION</h3>
       <label>SELECT PACKAGE</label>
       <button class="plan-selector" id="planBtn">
         <span id="planLabel">Pick a plan</span>
@@ -135,16 +140,16 @@
 
   <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
   <div class="bottom-sheet" id="planSheet">
-    <h2 style="margin: 0 0 15px; font-size: 16px;">AVAILABLE PLANS</h2>
+    <h2 id="sheetTitle" style="margin: 0 0 15px; font-size: 16px;">AVAILABLE PLANS</h2>
     <div id="plansContainer"></div>
-    <button class="buy-btn" onclick="confirmPlanSelection()">CONFIRM</button>
+    <button id="confirmBtn" class="buy-btn" onclick="confirmPlanSelection()">CONFIRM</button>
   </div>
 
   <div class="modal" id="globalModal">
     <div class="modal-content">
       <h3 id="modalTitle">Notice</h3>
       <p id="modalText" style="font-family:'Cairo'; font-size: 14px; opacity:0.8;"></p>
-      <button class="buy-btn" onclick="closeModal()">OK</button>
+      <button id="modalOkBtn" class="buy-btn" onclick="closeModal()">OK</button>
     </div>
   </div>
 
@@ -155,10 +160,30 @@
 
   const productId = new URLSearchParams(window.location.search).get("id");
   let currentProduct = null, allPlans = [], selectedPlan = null, tempSelectedPlanId = null;
+  let userRole = 'user'; // الافتراضي
 
   async function init() {
     if(!productId) return;
-    // جلب كل البيانات بما فيها العواميد الجديدة
+    
+    // 1. جلب رتبة المستخدم أولاً
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const { data: profile } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
+      if (profile) userRole = profile.role;
+    }
+
+    // تطبيق الستايل إذا كان موزع
+    if (userRole === 'reseller') {
+      document.getElementById("badgeLabel").textContent = "RESELLER PANEL";
+      document.getElementById("badgeLabel").style.color = "var(--neon-green)";
+      document.getElementById("pPrice").classList.add("reseller-color");
+      document.getElementById("planBtn").classList.add("reseller-bg");
+      document.getElementById("buyBtn").classList.add("reseller-btn");
+      document.getElementById("confirmBtn").classList.add("reseller-btn");
+      document.getElementById("modalOkBtn").classList.add("reseller-btn");
+    }
+
+    // 2. جلب بيانات المنتج
     const { data: product } = await sb.from("products").select("*").eq("id", productId).single();
     if(!product) return;
     currentProduct = product;
@@ -167,6 +192,7 @@
     document.getElementById("pCat").textContent = "Category: " + (product.category || "General");
     document.getElementById("heroImg").src = `assets/products/${product.id}.jpg`;
 
+    // 3. جلب الخطط مع مراعاة السعرين
     const { data: plans } = await sb.from("product_plan_prices")
                                 .select("*").eq("product_id", productId)
                                 .eq("active", true).order('price', {ascending: true});
@@ -177,12 +203,18 @@
 
   function renderPlans() {
     const container = document.getElementById("plansContainer");
-    container.innerHTML = allPlans.map(p => `
-      <div class="plan-option ${String(tempSelectedPlanId) === String(p.id) ? 'selected' : ''}" onclick="tempSelectPlan('${p.id}')">
-        <div class="p-name">${p.plan_label}</div>
-        <div class="p-price">$${Number(p.price).toFixed(2)}</div>
-      </div>
-    `).join('');
+    container.innerHTML = allPlans.map(p => {
+      const priceToShow = (userRole === 'reseller') ? (p.reseller_price || p.price) : p.price;
+      const isSelected = String(tempSelectedPlanId) === String(p.id);
+      const selectedClass = isSelected ? (userRole === 'reseller' ? 'selected reseller-border' : 'selected') : '';
+      
+      return `
+        <div class="plan-option ${selectedClass}" onclick="tempSelectPlan('${p.id}')">
+          <div class="p-name">${p.plan_label}</div>
+          <div class="p-price" style="${userRole === 'reseller' ? 'color:var(--neon-green)' : ''}">$${Number(priceToShow).toFixed(2)}</div>
+        </div>
+      `;
+    }).join('');
   }
 
   function tempSelectPlan(id) { tempSelectedPlanId = id; renderPlans(); }
@@ -196,8 +228,10 @@
   function setPlan(plan) {
     selectedPlan = plan;
     tempSelectedPlanId = plan.id;
+    const finalPrice = (userRole === 'reseller') ? (plan.reseller_price || plan.price) : plan.price;
+    
     document.getElementById("planLabel").textContent = plan.plan_label;
-    document.getElementById("pPrice").textContent = `$${Number(plan.price).toFixed(2)}`;
+    document.getElementById("pPrice").textContent = `$${Number(finalPrice).toFixed(2)}`;
     updateFields();
   }
 
@@ -209,18 +243,13 @@
     const planL = selectedPlan && selectedPlan.plan_label ? selectedPlan.plan_label.toLowerCase() : "";
     const isDirectPlan = planL.includes("direct");
 
-    // فحص Email/Password (دمجنا المنطق القديم والجديد)
     if (isDirectPlan || currentProduct.require_email || currentProduct.require_account_details) {
       fields.push({ id: "acc_email", label: currentProduct.email_label || "EMAIL / USERNAME" });
       fields.push({ id: "acc_pass", label: currentProduct.password_label || "PASSWORD" });
     }
-
-    // فحص الـ Backup Codes (الجديد)
     if (currentProduct.require_backup_codes) {
       fields.push({ id: "backup_codes", label: "BACKUP CODES (2FA)" });
     }
-
-    // فحص الـ Player ID (الجديد والقديم)
     if (currentProduct.require_player_id || currentProduct.requires_player_id) {
       fields.push({ id: "player_id", label: currentProduct.player_id_label || "PLAYER ID" });
     }
@@ -257,14 +286,14 @@
       if(!i.value.trim()) { showModal("Error", "Please fill all fields"); btn.disabled = false; return; }
     }
 
-    // تجهيز الـ Backup Codes بقلب الـ Note عشان يوصلوك عالمكتب
+    const finalPrice = (userRole === 'reseller') ? (selectedPlan.reseller_price || selectedPlan.price) : selectedPlan.price;
     let finalNote = document.getElementById("customerNote").value;
     const bCodes = document.getElementById("backup_codes")?.value;
     if(bCodes) finalNote += "\nBackup Codes: " + bCodes;
 
     const { data, error } = await sb.rpc("place_order", {
       p_product_id: productId, 
-      p_price: selectedPlan.price,
+      p_price: finalPrice, // نرسل سعر الموزع للطلبات إذا كان موزع
       p_duration: selectedPlan.plan_label, 
       p_note: finalNote,
       p_player_id: document.getElementById("player_id")?.value || null,
