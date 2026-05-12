@@ -2,187 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baroud | Recharge System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baroud | Under Maintenance</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --neon-blue: #38bdf8; --bg-dark: #020508; --card-bg: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.1); }
-    body { margin: 0; font-family: 'Cairo', sans-serif; background: var(--bg-dark); color: #fff; min-height: 100vh; padding: 15px; }
-    .wrap { max-width: 450px; margin: 0 auto; padding-bottom: 50px; }
-    .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .balance-box { background: rgba(56, 189, 248, 0.1); padding: 8px 15px; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.2); font-family: 'Orbitron'; font-size: 13px; color: var(--neon-blue); font-weight: 900; }
-    .f-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
-    .f-pill { padding: 10px 5px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--border); font-size: 10px; font-weight: 900; cursor: pointer; text-align: center; transition: 0.3s; font-family: 'Orbitron'; color: #888; }
-    .f-pill.active { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); }
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-    .card-info { display: flex; align-items: center; gap: 12px; }
-    .card-icon { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid var(--border); }
-    .card-title { font-weight: 700; font-size: 13px; }
-    .card-price { color: var(--neon-blue); font-family: 'Orbitron'; font-weight: 900; font-size: 15px; }
-    .buy-btn { background: var(--neon-blue); color: #000; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 900; font-size: 11px; cursor: pointer; font-family: 'Orbitron'; }
-    .ct-container { background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--neon-blue); border-radius: 20px; padding: 20px; }
-    .ct-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 14px; border-radius: 12px; color: #fff; font-size: 18px; font-weight: 900; outline: none; margin-bottom: 12px; text-align: center; }
-    .ct-res { text-align: center; font-size: 30px; font-weight: 900; color: var(--neon-blue); margin: 10px 0; font-family: 'Orbitron'; }
+    :root { --neon-blue: #38bdf8; --bg-dark: #020508; }
+    body { 
+      margin: 0; 
+      font-family: 'Cairo', sans-serif; 
+      background: var(--bg-dark); 
+      color: #fff; 
+      height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      text-align: center;
+      overflow: hidden;
+    }
+    .m-box { padding: 20px; max-width: 400px; }
+    .icon { 
+      font-size: 60px; 
+      margin-bottom: 20px; 
+      filter: drop-shadow(0 0 10px var(--neon-blue));
+      animation: pulse 2s infinite;
+    }
+    h1 { font-family: 'Orbitron'; font-weight: 900; color: var(--neon-blue); letter-spacing: 2px; font-size: 24px; }
+    p { opacity: 0.7; font-size: 14px; line-height: 1.6; }
+    .loader {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(56, 189, 248, 0.1);
+      border-top: 3px solid var(--neon-blue);
+      border-radius: 50%;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
   </style>
 </head>
 <body>
 
-<div class="wrap">
-  <div class="top-nav">
-    <div onclick="window.location.href='services.html'" style="cursor:pointer; font-size: 24px;">←</div>
-    <div class="balance-box" id="userBalance">0.00 🇱🇧</div>
-  </div>
-
-  <h2 id="pageTitle" style="font-family:'Orbitron'; font-weight:900; font-size:22px; margin-bottom:15px;">RECHARGE</h2>
-  
-  <div class="f-grid">
-    <div class="f-pill active" data-cat="ALFA Cards">Alfa Cards</div>
-    <div class="f-pill" data-cat="TOUCH">Touch Cards</div>
-    <div class="f-pill" data-cat="Internet">Internet</div>
-    <div class="f-pill" data-cat="uShare">uShare</div>
-    <div class="f-pill" data-cat="ALFA CREDIT">Alfa Credit</div>
-    <div class="f-pill" data-cat="MTC CREDIT">Mtc Credit</div>
-  </div>
-
-  <div id="product-list"></div>
-
-  <div id="ct-panel" style="display:none;">
-    <div class="ct-container">
-      <input type="number" id="ctAmt" class="ct-input" placeholder="Amount ($)">
-      <input type="number" id="ctPhone" class="ct-input" placeholder="70 000 000">
-      <div class="ct-res" id="ctTotalDisplay">$0.00</div>
-      <button id="ctBtn" class="buy-btn" onclick="sendCreditOrder()" style="width:100%; padding:15px; font-size:14px;">CONFIRM TRANSFER</button>
-    </div>
-  </div>
+<div class="m-box">
+  <div class="icon">🛠️</div>
+  <h1>UNDER MAINTENANCE</h1>
+  <p>عم نحدّث أسعار التشريج ونطور السستم كرمال نخدمكم بشكل أسرع. <br> دقائق وبنرجع معكم!</p>
+  <div class="loader"></div>
+  <p style="font-size: 10px; font-family: 'Orbitron'; margin-top: 30px; opacity: 0.3;">BAROUD APP v2.0</p>
 </div>
 
-<script>
-  const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  let activeFilter = "ALFA Cards";
-  let currentUser = null;
-
-  async function init() {
-    const { data: { session } } = await sb.auth.getSession();
-    if(session) {
-      currentUser = session.user;
-      updateBalanceUI();
-    } else {
-      window.location.href = "login.html";
-    }
-    fetchProducts();
-  }
-
-  async function updateBalanceUI() {
-    const { data } = await sb.from('profiles').select('balance').eq('id', currentUser.id).single();
-    if(data) {
-      document.getElementById('userBalance').innerText = `${data.balance.toFixed(2)} 🇱🇧`;
-      return data.balance;
-    }
-    return 0;
-  }
-
-  async function fetchProducts() {
-    const listEl = document.getElementById('product-list');
-    const ctEl = document.getElementById('ct-panel');
-    if(activeFilter.includes("CREDIT")) {
-      listEl.innerHTML = ""; ctEl.style.display = "block"; return;
-    }
-    ctEl.style.display = "none";
-    listEl.innerHTML = "<div style='text-align:center; opacity:0.3; padding:20px;'>Loading...</div>";
-
-    const { data: prods } = await sb.from('products')
-      .select('*')
-      .ilike('title', `%${activeFilter}%`)
-      .eq('active', true)
-      .order('price', {ascending: true});
-
-    listEl.innerHTML = prods && prods.length > 0 ? prods.map(p => `
-      <div class="card">
-        <div class="card-info">
-          <div class="card-icon">${p.title.toUpperCase().includes('ALFA') ? '🔴' : '🔵'}</div>
-          <div>
-            <div class="card-title">${p.title}</div>
-            <div class="card-price">$${p.price.toFixed(2)}</div>
-          </div>
-        </div>
-        <button class="buy-btn" onclick='handlePurchase(${JSON.stringify(p)})'>BUY</button>
-      </div>
-    `).join('') : "<div style='text-align:center; padding:20px; opacity:0.5;'>Coming Soon...</div>";
-  }
-
-  async function handlePurchase(product) {
-    const balance = await updateBalanceUI();
-    if (balance < product.price) return alert("Insufficient Balance! ❌");
-    
-    if (!confirm(`Confirm buying ${product.title}?`)) return;
-
-    const { error: orderErr } = await sb.from('orders').insert([{
-      user_id: currentUser.id,
-      product_id: product.id,
-      amount: product.price,
-      status: 'pending',
-      details: `Recharge Order: ${product.title}`
-    }]);
-
-    if (orderErr) {
-      alert("Error: " + orderErr.message);
-    } else {
-      await sb.from('profiles').update({ balance: balance - product.price }).eq('id', currentUser.id);
-      alert("Success! ✅");
-      window.location.href = "my-orders.html";
-    }
-  }
-
-  async function sendCreditOrder() {
-    const amount = parseFloat(document.getElementById('ctAmt').value);
-    const phone = document.getElementById('ctPhone').value;
-    const rate = activeFilter === 'ALFA CREDIT' ? 1.44 : 1.39;
-    const totalCost = amount * rate;
-
-    if (!amount || !phone) return alert("Fill all fields!");
-    
-    const balance = await updateBalanceUI();
-    if (balance < totalCost) return alert("Insufficient Balance! ❌");
-
-    document.getElementById('ctBtn').disabled = true;
-
-    const { error: orderErr } = await sb.from('orders').insert([{
-      user_id: currentUser.id,
-      amount: totalCost,
-      status: 'pending',
-      details: `Credit Transfer: ${amount}$ to ${phone} (${activeFilter})`
-    }]);
-
-    if (!orderErr) {
-      await sb.from('profiles').update({ balance: balance - totalCost }).eq('id', currentUser.id);
-      alert("Credit Request Sent! ✅");
-      window.location.href = "my-orders.html";
-    } else {
-      alert("Error: " + orderErr.message);
-      document.getElementById('ctBtn').disabled = false;
-    }
-  }
-
-  document.getElementById('ctAmt').oninput = (e) => {
-    const val = parseFloat(e.target.value) || 0;
-    const rate = activeFilter === 'ALFA CREDIT' ? 1.44 : 1.39;
-    document.getElementById('ctTotalDisplay').innerText = `$${(val * rate).toFixed(2)}`;
-  };
-
-  document.querySelectorAll('.f-pill').forEach(pill => {
-    pill.onclick = () => {
-      document.querySelectorAll('.f-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      activeFilter = pill.dataset.cat;
-      fetchProducts();
-    };
-  });
-
-  init();
-</script>
 </body>
 </html>
