@@ -117,7 +117,6 @@
     
     if (!session) { location.replace('login.html'); return; }
 
-    // 1. جلب الطلبات أولاً لضمان عمل الصفحة
     const { data: orders, error } = await sb
       .from('orders')
       .select('*')
@@ -134,7 +133,6 @@
       return;
     }
 
-    // 2. جلب خريطة المنتجات لربط الـ ID بالاسم
     const { data: products } = await sb.from('products').select('id, title');
     const productMap = {};
     if (products) {
@@ -146,8 +144,11 @@
       const payClass = (o.status === 'paid') ? 'done' : 'pending';
       const hasReply = o.admin_reply && o.admin_reply.trim() !== "";
       
-      // تحديد الاسم: الأولوية لجدول المنتجات، ثم الحقول الاحتياطية
       const orderTitle = productMap[o.product_id] || o.product_title || o.title || 'Service Order';
+
+      // فحص ذكي للمسميات المختلفة داخل قاعدة البيانات لضمان العرض
+      const orderPlan = o.plan_label || o.plan || o.selected_plan;
+      const orderNotes = o.notes || o.description || o.user_notes;
 
       return `
         <div class="card">
@@ -169,9 +170,9 @@
              ${o.player_name ? `<div class="detail-item"><span class="detail-label">Name:</span><span class="detail-value">${o.player_name}</span></div>` : ''}
              ${o.account_email ? `<div class="detail-item"><span class="detail-label">Email:</span><span class="detail-value">${o.account_email}</span></div>` : ''}
              ${o.account_password ? `<div class="detail-item"><span class="detail-label">Password:</span><span class="detail-value">${o.account_password}</span></div>` : ''}
-             ${o.plan_label ? `<div class="detail-item"><span class="detail-label">Plan:</span><span class="detail-value">${o.plan_label}</span></div>` : ''}
+             ${orderPlan ? `<div class="detail-item"><span class="detail-label">Plan:</span><span class="detail-value">${orderPlan}</span></div>` : ''}
              ${o.region ? `<div class="detail-item"><span class="detail-label">Region:</span><span class="detail-value">${o.region}</span></div>` : ''}
-             ${o.notes ? `<div class="detail-item"><span class="detail-label">Notes:</span><span class="detail-value">${o.notes}</span></div>` : ''}
+             ${orderNotes ? `<div class="detail-item"><span class="detail-label">Notes/Desc:</span><span class="detail-value">${orderNotes}</span></div>` : ''}
              ${o.phone_number ? `<div class="detail-item"><span class="detail-label">Phone:</span><span class="detail-value">${o.phone_number}</span></div>` : ''}
           </div>
 
