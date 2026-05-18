@@ -50,6 +50,8 @@
 
   .details-box { background: rgba(0,0,0,0.3); border-radius: 14px; padding: 12px; margin-top: 8px; border: 1px solid var(--border); display: none; }
   .kv { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+  .kv .k { font-weight: bold; color: var(--neon-blue); text-transform: uppercase; }
+  .kv .v { text-align: right; word-break: break-all; max-width: 70%; }
 
   .controls { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-top: 18px; align-items: flex-end; }
   select { width: 100%; padding: 11px; border-radius: 10px; background: #0c121d; border: 1px solid var(--border); color: #fff; font-size: 12px; }
@@ -110,10 +112,9 @@ function renderOrders(){
   const filtered = ordersCache.filter(o => String(o.id).includes(term) || String(o.user_id).includes(term));
 
   listEl.innerHTML = filtered.map(o => {
-    const title = titleById[o.product_id] || o.product_title || "Product";
+    const title = titleById[o.product_id] || o.product_title || o.title || "Product";
     const dStatus = (o.delivery_status || "pending").toLowerCase();
     
-    // 🔥 اختيار الرمز واللون حسب الحالة
     let icon = "•"; 
     let iconClass = "st-pending";
     if(dStatus === "done") { icon = "✓"; iconClass = "st-done"; }
@@ -148,8 +149,36 @@ function toggleDetails(id){
   const el = document.getElementById(`details_${id}`);
   if(el.style.display === "block") { el.style.display = "none"; return; }
   const o = ordersCache.find(x => x.id === id);
-  const keys = ["phone", "phone_number", "number", "whatsapp", "player_id", "player_name", "account_email", "note"];
-  el.innerHTML = keys.filter(k => o[k]).map(k => `<div class="kv"><span class="k">${k}</span><span class="v">${o[k]}</span></div>`).join("");
+  
+  // 🔥 تم إضافة وتوسيع الحقول لتشمل الـ Plan والـ Description والـ Notes والـ Email بشكل كامل
+  const keys = [
+    "player_id", 
+    "player_name", 
+    "account_email", 
+    "account_password", 
+    "plan_label", 
+    "plan", 
+    "selected_plan", 
+    "region", 
+    "notes", 
+    "description", 
+    "user_notes", 
+    "phone", 
+    "phone_number", 
+    "number", 
+    "whatsapp"
+  ];
+  
+  el.innerHTML = keys.filter(k => o[k] && String(o[k]).trim() !== "").map(k => {
+    // تنسيق الاسم ليظهر بشكل أرتب للآدمن
+    let displayKey = k.replace('_', ' ');
+    return `<div class="kv"><span class="k">${displayKey}</span><span class="v">${o[k]}</span></div>`;
+  }).join("");
+  
+  if(el.innerHTML === "") {
+    el.innerHTML = `<div style="font-size:12px; opacity:0.5; text-align:center;">No details found</div>`;
+  }
+  
   el.style.display = "block";
 }
 
