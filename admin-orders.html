@@ -42,7 +42,9 @@
   .st-done { color: var(--neon-green); background: rgba(74, 222, 128, 0.1); border: 1px solid var(--neon-green); }
   .st-rejected { color: var(--neon-red); background: rgba(248, 113, 113, 0.1); border: 1px solid var(--neon-red); }
 
-  .order-title { font-weight: 900; font-size: 16px; display: flex; align-items: center; }
+  .order-title { font-weight: 900; font-size: 16px; display: flex; align-items: center; text-transform: uppercase; }
+  .order-plan-badge { font-size: 11px; background: rgba(10, 160, 255, 0.15); color: #fff; padding: 2px 8px; border-radius: 6px; margin-left: 8px; border: 1px solid rgba(10, 160, 255, 0.3); font-family: 'Orbitron', 'Cairo'; }
+
   .price-tag { font-family: 'Orbitron'; color: var(--neon-blue); font-weight: 900; font-size: 18px; }
 
   .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
@@ -112,9 +114,13 @@ function renderOrders(){
   const filtered = ordersCache.filter(o => String(o.id).includes(term) || String(o.user_id).includes(term));
 
   listEl.innerHTML = filtered.map(o => {
-    const title = titleById[o.product_id] || o.product_title || o.title || "Product";
+    const productTitle = titleById[o.product_id] || o.product_title || o.title || "Product";
     const dStatus = (o.delivery_status || "pending").toLowerCase();
     
+    // 🔥 جلب البلان المختار من قاعدة البيانات بأي تسمية كانت لتظهر بالعنوان فوراً
+    const planValue = o.plan_label || o.plan || o.selected_plan || "";
+    const planBadge = planValue.trim() !== "" ? `<span class="order-plan-badge">${planValue}</span>` : "";
+
     let icon = "•"; 
     let iconClass = "st-pending";
     if(dStatus === "done") { icon = "✓"; iconClass = "st-done"; }
@@ -124,7 +130,10 @@ function renderOrders(){
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="order-title"><span class="status-icon ${iconClass}">${icon}</span>${title}</div>
+            <div class="order-title">
+              <span class="status-icon ${iconClass}">${icon}</span>
+              ${productTitle} ${planBadge}
+            </div>
             <div style="font-size:10px; opacity:0.4">#${o.id} • ${new Date(o.created_at).toLocaleString()}</div>
           </div>
           <div class="price-tag">$${Number(o.price || 0).toFixed(2)}</div>
@@ -150,7 +159,6 @@ function toggleDetails(id){
   if(el.style.display === "block") { el.style.display = "none"; return; }
   const o = ordersCache.find(x => x.id === id);
   
-  // 🔥 تم إضافة وتوسيع الحقول لتشمل الـ Plan والـ Description والـ Notes والـ Email بشكل كامل
   const keys = [
     "player_id", 
     "player_name", 
@@ -170,7 +178,6 @@ function toggleDetails(id){
   ];
   
   el.innerHTML = keys.filter(k => o[k] && String(o[k]).trim() !== "").map(k => {
-    // تنسيق الاسم ليظهر بشكل أرتب للآدمن
     let displayKey = k.replace('_', ' ');
     return `<div class="kv"><span class="k">${displayKey}</span><span class="v">${o[k]}</span></div>`;
   }).join("");
