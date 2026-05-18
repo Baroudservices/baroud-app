@@ -41,7 +41,8 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-    .order-title { font-weight: 900; font-size: 15px; color: var(--neon-blue); text-transform: uppercase; line-height: 1.2; max-width: 70%; }
+    .order-title { font-weight: 900; font-size: 15px; color: var(--neon-blue); text-transform: uppercase; line-height: 1.2; max-width: 75%; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .order-plan-badge { font-size: 10px; background: rgba(56, 189, 248, 0.15); color: #fff; padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Orbitron', 'Cairo'; text-transform: uppercase; }
     .order-date { font-size: 10px; opacity: 0.5; font-family: 'Cairo'; margin-top: 4px; }
     .order-price { font-weight: 900; font-size: 18px; }
 
@@ -60,7 +61,7 @@
     }
     .detail-item { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; font-family: 'Cairo'; }
     .detail-item:last-child { margin-bottom: 0; }
-    .detail-label { opacity: 0.6; }
+    .detail-label { opacity: 0.6; text-transform: uppercase; font-weight: 700; }
     .detail-value { font-weight: 700; color: #fff; text-align: right; word-break: break-all; margin-left: 10px; }
 
     .reply-area {
@@ -144,17 +145,22 @@
       const payClass = (o.status === 'paid') ? 'done' : 'pending';
       const hasReply = o.admin_reply && o.admin_reply.trim() !== "";
       
-      const orderTitle = productMap[o.product_id] || o.product_title || o.title || 'Service Order';
+      const productTitle = productMap[o.product_id] || o.product_title || o.title || 'Service Order';
 
-      // فحص ذكي للمسميات المختلفة داخل قاعدة البيانات لضمان العرض
-      const orderPlan = o.plan_label || o.plan || o.selected_plan;
-      const orderNotes = o.notes || o.description || o.user_notes;
+      // فحص ذكي للمسميات المختلفة للبلان والوصف لضمان جلب الداتا الصحيحة
+      const orderPlan = o.plan_label || o.plan || o.selected_plan || "";
+      const orderNotes = o.notes || o.description || o.user_notes || "";
+      
+      // تجهيز شارة البلان المختار لتظهر في العنوان مباشرة مثل صفحة الآدمن
+      const planBadge = orderPlan.trim() !== "" ? `<span class="order-plan-badge">${orderPlan}</span>` : "";
+
+      let phone = o.phone || o.phone_number || o.number || o.whatsapp || "";
 
       return `
         <div class="card">
           <div class="card-top">
             <div>
-              <div class="order-title">${orderTitle}</div>
+              <div class="order-title">${productTitle} ${planBadge}</div>
               <div class="order-date">${new Date(o.created_at).toLocaleString('en-GB')}</div>
             </div>
             <div class="order-price">$${Number(o.price || 0).toFixed(2)}</div>
@@ -166,14 +172,14 @@
           </div>
 
           <div class="details-box">
-             ${o.player_id ? `<div class="detail-item"><span class="detail-label">ID:</span><span class="detail-value">${o.player_id}</span></div>` : ''}
-             ${o.player_name ? `<div class="detail-item"><span class="detail-label">Name:</span><span class="detail-value">${o.player_name}</span></div>` : ''}
+             ${o.player_id ? `<div class="detail-item"><span class="detail-label">Player ID:</span><span class="detail-value">${o.player_id}</span></div>` : ''}
+             ${o.player_name ? `<div class="detail-item"><span class="detail-label">Player Name:</span><span class="detail-value">${o.player_name}</span></div>` : ''}
              ${o.account_email ? `<div class="detail-item"><span class="detail-label">Email:</span><span class="detail-value">${o.account_email}</span></div>` : ''}
              ${o.account_password ? `<div class="detail-item"><span class="detail-label">Password:</span><span class="detail-value">${o.account_password}</span></div>` : ''}
              ${orderPlan ? `<div class="detail-item"><span class="detail-label">Plan:</span><span class="detail-value">${orderPlan}</span></div>` : ''}
              ${o.region ? `<div class="detail-item"><span class="detail-label">Region:</span><span class="detail-value">${o.region}</span></div>` : ''}
              ${orderNotes ? `<div class="detail-item"><span class="detail-label">Notes/Desc:</span><span class="detail-value">${orderNotes}</span></div>` : ''}
-             ${o.phone_number ? `<div class="detail-item"><span class="detail-label">Phone:</span><span class="detail-value">${o.phone_number}</span></div>` : ''}
+             ${phone ? `<div class="detail-item"><span class="detail-label">Phone:</span><span class="detail-value">${phone}</span></div>` : ''}
           </div>
 
           <div class="reply-area">
