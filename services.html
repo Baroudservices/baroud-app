@@ -5,156 +5,155 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Baroud | Services Portal</title>
   
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
-      --neon-cyan: #00f2ff;
-      --neon-glow: rgba(0, 242, 255, 0.2);
-      --bg-gradient: radial-gradient(circle at top, #0b1528 0%, #020508 100%);
+      --primary-blue: #3b82f6;
+      --soft-glow: rgba(59, 130, 246, 0.15);
+      --bg-dark: #030712;
       --card-bg: rgba(255, 255, 255, 0.02);
-      --card-border: rgba(255, 255, 255, 0.06);
-      --card-hover-border: rgba(0, 242, 255, 0.3);
+      --card-border: rgba(255, 255, 255, 0.05);
+      --text-muted: #9ca3af;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
     
     body { 
       margin: 0; padding: 0; 
-      background: var(--bg-gradient); color: #fff; 
+      background-color: var(--bg-dark); color: #f3f4f6; 
       font-family: 'Cairo', 'Orbitron', sans-serif; 
       overflow-x: hidden;
       min-height: 100vh;
+      letter-spacing: -0.2px;
     }
     
     .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 16px 120px; }
 
-    /* ===== TOPBAR (Break-Tech Style) ===== */
+    /* ===== TOPBAR (Minimal & Premium) ===== */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 20px; 
-      background: rgba(2, 5, 8, 0.75);
+      padding: 16px 20px; 
+      background: rgba(3, 7, 18, 0.8);
       position: sticky; top: 0; z-index: 1000; 
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
       border-bottom: 1px solid var(--card-border);
     }
     .brand-title {
       font-family: 'Orbitron';
-      font-weight: 900; letter-spacing: 3px; 
-      background: linear-gradient(135deg, #fff 0%, var(--neon-cyan) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      font-size: 20px;
+      font-weight: 700; letter-spacing: 4px; 
+      color: #ffffff;
+      font-size: 19px;
+      text-shadow: 0 2px 10px rgba(255,255,255,0.1);
     }
     
     /* ===== SLIDER ===== */
     .slider-box { 
-      width: 100%; height: 160px; border-radius: 24px; 
+      width: 100%; height: 165px; border-radius: 20px; 
       overflow: hidden; margin: 20px 0; 
       border: 1px solid var(--card-border);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.2, 1, 0.2, 1); }
     .slides img { width: 33.333%; height: 100%; object-fit: cover; }
 
     /* ===== SEARCH BAR ===== */
     .search-wrap { 
-      background: rgba(255, 255, 255, 0.04); 
-      border-radius: 16px; padding: 0 16px; margin-bottom: 24px; 
+      background: rgba(255, 255, 255, 0.03); 
+      border-radius: 14px; padding: 0 16px; margin-bottom: 24px; 
       display: flex; align-items: center;
       border: 1px solid var(--card-border);
-      backdrop-filter: blur(10px);
+      transition: border 0.3s ease;
     }
     .search-wrap input { 
-      width: 100%; height: 48px; background: none; border: none; 
-      color: #fff; font-size: 14px; font-weight: 600; font-family: 'Cairo';
+      width: 100%; height: 46px; background: none; border: none; 
+      color: #ffffff; font-size: 13px; font-weight: 600; font-family: 'Cairo';
     }
-    .search-wrap input::placeholder { color: rgba(255,255,255,0.3); }
+    .search-wrap input::placeholder { color: rgba(255, 255, 255, 0.25); }
 
     /* ===== DAILY OFFERS ===== */
     .offers-btn {
       display: flex; align-items: center; justify-content: space-between;
-      background: linear-gradient(135deg, #ff007a 0%, #ff4b2b 100%);
-      margin-bottom: 24px; padding: 14px 20px; border-radius: 18px;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      margin-bottom: 24px; padding: 14px 20px; border-radius: 16px;
       text-decoration: none;
-      box-shadow: 0 0 20px rgba(255, 0, 122, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
     }
     .offers-btn:active { transform: scale(0.98); }
-    .off-txt h2 { margin: 0; font-size: 14px; font-weight: 900; color: #fff; letter-spacing: 1px; }
-    .off-txt p { margin: 2px 0 0; font-size: 10px; opacity: 0.8; font-family: 'Cairo'; }
-    .off-icon { font-size: 20px; animation: pulse 1.5s infinite; }
+    .off-txt h2 { margin: 0; font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 1px; }
+    .off-txt p { margin: 2px 0 0; font-size: 10px; color: #bfdbfe; font-family: 'Cairo'; }
+    .off-icon { font-size: 18px; animation: gentle-pulse 2s infinite ease-in-out; }
     
-    /* ===== GRID & PREMIUM CARDS ===== */
+    /* ===== GRID & SMOOTH PREMIUM CARDS ===== */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     
     .service-card { 
       background: var(--card-bg); 
-      border-radius: 24px; 
+      border-radius: 20px; 
       border: 1px solid var(--card-border); 
       overflow: hidden; text-decoration: none; 
       display: flex; flex-direction: column; 
-      height: 180px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      height: 175px; 
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* تأثير الضغط والـ Glow الناعم المستوحى من الموقع */
+    /* لمسة سلسة وراقية عند الضغط تناسب راحة العين */
     .service-card:active { 
-      transform: scale(0.96); 
-      border-color: var(--neon-cyan);
-      box-shadow: 0 0 15px var(--neon-glow);
+      transform: translateY(3px);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: 0 4px 20px var(--soft-glow);
     }
     
-    .img-box { width: 100%; height: 125px; overflow: hidden; background: #000; position: relative; }
+    .img-box { width: 100%; height: 120px; overflow: hidden; background: #030712; position: relative; }
     .img-box img { 
       width: 100%; height: 100%; 
       object-fit: cover; 
       object-position: center;
-      transition: transform 0.5s ease;
     }
-    /* طبقة ظلال خفيفة أسفل الصورة لدمج النص */
+    /* تلاشي ناعم بأسفل الصورة ليدمج النص واللوغو بروقان */
     .img-box::after {
       content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(2,5,8,0.8) 0%, rgba(2,5,8,0) 40%);
+      background: linear-gradient(to top, var(--bg-dark) 0%, rgba(3, 7, 18, 0) 50%);
     }
     
     .label-box { 
       flex: 1; display: flex; align-items: center; justify-content: center;
-      padding: 8px 12px; text-align: center; 
-      font-size: 11px; font-weight: 700; color: #fff;
-      background: rgba(2, 5, 8, 0.4);
-      letter-spacing: 0.5px;
+      padding: 6px 12px; text-align: center; 
+      font-size: 11px; font-weight: 700; color: #f3f4f6;
+      letter-spacing: 0.3px;
     }
 
     /* ===== DRAWER & OVERLAY ===== */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; z-index: 2000; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; z-index: 2000; }
     .drawer { 
-      position: fixed; top: 0; right: -100%; width: 290px; height: 100%; 
-      background: #040914; z-index: 2100; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+      position: fixed; top: 0; right: -100%; width: 280px; height: 100%; 
+      background: #090d16; z-index: 2100; transition: 0.3s ease; 
       padding: 40px 24px; border-left: 1px solid var(--card-border); 
     }
     .drawer.active { right: 0; }
     .m-item { 
-      display: block; padding: 16px 0; color: rgba(255,255,255,0.7); 
-      text-decoration: none; font-weight: 600; font-size: 14px;
+      display: block; padding: 16px 0; color: var(--text-muted); 
+      text-decoration: none; font-weight: 600; font-size: 13px;
       border-bottom: 1px solid var(--card-border); transition: 0.2s;
     }
-    .m-item:active { color: var(--neon-cyan); }
+    .m-item:active { color: var(--primary-blue); }
 
-    /* ===== PREMIUM DOCK ===== */
+    /* ===== PREMIUM MINIMAL DOCK ===== */
     .dock { 
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); 
-      width: 90%; max-width: 380px; height: 68px; 
-      background: rgba(6, 11, 20, 0.65); 
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255,255,255,0.08); 
-      border-radius: 24px; display: flex; align-items: center; justify-content: space-around; 
+      width: 88%; max-width: 360px; height: 64px; 
+      background: rgba(15, 23, 42, 0.6); 
+      backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.06); 
+      border-radius: 20px; display: flex; align-items: center; justify-content: space-around; 
       z-index: 1000;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .dock-icon { font-size: 22px; cursor: pointer; opacity: 0.4; transition: 0.2s; }
-    .dock-icon.active { opacity: 1; color: var(--neon-cyan); drop-shadow: 0 0 8px var(--neon-cyan); }
+    .dock-icon { font-size: 20px; cursor: pointer; opacity: 0.35; transition: 0.2s; }
+    .dock-icon.active { opacity: 1; color: var(--primary-blue); }
     
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @keyframes gentle-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.06); opacity: 1; } }
   </style>
 </head>
 
@@ -162,26 +161,26 @@
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="drawer">
     <div style="text-align: center; margin-bottom: 35px;">
-        <div id="userAvatar" style="width: 65px; height: 65px; background: rgba(0, 242, 255, 0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: var(--neon-cyan); font-size: 24px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);">👤</div>
-        <div style="font-size: 13px; font-weight: 900; color: #fff; letter-spacing: 1px;">BAROUD PORTAL</div>
+        <div id="userAvatar" style="width: 60px; height: 60px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 22px;">👤</div>
+        <div style="font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">BAROUD HUB</div>
     </div>
     <a href="services.html" class="m-item">🏠 Home </a>
     <a href="my-orders.html" class="m-item">📦 Order History</a>
-    <a href="https://wa.me/96176452027" class="m-item">💬 Support Chat</a>
+    <a href="https://wa.me/96170385398" class="m-item">💬 Support Chat</a>
   </aside>
 
   <header class="topbar">
     <div style="width: 40px;"></div> 
     <div class="brand-title">BAROUD</div>
-    <div class="menu-trigger" id="menuBtn" style="font-size: 22px; cursor: pointer; color: rgba(255,255,255,0.8);">☰</div>
+    <div class="menu-trigger" id="menuBtn" style="font-size: 20px; cursor: pointer; color: var(--text-muted);">☰</div>
   </header>
 
   <main class="wrap">
     <div class="slider-box">
       <div class="slides" id="mainSlider">
-        <img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/0b1528/00f2ff?text=PREMIUM+SERVICES'">
-        <img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/0b1528/2ecc71?text=BEST+PRICES'">
-        <img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/0b1528/00f2ff?text=24/7+SUPPORT'">
+        <img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/030712/3b82f6?text=PREMIUM+SERVICES'">
+        <img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/030712/3b82f6?text=BEST+PRICES'">
+        <img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/030712/3b82f6?text=24/7+SUPPORT'">
       </div>
     </div>
 
@@ -192,9 +191,9 @@
     <a href="offers.html" class="offers-btn">
         <div class="off-txt">
             <h2>DAILY OFFERS</h2>
-            <p>Hottest deals available now</p>
+            <p>Explore hottest premium deals</p>
         </div>
-        <div class="off-icon">🔥</div>
+        <div class="off-icon">✨</div>
     </a>
 
     <section class="grid" id="serviceGrid">
@@ -228,7 +227,7 @@
   <nav class="dock" id="bottomDock">
     <div class="dock-icon active" id="homeIcon">🏠</div>
     <div class="dock-icon" onclick="location.href='my-orders.html'">📦</div>
-    <div class="dock-icon" onclick="window.open('https://wa.me/96176452027')">💬</div>
+    <div class="dock-icon" onclick="window.open('https://wa.me/96170385398')">💬</div>
   </nav>
 
   <script>
@@ -244,7 +243,7 @@
     overlay.onclick = () => { drawer.classList.remove("active"); overlay.style.display = "none"; };
 
     async function init() {
-      console.log("Portal initialized smoothly with modern tech UI.");
+      console.log("Clean Ultra-Premium portal layout ready.");
     }
     init();
 
