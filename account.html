@@ -160,19 +160,17 @@
 
   const productId = new URLSearchParams(window.location.search).get("id");
   let currentProduct = null, allPlans = [], selectedPlan = null, tempSelectedPlanId = null;
-  let userRole = 'user'; // الافتراضي
+  let userRole = 'user'; 
 
   async function init() {
     if(!productId) return;
     
-    // 1. جلب رتبة المستخدم أولاً
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
       const { data: profile } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
       if (profile) userRole = profile.role;
     }
 
-    // تطبيق الستايل إذا كان موزع
     if (userRole === 'reseller') {
       document.getElementById("badgeLabel").textContent = "RESELLER PANEL";
       document.getElementById("badgeLabel").style.color = "var(--neon-green)";
@@ -183,7 +181,6 @@
       document.getElementById("modalOkBtn").classList.add("reseller-btn");
     }
 
-    // 2. جلب بيانات المنتج
     const { data: product } = await sb.from("products").select("*").eq("id", productId).single();
     if(!product) return;
     currentProduct = product;
@@ -192,7 +189,6 @@
     document.getElementById("pCat").textContent = "Category: " + (product.category || "General");
     document.getElementById("heroImg").src = `assets/products/${product.id}.jpg`;
 
-    // 3. جلب الخطط مع مراعاة السعرين
     const { data: plans } = await sb.from("product_plan_prices")
                                 .select("*").eq("product_id", productId)
                                 .eq("active", true).order('price', {ascending: true});
@@ -279,30 +275,49 @@
 
   document.getElementById("buyBtn").onclick = async () => {
     const btn = document.getElementById("buyBtn");
-    btn.disabled = true; btn.textContent = "PROCESSING...";
-
+    
+    // التأكد من تعبئة جميع الحقول المطلوبة قبل الإرسال للواتساب
     const inputs = document.querySelectorAll("#dynamicFields input");
     for(let i of inputs) {
-      if(!i.value.trim()) { showModal("Error", "Please fill all fields"); btn.disabled = false; return; }
+      if(!i.value.trim()) { 
+        showModal("Error", "Please fill all required fields"); 
+        return; 
+      }
     }
 
     const finalPrice = (userRole === 'reseller') ? (selectedPlan.reseller_price || selectedPlan.price) : selectedPlan.price;
-    let finalNote = document.getElementById("customerNote").value;
-    const bCodes = document.getElementById("backup_codes")?.value;
-    if(bCodes) finalNote += "\nBackup Codes: " + bCodes;
+    
+    // تجميع البيانات المدخلة لتوليد رسالة الواتساب المنسقة
+    const accEmail = document.getElementById("acc_email")?.value || "";
+    const accPass = document.getElementById("acc_pass")?.value || "";
+    const backupCodes = document.getElementById("backup_codes")?.value || "";
+    const playerId = document.getElementById("player_id")?.value || "";
+    const customerNote = document.getElementById("customerNote").value.trim();
 
-    const { data, error } = await sb.rpc("place_order", {
-      p_product_id: productId, 
-      p_price: finalPrice, // نرسل سعر الموزع للطلبات إذا كان موزع
-      p_duration: selectedPlan.plan_label, 
-      p_note: finalNote,
-      p_player_id: document.getElementById("player_id")?.value || null,
-      p_acc_email: document.getElementById("acc_email")?.value || null,
-      p_acc_pass: document.getElementById("acc_pass")?.value || null
-    });
+    // بناء نص الرسالة بأسلوب منظم جداً يصل إلى هاتفك
+    let wpMessage = `🔥 *NEW ORDER - BAROUD APP* 🔥\n\n` +
+                    `📦 *Product:* ${currentProduct.title}\n` +
+                    `⏱️ *Plan:* ${selectedPlan.plan_label}\n` +
+                    `💰 *Price:* $${Number(finalPrice).toFixed(2)}\n` +
+                    `👤 *Role:* ${userRole.toUpperCase()}\n\n` +
+                    `🚨 *Order Details:* \n`;
 
-    if(error) { showModal("Failed", error.message); btn.disabled = false; }
-    else { showModal("Success!", "Redirecting..."); setTimeout(()=>location.href="my-orders.html", 1200); }
+    if (playerId) wpMessage += `🔹 *Player ID:* ${playerId}\n`;
+    if (accEmail) wpMessage += `🔹 *Email/User:* ${accEmail}\n`;
+    if (accPass)  wpMessage += `🔹 *Password:* ${accPass}\n`;
+    if (backupCodes) wpMessage += `🔹 *Backup Codes:* ${backupCodes}\n`;
+    if (customerNote) wpMessage += `📝 *Notes:* ${customerNote}\n`;
+
+    wpMessage += `\nيرجى تأكيد واستلام الطلب عبر الواتساب لتجهيز الدفع 🟢`;
+
+    const adminWhatsAppNumber = "70385398"; // رقم الواتساب الخاص بك للعمل الفوري
+    const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(wpMessage)}`;
+
+    // فتح الرابط وتوجيه العميل مباشرة
+    window.open(whatsappUrl, '_blank');
+
+    // إعادة تفعيل الزر ليعمل مرة أخرى دون تعليق
+    btn.textContent = "PURCHASE NOW";
   };
 
   function showModal(t, txt) { 
