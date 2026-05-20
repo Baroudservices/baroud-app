@@ -3,157 +3,169 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Baroud | Services Portal</title>
+  <title>Baroud | Premium Hub</title>
   
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
-      --primary-blue: #3b82f6;
-      --soft-glow: rgba(59, 130, 246, 0.15);
-      --bg-dark: #030712;
-      --card-bg: rgba(255, 255, 255, 0.02);
-      --card-border: rgba(255, 255, 255, 0.05);
-      --text-muted: #9ca3af;
+      --bg-dark: #02040a;
+      --brand-blue: #2563eb;
+      --brand-glow: rgba(37, 99, 211, 0.12);
+      --glass-card: rgba(255, 255, 255, 0.02);
+      --glass-border: rgba(255, 255, 255, 0.04);
+      --glass-border-active: rgba(37, 99, 211, 0.3);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
     
     body { 
       margin: 0; padding: 0; 
-      background-color: var(--bg-dark); color: #f3f4f6; 
-      font-family: 'Cairo', 'Orbitron', sans-serif; 
+      background-color: var(--bg-dark); color: #f8fafc; 
+      font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif; 
       overflow-x: hidden;
       min-height: 100vh;
-      letter-spacing: -0.2px;
     }
     
-    .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 16px 120px; }
+    .wrap { width: 100%; max-width: 450px; margin: 0 auto; padding: 0 18px 120px; }
 
-    /* ===== TOPBAR (Minimal & Premium) ===== */
+    /* ===== TOPBAR (Next-Gen Luxury) ===== */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px; 
-      background: rgba(3, 7, 18, 0.8);
+      padding: 20px 24px; 
+      background: rgba(2, 4, 10, 0.7);
       position: sticky; top: 0; z-index: 1000; 
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+      border-bottom: 1px solid var(--glass-border);
     }
     .brand-title {
-      font-family: 'Orbitron';
-      font-weight: 700; letter-spacing: 4px; 
+      font-family: 'Plus Jakarta Sans';
+      font-weight: 800; letter-spacing: 5px; 
       color: #ffffff;
-      font-size: 19px;
-      text-shadow: 0 2px 10px rgba(255,255,255,0.1);
+      font-size: 20px;
+      background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     
-    /* ===== SLIDER ===== */
+    /* ===== FLOATING SLIDER ===== */
     .slider-box { 
-      width: 100%; height: 165px; border-radius: 20px; 
+      width: 100%; height: 155px; border-radius: 28px; 
       overflow: hidden; margin: 20px 0; 
-      border: 1px solid var(--card-border);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
-    .slides { display: flex; width: 300%; height: 100%; transition: 0.8s cubic-bezier(0.2, 1, 0.2, 1); }
+    .slides { display: flex; width: 300%; height: 100%; transition: 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
     .slides img { width: 33.333%; height: 100%; object-fit: cover; }
 
-    /* ===== SEARCH BAR ===== */
+    /* ===== PREMIUM MINIMAL SEARCH ===== */
     .search-wrap { 
-      background: rgba(255, 255, 255, 0.03); 
-      border-radius: 14px; padding: 0 16px; margin-bottom: 24px; 
+      background: rgba(255, 255, 255, 0.02); 
+      border-radius: 20px; padding: 0 20px; margin-bottom: 26px; 
       display: flex; align-items: center;
-      border: 1px solid var(--card-border);
-      transition: border 0.3s ease;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
     }
     .search-wrap input { 
-      width: 100%; height: 46px; background: none; border: none; 
-      color: #ffffff; font-size: 13px; font-weight: 600; font-family: 'Cairo';
+      width: 100%; height: 50px; background: none; border: none; 
+      color: #ffffff; font-size: 14px; font-weight: 600; font-family: 'Cairo';
     }
-    .search-wrap input::placeholder { color: rgba(255, 255, 255, 0.25); }
+    .search-wrap input::placeholder { color: rgba(255, 255, 255, 0.2); }
 
-    /* ===== DAILY OFFERS ===== */
+    /* ===== EXCLUSIVE OFFERS ===== */
     .offers-btn {
       display: flex; align-items: center; justify-content: space-between;
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-      margin-bottom: 24px; padding: 14px 20px; border-radius: 16px;
+      background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+      margin-bottom: 26px; padding: 16px 24px; border-radius: 20px;
       text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 25px rgba(37, 99, 211, 0.2);
     }
     .offers-btn:active { transform: scale(0.98); }
-    .off-txt h2 { margin: 0; font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 1px; }
-    .off-txt p { margin: 2px 0 0; font-size: 10px; color: #bfdbfe; font-family: 'Cairo'; }
-    .off-icon { font-size: 18px; animation: gentle-pulse 2s infinite ease-in-out; }
+    .off-txt h2 { margin: 0; font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 1px; font-family: 'Plus Jakarta Sans'; }
+    .off-txt p { margin: 3px 0 0; font-size: 11px; color: #dbeafe; font-family: 'Cairo'; font-weight: 600; }
+    .off-icon { font-size: 20px; animation: smooth-bounce 2s infinite ease-in-out; }
     
-    /* ===== GRID & SMOOTH PREMIUM CARDS ===== */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    /* ===== GRID & THE NEW LUXURY BADGE CARDS ===== */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     
     .service-card { 
-      background: var(--card-bg); 
-      border-radius: 20px; 
-      border: 1px solid var(--card-border); 
-      overflow: hidden; text-decoration: none; 
+      background: var(--glass-card); 
+      border-radius: 28px; 
+      border: 1px solid var(--glass-border); 
+      text-decoration: none; 
       display: flex; flex-direction: column; 
-      height: 175px; 
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      align-items: center; justify-content: center;
+      height: 160px; padding: 20px 10px;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     }
-    /* لمسة سلسة وراقية عند الضغط تناسب راحة العين */
+    /* لمسة الأجهزة الذكية الفخمة عند الكبس */
     .service-card:active { 
-      transform: translateY(3px);
+      transform: translateY(-4px) scale(1.02);
       background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(59, 130, 246, 0.4);
-      box-shadow: 0 4px 20px var(--soft-glow);
+      border-color: var(--glass-border-active);
+      box-shadow: 0 12px 24px var(--brand-glow);
     }
     
-    .img-box { width: 100%; height: 120px; overflow: hidden; background: #030712; position: relative; }
+    /* دائرة الأيقونة الفخمة المضاءة بنعومة بدلاً من المربع الميت */
+    .img-box { 
+      width: 64px; height: 64px; 
+      border-radius: 50%; 
+      overflow: hidden; 
+      background: rgba(255, 255, 255, 0.02); 
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+      box-shadow: inset 0 2px 8px rgba(255,255,255,0.03);
+      transition: all 0.4s ease;
+    }
+    .service-card:active .img-box {
+      border-color: var(--brand-blue);
+      box-shadow: 0 0 15px rgba(37, 99, 211, 0.3);
+    }
     .img-box img { 
       width: 100%; height: 100%; 
-      object-fit: cover; 
-      object-position: center;
-    }
-    /* تلاشي ناعم بأسفل الصورة ليدمج النص واللوغو بروقان */
-    .img-box::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to top, var(--bg-dark) 0%, rgba(3, 7, 18, 0) 50%);
+      object-fit: cover;
     }
     
     .label-box { 
-      flex: 1; display: flex; align-items: center; justify-content: center;
-      padding: 6px 12px; text-align: center; 
-      font-size: 11px; font-weight: 700; color: #f3f4f6;
-      letter-spacing: 0.3px;
+      font-size: 11px; font-weight: 700; color: #f1f5f9;
+      letter-spacing: 0.5px; text-align: center;
+      opacity: 0.9; transition: color 0.3s;
     }
+    .service-card:active .label-box { color: #ffffff; opacity: 1; }
 
     /* ===== DRAWER & OVERLAY ===== */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; z-index: 2000; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: none; z-index: 2000; }
     .drawer { 
       position: fixed; top: 0; right: -100%; width: 280px; height: 100%; 
-      background: #090d16; z-index: 2100; transition: 0.3s ease; 
-      padding: 40px 24px; border-left: 1px solid var(--card-border); 
+      background: #050811; z-index: 2100; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+      padding: 40px 24px; border-left: 1px solid var(--glass-border); 
     }
     .drawer.active { right: 0; }
     .m-item { 
-      display: block; padding: 16px 0; color: var(--text-muted); 
+      display: block; padding: 18px 0; color: #94a3b8; 
       text-decoration: none; font-weight: 600; font-size: 13px;
-      border-bottom: 1px solid var(--card-border); transition: 0.2s;
+      border-bottom: 1px solid var(--glass-border); transition: 0.2s;
     }
-    .m-item:active { color: var(--primary-blue); }
+    .m-item:active { color: var(--brand-blue); }
 
-    /* ===== PREMIUM MINIMAL DOCK ===== */
+    /* ===== ULTRA-MINIMAL DOCK ===== */
     .dock { 
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); 
-      width: 88%; max-width: 360px; height: 64px; 
-      background: rgba(15, 23, 42, 0.6); 
+      position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); 
+      width: 88%; max-width: 360px; height: 66px; 
+      background: rgba(5, 8, 17, 0.6); 
       backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-      border: 1px solid rgba(255, 255, 255, 0.06); 
-      border-radius: 20px; display: flex; align-items: center; justify-content: space-around; 
+      border: 1px solid rgba(255, 255, 255, 0.05); 
+      border-radius: 24px; display: flex; align-items: center; justify-content: space-around; 
       z-index: 1000;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
     }
-    .dock-icon { font-size: 20px; cursor: pointer; opacity: 0.35; transition: 0.2s; }
-    .dock-icon.active { opacity: 1; color: var(--primary-blue); }
+    .dock-icon { font-size: 20px; cursor: pointer; opacity: 0.3; transition: 0.3s; }
+    .dock-icon.active { opacity: 1; color: var(--brand-blue); filter: drop-shadow(0 2px 8px rgba(37,99,211,0.4)); }
     
-    @keyframes gentle-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.06); opacity: 1; } }
+    @keyframes smooth-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
   </style>
 </head>
 
@@ -161,8 +173,8 @@
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="drawer">
     <div style="text-align: center; margin-bottom: 35px;">
-        <div id="userAvatar" style="width: 60px; height: 60px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 22px;">👤</div>
-        <div style="font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">BAROUD HUB</div>
+        <div id="userAvatar" style="width: 60px; height: 60px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">👤</div>
+        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">BAROUD PLATFORM</div>
     </div>
     <a href="services.html" class="m-item">🏠 Home </a>
     <a href="my-orders.html" class="m-item">📦 Order History</a>
@@ -172,87 +184,4 @@
   <header class="topbar">
     <div style="width: 40px;"></div> 
     <div class="brand-title">BAROUD</div>
-    <div class="menu-trigger" id="menuBtn" style="font-size: 20px; cursor: pointer; color: var(--text-muted);">☰</div>
-  </header>
-
-  <main class="wrap">
-    <div class="slider-box">
-      <div class="slides" id="mainSlider">
-        <img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/030712/3b82f6?text=PREMIUM+SERVICES'">
-        <img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/030712/3b82f6?text=BEST+PRICES'">
-        <img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/030712/3b82f6?text=24/7+SUPPORT'">
-      </div>
-    </div>
-
-    <div class="search-wrap">
-      <input type="text" placeholder="Search accounts, games...">
-    </div>
-
-    <a href="offers.html" class="offers-btn">
-        <div class="off-txt">
-            <h2>DAILY OFFERS</h2>
-            <p>Explore hottest premium deals</p>
-        </div>
-        <div class="off-icon">✨</div>
-    </a>
-
-    <section class="grid" id="serviceGrid">
-      <a href="accounts.html" class="service-card">
-        <div class="img-box"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=500'"></div>
-        <div class="label-box">ACCOUNTS</div>
-      </a>
-      <a href="apps.html" class="service-card">
-        <div class="img-box"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=500'"></div>
-        <div class="label-box">PREMIUM APPS</div>
-      </a>
-      <a href="games.html" class="service-card">
-        <div class="img-box"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500'"></div>
-        <div class="label-box">GAMING</div>
-      </a>
-      <a href="giftcards.html" class="service-card">
-        <div class="img-box"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'"></div>
-        <div class="label-box">GIFT CARDS</div>
-      </a>
-      <a href="ai-tools.html" class="service-card">
-        <div class="img-box"><img src="assets/ai.png" onerror="this.src='https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500'"></div>
-        <div class="label-box">AI TOOLS</div>
-      </a>
-      <a href="phone-recharge.html" class="service-card">
-        <div class="img-box"><img src="assets/mobile.png" onerror="this.src='https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?w=500'"></div>
-        <div class="label-box">MOBILE RECHARGE</div>
-      </a>
-    </section>
-  </main>
-
-  <nav class="dock" id="bottomDock">
-    <div class="dock-icon active" id="homeIcon">🏠</div>
-    <div class="dock-icon" onclick="location.href='my-orders.html'">📦</div>
-    <div class="dock-icon" onclick="window.open('https://wa.me/96170385398')">💬</div>
-  </nav>
-
-  <script>
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    const btn = document.getElementById("menuBtn");
-    const drawer = document.getElementById("drawer");
-    const overlay = document.getElementById("overlay");
-
-    btn.onclick = () => { drawer.classList.add("active"); overlay.style.display = "block"; };
-    overlay.onclick = () => { drawer.classList.remove("active"); overlay.style.display = "none"; };
-
-    async function init() {
-      console.log("Clean Ultra-Premium portal layout ready.");
-    }
-    init();
-
-    let currentIdx = 0;
-    setInterval(() => { 
-      currentIdx = (currentIdx + 1) % 3; 
-      const slider = document.getElementById("mainSlider");
-      if(slider) slider.style.transform = `translateX(-${currentIdx * 33.333}%)`; 
-    }, 5000);
-  </script>
-</body>
-</html>
+    <div class="menu-trigger" id="menuBtn" style="font-size:
