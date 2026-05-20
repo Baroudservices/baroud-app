@@ -6,7 +6,6 @@
   <title>Baroud | Premium Hub</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Cairo:wght@600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -16,7 +15,6 @@
       --glass-base: rgba(255, 255, 255, 0.02);
       --glass-border: rgba(255, 255, 255, 0.04);
       --glass-hover: rgba(255, 255, 255, 0.05);
-      --text-muted: #64748b;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -48,19 +46,6 @@
       background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-
-    /* بار رصيد ناعم وملموم */
-    .user-info-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      margin: 12px 0 4px; padding: 10px 14px;
-      background: rgba(255,255,255,0.01); border-radius: 16px;
-      border: 1px solid var(--glass-border);
-    }
-    .balance-box { font-size: 13px; font-weight: 700; color: #f8fafc; }
-    .balance-box span { color: var(--brand-blue); }
-    .wallet-pill { padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; background: rgba(255,255,255,0.04); }
-    .wallet-pill.reseller { background: rgba(16, 185, 129, 0.08); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.15); }
-    .reseller-badge { display: none; font-size: 9px; background: #10b981; color: #fff; padding: 1px 6px; border-radius: 6px; margin-left: 5px; font-weight: 700; }
     
     /* ===== SLIDER (Compact Radius) ===== */
     .slider-box { 
@@ -115,7 +100,7 @@
       backdrop-filter: blur(10px);
     }
     
-    /* كروت متناسقة ونحيفة مريحة جداً بالتقليب */
+    /* المقاسات الجديدة الناعمة والملمومة */
     .c-large { grid-column: span 6; flex-direction: row; justify-content: flex-start; gap: 18px; padding: 14px 20px; height: 78px; }
     .c-medium { grid-column: span 3; height: 120px; }
 
@@ -126,7 +111,7 @@
       box-shadow: 0 10px 20px var(--brand-glow);
     }
     
-    /* حجم الأيقونات ملموم وناعم */
+    /* حجم الأيقونات ناعم جداً ومش ضخم */
     .img-box { 
       width: 46px; height: 46px; 
       border-radius: 14px; 
@@ -185,9 +170,8 @@
   <div class="overlay" id="overlay"></div>
   <aside class="drawer" id="drawer">
     <div style="text-align: center; margin-bottom: 25px;">
-        <div id="userAvatar" style="width: 50px; height: 50px; background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px;">👤</div>
-        <div id="userEmail" style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px; word-break: break-all;">Loading...</div>
-        <div style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">BAROUD HUB <span id="resellerBadge" class="reseller-badge">RESELLER</span></div>
+        <div style="width: 50px; height: 50px; background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px;">👤</div>
+        <div style="font-size: 13px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">BAROUD HUB</div>
     </div>
     <a href="services.html" class="m-item">🏠 Home </a>
     <a href="my-orders.html" class="m-item">📦 Order History</a>
@@ -201,11 +185,6 @@
   </header>
 
   <main class="wrap">
-    <div class="user-info-bar">
-      <div class="balance-box">Balance: <span id="balanceText">$0.00</span></div>
-      <div id="walletPill" class="wallet-pill">User Wallet</div>
-    </div>
-
     <div class="slider-box">
       <div class="slides" id="mainSlider">
         <img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/500x300/03060f/3b82f6?text=PREMIUM+SERVICES'">
@@ -259,44 +238,17 @@
 
   <nav class="dock" id="bottomDock">
     <div class="dock-icon active" id="homeIcon">🏠</div>
-    <div class="dock-icon" onclick="location.href='add-credit.html'">💳</div>
     <div class="dock-icon" onclick="location.href='my-orders.html'">📦</div>
     <div class="dock-icon" onclick="window.open('https://wa.me/96170385398')">💬</div>
   </nav>
 
   <script>
-    const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     const btn = document.getElementById("menuBtn");
     const drawer = document.getElementById("drawer");
     const overlay = document.getElementById("overlay");
 
     btn.onclick = () => { drawer.classList.add("active"); overlay.style.display = "block"; };
     overlay.onclick = () => { drawer.classList.remove("active"); overlay.style.display = "none"; };
-
-    async function init() {
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) return window.location.replace("login.html");
-
-      document.getElementById("userEmail").textContent = session.user.email;
-      
-      const { data: profile } = await sb.from("profiles").select("balance, role").eq("id", session.user.id).single();
-
-      if (profile) {
-        document.getElementById("balanceText").textContent = `$${profile.balance.toFixed(2)}`;
-
-        if (profile.role === 'reseller') {
-          document.getElementById("walletPill").classList.add("reseller");
-          document.getElementById("walletPill").textContent = "Reseller Wallet";
-          document.getElementById("resellerBadge").style.display = "inline-block";
-          document.getElementById("userAvatar").style.borderColor = "#10b981";
-          document.getElementById("homeIcon").classList.add("reseller");
-        }
-      }
-    }
-    init();
 
     let currentIdx = 0;
     setInterval(() => { 
