@@ -79,4 +79,191 @@
       margin-bottom: 28px; padding: 18px 24px; border-radius: 24px;
       text-decoration: none;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow:
+      box-shadow: 0 12px 30px rgba(37, 99, 211, 0.25);
+      transition: all 0.3s ease;
+    }
+    .offers-btn:active { transform: scale(0.97); opacity: 0.9; }
+    .off-txt h2 { margin: 0; font-size: 13px; font-weight: 800; color: #fff; letter-spacing: 1.5px; font-family: 'Plus Jakarta Sans'; }
+    .off-txt p { margin: 4px 0 0; font-size: 11px; color: #bfdbfe; font-family: 'Cairo'; font-weight: 600; }
+    .off-icon { font-size: 20px; animation: smooth-bounce 2s infinite ease-in-out; }
+    
+    /* ===== THE NEW ASYMMETRIC PREMIUM GRID ===== */
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+    
+    /* ستايل الكروت الفخمة المنحوتة */
+    .service-card { 
+      background: var(--glass-base); 
+      border-radius: 32px; 
+      border: 1px solid var(--glass-border); 
+      text-decoration: none; 
+      display: flex; flex-direction: column; 
+      align-items: center; justify-content: center;
+      padding: 24px 16px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+    }
+    
+    /* توزيع أحجام ذكي وغير ممل لحركة السايت */
+    .c-large { grid-column: span 6; flex-direction: row; justify-content: flex-start; gap: 24px; padding: 20px 28px; height: 110px; }
+    .c-medium { grid-column: span 3; height: 165px; }
+
+    .service-card:active { 
+      transform: translateY(-6px) scale(1.02);
+      background: var(--glass-hover);
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: 0 20px 40px var(--brand-glow);
+    }
+    
+    /* حاوية الأيقونة الفضية الكريستال */
+    .img-box { 
+      width: 60px; height: 60px; 
+      border-radius: 20px; 
+      overflow: hidden; 
+      background: rgba(255, 255, 255, 0.02); 
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: inset 0 2px 6px rgba(255,255,255,0.05);
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .service-card:active .img-box {
+      border-color: var(--brand-blue);
+      background: rgba(59, 130, 246, 0.05);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
+    }
+    .img-box img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .label-box { 
+      font-size: 12px; font-weight: 700; color: #f1f5f9;
+      letter-spacing: 0.6px; text-align: center;
+    }
+    .c-large .label-box { font-size: 14px; letter-spacing: 1px; }
+
+    /* ===== DRAWER & OVERLAY ===== */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: none; z-index: 2000; }
+    .drawer { 
+      position: fixed; top: 0; right: -100%; width: 280px; height: 100%; 
+      background: #050914; z-index: 2100; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+      padding: 40px 24px; border-left: 1px solid var(--glass-border); 
+    }
+    .drawer.active { right: 0; }
+    .m-item { 
+      display: block; padding: 18px 0; color: #94a3b8; 
+      text-decoration: none; font-weight: 600; font-size: 13px;
+      border-bottom: 1px solid var(--glass-border); transition: 0.2s;
+    }
+    .m-item:active { color: var(--brand-blue); }
+
+    /* ===== MAC-STYLE DOCK NAV ===== */
+    .dock { 
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); 
+      width: 85%; max-width: 340px; height: 68px; 
+      background: rgba(5, 9, 20, 0.4); 
+      backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.04); 
+      border-radius: 30px; display: flex; align-items: center; justify-content: space-around; 
+      z-index: 1000;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    }
+    .dock-icon { font-size: 22px; cursor: pointer; opacity: 0.25; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-decoration: none; color: inherit; }
+    .dock-icon:active { transform: scale(1.2); }
+    .dock-icon.active { opacity: 1; color: var(--brand-blue); filter: drop-shadow(0 4px 12px rgba(59,130,246,0.5)); }
+    
+    @keyframes smooth-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  </style>
+</head>
+
+<body>
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer">
+    <div style="text-align: center; margin-bottom: 35px;">
+        <div id="userAvatar" style="width: 60px; height: 60px; background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">👤</div>
+        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">BAROUD PLATFORM</div>
+    </div>
+    <a href="services.html" class="m-item">🏠 Home </a>
+    <a href="my-orders.html" class="m-item">📦 Order History</a>
+    <a href="https://wa.me/96170385398" class="m-item">💬 Support Chat</a>
+  </aside>
+
+  <header class="topbar">
+    <div style="width: 40px;"></div> 
+    <div class="brand-title">BAROUD</div>
+    <div class="menu-trigger" id="menuBtn" style="font-size: 20px; cursor: pointer; color: #94a3b8;">☰</div>
+  </header>
+
+  <main class="wrap">
+    <div class="slider-box">
+      <div class="slides" id="mainSlider">
+        <img src="assets/banner1.jpg" onerror="this.src='https://placehold.co/600x400/03060f/3b82f6?text=PREMIUM+SERVICES'">
+        <img src="assets/banner2.jpg" onerror="this.src='https://placehold.co/600x400/03060f/3b82f6?text=BEST+PRICES'">
+        <img src="assets/banner3.jpg" onerror="this.src='https://placehold.co/600x400/03060f/3b82f6?text=24/7+SUPPORT'">
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <input type="text" placeholder="Search accounts, games...">
+    </div>
+
+    <a href="offers.html" class="offers-btn">
+        <div class="off-txt">
+            <h2>EXCLUSIVE OFFERS</h2>
+            <p>Hottest premium deals live now</p>
+        </div>
+        <div class="off-icon">✨</div>
+    </a>
+
+    <section class="grid" id="serviceGrid">
+      <a href="accounts.html" class="service-card c-large">
+        <div class="img-box"><img src="assets/accounts.png" onerror="this.src='https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=150'"></div>
+        <div class="label-box">ACCOUNTS</div>
+      </a>
+      
+      <a href="apps.html" class="service-card c-medium">
+        <div class="img-box"><img src="assets/apps.png" onerror="this.src='https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=150'"></div>
+        <div class="label-box">PREMIUM APPS</div>
+      </a>
+      <a href="games.html" class="service-card c-medium">
+        <div class="img-box"><img src="assets/games.png" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?w=150'"></div>
+        <div class="label-box">GAMING</div>
+      </a>
+      
+      <a href="giftcards.html" class="service-card c-medium">
+        <div class="img-box"><img src="assets/giftcards.png" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=150'"></div>
+        <div class="label-box">GIFT CARDS</div>
+      </a>
+      <a href="ai-tools.html" class="service-card c-medium">
+        <div class="img-box"><img src="assets/ai.png" onerror="this.src='https://images.unsplash.com/photo-1677442136019-21780ecad995?w=150'"></div>
+        <div class="label-box">AI TOOLS</div>
+      </a>
+
+      <a href="phone-recharge.html" class="service-card c-large">
+        <div class="img-box"><img src="assets/mobile.png" onerror="this.src='https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?w=150'"></div>
+        <div class="label-box">MOBILE RECHARGE</div>
+      </a>
+    </section>
+  </main>
+
+  <nav class="dock" id="bottomDock">
+    <div class="dock-icon active" id="homeIcon">🏠</div>
+    <div class="dock-icon" onclick="location.href='my-orders.html'">📦</div>
+    <div class="dock-icon" onclick="window.open('https://wa.me/96170385398')">💬</div>
+  </nav>
+
+  <script>
+    const btn = document.getElementById("menuBtn");
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+
+    btn.onclick = () => { drawer.classList.add("active"); overlay.style.display = "block"; };
+    overlay.onclick = () => { drawer.classList.remove("active"); overlay.style.display = "none"; };
+
+    let currentIdx = 0;
+    setInterval(() => { 
+      currentIdx = (currentIdx + 1) % 3; 
+      const slider = document.getElementById("mainSlider");
+      if(slider) slider.style.transform = `translateX(-${currentIdx * 33.333}%)`; 
+    }, 5000);
+  </script>
+</body>
+</html>
