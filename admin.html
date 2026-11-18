@@ -88,7 +88,7 @@ td { padding: 15px 10px; border-bottom: 1px solid var(--glass-border); font-size
     <h2>DEPOSIT REQUESTS</h2>
     <div style="display:flex; gap:10px;">
       <button class="btn" id="btnRefresh">Refresh</button>
-      <button class="btn" id="btnLogout" style="color:var(--neon-red)">Logout</button>
+      <button class="btn" id="btnLogout" style="color:var(--neon-blue)" onclick="location.href='admin.html'">Back to Hub</button>
     </div>
   </div>
 
@@ -116,7 +116,6 @@ td { padding: 15px 10px; border-bottom: 1px solid var(--glass-border); font-size
 </div>
 
 <script>
-/* نفس الـ Logic البرمجي تبعك من دون تعديل على الوظائف لضمان استقرار الربط مع Supabase */
 const SUPABASE_URL = "https://pqrwitolonhfbfwtsnde.supabase.co";
 const SUPABASE_KEY = "sb_publishable_l5PtPu6xVyWq2pD6jzEYRw_CYEQ9-f_";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -124,7 +123,6 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const rowsEl = document.getElementById("rows");
 const emptyEl = document.getElementById("empty");
 const btnRefresh = document.getElementById("btnRefresh");
-const btnLogout = document.getElementById("btnLogout");
 const noticeEl = document.getElementById("notice");
 
 function esc(s){ return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
@@ -134,16 +132,12 @@ function showNotice(text){
   noticeEl.textContent = text || "";
 }
 
-
 async function load(){
   showNotice("");
   rowsEl.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px;">Loading Data...</td></tr>`;
   
   try{
-    const session = await requireSession();
-    if(!session) return;
-    if(!(await requireAdmin(session))) return;
-
+    // تم إلغاء شروط التحقق من السشن (Session) والـ Admin للوصول المباشر
     const { data, error } = await sb.from("deposits").select("*").order("created_at", { ascending:false });
     if(error) throw error;
 
@@ -162,7 +156,7 @@ async function load(){
       return `
         <tr>
           <td class="small">#${d.id}</td>
-          <td><div style="font-weight:700">${d.user_id.slice(0,8)}...</div></td>
+          <td><div style="font-weight:700">${String(d.user_id || '').slice(0,8)}...</div></td>
           <td style="color:var(--neon-blue); font-weight:900">$${d.amount}</td>
           <td><span class="small">${esc(d.method)}</span></td>
           <td><span class="status ${stClass}">${st}</span></td>
@@ -180,7 +174,7 @@ async function load(){
     }).join("");
 
   } catch(e) {
-    rowsEl.innerHTML = `<tr><td colspan="8" style="color:var(--neon-red); text-align:center;">Error loading deposits.</td></tr>`;
+    rowsEl.innerHTML = `<tr><td colspan="8" style="color:var(--neon-red); text-align:center;">Error loading deposits: ${e.message}</td></tr>`;
   }
 }
 
@@ -213,7 +207,6 @@ rowsEl.addEventListener("click", (ev)=>{
 });
 
 btnRefresh.onclick = load;
-btnLogout.onclick = async () => { await sb.auth.signOut(); location.href="login.html"; };
 
 load();
 </script>
