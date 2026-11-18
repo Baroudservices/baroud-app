@@ -63,33 +63,11 @@ h1 { margin: 0 0 10px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5
   font-weight: 700; cursor: pointer; transition: 0.3s;
 }
 .logout-btn:hover { background: rgba(239, 68, 68, 0.15); }
-
-#loginBox input {
-  width: 100%; padding: 16px; margin-bottom: 20px;
-  border-radius: 16px; border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.2); color: #fff; text-align: center; 
-  font-size: 18px; outline: none; transition: 0.3s;
-}
-#loginBox input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1); }
-
-.login-btn {
-  width: 100%; padding: 16px; border-radius: 16px; border: 0;
-  background: linear-gradient(135deg, #0aa0ff, #4f46e5);
-  color: #fff; font-weight: 700; font-size: 16px; cursor: pointer;
-  box-shadow: 0 10px 20px -5px rgba(10, 160, 255, 0.4);
-}
 </style>
 </head>
 <body>
 
-<div class="hub-card" id="loginBox">
-  <h1>Baroud <span class="gradient-text">Admin</span></h1>
-  <span class="small">Secure Terminal Access</span>
-  <input type="password" id="passInput" placeholder="Enter PIN Code" inputmode="numeric">
-  <button class="login-btn" onclick="checkLogin()">Unlock Terminal</button>
-</div>
-
-<div class="hub-card" id="menuBox" style="display:none">
+<div class="hub-card" id="menuBox">
   <h1>Admin <span class="gradient-text">Hub</span> 👑</h1>
   <span class="small">Control Center • Active Session</span>
   
@@ -102,25 +80,9 @@ h1 { margin: 0 0 10px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5
     <div class="nav-item" onclick="location.href='#'" style="opacity: 0.5;"><span>⚙️</span> Settings</div>
   </div>
 
-  <button class="logout-btn" onclick="location.reload()">Terminate Session</button>
+  <button class="logout-btn" onclick="location.reload()">Refresh Page</button>
 </div>
 
-<script>
-function checkLogin() {
-  const p = document.getElementById('passInput').value;
-  if(p === "230320") {
-    document.getElementById('loginBox').style.animation = 'fadeOut 0.3s forwards';
-    setTimeout(() => {
-      document.getElementById('loginBox').style.display = 'none';
-      document.getElementById('menuBox').style.display = 'block';
-    }, 300);
-  } else {
-    alert("Unauthorized Access!");
-  }
-}
-
-document.getElementById('passInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkLogin(); });
-</script>
 <script src="app-ui.js?v=3"></script>
 </body>
 </html>
