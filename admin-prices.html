@@ -87,7 +87,7 @@ input, select {
     <div class="page-title">BAROUD ADMIN</div>
     <div style="display: flex; gap: 8px;">
       <button class="btn" id="btnRefresh">Refresh</button>
-      <button class="btn" id="btnLogout" style="color:#ff4444">Logout</button>
+      <button class="btn" id="btnBackHub" style="color:var(--neon-blue)" onclick="location.href='admin.html'">Back to Hub</button>
     </div>
   </div>
 
@@ -162,7 +162,6 @@ function setMsg(text, type='info'){
   msg.style.color = type === 'error' ? '#ff4444' : '#1bc7ff';
   if(type !== 'error') setTimeout(() => { msg.textContent = ""; }, 3000);
 }
-
 
 async function loadProducts(){
   const { data, error } = await sb.from("products").select("id,title").order("title");
@@ -283,9 +282,11 @@ document.getElementById("btnRefresh").onclick = () => location.reload();
 document.getElementById("btnAddPlan").onclick = () => renderPlanRow({ plan_key:"", plan_label:"", price:0, reseller_price:0, active:true });
 document.getElementById("plansClose").onclick = () => plansModal.style.display = "none";
 document.getElementById("btnPlansCancel").onclick = () => plansModal.style.display = "none";
-document.getElementById("btnLogout").onclick = async () => { await sb.auth.signOut(); location.href="login.html"; };
 
-boot();
+// تم استبدال زر الخروج بزر للعودة إلى لوحة التحكم الرئيسية مباشرة
+// document.getElementById("btnLogout").onclick = ...
+
+loadProducts();
 </script>
 </body>
 </html>
