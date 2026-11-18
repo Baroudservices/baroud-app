@@ -163,11 +163,6 @@ function setMsg(text, type='info'){
   if(type !== 'error') setTimeout(() => { msg.textContent = ""; }, 3000);
 }
 
-async function boot(){
-  const { data: { session } } = await sb.auth.getSession();
-  if(!session) { window.location.href="login.html"; return; }
-  await loadProducts();
-}
 
 async function loadProducts(){
   const { data, error } = await sb.from("products").select("id,title").order("title");
