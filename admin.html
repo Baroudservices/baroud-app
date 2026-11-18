@@ -134,16 +134,6 @@ function showNotice(text){
   noticeEl.textContent = text || "";
 }
 
-async function requireSession(){
-  const { data: s } = await sb.auth.getSession();
-  if(!s?.session) { location.href="login.html"; return null; }
-  return s.session;
-}
-
-async function requireAdmin(session){
-  const { data: profile } = await sb.from("profiles").select("is_admin").eq("id", session.user.id).single();
-  return profile?.is_admin === true;
-}
 
 async function load(){
   showNotice("");
